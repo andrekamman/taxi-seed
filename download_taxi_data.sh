@@ -10,6 +10,43 @@ urls_file="raw_data_urls.txt"
 # Create output directory if it doesn't exist
 mkdir -p "$output_dir"
 
+# Function to remove corrupt parquet files (missing PAR1 magic bytes)
+# Parquet files must have PAR1 at both the start AND end of the file
+cleanup_corrupt_files() {
+    echo "Checking for corrupt parquet files..."
+    local corrupt_count=0
+
+    while IFS= read -r -d '' file; do
+        if [ -f "$file" ]; then
+            local is_corrupt=0
+
+            # Check for PAR1 magic bytes at start of file
+            if ! head -c 4 "$file" 2>/dev/null | grep -q "PAR1"; then
+                is_corrupt=1
+            # Check for PAR1 magic bytes at end of file (truncation check)
+            elif ! tail -c 4 "$file" 2>/dev/null | grep -q "PAR1"; then
+                is_corrupt=1
+            fi
+
+            if [ $is_corrupt -eq 1 ]; then
+                echo "  Removing corrupt file: $file"
+                rm -f "$file"
+                ((corrupt_count++))
+            fi
+        fi
+    done < <(find "$output_dir" -name "*.parquet" -print0 2>/dev/null)
+
+    if [ $corrupt_count -gt 0 ]; then
+        echo "  Removed $corrupt_count corrupt file(s)"
+    else
+        echo "  No corrupt files found"
+    fi
+    echo ""
+}
+
+# Clean up any corrupt files before generating URL list
+cleanup_corrupt_files
+
 # Calculate previous month (data is typically available with 1 month lag)
 current_year=$(date +%Y)
 current_month=$(date +%-m)
