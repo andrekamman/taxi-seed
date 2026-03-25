@@ -38,11 +38,14 @@ def run_preprocess(config_path: Path, output_dir: Path) -> None:
         columns = ds_config["columns"]
         chunk_size = ds_config.get("chunk_size", 5000)
 
+        max_rows = ds_config.get("max_rows")
+
         num_chunks = export_chunks(
             parquet_glob=ds_config["path"],
             columns=columns,
             chunk_size=chunk_size,
             output_dir=output_dir / "data" / ds_name,
+            max_rows=max_rows,
         )
         ds_chunk_counts[ds_name] = num_chunks
         print(f"  Exported {num_chunks} chunks to data/{ds_name}/")

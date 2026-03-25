@@ -12,6 +12,7 @@ data_sources:
   yellow_trips:
     path: raw/yellow/2026/*.parquet
     chunk_size: 5000
+    # max_rows: 1000000              # optional: cap total rows exported
     key_columns: [pickup_time, dropoff_time]
     columns:
       pickup_time: tpep_pickup_datetime

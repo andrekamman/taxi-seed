@@ -72,6 +72,28 @@ def test_export_chunks_json_format(sample_parquet, tmp_path):
     assert "tpep_pickup_datetime" not in rows[0]
 
 
+def test_export_chunks_max_rows(sample_parquet, tmp_path):
+    output_dir = tmp_path / "output"
+    columns = {
+        "pickup_time": "tpep_pickup_datetime",
+        "fare_amount": "fare_amount",
+    }
+    num_chunks = export_chunks(
+        parquet_glob=str(sample_parquet / "*.parquet"),
+        columns=columns,
+        chunk_size=10,
+        output_dir=output_dir / "data",
+        max_rows=15,
+    )
+    assert num_chunks == 2  # 15 rows / 10 per chunk = 2 chunks
+    with open(output_dir / "data" / "chunk_0000.json") as f:
+        rows0 = json.load(f)
+    with open(output_dir / "data" / "chunk_0001.json") as f:
+        rows1 = json.load(f)
+    assert len(rows0) == 10
+    assert len(rows1) == 5
+
+
 def test_export_chunks_no_matching_files(tmp_path):
     with pytest.raises(FileNotFoundError, match="No parquet files"):
         export_chunks(
