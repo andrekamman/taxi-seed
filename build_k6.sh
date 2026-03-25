@@ -17,7 +17,7 @@ fi
 # Build K6 with SQL extensions
 xk6 build \
     --with github.com/grafana/xk6-sql \
-    --with github.com/grafana/xk6-sql-driver-mssql \
+    --with github.com/grafana/xk6-sql-driver-sqlserver \
     --output ./k6
 
 echo ""

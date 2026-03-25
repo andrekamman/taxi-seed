@@ -23,10 +23,10 @@ def generate_manifest(
     """
     password = target["password"]
     connection_string = (
-        f"server={target['host']},{target['port']};"
-        f"database={target['database']};"
-        f"user id={target['username']};"
-        f"password={password};"
+        f"Server={target['host']},{target['port']};"
+        f"Database={target['database']};"
+        f"User Id={target['username']};"
+        f"Password={password};"
         f"TrustServerCertificate=true"
     )
 
@@ -92,17 +92,21 @@ export function {func_name}() {{
     functions_str = "\n".join(functions)
 
     return f"""import sql from 'k6/x/sql';
+import driver from 'k6/x/sql/driver/sqlserver';
 import {{ SharedArray }} from 'k6/data';
 import exec from 'k6/execution';
 import {{ sleep }} from 'k6';
 
-// Load scenario manifests
+// Load scenario manifests (init stage — open() is allowed here)
 const manifests = {{}};
 {_generate_manifest_loaders(scenarios_config)}
 
-// Load chunk file lists per data source into SharedArray (shared across VUs)
-const chunkLists = {{}};
-{_generate_chunk_list_loaders(scenarios_config)}
+// Pre-load all chunk data per data source into SharedArrays during init.
+// Each chunk's rows are stored as a flat array; chunk boundaries are tracked
+// by chunkSize so VUs can select their slice at runtime.
+const chunkData = {{}};
+const chunkMeta = {{}};
+{_generate_chunk_data_loaders(scenarios_config)}
 
 export const options = {{
     scenarios: {scenarios_json},
@@ -125,13 +129,12 @@ function getConnection(manifest) {{
             }}
             connStr = connStr.replace(match[0], envVal);
         }}
-        connections[key] = sql.open('sqlserver', connStr);
+        connections[key] = sql.open(driver, connStr);
     }}
     return connections[key];
 }}
 
 export function teardown() {{
-    // Close all cached database connections
     for (const [key, db] of Object.entries(connections)) {{
         db.close();
     }}
@@ -148,7 +151,6 @@ function weightedRandom(workload) {{
 }}
 
 function randomBetween(minStr, maxStr) {{
-    // Parse duration strings like "200ms", "1s"
     function parseMs(s) {{
         if (s.endsWith('ms')) return parseFloat(s);
         if (s.endsWith('s')) return parseFloat(s) * 1000;
@@ -159,25 +161,36 @@ function randomBetween(minStr, maxStr) {{
     return (min + Math.random() * (max - min)) / 1000; // K6 sleep uses seconds
 }}
 
+function getChunkRows(dataSource, chunkIdx) {{
+    const meta = chunkMeta[dataSource];
+    const data = chunkData[dataSource];
+    const start = chunkIdx * meta.chunkSize;
+    const end = Math.min(start + meta.chunkSize, data.length);
+    const rows = [];
+    for (let i = start; i < end; i++) {{
+        rows.push(data[i]);
+    }}
+    return rows;
+}}
+
 function processChunk(manifest, scenarioName) {{
-    const chunkFiles = chunkLists[manifest.data_source];
-    let chunkIdx;
+    const meta = chunkMeta[manifest.data_source];
+    const numChunks = meta.numChunks;
 
     if (manifest.ordering === 'sequential') {{
-        // Sequential: process all chunks in order in a single iteration
         const db = getConnection(manifest);
-        for (let i = 0; i < chunkFiles.length; i++) {{
-            const rows = JSON.parse(open(chunkFiles[i]));
+        for (let i = 0; i < numChunks; i++) {{
+            const rows = getChunkRows(manifest.data_source, i);
             processRows(db, manifest, rows);
         }}
         return;
     }}
 
     // Parallel: each iteration gets one chunk
-    chunkIdx = exec.scenario.iterationInTest;
-    if (chunkIdx >= chunkFiles.length) return; // no more chunks
+    const chunkIdx = exec.scenario.iterationInTest;
+    if (chunkIdx >= numChunks) return;
 
-    const rows = JSON.parse(open(chunkFiles[chunkIdx]));
+    const rows = getChunkRows(manifest.data_source, chunkIdx);
     const db = getConnection(manifest);
     processRows(db, manifest, rows);
 }}
@@ -188,21 +201,20 @@ function processRows(db, manifest, rows) {{
     for (const row of rows) {{
         const op = weightedRandom(manifest.workload);
         const values = manifest.column_order.map(c => row[c]);
-        const keyValues = manifest.key_columns.map(c => row[c]);
 
         if (op === 'insert' || processed.length === 0) {{
-            sql.query(db, manifest.sql.insert, ...values);
+            db.exec(manifest.sql.insert, ...values);
         }} else if (op === 'update') {{
             const target = processed[Math.floor(Math.random() * processed.length)];
             const nonKeyValues = manifest.column_order
                 .filter(c => !manifest.key_columns.includes(c))
                 .map(c => row[c]);
             const targetKeyValues = manifest.key_columns.map(c => target[c]);
-            sql.query(db, manifest.sql.update, ...nonKeyValues, ...targetKeyValues);
+            db.exec(manifest.sql.update, ...nonKeyValues, ...targetKeyValues);
         }} else if (op === 'delete') {{
             const target = processed[Math.floor(Math.random() * processed.length)];
             const targetKeyValues = manifest.key_columns.map(c => target[c]);
-            sql.query(db, manifest.sql.delete, ...targetKeyValues);
+            db.exec(manifest.sql.delete, ...targetKeyValues);
         }}
 
         processed.push(row);
@@ -223,16 +235,44 @@ def _generate_manifest_loaders(scenarios_config: dict) -> str:
     return "\n".join(lines)
 
 
-def _generate_chunk_list_loaders(scenarios_config: dict) -> str:
-    """Generate JS code to build chunk file path arrays per data source."""
+def _generate_chunk_data_loaders(scenarios_config: dict) -> str:
+    """Generate JS code to pre-load all chunk data into SharedArrays during init.
+
+    Each data source gets its chunks concatenated into a single SharedArray.
+    chunkMeta tracks chunkSize and numChunks so VUs can slice at runtime.
+    """
     data_sources = set()
     for scenario in scenarios_config.values():
         data_sources.add(scenario["data_source"])
 
     lines = []
     for ds in sorted(data_sources):
+        # Load chunk index to get file paths, then concat all chunk data
+        # All open() calls happen here in init stage
         lines.append(
-            f"chunkLists['{ds}'] = new SharedArray('{ds}_chunks', "
-            f"() => JSON.parse(open('./data/{ds}/chunks.json')));"
+            f"const {_safe_var(ds)}Files = JSON.parse(open('./data/{ds}/chunks.json'));"
+        )
+        lines.append(
+            f"chunkData['{ds}'] = new SharedArray('{ds}_data', function() {{"
+        )
+        lines.append(f"    let allRows = [];")
+        lines.append(f"    for (const f of {_safe_var(ds)}Files) {{")
+        lines.append(f"        const chunk = JSON.parse(open(f));")
+        lines.append(f"        allRows = allRows.concat(chunk);")
+        lines.append(f"    }}")
+        lines.append(f"    return allRows;")
+        lines.append(f"}});")
+        # Store metadata for chunk slicing
+        lines.append(
+            f"chunkMeta['{ds}'] = {{ "
+            f"numChunks: {_safe_var(ds)}Files.length, "
+            f"chunkSize: chunkData['{ds}'].length > 0 && {_safe_var(ds)}Files.length > 0 "
+            f"? Math.ceil(chunkData['{ds}'].length / {_safe_var(ds)}Files.length) : 0 "
+            f"}};"
         )
     return "\n".join(lines)
+
+
+def _safe_var(name: str) -> str:
+    """Convert a data source name to a safe JS variable name."""
+    return name.replace("-", "_").replace(".", "_")
