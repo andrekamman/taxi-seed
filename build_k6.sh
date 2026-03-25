@@ -6,6 +6,9 @@
 
 set -euo pipefail
 
+# Ensure Go bin is in PATH
+export PATH="$PATH:$(go env GOPATH)/bin"
+
 echo "Building custom K6 binary with SQL Server support..."
 
 # Install xk6 if not present
