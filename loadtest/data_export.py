@@ -21,6 +21,7 @@ def export_chunks(
     columns: dict[str, str],
     chunk_size: int,
     output_dir: Path,
+    max_rows: int | None = None,
 ) -> int:
     """Export parquet data as chunked JSON files.
 
@@ -29,6 +30,7 @@ def export_chunks(
         columns: Mapping of {output_name: source_column_name}.
         chunk_size: Number of rows per chunk file.
         output_dir: Directory to write chunk_NNNN.json files.
+        max_rows: Maximum total rows to export. None means all rows.
 
     Returns:
         Number of chunk files created.
@@ -47,6 +49,9 @@ def export_chunks(
     if total_rows == 0:
         raise FileNotFoundError(f"No parquet files matched: {parquet_glob}")
 
+    if max_rows is not None:
+        total_rows = min(total_rows, max_rows)
+
     # Build SELECT with column renaming
     select_parts = [
         f'"{source}" AS "{target}"' for target, source in columns.items()
@@ -60,8 +65,10 @@ def export_chunks(
     offset = 0
 
     while offset < total_rows:
+        remaining = total_rows - offset
+        fetch_size = min(chunk_size, remaining)
         rows = db.sql(
-            f"SELECT {select_sql} FROM '{parquet_glob}' LIMIT {chunk_size} OFFSET {offset}"
+            f"SELECT {select_sql} FROM '{parquet_glob}' LIMIT {fetch_size} OFFSET {offset}"
         ).fetchall()
 
         if not rows:
