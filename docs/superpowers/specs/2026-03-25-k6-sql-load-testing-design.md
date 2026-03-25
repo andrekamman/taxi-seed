@@ -47,8 +47,8 @@ data_sources:
   yellow_trips:
     path: raw/yellow/2026/*.parquet
     chunk_size: 5000                    # rows per chunk file
+    key_columns: [pickup_time, dropoff_time]  # WHERE clause for UPDATE/DELETE
     columns:                            # select + rename columns
-      id: tpep_pickup_datetime          # row identifier for updates/deletes
       pickup_time: tpep_pickup_datetime
       dropoff_time: tpep_dropoff_datetime
       passenger_count: passenger_count
@@ -116,7 +116,7 @@ scenarios:
 ### Config sections
 
 - **`data_sources`** — which parquet files to read and how to map columns. Decoupled from scenarios so the same data can be reused across multiple targets. `chunk_size` controls memory usage during K6 execution.
-- **`targets`** — SQL Server connection details. One entry per server/database combination. Passwords reference environment variables to stay out of config files.
+- **`targets`** — SQL Server connection details. One entry per server/database combination. `${VAR}` references are resolved at K6 runtime via `__ENV.VAR`, not by the preprocessor — credentials are never written to disk in the output directory.
 - **`scenarios`** — each becomes a K6 scenario. Links a target to a data source with a specific workload mix, think time range, and K6 executor configuration. The `k6` section is passthrough — any valid K6 executor config is accepted.
 
 ## Preprocessor (`preprocess.py`)
@@ -125,14 +125,14 @@ scenarios:
 
 **Responsibilities:**
 
-1. Parse and validate config YAML (check workload percentages sum to 100, required fields present, referenced targets/data_sources exist).
+1. Parse and validate config YAML (check workload percentages sum to 100, required fields present, referenced targets/data_sources exist, key_columns exist in columns mapping, glob patterns match at least one file).
 2. Read parquet files via DuckDB, apply column selection and renaming from the `columns` mapping.
 3. Map DuckDB/parquet types to SQL Server types (BIGINT, VARCHAR, DATETIME2, FLOAT, DECIMAL, etc.).
 4. Split rows into numbered chunk files (`chunk_0000.json`, `chunk_0001.json`, ...) per data source.
 5. Generate parameterized SQL templates (INSERT, UPDATE, DELETE) per target/table based on the column mapping.
 6. Generate CREATE TABLE scripts per target/table.
-7. Generate scenario manifest JSON files containing: connection string, table name, workload percentages, think time config, SQL templates, data source reference, ordering mode.
-8. Generate the K6 `test.js` script with one scenario block and executor function per config scenario.
+7. Generate scenario manifest JSON files containing: table name, workload percentages, think time config, SQL templates, data source reference, ordering mode, and connection string template (with `${VAR}` placeholders preserved for K6 runtime resolution).
+8. Generate the K6 `test.js` script with one scenario block and executor function per config scenario. The generated script reads manifests at runtime via `open()` — manifests are runtime artifacts, not just intermediate build artifacts.
 
 ### Output structure
 
@@ -153,23 +153,41 @@ k6_output/
   test.js
 ```
 
+### Chunk file format
+
+Each chunk file is a JSON array of row objects using mapped column names. Timestamps are ISO 8601 strings. Example:
+
+```json
+[
+  {"pickup_time": "2026-01-15T08:30:00", "dropoff_time": "2026-01-15T09:15:00", "passenger_count": 2, "trip_distance": 3.4, "fare_amount": 15.50, "tip_amount": 3.00},
+  ...
+]
+```
+
+### Data loading in K6
+
+Chunk metadata (list of file paths) is loaded into a `SharedArray` in the init context. During execution, each VU uses `open()` to read its assigned chunk file and `JSON.parse()` to deserialize it. Only one chunk is in memory per VU at a time. This avoids loading the full dataset into `SharedArray` while keeping memory bounded.
+
 ### SQL generation
 
 The preprocessor generates parameterized SQL from the column mapping:
 
 ```sql
--- INSERT
+-- INSERT (all columns)
 INSERT INTO taxi_trips (pickup_time, dropoff_time, passenger_count,
   trip_distance, fare_amount, tip_amount)
 VALUES (@p1, @p2, @p3, @p4, @p5, @p6)
 
--- UPDATE (randomizes which non-key columns get updated)
-UPDATE taxi_trips SET fare_amount = @p1, tip_amount = @p2
-WHERE pickup_time = @p3 AND dropoff_time = @p4
+-- UPDATE (sets all non-key columns, WHERE uses key_columns)
+UPDATE taxi_trips SET passenger_count = @p1, trip_distance = @p2,
+  fare_amount = @p3, tip_amount = @p4
+WHERE pickup_time = @p5 AND dropoff_time = @p6
 
--- DELETE
+-- DELETE (WHERE uses key_columns)
 DELETE FROM taxi_trips WHERE pickup_time = @p1 AND dropoff_time = @p2
 ```
+
+Key columns for UPDATE/DELETE WHERE clauses are defined by `key_columns` in the data source config. The UPDATE template always sets all non-key columns — the variability comes from using different source row values, not from randomizing which columns appear.
 
 ### Type mapping
 
@@ -183,6 +201,12 @@ DELETE FROM taxi_trips WHERE pickup_time = @p1 AND dropoff_time = @p2
 | TIMESTAMP           | DATETIME2       |
 | BOOLEAN             | BIT             |
 | DECIMAL(p,s)        | DECIMAL(p,s)    |
+| DATE                | DATE            |
+| SMALLINT / INT16    | SMALLINT        |
+| TINYINT / INT8      | TINYINT         |
+| HUGEINT             | DECIMAL(38,0)   |
+
+Unmapped types cause a validation error with a message listing the column name, source type, and file path.
 
 ## K6 test script behavior
 
@@ -192,8 +216,8 @@ Each config scenario maps to a K6 scenario with its own executor function. The K
 
 ### Chunk processing
 
-- **Parallel mode (default):** VUs share an atomic counter. Each VU claims the next unclaimed chunk index, loads that chunk file, iterates through its rows, and grabs the next chunk when done. Multiple VUs process different chunks concurrently.
-- **Sequential mode:** A single VU processes chunks in order (0, 1, 2, ...). The K6 scenario is configured with a single VU regardless of the executor config. Think time and pacing still apply.
+- **Parallel mode (default):** Each VU uses `execution.scenario.iterationInTest` as a chunk index — K6 assigns each iteration a unique sequential number, so chunks are naturally distributed across VUs without shared mutable state. When chunk index exceeds available chunks, the VU wraps around or completes.
+- **Sequential mode:** The preprocessor overrides the K6 executor config to force `per-vu-iterations` with 1 VU. If the user's config specifies more VUs, the preprocessor emits a warning. The single VU processes chunks 0, 1, 2, ... in order. Think time and pacing still apply.
 
 ### Operation selection
 
@@ -201,7 +225,9 @@ For each row in a chunk, the script picks an operation (insert, update, delete) 
 
 - **INSERT:** Executes the insert SQL template with values from the current row.
 - **UPDATE:** Picks a previously-processed row from the current chunk and updates some of its non-key fields with values from the current row.
-- **DELETE:** Picks a previously-processed row from the current chunk and deletes it by key.
+- **DELETE:** Picks a previously-processed row from the current chunk and deletes it by key columns.
+
+UPDATE and DELETE target rows from the current VU's current chunk only. This is a deliberate design choice — it avoids cross-VU conflicts in parallel mode and ensures operations target rows that are known to exist.
 
 If no previously-processed rows exist yet (start of a chunk), update/delete operations fall back to insert.
 
@@ -211,16 +237,18 @@ After each operation, the script sleeps for a random duration between `think_tim
 
 ### Connection management
 
-Each scenario function opens its own database connection via xk6-sql using the connection string from its manifest. Connections are established in the `setup()` phase or on first use per VU.
+Each VU opens its own database connection via xk6-sql on first use within the executor function, then caches it for the VU's lifetime. Connections cannot be shared through K6's `setup()` because setup return values are serialized. The connection string is read from the scenario manifest (loaded via `open()` in the init context). Connections are closed in `teardown()` or when the VU completes.
 
 ## Custom K6 binary
 
 Built with xk6:
 
 ```bash
-xk6 build --with github.com/grafana/xk6-sql
-  --with github.com/microsoft/go-mssqldb
+xk6 build --with github.com/grafana/xk6-sql \
+  --with github.com/grafana/xk6-sql-driver-mssql
 ```
+
+Exact module paths and versions should be verified against current xk6-sql documentation at build time.
 
 This is a one-time build step. The resulting binary replaces the standard `k6` command.
 
