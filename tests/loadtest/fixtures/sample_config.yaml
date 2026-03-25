@@ -1,0 +1,38 @@
+data_sources:
+  yellow_trips:
+    path: "tests/loadtest/fixtures/*.parquet"
+    chunk_size: 100
+    key_columns: [pickup_time, dropoff_time]
+    columns:
+      pickup_time: tpep_pickup_datetime
+      dropoff_time: tpep_dropoff_datetime
+      passenger_count: passenger_count
+      trip_distance: trip_distance
+      fare_amount: fare_amount
+      tip_amount: tip_amount
+
+targets:
+  test_server:
+    host: localhost
+    port: 1433
+    database: test_db
+    username: sa
+    password: ${MSSQL_PASSWORD}
+    table: taxi_trips
+
+scenarios:
+  basic_load:
+    target: test_server
+    data_source: yellow_trips
+    ordering: parallel
+    workload:
+      insert: 80
+      update: 15
+      delete: 5
+    think_time:
+      min: 200ms
+      max: 1s
+    k6:
+      executor: constant-vus
+      vus: 5
+      duration: 1m
