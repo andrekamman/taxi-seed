@@ -35,22 +35,26 @@ data_sources:
       tip_amount: tip_amount
 
 # SQL Server targets
+# Default: local Docker container started with:
+#   docker run -d --name sqlserver-loadtest -e 'ACCEPT_EULA=Y' \
+#     -e 'MSSQL_SA_PASSWORD=YourPassword!' -p 1433:1433 \
+#     mcr.microsoft.com/mssql/server:2022-latest
 targets:
   server_a_sales:
-    host: sqlserver-a.local
+    host: localhost
     port: 1433
-    database: sales_db
+    database: loadtest_db
     username: sa
     password: ${MSSQL_PASSWORD}
     table: taxi_trips
 
   server_b_analytics:
-    host: sqlserver-b.local
+    host: localhost
     port: 1433
-    database: analytics_db
+    database: loadtest_db
     username: sa
     password: ${MSSQL_PASSWORD}
-    table: taxi_trips
+    table: taxi_trips_green
 
 # Scenarios — each becomes a K6 scenario running concurrently
 scenarios:
