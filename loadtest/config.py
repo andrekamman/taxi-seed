@@ -39,22 +39,44 @@ def validate_config(config: dict) -> None:
 
     # Validate data sources
     for name, ds in data_sources.items():
-        for field in ("path", "columns", "key_columns"):
-            if field not in ds:
-                raise ConfigError(f"Data source {name!r}: missing required field {field!r}")
-        # key_columns must reference mapped column names
-        columns = ds["columns"]
-        for kc in ds["key_columns"]:
-            if kc not in columns:
-                raise ConfigError(
-                    f"Data source {name!r}: key_column {kc!r} not found in columns mapping"
-                )
-        # Glob must match at least one file
-        import glob as globmod
-        if not globmod.glob(ds["path"]):
+        mode = ds.get("mode", "parquet")
+        if mode not in ("parquet", "synthetic"):
             raise ConfigError(
-                f"Data source {name!r}: path {ds['path']!r} matches no files"
+                f"Data source {name!r}: mode must be 'parquet' or 'synthetic', "
+                f"got {mode!r}"
             )
+
+        if mode == "synthetic":
+            for field in ("columns", "key_columns"):
+                if field not in ds:
+                    raise ConfigError(f"Data source {name!r}: missing required field {field!r}")
+            columns = ds["columns"]
+            for col_name, col_def in columns.items():
+                if not isinstance(col_def, dict) or "type" not in col_def:
+                    raise ConfigError(
+                        f"Data source {name!r}: synthetic column {col_name!r} "
+                        f"must have a 'type' field"
+                    )
+            for kc in ds["key_columns"]:
+                if kc not in columns:
+                    raise ConfigError(
+                        f"Data source {name!r}: key_column {kc!r} not found in columns"
+                    )
+        else:
+            for field in ("path", "columns", "key_columns"):
+                if field not in ds:
+                    raise ConfigError(f"Data source {name!r}: missing required field {field!r}")
+            columns = ds["columns"]
+            for kc in ds["key_columns"]:
+                if kc not in columns:
+                    raise ConfigError(
+                        f"Data source {name!r}: key_column {kc!r} not found in columns mapping"
+                    )
+            import glob as globmod
+            if not globmod.glob(ds["path"]):
+                raise ConfigError(
+                    f"Data source {name!r}: path {ds['path']!r} matches no files"
+                )
 
     # Validate targets
     for name, target in targets.items():

@@ -31,39 +31,69 @@ def run_preprocess(config_path: Path, output_dir: Path) -> None:
 
     ds_chunk_counts = {}
     ds_schemas = {}
+    ds_modes = {}
 
-    # Step 1: Export data sources to chunked JSON
+    # Type mapping from synthetic config types to SQL Server types
+    SYNTHETIC_TYPE_MAP = {
+        "datetime": "DATETIME2",
+        "int": "INT",
+        "bigint": "BIGINT",
+        "float": "FLOAT",
+        "string": "NVARCHAR(MAX)",
+        "bool": "BIT",
+        "date": "DATE",
+    }
+
+    # Step 1: Export data sources
     for ds_name, ds_config in data_sources.items():
-        print(f"Exporting data source: {ds_name}")
-        columns = ds_config["columns"]
-        chunk_size = ds_config.get("chunk_size", 5000)
+        mode = ds_config.get("mode", "parquet")
+        ds_modes[ds_name] = mode
 
-        max_rows = ds_config.get("max_rows")
+        if mode == "synthetic":
+            print(f"Synthetic data source: {ds_name}")
+            columns = ds_config["columns"]
+            mapped_schema = {}
+            for col_name, col_def in columns.items():
+                syn_type = col_def["type"]
+                if syn_type not in SYNTHETIC_TYPE_MAP:
+                    raise ValueError(
+                        f"Data source {ds_name!r}: unknown synthetic type {syn_type!r} "
+                        f"for column {col_name!r}"
+                    )
+                mapped_schema[col_name] = SYNTHETIC_TYPE_MAP[syn_type]
+            ds_schemas[ds_name] = mapped_schema
+            ds_chunk_counts[ds_name] = 0
+            print(f"  Columns: {', '.join(columns.keys())}")
+        else:
+            print(f"Exporting data source: {ds_name}")
+            columns = ds_config["columns"]
+            chunk_size = ds_config.get("chunk_size", 5000)
+            max_rows = ds_config.get("max_rows")
 
-        num_chunks = export_chunks(
-            parquet_glob=ds_config["path"],
-            columns=columns,
-            chunk_size=chunk_size,
-            output_dir=output_dir / "data" / ds_name,
-            max_rows=max_rows,
-        )
-        ds_chunk_counts[ds_name] = num_chunks
-        print(f"  Exported {num_chunks} chunks to data/{ds_name}/")
+            num_chunks = export_chunks(
+                parquet_glob=ds_config["path"],
+                columns=columns,
+                chunk_size=chunk_size,
+                output_dir=output_dir / "data" / ds_name,
+                max_rows=max_rows,
+            )
+            ds_chunk_counts[ds_name] = num_chunks
+            print(f"  Exported {num_chunks} chunks to data/{ds_name}/")
 
-        # Write chunk index file
-        chunk_files = [
-            f"./data/{ds_name}/chunk_{i:04d}.json" for i in range(num_chunks)
-        ]
-        with open(output_dir / "data" / ds_name / "chunks.json", "w") as f:
-            json.dump(chunk_files, f)
+            # Write chunk index file
+            chunk_files = [
+                f"./data/{ds_name}/chunk_{i:04d}.json" for i in range(num_chunks)
+            ]
+            with open(output_dir / "data" / ds_name / "chunks.json", "w") as f:
+                json.dump(chunk_files, f)
 
-        # Get schema and map types
-        parquet_schema = get_schema(ds_config["path"])
-        mapped_schema = {}
-        for mapped_name, source_name in columns.items():
-            duckdb_type = parquet_schema[source_name]
-            mapped_schema[mapped_name] = map_duckdb_to_mssql(duckdb_type)
-        ds_schemas[ds_name] = mapped_schema
+            # Get schema and map types
+            parquet_schema = get_schema(ds_config["path"])
+            mapped_schema = {}
+            for mapped_name, source_name in columns.items():
+                duckdb_type = parquet_schema[source_name]
+                mapped_schema[mapped_name] = map_duckdb_to_mssql(duckdb_type)
+            ds_schemas[ds_name] = mapped_schema
 
     # Step 2: Generate SQL and schema files per target
     schema_dir = output_dir / "schema"
@@ -102,6 +132,8 @@ def run_preprocess(config_path: Path, output_dir: Path) -> None:
             "delete": generate_delete_sql(target["table"], key_columns),
         }
 
+        mode = ds_modes[ds_name]
+
         manifest = generate_manifest(
             scenario_name=scenario_name,
             target=target,
@@ -113,6 +145,8 @@ def run_preprocess(config_path: Path, output_dir: Path) -> None:
             sql_templates=sql_templates,
             column_order=list(ds_config["columns"].keys()),
             key_columns=key_columns,
+            mode=mode,
+            synthetic_columns=ds_config["columns"] if mode == "synthetic" else None,
         )
 
         manifest_path = scenarios_dir / f"{scenario_name}.json"
@@ -121,7 +155,7 @@ def run_preprocess(config_path: Path, output_dir: Path) -> None:
         print(f"  Manifest: {scenario_name}.json")
 
     # Step 4: Generate K6 test script
-    test_js = generate_test_js(scenarios)
+    test_js = generate_test_js(scenarios, data_sources)
     (output_dir / "test.js").write_text(test_js)
     print(f"  Generated test.js")
 
