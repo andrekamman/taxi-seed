@@ -3,6 +3,32 @@
 # NYC TLC Trip Data Downloader
 # Downloads Yellow, Green, FHV, and FHVHV taxi trip data
 
+# Parse flags
+recent_only=0
+recent_months=3
+
+while [[ $# -gt 0 ]]; do
+    case $1 in
+        --recent)
+            recent_only=1
+            if [[ -n "$2" && "$2" =~ ^[0-9]+$ ]]; then
+                recent_months=$2
+                shift
+            fi
+            shift
+            ;;
+        -h|--help)
+            echo "Usage: $0 [--recent [N]]"
+            echo "  --recent [N]  Download only the last N months (default 3) per data type, newest first"
+            exit 0
+            ;;
+        *)
+            echo "Unknown option: $1"
+            exit 1
+            ;;
+    esac
+done
+
 # Output directory
 output_dir="raw"
 urls_file="raw_data_urls.txt"
@@ -97,6 +123,68 @@ generate_urls() {
     done
 }
 
+# Download recent N months of a data type (newest first)
+# Tries older months on failure until it gets N successful downloads
+download_recent_type() {
+    local data_type=$1
+    local want=$recent_months
+    local got=0
+    local failures=0
+    local max_failures=6  # stop trying after this many consecutive failures
+    local year=$prev_year
+    local month=$prev_month
+
+    echo "--- $data_type: looking for $want recent months ---"
+
+    while [ $got -lt $want ] && [ $failures -lt $max_failures ]; do
+        month_padded=$(printf '%02d' $month)
+        filename="${data_type}_tripdata_${year}-${month_padded}.parquet"
+        target_dir="$output_dir/$data_type/$year"
+        target_path="$target_dir/$filename"
+        url="https://d37ci6vzurychx.cloudfront.net/trip-data/${filename}"
+
+        if [ -f "$target_path" ]; then
+            echo "  Already have $filename"
+            ((got++))
+        else
+            echo "  Trying $filename..."
+            mkdir -p "$target_dir"
+
+            if wget -q --spider "$url" 2>/dev/null && \
+               wget --progress=bar:force -O "$target_path" "$url" 2>&1; then
+                if [ -s "$target_path" ] && head -c 4 "$target_path" 2>/dev/null | grep -q "PAR1"; then
+                    echo "    Saved to $data_type/$year/$filename"
+                    ((got++))
+                    failures=0
+                else
+                    echo "    Not a valid parquet file, trying older month"
+                    rm -f "$target_path"
+                    ((failures++))
+                fi
+            else
+                echo "    Not available, trying older month"
+                rm -f "$target_path"
+                ((failures++))
+            fi
+            sleep 2
+        fi
+
+        # Move to previous month
+        ((month--))
+        if [ $month -eq 0 ]; then
+            month=12
+            ((year--))
+        fi
+    done
+
+    if [ $got -lt $want ]; then
+        echo "  Got $got/$want months for $data_type (stopped after $max_failures consecutive failures)"
+    else
+        echo "  Got $got/$want months for $data_type"
+    fi
+    echo ""
+}
+
 # Function to organize downloaded files into subdirectories
 organize_files() {
     for file in "$output_dir"/*.parquet; do
@@ -121,7 +209,23 @@ organize_files() {
     done
 }
 
-# Generate URLs for all data types
+# Recent mode: download inline per type, trying older months on failure
+if [ $recent_only -eq 1 ]; then
+    echo "Downloading recent $recent_months months per data type (newest first)..."
+    echo "Will try older months if a month isn't available yet."
+    echo ""
+
+    download_recent_type "yellow"
+    download_recent_type "green"
+    download_recent_type "fhv"
+    download_recent_type "fhvhv"
+
+    echo "Download complete!"
+    echo "Files saved to: ${output_dir}/<type>/<year>/"
+    exit 0
+fi
+
+# Full mode: generate URL list then download
 echo "Generating URL list..."
 {
     generate_urls "yellow" 2009 1
