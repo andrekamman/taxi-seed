@@ -13,10 +13,15 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
-packages = ["k6-loadtest/src/k6_loadtest", "shared/src/taxi_shared"]
+packages = [
+  "k6-loadtest/src/k6_loadtest",
+  "schema-drift/src/schema_drift",
+  "shared/src/taxi_shared",
+]
 
 [project.optional-dependencies]
 test = ["pytest>=8.0"]
 
 [project.scripts]
 k6-preprocess = "k6_loadtest.preprocess:main"
+schema-drift = "schema_drift.cli:main"
