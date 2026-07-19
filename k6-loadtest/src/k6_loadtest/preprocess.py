@@ -160,7 +160,7 @@ def run_preprocess(config_path: Path, output_dir: Path) -> None:
     print(f"  Generated test.js")
 
     print(f"\nDone! Output written to: {output_dir}")
-    print(f"Run with: ./k6 run {output_dir}/test.js")
+    print(f"Run with: ./k6-loadtest/k6 run {output_dir}/test.js")
 
 
 def main():

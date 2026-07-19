@@ -1,13 +1,18 @@
 #!/bin/bash
 # Build custom K6 binary with xk6-sql and MS SQL driver
 #
-# Prerequisites: Go 1.21+ installed
+# Prerequisites: Go 1.22+ installed
 # Installs xk6 if not present, then builds k6 with SQL Server support.
 
 set -euo pipefail
 
 # Ensure Go bin is in PATH
 export PATH="$PATH:$(go env GOPATH)/bin"
+
+# Resolve output alongside this script so the binary lands in k6-loadtest/
+# regardless of the caller's working directory.
+script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+output_path="$script_dir/k6"
 
 echo "Building custom K6 binary with SQL Server support..."
 
@@ -21,8 +26,8 @@ fi
 xk6 build \
     --with github.com/grafana/xk6-sql \
     --with github.com/grafana/xk6-sql-driver-sqlserver \
-    --output ./k6
+    --output "$output_path"
 
 echo ""
-echo "Build complete: ./k6"
-echo "Verify with: ./k6 version"
+echo "Build complete: $output_path"
+echo "Verify with: $output_path version"

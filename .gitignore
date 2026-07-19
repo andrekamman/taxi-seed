@@ -210,4 +210,4 @@ __marimo__/
 
 # K6 load testing output and binary
 k6-loadtest/output/
-k6
+k6-loadtest/k6
