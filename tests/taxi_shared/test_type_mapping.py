@@ -1,6 +1,6 @@
 import pytest
 
-from loadtest.type_mapping import map_duckdb_to_mssql, TypeMappingError
+from taxi_shared.type_mapping import map_duckdb_to_mssql, TypeMappingError
 
 
 def test_basic_types():

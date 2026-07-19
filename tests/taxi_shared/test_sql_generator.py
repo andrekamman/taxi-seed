@@ -1,6 +1,6 @@
 import pytest
 
-from loadtest.sql_generator import (
+from taxi_shared.sql_generator import (
     generate_insert_sql,
     generate_update_sql,
     generate_delete_sql,

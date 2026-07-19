@@ -7,8 +7,8 @@ from pathlib import Path
 
 from loadtest.config import load_config, validate_config
 from loadtest.data_export import export_chunks, get_schema
-from loadtest.type_mapping import map_duckdb_to_mssql
-from loadtest.sql_generator import (
+from taxi_shared.type_mapping import map_duckdb_to_mssql
+from taxi_shared.sql_generator import (
     generate_insert_sql,
     generate_update_sql,
     generate_delete_sql,
