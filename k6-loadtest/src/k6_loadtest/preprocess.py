@@ -5,8 +5,8 @@ import json
 import sys
 from pathlib import Path
 
-from loadtest.config import load_config, validate_config
-from loadtest.data_export import export_chunks, get_schema
+from k6_loadtest.config import load_config, validate_config
+from k6_loadtest.data_export import export_chunks, get_schema
 from taxi_shared.type_mapping import map_duckdb_to_mssql
 from taxi_shared.sql_generator import (
     generate_insert_sql,
@@ -14,7 +14,7 @@ from taxi_shared.sql_generator import (
     generate_delete_sql,
     generate_create_table_sql,
 )
-from loadtest.k6_generator import generate_manifest, generate_test_js
+from k6_loadtest.k6_generator import generate_manifest, generate_test_js
 
 
 def run_preprocess(config_path: Path, output_dir: Path) -> None:

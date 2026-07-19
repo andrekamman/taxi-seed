@@ -4,7 +4,7 @@ from pathlib import Path
 
 import duckdb
 
-from loadtest.data_export import export_chunks, get_schema
+from k6_loadtest.data_export import export_chunks, get_schema
 
 
 FIXTURES = Path(__file__).parent / "fixtures"

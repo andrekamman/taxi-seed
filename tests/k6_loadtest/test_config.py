@@ -1,7 +1,7 @@
 import pytest
 from pathlib import Path
 
-from loadtest.config import load_config, validate_config, ConfigError
+from k6_loadtest.config import load_config, validate_config, ConfigError
 
 
 FIXTURES = Path(__file__).parent / "fixtures"
@@ -73,7 +73,7 @@ def test_validate_config_invalid_ordering():
 
 
 def test_parse_think_time():
-    from loadtest.config import parse_duration_ms
+    from k6_loadtest.config import parse_duration_ms
     assert parse_duration_ms("200ms") == 200
     assert parse_duration_ms("1s") == 1000
     assert parse_duration_ms("2s") == 2000

@@ -2,7 +2,7 @@ import json
 import pytest
 from pathlib import Path
 
-from loadtest.k6_generator import generate_manifest, generate_test_js
+from k6_loadtest.k6_generator import generate_manifest, generate_test_js
 
 
 def test_generate_manifest():

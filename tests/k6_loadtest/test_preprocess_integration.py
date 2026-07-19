@@ -4,7 +4,7 @@ from pathlib import Path
 
 import duckdb
 
-from loadtest.preprocess import run_preprocess
+from k6_loadtest.preprocess import run_preprocess
 
 
 @pytest.fixture

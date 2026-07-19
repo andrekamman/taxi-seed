@@ -1,6 +1,6 @@
 data_sources:
   yellow_trips:
-    path: "tests/loadtest/fixtures/*.parquet"
+    path: "tests/k6_loadtest/fixtures/*.parquet"
     chunk_size: 100
     key_columns: [pickup_time, dropoff_time]
     columns:
