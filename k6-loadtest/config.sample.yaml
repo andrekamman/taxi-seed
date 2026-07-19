@@ -1,11 +1,11 @@
 # K6 SQL Server Load Test Configuration
-# Copy this file to config.yaml and adjust for your environment.
+# Copy this file to k6-loadtest/config.yaml and adjust for your environment.
 #
-# Usage:
-#   1. Build custom K6:  ./build_k6.sh
-#   2. Preprocess data:  uv run k6-preprocess --config config.yaml --output k6_output/
-#   3. Create tables:    Apply scripts from k6_output/schema/ to your SQL Servers
-#   4. Run load test:    MSSQL_PASSWORD=yourpass ./k6 run k6_output/test.js
+# Usage (from the repo root):
+#   1. Build custom K6:  ./k6-loadtest/build_k6.sh
+#   2. Preprocess data:  uv run k6-preprocess --config k6-loadtest/config.yaml --output k6-loadtest/output/
+#   3. Create tables:    Apply scripts from k6-loadtest/output/schema/ to your SQL Servers
+#   4. Run load test:    MSSQL_PASSWORD=yourpass ./k6-loadtest/k6 run k6-loadtest/output/test.js
 
 # Data sources — two modes available:
 #   mode: parquet    — reads real data from parquet files (default)

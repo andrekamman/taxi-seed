@@ -176,8 +176,8 @@ def main():
     parser.add_argument(
         "--output",
         type=Path,
-        default=Path("k6_output"),
-        help="Output directory (default: k6_output/)",
+        default=Path("k6-loadtest/output"),
+        help="Output directory (default: k6-loadtest/output/)",
     )
     args = parser.parse_args()
 
