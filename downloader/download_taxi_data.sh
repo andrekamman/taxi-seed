@@ -31,7 +31,9 @@ while [[ $# -gt 0 ]]; do
 done
 
 # Output directory
-output_dir="raw"
+# Resolve raw/ relative to this script's location, so the script works from any CWD.
+script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+output_dir="$script_dir/../raw"
 
 # Create output directory if it doesn't exist
 mkdir -p "$output_dir"
