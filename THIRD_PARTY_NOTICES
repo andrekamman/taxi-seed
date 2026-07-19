@@ -1,6 +1,19 @@
+Third-Party Notices
+===================
+
+This project was originally inspired by nyc-taxi-data by Todd Schneider
+(https://github.com/toddwschneider/nyc-taxi-data), which is distributed
+under the MIT License. The downloader in this repository has been
+substantially rewritten, but attribution is preserved in acknowledgment
+of the original project.
+
+The original license notice follows:
+
+-------------------------------------------------------------------------------
+
 MIT License
 
-Copyright (c) 2026 Andre Kamman
+Copyright (c) 2017 Todd Schneider
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
