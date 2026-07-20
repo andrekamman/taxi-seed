@@ -30,10 +30,37 @@ while [[ $# -gt 0 ]]; do
     esac
 done
 
-# Output directory
-# Resolve raw/ relative to this script's location, so the script works from any CWD.
-script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-output_dir="$script_dir/../raw"
+# Output directory: honor OUTPUT_DIR override; otherwise resolve raw/ relative
+# to this script's location, so the script works from any CWD.
+if [ -n "$OUTPUT_DIR" ]; then
+    output_dir="$OUTPUT_DIR"
+else
+    script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+    output_dir="$script_dir/../raw"
+fi
+
+# Warn if running under WSL and about to write to the Linux filesystem. The
+# TLC dataset is large (100+ GB full history) and everything under the WSL2
+# root grows the VHDX file on the Windows C: drive — which does not shrink
+# when you later delete files.
+is_wsl() { grep -qiE '(microsoft|wsl)' /proc/version 2>/dev/null; }
+if is_wsl && [[ "$output_dir" != /mnt/* ]]; then
+    echo "WARNING: WSL detected — about to write to the Linux filesystem."
+    echo "  Path:      $output_dir"
+    echo "  Downloads: up to ~100 GB (full history), ~1 GB (--recent 3)"
+    echo "  Impact:    grows your WSL2 VHDX on the Windows C: drive."
+    echo ""
+    echo "  To write to a Windows path instead, set OUTPUT_DIR, e.g.:"
+    echo "    OUTPUT_DIR=/mnt/c/Users/\$USER/taxi-data $0 $*"
+    echo ""
+    if [ -t 0 ]; then
+        read -p "Continue writing to $output_dir? [y/N] " reply
+        [[ "$reply" =~ ^[Yy]$ ]] || { echo "Aborted."; exit 1; }
+    else
+        echo "  (non-interactive: proceeding without confirmation)"
+    fi
+    echo ""
+fi
 
 # Create output directory if it doesn't exist
 mkdir -p "$output_dir"
