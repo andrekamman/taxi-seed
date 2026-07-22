@@ -4,19 +4,32 @@ import duckdb
 
 
 def get_column_stats(
-    conn: duckdb.DuckDBPyConnection, file_path: Path, column_name: str, sample_size: int = 10000
+    conn: duckdb.DuckDBPyConnection, file_path: Path, column_name: str, sample_size: "int | str" = 5000
 ) -> dict | None:
     """Get statistics for a column from a parquet file."""
     try:
         # Quote column name to handle special characters
         col_quoted = f'"{column_name}"'
 
+        # Build the SAMPLE clause. int → rows; str ending in "%" → percent;
+        # 0 or "0%" or "100%" → no sampling (full scan).
+        if isinstance(sample_size, str) and sample_size.endswith("%"):
+            pct = int(sample_size.rstrip("%"))
+            if pct <= 0 or pct >= 100:
+                sample_clause = ""
+            else:
+                sample_clause = f"USING SAMPLE {pct} PERCENT"
+        elif isinstance(sample_size, int) and sample_size > 0:
+            sample_clause = f"USING SAMPLE {sample_size}"
+        else:
+            sample_clause = ""
+
         # Get basic stats using a sample for performance
         stats_query = f"""
             WITH sample AS (
                 SELECT {col_quoted} as val
                 FROM '{file_path}'
-                USING SAMPLE {sample_size}
+                {sample_clause}
             )
             SELECT
                 COUNT(*) as total_count,
@@ -36,7 +49,7 @@ def get_column_stats(
             WITH sample AS (
                 SELECT {col_quoted} as val
                 FROM '{file_path}'
-                USING SAMPLE {sample_size}
+                {sample_clause}
             )
             SELECT
                 MIN(TRY_CAST(val AS DOUBLE)) as min_val,
@@ -56,7 +69,7 @@ def get_column_stats(
             WITH sample AS (
                 SELECT {col_quoted} as val
                 FROM '{file_path}'
-                USING SAMPLE {sample_size}
+                {sample_clause}
             )
             SELECT val, COUNT(*) as cnt
             FROM sample

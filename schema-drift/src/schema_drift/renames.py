@@ -59,6 +59,7 @@ def detect_renames_by_data(
     file_from: Path,
     file_to: Path,
     threshold: float = 0.6,
+    sample_size: "int | str" = 5000,
 ) -> tuple[list[ColumnRename], list[ColumnInfo], list[ColumnInfo]]:
     """Detect likely column renames using data similarity (generic, no domain knowledge)."""
     renames = []
@@ -68,10 +69,10 @@ def detect_renames_by_data(
     stats_added = {}
 
     for col in removed:
-        stats_removed[col.name] = get_column_stats(conn, file_from, col.name, sample_size=5000)
+        stats_removed[col.name] = get_column_stats(conn, file_from, col.name, sample_size=sample_size)
 
     for col in added:
-        stats_added[col.name] = get_column_stats(conn, file_to, col.name, sample_size=5000)
+        stats_added[col.name] = get_column_stats(conn, file_to, col.name, sample_size=sample_size)
 
     # Calculate data similarity scores for all pairs with compatible types
     scores = []

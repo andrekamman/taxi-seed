@@ -79,6 +79,7 @@ def analyze_data_type(
     data_type: str,
     verify_data: bool = False,
     generic_mode: bool = False,
+    sample_size: "int | str" = 5000,
 ) -> dict:
     """Analyze schema drift for a specific data type.
 
@@ -138,7 +139,7 @@ def analyze_data_type(
             # Use data-driven rename detection
             print(f"    Comparing {len(removed)} removed vs {len(added)} added columns by data similarity...")
             renames, removed, added = detect_renames_by_data(
-                conn, removed, added, prev_file, curr_file
+                conn, removed, added, prev_file, curr_file, sample_size=sample_size
             )
             if renames:
                 print(f"    Found {len(renames)} potential renames (requires human review)")
