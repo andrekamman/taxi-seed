@@ -15,6 +15,7 @@ build-backend = "hatchling.build"
 [tool.hatch.build.targets.wheel]
 packages = [
   "k6-loadtest/src/k6_loadtest",
+  "normalize/src/taxi_normalize",
   "schema-drift/src/schema_drift",
   "shared/src/taxi_shared",
 ]
@@ -24,4 +25,5 @@ test = ["pytest>=8.0"]
 
 [project.scripts]
 k6-preprocess = "k6_loadtest.preprocess:main"
+normalize = "taxi_normalize.cli:main"
 schema-drift = "schema_drift.cli:main"
