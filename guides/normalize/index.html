@@ -1,0 +1,1759 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Downloader, schema-drift analyzer, and K6 SQL Server load tester for NYC TLC taxi trip data">
+      
+      
+      
+        <link rel="canonical" href="https://andrekamman.github.io/taxi/guides/normalize/">
+      
+      
+        <link rel="prev" href="../schema-drift/">
+      
+      
+        <link rel="next" href="../k6-loadtest/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>Normalize - taxi</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.ec1eaa64.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#normalize" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="taxi" class="md-header__button md-logo" aria-label="taxi" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            taxi
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Normalize
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+          <a href="javascript:void(0)" class="md-search__icon md-icon" title="Share" aria-label="Share" data-clipboard data-clipboard-text="" data-md-component="search-share" tabindex="-1">
+            
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9a3 3 0 0 0-3 3 3 3 0 0 0 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.15c-.05.21-.08.43-.08.66 0 1.61 1.31 2.91 2.92 2.91s2.92-1.3 2.92-2.91A2.92 2.92 0 0 0 18 16.08"/></svg>
+          </a>
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/andrekamman/taxi" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    andrekamman/taxi
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="taxi" class="md-nav__button md-logo" aria-label="taxi" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    taxi
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/andrekamman/taxi" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    andrekamman/taxi
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../getting-started/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Guides
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Guides
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../downloader/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Downloader
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../schema-drift/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Schema Drift
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Normalize
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Normalize
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#prerequisites" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Prerequisites
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#install" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Install
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#the-three-state-model" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The three-state model
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#mapping-file" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Mapping file
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#bootstrap-and-amend" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Bootstrap and amend
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Bootstrap and amend">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#bootstrap" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Bootstrap
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#amend" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Amend
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#the-ack_date-convention" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The ack_date convention
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#exit-codes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Exit codes
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#the-sample-flag" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The --sample flag
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#worked-example-1-first-time-yellow" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Worked example 1: First-time yellow
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#worked-example-2-new-drift-appears-months-later" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Worked example 2: New drift appears months later
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#what-runs-automatically-no-mapping-needed" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What runs automatically (no mapping needed)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#what-triggers-an-error" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What triggers an error
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../k6-loadtest/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    K6 Load Test
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../cookbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Cookbook
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reference
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Reference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/configuration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Configuration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/exit-codes/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Exit codes
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Design Specs
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Design Specs
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../superpowers/specs/2026-07-19-monorepo-restructure-design/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Monorepo restructure
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../superpowers/specs/2026-07-21-normalizer-design/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Normalizer
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../superpowers/specs/2026-03-25-k6-sql-load-testing-design/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    K6 SQL load testing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../superpowers/specs/2026-07-22-documentation-design/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Documentation site
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../contributing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Contributing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#prerequisites" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Prerequisites
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#install" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Install
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#the-three-state-model" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The three-state model
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#mapping-file" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Mapping file
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#bootstrap-and-amend" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Bootstrap and amend
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Bootstrap and amend">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#bootstrap" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Bootstrap
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#amend" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Amend
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#the-ack_date-convention" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The ack_date convention
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#exit-codes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Exit codes
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#the-sample-flag" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The --sample flag
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#worked-example-1-first-time-yellow" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Worked example 1: First-time yellow
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#worked-example-2-new-drift-appears-months-later" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Worked example 2: New drift appears months later
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#what-runs-automatically-no-mapping-needed" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What runs automatically (no mapping needed)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#what-triggers-an-error" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What triggers an error
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="normalize">Normalize</h1>
+<p><strong>Data loss is a first-class error, not a warning.</strong> The <code>normalize</code> tool rewrites historical TLC parquet to conform to the latest schema — but every silent drop of non-null data, every lossy cast, requires an explicit human acknowledgment written into a version-controlled mapping YAML. There is no <code>--force</code> flag. There is no "warn and continue" mode. If the tool can't prove a transformation is loss-free, it halts and asks.</p>
+<p>The operational model is a two-phase loop: you run the tool, and it either (a) writes normalized parquet successfully or (b) rewrites a per-type mapping file with new items for you to review. You edit the mapping, re-run, and repeat until everything is resolved. On the first run against a raw type that has no mapping yet, the tool auto-generates the scaffold from the actual raw data and exits without writing any parquet. On every subsequent run it validates the mapping against the current raw data and, if new schema drift has appeared since the last run, amends the mapping in place with new SUGGESTED/TODO entries.</p>
+<p>This bootstrap-and-amend semantics is what makes <code>normalize</code> safe to run on a schedule. A future orchestrator sub-project will invoke <code>normalize</code> on a cron — when TLC ships new drift (they do, roughly once a year), you'll wake up to a mapping-file diff to review in a pull request, not a silent failure and not a wholesale scaffold regeneration that clobbers your prior decisions.</p>
+<h2 id="prerequisites">Prerequisites</h2>
+<ul>
+<li>A <code>raw/&lt;type&gt;/</code> mirror produced by the <a href="../downloader/">downloader</a>.</li>
+<li><code>uv sync</code> in the repo root.</li>
+</ul>
+<h2 id="install">Install</h2>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-1">1</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1"></a>uv<span class="w"> </span>sync
+</code></pre></div></td></tr></table></div>
+<p>That's it. <code>normalize</code> is exposed as a <code>uv run</code> entry point.</p>
+<h2 id="the-three-state-model">The three-state model</h2>
+<p>Every invocation of <code>normalize &lt;type&gt;</code> resolves to exactly one of three outcomes: <strong>bootstrap</strong> (no mapping yet), <strong>amend</strong> (mapping exists but has unresolved items), or <strong>normalize</strong> (mapping is complete).</p>
+<pre class="mermaid"><code>stateDiagram-v2
+  [*] --&gt; First_run: normalize yellow
+  First_run --&gt; Awaiting_edits: no mapping found -&gt; auto-bootstrap -&gt; exit 3
+  Awaiting_edits --&gt; Second_run: human edits YAML
+  Second_run --&gt; Unresolved: unresolved items -&gt; auto-amend -&gt; exit 1
+  Second_run --&gt; Complete: mapping complete
+  Unresolved --&gt; Awaiting_edits: human re-edits
+  Complete --&gt; [*]: normalized parquet written -&gt; exit 0</code></pre>
+<p><strong>First run.</strong> No mapping file exists at <code>normalize/mappings/&lt;type&gt;.yaml</code>. The tool scans the raw parquet metadata, invokes schema-drift's rename detector, and writes a mapping YAML with a machine-generated timeline header and a SUGGESTED/TODO scaffold covering every rename candidate, lossy cast, and unmapped column with data. Then it prints next-step instructions and exits 3. No parquet is written.</p>
+<p><strong>Awaiting edits.</strong> The tool has done all it can. Your turn: open the YAML, uncomment the SUGGESTED renames you agree with (delete the ones you don't), and fill in <code>ack_date:</code> on the TODO blocks for lossy casts and data drops you want to accept. This is the pause-and-think step. It's not automatable, and it's not supposed to be.</p>
+<p><strong>Second run with unresolved items.</strong> You re-run <code>normalize &lt;type&gt;</code>. The tool loads the mapping, plans the transformation for every historical file, and finds items still unresolved — either because you didn't finish editing, or because new drift has appeared (TLC added a column, changed a type). The tool amends the mapping in place: existing entries are preserved, new SUGGESTED/TODO items are appended below. It prints a consolidated error report and exits 1. Still no parquet written.</p>
+<p><strong>Second run with complete mapping.</strong> Every historical file is fully planned. The tool writes normalized parquet to <code>raw-normalized/&lt;type&gt;/&lt;year&gt;/*.parquet</code>, mirroring the input layout. Files already present in the output directory are skipped, so the second-time cost is only the incremental diff. Exit 0.</p>
+<h2 id="mapping-file">Mapping file</h2>
+<p>The mapping YAML lives at <code>normalize/mappings/&lt;type&gt;.yaml</code> and is version-controlled alongside the rest of the repo. Every non-comment change to this file is an operational decision worth reviewing in a PR.</p>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-1-1"> 1</a></span>
+<span class="normal"><a href="#__codelineno-1-2"> 2</a></span>
+<span class="normal"><a href="#__codelineno-1-3"> 3</a></span>
+<span class="normal"><a href="#__codelineno-1-4"> 4</a></span>
+<span class="normal"><a href="#__codelineno-1-5"> 5</a></span>
+<span class="normal"><a href="#__codelineno-1-6"> 6</a></span>
+<span class="normal"><a href="#__codelineno-1-7"> 7</a></span>
+<span class="normal"><a href="#__codelineno-1-8"> 8</a></span>
+<span class="normal"><a href="#__codelineno-1-9"> 9</a></span>
+<span class="normal"><a href="#__codelineno-1-10">10</a></span>
+<span class="normal"><a href="#__codelineno-1-11">11</a></span>
+<span class="normal"><a href="#__codelineno-1-12">12</a></span>
+<span class="normal"><a href="#__codelineno-1-13">13</a></span>
+<span class="normal"><a href="#__codelineno-1-14">14</a></span>
+<span class="normal"><a href="#__codelineno-1-15">15</a></span>
+<span class="normal"><a href="#__codelineno-1-16">16</a></span>
+<span class="normal"><a href="#__codelineno-1-17">17</a></span>
+<span class="normal"><a href="#__codelineno-1-18">18</a></span>
+<span class="normal"><a href="#__codelineno-1-19">19</a></span>
+<span class="normal"><a href="#__codelineno-1-20">20</a></span>
+<span class="normal"><a href="#__codelineno-1-21">21</a></span>
+<span class="normal"><a href="#__codelineno-1-22">22</a></span>
+<span class="normal"><a href="#__codelineno-1-23">23</a></span>
+<span class="normal"><a href="#__codelineno-1-24">24</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1"></a><span class="c1"># Generated by `normalize yellow` on 2026-07-22.</span>
+<a id="__codelineno-1-2" name="__codelineno-1-2"></a><span class="c1"># Detected drift transitions:</span>
+<a id="__codelineno-1-3" name="__codelineno-1-3"></a><span class="c1">#   2013-01 -&gt; 2015-01: renamed pu_datetime-&gt;tpep_pickup_datetime; added PULocationID</span>
+<a id="__codelineno-1-4" name="__codelineno-1-4"></a><span class="c1">#   2016-06 -&gt; 2016-07: dropped pickup_latitude, pickup_longitude</span>
+<a id="__codelineno-1-5" name="__codelineno-1-5"></a><span class="c1">#   2020-01 -&gt; 2020-02: added congestion_surcharge</span>
+<a id="__codelineno-1-6" name="__codelineno-1-6"></a><span class="c1">#   2023-01 -&gt; 2023-02: added airport_fee</span>
+<a id="__codelineno-1-7" name="__codelineno-1-7"></a>
+<a id="__codelineno-1-8" name="__codelineno-1-8"></a><span class="nt">target</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">yellow_tripdata_2024-01.parquet</span>
+<a id="__codelineno-1-9" name="__codelineno-1-9"></a>
+<a id="__codelineno-1-10" name="__codelineno-1-10"></a><span class="nt">renames</span><span class="p">:</span>
+<a id="__codelineno-1-11" name="__codelineno-1-11"></a><span class="w">  </span><span class="nt">pu_datetime</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">tpep_pickup_datetime</span>
+<a id="__codelineno-1-12" name="__codelineno-1-12"></a><span class="w">  </span><span class="nt">do_datetime</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">tpep_dropoff_datetime</span>
+<a id="__codelineno-1-13" name="__codelineno-1-13"></a>
+<a id="__codelineno-1-14" name="__codelineno-1-14"></a><span class="nt">lossy_casts</span><span class="p">:</span>
+<a id="__codelineno-1-15" name="__codelineno-1-15"></a><span class="w">  </span><span class="nt">passenger_count</span><span class="p">:</span>
+<a id="__codelineno-1-16" name="__codelineno-1-16"></a><span class="w">    </span><span class="nt">from</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">DOUBLE</span>
+<a id="__codelineno-1-17" name="__codelineno-1-17"></a><span class="w">    </span><span class="nt">to</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">BIGINT</span>
+<a id="__codelineno-1-18" name="__codelineno-1-18"></a><span class="w">    </span><span class="nt">ack_date</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2026-07-21</span>
+<a id="__codelineno-1-19" name="__codelineno-1-19"></a>
+<a id="__codelineno-1-20" name="__codelineno-1-20"></a><span class="nt">acknowledged_data_loss</span><span class="p">:</span>
+<a id="__codelineno-1-21" name="__codelineno-1-21"></a><span class="w">  </span><span class="nt">pickup_latitude</span><span class="p">:</span>
+<a id="__codelineno-1-22" name="__codelineno-1-22"></a><span class="w">    </span><span class="nt">ack_date</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2026-07-21</span>
+<a id="__codelineno-1-23" name="__codelineno-1-23"></a><span class="w">  </span><span class="nt">pickup_longitude</span><span class="p">:</span>
+<a id="__codelineno-1-24" name="__codelineno-1-24"></a><span class="w">    </span><span class="nt">ack_date</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2026-07-21</span>
+</code></pre></div></td></tr></table></div>
+<p>See the <a href="../../reference/configuration/">Reference → Configuration</a> page for the field-by-field schema.</p>
+<h2 id="bootstrap-and-amend">Bootstrap and amend</h2>
+<p>Both operations run the same underlying analysis; the difference is in whether existing content is preserved.</p>
+<h3 id="bootstrap">Bootstrap</h3>
+<p>Fires when no mapping file exists. Sequence:</p>
+<ol>
+<li>Scan <code>raw/&lt;type&gt;/**/*.parquet</code> via parquet metadata only — no data scan.</li>
+<li>Call <code>schema_drift.analyze.analyze_data_type()</code> in generic mode to compute the drift timeline plus rename candidates.</li>
+<li>Emit YAML with:</li>
+<li><strong>Timeline header</strong> — one comment line per detected transition, listing renames/adds/drops/type-changes between adjacent schema signatures.</li>
+<li><strong><code>target:</code></strong> — pinned to the newest raw file. This is the canonical schema all historical files will be rewritten to.</li>
+<li><strong><code>renames:</code></strong> — commented <code># SUGGESTED (confidence X%, data-verified) — uncomment to accept:</code> lines above each rename candidate detected by schema-drift.</li>
+<li><strong><code>lossy_casts:</code></strong> — commented TODO blocks for every type change that could lose data.</li>
+<li><strong><code>acknowledged_data_loss:</code></strong> — commented TODO blocks for every column that has historical data but no place to land in the target schema.</li>
+<li>Exit 3 with next-step instructions.</li>
+</ol>
+<h3 id="amend">Amend</h3>
+<p>Fires when the mapping exists but the planner finds unresolved items. Sequence:</p>
+<ol>
+<li>Load the existing mapping — the loader parses YAML semantically, so <code>renames:</code> dict entries and <code>ack_date</code> values survive. <strong>Body comments do not survive</strong>; PyYAML strips them on parse.</li>
+<li>Recompute the drift analysis from the current raw files.</li>
+<li>Diff the new analysis against the existing mapping's semantic content — determine which items are NOT already handled.</li>
+<li>Rewrite the file: regenerated timeline header, then existing entries (renames, lossy_casts, acknowledged_data_loss), then newly appended SUGGESTED/TODO items per section.</li>
+<li>Print the consolidated unresolved report + amendment note. Exit 1.</li>
+</ol>
+<p>The critical property: <strong>your semantic decisions survive</strong>. A rename you accepted stays accepted. An <code>ack_date</code> you filled in stays filled in. What you lose are the free-form comments you wrote in the file body — because there's no way for the tool to associate a comment with the entry it describes across an edit. Put reasoning in the <code>reason:</code> field of an ack entry instead, or in the git commit message.</p>
+<p>Operational rationale: the (future) orchestrator sub-project will run <code>normalize</code> on a cron. When TLC ships new drift, amend semantics mean the human wakes up to a mapping-file diff to review — not a silent failure, not a scaffold regenerated from scratch.</p>
+<h2 id="the-ack_date-convention">The <code>ack_date</code> convention</h2>
+<p><code>ack_date</code> is the only required field for <code>lossy_casts:</code> and <code>acknowledged_data_loss:</code> entries. <code>ack_by</code> and <code>reason</code> are optional but recommended.</p>
+<p><strong>Minimum ack:</strong></p>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-2-1">1</a></span>
+<span class="normal"><a href="#__codelineno-2-2">2</a></span>
+<span class="normal"><a href="#__codelineno-2-3">3</a></span>
+<span class="normal"><a href="#__codelineno-2-4">4</a></span>
+<span class="normal"><a href="#__codelineno-2-5">5</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1"></a><span class="nt">lossy_casts</span><span class="p">:</span>
+<a id="__codelineno-2-2" name="__codelineno-2-2"></a><span class="w">  </span><span class="nt">passenger_count</span><span class="p">:</span>
+<a id="__codelineno-2-3" name="__codelineno-2-3"></a><span class="w">    </span><span class="nt">from</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">DOUBLE</span>
+<a id="__codelineno-2-4" name="__codelineno-2-4"></a><span class="w">    </span><span class="nt">to</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">BIGINT</span>
+<a id="__codelineno-2-5" name="__codelineno-2-5"></a><span class="w">    </span><span class="nt">ack_date</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2026-07-21</span>
+</code></pre></div></td></tr></table></div>
+<p><strong>Well-documented ack</strong> (recommended for public or audit-friendly repos):</p>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-3-1">1</a></span>
+<span class="normal"><a href="#__codelineno-3-2">2</a></span>
+<span class="normal"><a href="#__codelineno-3-3">3</a></span>
+<span class="normal"><a href="#__codelineno-3-4">4</a></span>
+<span class="normal"><a href="#__codelineno-3-5">5</a></span>
+<span class="normal"><a href="#__codelineno-3-6">6</a></span>
+<span class="normal"><a href="#__codelineno-3-7">7</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1"></a><span class="nt">lossy_casts</span><span class="p">:</span>
+<a id="__codelineno-3-2" name="__codelineno-3-2"></a><span class="w">  </span><span class="nt">passenger_count</span><span class="p">:</span>
+<a id="__codelineno-3-3" name="__codelineno-3-3"></a><span class="w">    </span><span class="nt">from</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">DOUBLE</span>
+<a id="__codelineno-3-4" name="__codelineno-3-4"></a><span class="w">    </span><span class="nt">to</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">BIGINT</span>
+<a id="__codelineno-3-5" name="__codelineno-3-5"></a><span class="w">    </span><span class="nt">ack_date</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2026-07-21</span>
+<a id="__codelineno-3-6" name="__codelineno-3-6"></a><span class="w">    </span><span class="nt">ack_by</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">andrekamman</span>
+<a id="__codelineno-3-7" name="__codelineno-3-7"></a><span class="w">    </span><span class="nt">reason</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Values</span><span class="nv"> </span><span class="s">are</span><span class="nv"> </span><span class="s">logically</span><span class="nv"> </span><span class="s">integer;</span><span class="nv"> </span><span class="s">the</span><span class="nv"> </span><span class="s">2011-2014</span><span class="nv"> </span><span class="s">DOUBLE</span><span class="nv"> </span><span class="s">was</span><span class="nv"> </span><span class="s">a</span><span class="nv"> </span><span class="s">data-entry</span><span class="nv"> </span><span class="s">choice.&quot;</span>
+</code></pre></div></td></tr></table></div>
+<p>Why the convention: the <code>ack_date</code> is the enforced pause-and-think. Its presence is what the tool checks; its value is what a future reviewer reads. <code>ack_by</code> and <code>reason</code> add context that git history alone can approximate — you can always <code>git blame</code> the file — but only if the author's identity is clear at the time of the edit. Recording it in the YAML makes the decision self-contained.</p>
+<h2 id="exit-codes">Exit codes</h2>
+<table>
+<thead>
+<tr>
+<th>Code</th>
+<th>Meaning</th>
+<th>What to do</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0</td>
+<td>Success — files normalized or already present</td>
+<td>Nothing</td>
+</tr>
+<tr>
+<td>1</td>
+<td>Mapping incomplete; unresolved items reported and mapping amended</td>
+<td>Edit the mapping YAML, re-run</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Configuration error (missing raw data, malformed mapping, target file not found)</td>
+<td>Fix the reported issue</td>
+</tr>
+<tr>
+<td>3</td>
+<td>First run; scaffold generated</td>
+<td>Review the scaffold, edit, re-run</td>
+</tr>
+</tbody>
+</table>
+<p>When you invoke <code>normalize</code> with no argument, the tool runs all four types in turn and returns the highest exit code observed. This means a mixed run — say, <code>yellow</code> succeeds and <code>fhvhv</code> needs edits — exits 1, and CI can treat it as needs-attention.</p>
+<h2 id="the-sample-flag">The <code>--sample</code> flag</h2>
+<p><code>--sample &lt;N|N%&gt;</code> controls the number of rows sampled during rename-detection verification during bootstrap and amend. Default <code>100%</code> (full scan — err on the safe side).</p>
+<p>Reduce it only for very large datasets where bootstrap runtime becomes a problem:</p>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-4-1">1</a></span>
+<span class="normal"><a href="#__codelineno-4-2">2</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1"></a>uv<span class="w"> </span>run<span class="w"> </span>normalize<span class="w"> </span>yellow<span class="w"> </span>--sample<span class="w"> </span><span class="m">10</span>%
+<a id="__codelineno-4-2" name="__codelineno-4-2"></a>uv<span class="w"> </span>run<span class="w"> </span>normalize<span class="w"> </span>yellow<span class="w"> </span>--sample<span class="w"> </span><span class="m">5000</span>
+</code></pre></div></td></tr></table></div>
+<p>Important caveat: metadata-only checks (schema comparisons, null counts, min/max ranges) and precision scans (DOUBLE -&gt; BIGINT truncation detection) <strong>always full-scan</strong> regardless of <code>--sample</code>. Sampling those risks a false-negative data-loss decision, which is exactly the failure mode the tool exists to prevent.</p>
+<h2 id="worked-example-1-first-time-yellow">Worked example 1: First-time yellow</h2>
+<p>Assume you've mirrored the full yellow-taxi history to <code>raw/yellow/</code> via the downloader. Run:</p>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-5-1">1</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1"></a>uv<span class="w"> </span>run<span class="w"> </span>normalize<span class="w"> </span>yellow
+</code></pre></div></td></tr></table></div>
+<p>Expected output:</p>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-6-1">1</a></span>
+<span class="normal"><a href="#__codelineno-6-2">2</a></span>
+<span class="normal"><a href="#__codelineno-6-3">3</a></span>
+<span class="normal"><a href="#__codelineno-6-4">4</a></span>
+<span class="normal"><a href="#__codelineno-6-5">5</a></span>
+<span class="normal"><a href="#__codelineno-6-6">6</a></span>
+<span class="normal"><a href="#__codelineno-6-7">7</a></span>
+<span class="normal"><a href="#__codelineno-6-8">8</a></span>
+<span class="normal"><a href="#__codelineno-6-9">9</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1"></a>yellow: no mapping found — analyzed raw data and wrote normalize/mappings/yellow.yaml.
+<a id="__codelineno-6-2" name="__codelineno-6-2"></a>  Detected 4 drift transition(s) — see file header.
+<a id="__codelineno-6-3" name="__codelineno-6-3"></a>  6 SUGGESTED/TODO item(s) need your review.
+<a id="__codelineno-6-4" name="__codelineno-6-4"></a>
+<a id="__codelineno-6-5" name="__codelineno-6-5"></a>Next steps:
+<a id="__codelineno-6-6" name="__codelineno-6-6"></a>  1. Review normalize/mappings/yellow.yaml
+<a id="__codelineno-6-7" name="__codelineno-6-7"></a>  2. Uncomment SUGGESTED entries you accept, delete the rest
+<a id="__codelineno-6-8" name="__codelineno-6-8"></a>  3. Fill in `ack_date:` for each TODO to acknowledge lossy casts or data loss
+<a id="__codelineno-6-9" name="__codelineno-6-9"></a>  4. Re-run: uv run normalize yellow
+</code></pre></div></td></tr></table></div>
+<p>The generated <code>normalize/mappings/yellow.yaml</code> looks roughly like this:</p>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-7-1"> 1</a></span>
+<span class="normal"><a href="#__codelineno-7-2"> 2</a></span>
+<span class="normal"><a href="#__codelineno-7-3"> 3</a></span>
+<span class="normal"><a href="#__codelineno-7-4"> 4</a></span>
+<span class="normal"><a href="#__codelineno-7-5"> 5</a></span>
+<span class="normal"><a href="#__codelineno-7-6"> 6</a></span>
+<span class="normal"><a href="#__codelineno-7-7"> 7</a></span>
+<span class="normal"><a href="#__codelineno-7-8"> 8</a></span>
+<span class="normal"><a href="#__codelineno-7-9"> 9</a></span>
+<span class="normal"><a href="#__codelineno-7-10">10</a></span>
+<span class="normal"><a href="#__codelineno-7-11">11</a></span>
+<span class="normal"><a href="#__codelineno-7-12">12</a></span>
+<span class="normal"><a href="#__codelineno-7-13">13</a></span>
+<span class="normal"><a href="#__codelineno-7-14">14</a></span>
+<span class="normal"><a href="#__codelineno-7-15">15</a></span>
+<span class="normal"><a href="#__codelineno-7-16">16</a></span>
+<span class="normal"><a href="#__codelineno-7-17">17</a></span>
+<span class="normal"><a href="#__codelineno-7-18">18</a></span>
+<span class="normal"><a href="#__codelineno-7-19">19</a></span>
+<span class="normal"><a href="#__codelineno-7-20">20</a></span>
+<span class="normal"><a href="#__codelineno-7-21">21</a></span>
+<span class="normal"><a href="#__codelineno-7-22">22</a></span>
+<span class="normal"><a href="#__codelineno-7-23">23</a></span>
+<span class="normal"><a href="#__codelineno-7-24">24</a></span>
+<span class="normal"><a href="#__codelineno-7-25">25</a></span>
+<span class="normal"><a href="#__codelineno-7-26">26</a></span>
+<span class="normal"><a href="#__codelineno-7-27">27</a></span>
+<span class="normal"><a href="#__codelineno-7-28">28</a></span>
+<span class="normal"><a href="#__codelineno-7-29">29</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1"></a><span class="c1"># Generated by `normalize yellow` on 2026-07-22.</span>
+<a id="__codelineno-7-2" name="__codelineno-7-2"></a><span class="c1"># Detected drift transitions:</span>
+<a id="__codelineno-7-3" name="__codelineno-7-3"></a><span class="c1">#   2013-01 -&gt; 2015-01: renamed pu_datetime-&gt;tpep_pickup_datetime; added PULocationID</span>
+<a id="__codelineno-7-4" name="__codelineno-7-4"></a><span class="c1">#   2016-06 -&gt; 2016-07: dropped pickup_latitude, pickup_longitude</span>
+<a id="__codelineno-7-5" name="__codelineno-7-5"></a><span class="c1">#   2020-01 -&gt; 2020-02: added congestion_surcharge</span>
+<a id="__codelineno-7-6" name="__codelineno-7-6"></a><span class="c1">#   2023-01 -&gt; 2023-02: added airport_fee</span>
+<a id="__codelineno-7-7" name="__codelineno-7-7"></a>
+<a id="__codelineno-7-8" name="__codelineno-7-8"></a><span class="nt">target</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">yellow_tripdata_2024-01.parquet</span>
+<a id="__codelineno-7-9" name="__codelineno-7-9"></a>
+<a id="__codelineno-7-10" name="__codelineno-7-10"></a><span class="nt">renames</span><span class="p">:</span>
+<a id="__codelineno-7-11" name="__codelineno-7-11"></a><span class="w">  </span><span class="c1"># SUGGESTED (confidence 94%, data-verified) — uncomment to accept:</span>
+<a id="__codelineno-7-12" name="__codelineno-7-12"></a><span class="w">  </span><span class="c1"># pu_datetime: tpep_pickup_datetime</span>
+<a id="__codelineno-7-13" name="__codelineno-7-13"></a><span class="w">  </span><span class="c1"># SUGGESTED (confidence 94%, data-verified) — uncomment to accept:</span>
+<a id="__codelineno-7-14" name="__codelineno-7-14"></a><span class="w">  </span><span class="c1"># do_datetime: tpep_dropoff_datetime</span>
+<a id="__codelineno-7-15" name="__codelineno-7-15"></a>
+<a id="__codelineno-7-16" name="__codelineno-7-16"></a><span class="nt">lossy_casts</span><span class="p">:</span>
+<a id="__codelineno-7-17" name="__codelineno-7-17"></a><span class="w">  </span><span class="c1"># TODO: fill in ack_date to accept this precision-losing cast</span>
+<a id="__codelineno-7-18" name="__codelineno-7-18"></a><span class="w">  </span><span class="c1"># passenger_count:</span>
+<a id="__codelineno-7-19" name="__codelineno-7-19"></a><span class="w">  </span><span class="c1">#   from: DOUBLE</span>
+<a id="__codelineno-7-20" name="__codelineno-7-20"></a><span class="w">  </span><span class="c1">#   to: BIGINT</span>
+<a id="__codelineno-7-21" name="__codelineno-7-21"></a><span class="w">  </span><span class="c1">#   ack_date:</span>
+<a id="__codelineno-7-22" name="__codelineno-7-22"></a>
+<a id="__codelineno-7-23" name="__codelineno-7-23"></a><span class="nt">acknowledged_data_loss</span><span class="p">:</span>
+<a id="__codelineno-7-24" name="__codelineno-7-24"></a><span class="w">  </span><span class="c1"># TODO: fill in ack_date to accept dropping this column</span>
+<a id="__codelineno-7-25" name="__codelineno-7-25"></a><span class="w">  </span><span class="c1"># pickup_latitude:</span>
+<a id="__codelineno-7-26" name="__codelineno-7-26"></a><span class="w">  </span><span class="c1">#   ack_date:</span>
+<a id="__codelineno-7-27" name="__codelineno-7-27"></a><span class="w">  </span><span class="c1"># TODO: fill in ack_date to accept dropping this column</span>
+<a id="__codelineno-7-28" name="__codelineno-7-28"></a><span class="w">  </span><span class="c1"># pickup_longitude:</span>
+<a id="__codelineno-7-29" name="__codelineno-7-29"></a><span class="w">  </span><span class="c1">#   ack_date:</span>
+</code></pre></div></td></tr></table></div>
+<p>You review and edit — accepting the SUGGESTED renames, acking the drops:</p>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-8-1"> 1</a></span>
+<span class="normal"><a href="#__codelineno-8-2"> 2</a></span>
+<span class="normal"><a href="#__codelineno-8-3"> 3</a></span>
+<span class="normal"><a href="#__codelineno-8-4"> 4</a></span>
+<span class="normal"><a href="#__codelineno-8-5"> 5</a></span>
+<span class="normal"><a href="#__codelineno-8-6"> 6</a></span>
+<span class="normal"><a href="#__codelineno-8-7"> 7</a></span>
+<span class="normal"><a href="#__codelineno-8-8"> 8</a></span>
+<span class="normal"><a href="#__codelineno-8-9"> 9</a></span>
+<span class="normal"><a href="#__codelineno-8-10">10</a></span>
+<span class="normal"><a href="#__codelineno-8-11">11</a></span>
+<span class="normal"><a href="#__codelineno-8-12">12</a></span>
+<span class="normal"><a href="#__codelineno-8-13">13</a></span>
+<span class="normal"><a href="#__codelineno-8-14">14</a></span>
+<span class="normal"><a href="#__codelineno-8-15">15</a></span>
+<span class="normal"><a href="#__codelineno-8-16">16</a></span>
+<span class="normal"><a href="#__codelineno-8-17">17</a></span>
+<span class="normal"><a href="#__codelineno-8-18">18</a></span>
+<span class="normal"><a href="#__codelineno-8-19">19</a></span>
+<span class="normal"><a href="#__codelineno-8-20">20</a></span>
+<span class="normal"><a href="#__codelineno-8-21">21</a></span>
+<span class="normal"><a href="#__codelineno-8-22">22</a></span>
+<span class="normal"><a href="#__codelineno-8-23">23</a></span>
+<span class="normal"><a href="#__codelineno-8-24">24</a></span>
+<span class="normal"><a href="#__codelineno-8-25">25</a></span>
+<span class="normal"><a href="#__codelineno-8-26">26</a></span>
+<span class="normal"><a href="#__codelineno-8-27">27</a></span>
+<span class="normal"><a href="#__codelineno-8-28">28</a></span>
+<span class="normal"><a href="#__codelineno-8-29">29</a></span>
+<span class="normal"><a href="#__codelineno-8-30">30</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1"></a><span class="w"> </span>renames:
+<a id="__codelineno-8-2" name="__codelineno-8-2"></a><span class="gd">-  # SUGGESTED (confidence 94%, data-verified) — uncomment to accept:</span>
+<a id="__codelineno-8-3" name="__codelineno-8-3"></a><span class="gd">-  # pu_datetime: tpep_pickup_datetime</span>
+<a id="__codelineno-8-4" name="__codelineno-8-4"></a><span class="gd">-  # SUGGESTED (confidence 94%, data-verified) — uncomment to accept:</span>
+<a id="__codelineno-8-5" name="__codelineno-8-5"></a><span class="gd">-  # do_datetime: tpep_dropoff_datetime</span>
+<a id="__codelineno-8-6" name="__codelineno-8-6"></a><span class="gi">+  pu_datetime: tpep_pickup_datetime</span>
+<a id="__codelineno-8-7" name="__codelineno-8-7"></a><span class="gi">+  do_datetime: tpep_dropoff_datetime</span>
+<a id="__codelineno-8-8" name="__codelineno-8-8"></a>
+<a id="__codelineno-8-9" name="__codelineno-8-9"></a><span class="w"> </span>lossy_casts:
+<a id="__codelineno-8-10" name="__codelineno-8-10"></a><span class="gd">-  # TODO: fill in ack_date to accept this precision-losing cast</span>
+<a id="__codelineno-8-11" name="__codelineno-8-11"></a><span class="gd">-  # passenger_count:</span>
+<a id="__codelineno-8-12" name="__codelineno-8-12"></a><span class="gd">-  #   from: DOUBLE</span>
+<a id="__codelineno-8-13" name="__codelineno-8-13"></a><span class="gd">-  #   to: BIGINT</span>
+<a id="__codelineno-8-14" name="__codelineno-8-14"></a><span class="gd">-  #   ack_date:</span>
+<a id="__codelineno-8-15" name="__codelineno-8-15"></a><span class="gi">+  passenger_count:</span>
+<a id="__codelineno-8-16" name="__codelineno-8-16"></a><span class="gi">+    from: DOUBLE</span>
+<a id="__codelineno-8-17" name="__codelineno-8-17"></a><span class="gi">+    to: BIGINT</span>
+<a id="__codelineno-8-18" name="__codelineno-8-18"></a><span class="gi">+    ack_date: 2026-07-22</span>
+<a id="__codelineno-8-19" name="__codelineno-8-19"></a>
+<a id="__codelineno-8-20" name="__codelineno-8-20"></a><span class="w"> </span>acknowledged_data_loss:
+<a id="__codelineno-8-21" name="__codelineno-8-21"></a><span class="gd">-  # TODO: fill in ack_date to accept dropping this column</span>
+<a id="__codelineno-8-22" name="__codelineno-8-22"></a><span class="gd">-  # pickup_latitude:</span>
+<a id="__codelineno-8-23" name="__codelineno-8-23"></a><span class="gd">-  #   ack_date:</span>
+<a id="__codelineno-8-24" name="__codelineno-8-24"></a><span class="gd">-  # TODO: fill in ack_date to accept dropping this column</span>
+<a id="__codelineno-8-25" name="__codelineno-8-25"></a><span class="gd">-  # pickup_longitude:</span>
+<a id="__codelineno-8-26" name="__codelineno-8-26"></a><span class="gd">-  #   ack_date:</span>
+<a id="__codelineno-8-27" name="__codelineno-8-27"></a><span class="gi">+  pickup_latitude:</span>
+<a id="__codelineno-8-28" name="__codelineno-8-28"></a><span class="gi">+    ack_date: 2026-07-22</span>
+<a id="__codelineno-8-29" name="__codelineno-8-29"></a><span class="gi">+  pickup_longitude:</span>
+<a id="__codelineno-8-30" name="__codelineno-8-30"></a><span class="gi">+    ack_date: 2026-07-22</span>
+</code></pre></div></td></tr></table></div>
+<p>Second run:</p>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-9-1">1</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1"></a>uv<span class="w"> </span>run<span class="w"> </span>normalize<span class="w"> </span>yellow
+</code></pre></div></td></tr></table></div>
+<p>Expected output:</p>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-10-1">1</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1"></a>yellow: 209 file(s) normalized, 0 skipped (already present).
+</code></pre></div></td></tr></table></div>
+<p>Verify:</p>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-11-1">1</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1"></a>find<span class="w"> </span>raw-normalized/yellow<span class="w"> </span>-name<span class="w"> </span><span class="s1">&#39;*.parquet&#39;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>wc<span class="w"> </span>-l
+</code></pre></div></td></tr></table></div>
+<p>Expected: <code>209</code> (matching the raw count).</p>
+<p>Every historical file is now rewritten in the target file's schema. Downstream queries can assume a single schema across the entire history — no per-year branching, no runtime column-existence checks.</p>
+<h2 id="worked-example-2-new-drift-appears-months-later">Worked example 2: New drift appears months later</h2>
+<p>Fast-forward to 2028. TLC has changed the format again — added a new column (<code>route_zone_hash</code>) and narrowed the type of <code>passenger_count</code> from <code>DOUBLE</code> to <code>INTEGER</code>. Your existing <code>normalize/mappings/yellow.yaml</code> from 2026 no longer covers everything. You re-run:</p>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-12-1">1</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1"></a>uv<span class="w"> </span>run<span class="w"> </span>normalize<span class="w"> </span>yellow
+</code></pre></div></td></tr></table></div>
+<p>Expected output:</p>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-13-1"> 1</a></span>
+<span class="normal"><a href="#__codelineno-13-2"> 2</a></span>
+<span class="normal"><a href="#__codelineno-13-3"> 3</a></span>
+<span class="normal"><a href="#__codelineno-13-4"> 4</a></span>
+<span class="normal"><a href="#__codelineno-13-5"> 5</a></span>
+<span class="normal"><a href="#__codelineno-13-6"> 6</a></span>
+<span class="normal"><a href="#__codelineno-13-7"> 7</a></span>
+<span class="normal"><a href="#__codelineno-13-8"> 8</a></span>
+<span class="normal"><a href="#__codelineno-13-9"> 9</a></span>
+<span class="normal"><a href="#__codelineno-13-10">10</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1"></a>ERROR: yellow - 2 unresolved item(s) in normalize/mappings/yellow.yaml
+<a id="__codelineno-13-2" name="__codelineno-13-2"></a>  Cannot normalize this data type until these are handled.
+<a id="__codelineno-13-3" name="__codelineno-13-3"></a>
+<a id="__codelineno-13-4" name="__codelineno-13-4"></a>  - passenger_count: unacked_lossy_cast: DOUBLE -&gt; INTEGER would lose data (range/precision)
+<a id="__codelineno-13-5" name="__codelineno-13-5"></a>  - route_zone_hash: unmapped_drop: column has data; add to renames: or acknowledged_data_loss:
+<a id="__codelineno-13-6" name="__codelineno-13-6"></a>
+<a id="__codelineno-13-7" name="__codelineno-13-7"></a>  I&#39;ve amended normalize/mappings/yellow.yaml with 2 new SUGGESTED/TODO item(s) for the unresolved columns.
+<a id="__codelineno-13-8" name="__codelineno-13-8"></a>  Review the additions, then edit the mapping and re-run.
+<a id="__codelineno-13-9" name="__codelineno-13-9"></a>
+<a id="__codelineno-13-10" name="__codelineno-13-10"></a>  Nothing was written for yellow.
+</code></pre></div></td></tr></table></div>
+<p>The amended mapping now looks like:</p>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-14-1"> 1</a></span>
+<span class="normal"><a href="#__codelineno-14-2"> 2</a></span>
+<span class="normal"><a href="#__codelineno-14-3"> 3</a></span>
+<span class="normal"><a href="#__codelineno-14-4"> 4</a></span>
+<span class="normal"><a href="#__codelineno-14-5"> 5</a></span>
+<span class="normal"><a href="#__codelineno-14-6"> 6</a></span>
+<span class="normal"><a href="#__codelineno-14-7"> 7</a></span>
+<span class="normal"><a href="#__codelineno-14-8"> 8</a></span>
+<span class="normal"><a href="#__codelineno-14-9"> 9</a></span>
+<span class="normal"><a href="#__codelineno-14-10">10</a></span>
+<span class="normal"><a href="#__codelineno-14-11">11</a></span>
+<span class="normal"><a href="#__codelineno-14-12">12</a></span>
+<span class="normal"><a href="#__codelineno-14-13">13</a></span>
+<span class="normal"><a href="#__codelineno-14-14">14</a></span>
+<span class="normal"><a href="#__codelineno-14-15">15</a></span>
+<span class="normal"><a href="#__codelineno-14-16">16</a></span>
+<span class="normal"><a href="#__codelineno-14-17">17</a></span>
+<span class="normal"><a href="#__codelineno-14-18">18</a></span>
+<span class="normal"><a href="#__codelineno-14-19">19</a></span>
+<span class="normal"><a href="#__codelineno-14-20">20</a></span>
+<span class="normal"><a href="#__codelineno-14-21">21</a></span>
+<span class="normal"><a href="#__codelineno-14-22">22</a></span>
+<span class="normal"><a href="#__codelineno-14-23">23</a></span>
+<span class="normal"><a href="#__codelineno-14-24">24</a></span>
+<span class="normal"><a href="#__codelineno-14-25">25</a></span>
+<span class="normal"><a href="#__codelineno-14-26">26</a></span>
+<span class="normal"><a href="#__codelineno-14-27">27</a></span>
+<span class="normal"><a href="#__codelineno-14-28">28</a></span>
+<span class="normal"><a href="#__codelineno-14-29">29</a></span>
+<span class="normal"><a href="#__codelineno-14-30">30</a></span>
+<span class="normal"><a href="#__codelineno-14-31">31</a></span>
+<span class="normal"><a href="#__codelineno-14-32">32</a></span>
+<span class="normal"><a href="#__codelineno-14-33">33</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-14-1" name="__codelineno-14-1"></a><span class="c1"># Generated by `normalize yellow` on 2028-03-14.</span>
+<a id="__codelineno-14-2" name="__codelineno-14-2"></a><span class="c1"># Detected drift transitions:</span>
+<a id="__codelineno-14-3" name="__codelineno-14-3"></a><span class="c1">#   2013-01 -&gt; 2015-01: renamed pu_datetime-&gt;tpep_pickup_datetime; added PULocationID</span>
+<a id="__codelineno-14-4" name="__codelineno-14-4"></a><span class="c1">#   2016-06 -&gt; 2016-07: dropped pickup_latitude, pickup_longitude</span>
+<a id="__codelineno-14-5" name="__codelineno-14-5"></a><span class="c1">#   2020-01 -&gt; 2020-02: added congestion_surcharge</span>
+<a id="__codelineno-14-6" name="__codelineno-14-6"></a><span class="c1">#   2023-01 -&gt; 2023-02: added airport_fee</span>
+<a id="__codelineno-14-7" name="__codelineno-14-7"></a><span class="c1">#   2027-11 -&gt; 2027-12: added route_zone_hash; type-changed passenger_count(DOUBLE-&gt;INTEGER)</span>
+<a id="__codelineno-14-8" name="__codelineno-14-8"></a>
+<a id="__codelineno-14-9" name="__codelineno-14-9"></a><span class="nt">target</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">yellow_tripdata_2028-02.parquet</span>
+<a id="__codelineno-14-10" name="__codelineno-14-10"></a>
+<a id="__codelineno-14-11" name="__codelineno-14-11"></a><span class="nt">renames</span><span class="p">:</span>
+<a id="__codelineno-14-12" name="__codelineno-14-12"></a><span class="w">  </span><span class="nt">pu_datetime</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">tpep_pickup_datetime</span>
+<a id="__codelineno-14-13" name="__codelineno-14-13"></a><span class="w">  </span><span class="nt">do_datetime</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">tpep_dropoff_datetime</span>
+<a id="__codelineno-14-14" name="__codelineno-14-14"></a>
+<a id="__codelineno-14-15" name="__codelineno-14-15"></a><span class="nt">lossy_casts</span><span class="p">:</span>
+<a id="__codelineno-14-16" name="__codelineno-14-16"></a><span class="w">  </span><span class="nt">passenger_count</span><span class="p">:</span>
+<a id="__codelineno-14-17" name="__codelineno-14-17"></a><span class="w">    </span><span class="nt">from</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">DOUBLE</span>
+<a id="__codelineno-14-18" name="__codelineno-14-18"></a><span class="w">    </span><span class="nt">to</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">BIGINT</span>
+<a id="__codelineno-14-19" name="__codelineno-14-19"></a><span class="w">    </span><span class="nt">ack_date</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2026-07-22</span>
+<a id="__codelineno-14-20" name="__codelineno-14-20"></a><span class="w">  </span><span class="c1"># TODO: fill in ack_date to accept this precision-losing cast</span>
+<a id="__codelineno-14-21" name="__codelineno-14-21"></a><span class="w">  </span><span class="c1"># passenger_count:</span>
+<a id="__codelineno-14-22" name="__codelineno-14-22"></a><span class="w">  </span><span class="c1">#   from: DOUBLE</span>
+<a id="__codelineno-14-23" name="__codelineno-14-23"></a><span class="w">  </span><span class="c1">#   to: INTEGER</span>
+<a id="__codelineno-14-24" name="__codelineno-14-24"></a><span class="w">  </span><span class="c1">#   ack_date:</span>
+<a id="__codelineno-14-25" name="__codelineno-14-25"></a>
+<a id="__codelineno-14-26" name="__codelineno-14-26"></a><span class="nt">acknowledged_data_loss</span><span class="p">:</span>
+<a id="__codelineno-14-27" name="__codelineno-14-27"></a><span class="w">  </span><span class="nt">pickup_latitude</span><span class="p">:</span>
+<a id="__codelineno-14-28" name="__codelineno-14-28"></a><span class="w">    </span><span class="nt">ack_date</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2026-07-22</span>
+<a id="__codelineno-14-29" name="__codelineno-14-29"></a><span class="w">  </span><span class="nt">pickup_longitude</span><span class="p">:</span>
+<a id="__codelineno-14-30" name="__codelineno-14-30"></a><span class="w">    </span><span class="nt">ack_date</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2026-07-22</span>
+<a id="__codelineno-14-31" name="__codelineno-14-31"></a><span class="w">  </span><span class="c1"># TODO: fill in ack_date to accept dropping this column</span>
+<a id="__codelineno-14-32" name="__codelineno-14-32"></a><span class="w">  </span><span class="c1"># route_zone_hash:</span>
+<a id="__codelineno-14-33" name="__codelineno-14-33"></a><span class="w">  </span><span class="c1">#   ack_date:</span>
+</code></pre></div></td></tr></table></div>
+<p>Notice the existing entries are all preserved. Now you decide:</p>
+<ul>
+<li><code>route_zone_hash</code> — is this a <em>rename</em> of an older column you'd been dropping, or a genuinely new column with no historical equivalent? If a rename, add it to <code>renames:</code>; if you want to drop it, ack it under <code>acknowledged_data_loss:</code>.</li>
+<li><code>passenger_count</code> — the target type has narrowed from <code>BIGINT</code> (2026) to <code>INTEGER</code> (2028). Update the existing lossy-cast entry's <code>to:</code> field to <code>INTEGER</code> and bump the <code>ack_date</code>.</li>
+</ul>
+<p>Edit accordingly and re-run:</p>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-15-1">1</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-15-1" name="__codelineno-15-1"></a>uv<span class="w"> </span>run<span class="w"> </span>normalize<span class="w"> </span>yellow
+</code></pre></div></td></tr></table></div>
+<p>Exit 0, normalized parquet reflects the new target schema, and every historical file is once again queryable under a single schema.</p>
+<h2 id="what-runs-automatically-no-mapping-needed">What runs automatically (no mapping needed)</h2>
+<p>Some transformations are provably loss-free and never require an ack.</p>
+<ul>
+<li><strong>All-null column drops.</strong> A historical column that is null in every row across every file, and is missing from the target schema, is dropped automatically. No mapping entry needed. Rationale: no data is being lost.</li>
+<li><strong>Missing-in-historical null-fill.</strong> A column that appears in the target but not in a given historical file is filled with <code>NULL</code> in the normalized output. No mapping needed. This is the common case for columns TLC added over time (<code>congestion_surcharge</code>, <code>airport_fee</code>).</li>
+<li><strong>Safe widening casts.</strong> <code>INT</code> -&gt; <code>BIGINT</code>, <code>FLOAT</code> -&gt; <code>DOUBLE</code>, <code>VARCHAR(10)</code> -&gt; <code>VARCHAR(50)</code>, and equivalents. Automatic, no mapping needed. Rationale: the target type can represent every possible source value, so the transformation cannot lose information.</li>
+</ul>
+<h2 id="what-triggers-an-error">What triggers an error</h2>
+<ul>
+<li><strong>Non-null column without mapping.</strong> A column with any non-null historical value that is missing from the target schema AND does not appear in <code>renames:</code> or <code>acknowledged_data_loss:</code>. The tool amends the mapping with a SUGGESTED rename (if schema-drift found a plausible candidate) or a TODO ack block.</li>
+<li><strong>Lossy cast without ack.</strong> A type change where the target type cannot represent every source value: <code>DOUBLE</code> -&gt; <code>BIGINT</code> with fractional values in the source, <code>VARCHAR(50)</code> -&gt; <code>VARCHAR(10)</code> with strings longer than 10 chars, range narrowing that would overflow. The tool amends the mapping with a TODO <code>lossy_casts:</code> block.</li>
+</ul>
+<p>In both cases: nothing is written to <code>raw-normalized/</code>. The tool exits 1. Your job is to review the amendment, decide the right handling, and re-run.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var labels=set.querySelector(".tabbed-labels");for(var tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["content.code.copy", "content.tabs.link", "navigation.tracking", "navigation.top", "search.highlight", "search.share"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+    
+  </body>
+</html>

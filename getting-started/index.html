@@ -1,0 +1,1416 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Downloader, schema-drift analyzer, and K6 SQL Server load tester for NYC TLC taxi trip data">
+      
+      
+      
+        <link rel="canonical" href="https://andrekamman.github.io/taxi/getting-started/">
+      
+      
+        <link rel="prev" href="..">
+      
+      
+        <link rel="next" href="../guides/downloader/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>Getting Started - taxi</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.ec1eaa64.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#getting-started" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="taxi" class="md-header__button md-logo" aria-label="taxi" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            taxi
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Getting Started
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+          <a href="javascript:void(0)" class="md-search__icon md-icon" title="Share" aria-label="Share" data-clipboard data-clipboard-text="" data-md-component="search-share" tabindex="-1">
+            
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9a3 3 0 0 0-3 3 3 3 0 0 0 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.15c-.05.21-.08.43-.08.66 0 1.61 1.31 2.91 2.92 2.91s2.92-1.3 2.92-2.91A2.92 2.92 0 0 0 18 16.08"/></svg>
+          </a>
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/andrekamman/taxi" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    andrekamman/taxi
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="taxi" class="md-nav__button md-logo" aria-label="taxi" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    taxi
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/andrekamman/taxi" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    andrekamman/taxi
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#prerequisites" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Prerequisites
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#1-clone-and-install" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Clone and install
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-verify-install" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Verify install
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-download-three-recent-months-of-yellow" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Download three recent months of yellow
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-look-at-what-you-got" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Look at what you got
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-optional-run-schema-drift" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. (Optional) Run schema-drift
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#6-optional-normalize" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. (Optional) Normalize
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#where-to-next" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Where to next
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Guides
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Guides
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../guides/downloader/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Downloader
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../guides/schema-drift/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Schema Drift
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../guides/normalize/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Normalize
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../guides/k6-loadtest/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    K6 Load Test
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../cookbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Cookbook
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reference
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Reference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reference/configuration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Configuration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reference/exit-codes/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Exit codes
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Design Specs
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Design Specs
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../superpowers/specs/2026-07-19-monorepo-restructure-design/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Monorepo restructure
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../superpowers/specs/2026-07-21-normalizer-design/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Normalizer
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../superpowers/specs/2026-03-25-k6-sql-load-testing-design/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    K6 SQL load testing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../superpowers/specs/2026-07-22-documentation-design/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Documentation site
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../contributing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Contributing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#prerequisites" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Prerequisites
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#1-clone-and-install" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Clone and install
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-verify-install" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Verify install
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-download-three-recent-months-of-yellow" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Download three recent months of yellow
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-look-at-what-you-got" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Look at what you got
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-optional-run-schema-drift" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. (Optional) Run schema-drift
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#6-optional-normalize" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. (Optional) Normalize
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#where-to-next" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Where to next
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="getting-started">Getting Started</h1>
+<p>This tutorial walks a data engineer from a clean laptop to normalized parquet on disk in about 10 minutes on the yellow-only "happy path". Optional sections at the end cover schema-drift and normalize; each adds a couple of minutes. By the time you finish, you'll have three months of NYC TLC yellow taxi data downloaded, verified, and passed through the normalizer.</p>
+<p>The commands below assume a POSIX shell (bash or zsh) and a working internet connection. Everything runs locally — no cloud accounts, no credentials, no external services. If any step fails, the error output should point you at the relevant guide; the "Where to next" section at the bottom lists all of them.</p>
+<h2 id="prerequisites">Prerequisites</h2>
+<ul>
+<li>Python 3.12 or 3.13.</li>
+<li><a href="https://github.com/astral-sh/uv">uv</a> installed.</li>
+<li>curl (present on macOS and most Linux; on Windows install <a href="https://gitforwindows.org/">Git for Windows</a> and run everything in Git Bash).</li>
+<li>~300 MB free disk (<code>--recent 3 yellow</code> is ~200 MB; venv + wheels are ~100 MB).</li>
+<li>Optional: <a href="https://duckdb.org/docs/installation/">DuckDB CLI</a> for the "look at what you got" step (not required; you can do the same via <code>uv run python -c "..."</code>).</li>
+</ul>
+<div class="admonition warning">
+<p class="admonition-title">WSL users</p>
+<p>If you're running on WSL2, your data will land on the Linux filesystem — which grows the WSL2 VHDX on your Windows C: drive and does NOT shrink when files are deleted. Point downloads at a Windows path with <code>OUTPUT_DIR=/mnt/c/Users/$USER/taxi-data</code> instead. See the <a href="../guides/downloader/#windows-wsl">Downloader guide's WSL section</a> for full details.</p>
+</div>
+<h2 id="1-clone-and-install">1. Clone and install</h2>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-1">1</a></span>
+<span class="normal"><a href="#__codelineno-0-2">2</a></span>
+<span class="normal"><a href="#__codelineno-0-3">3</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1"></a>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/andrekamman/taxi.git
+<a id="__codelineno-0-2" name="__codelineno-0-2"></a><span class="nb">cd</span><span class="w"> </span>taxi
+<a id="__codelineno-0-3" name="__codelineno-0-3"></a>uv<span class="w"> </span>sync<span class="w"> </span>--extra<span class="w"> </span><span class="nb">test</span>
+</code></pre></div></td></tr></table></div>
+<p>The <code>--extra test</code> flag pulls in pytest alongside the runtime dependencies so you can verify the install by running the suite in the next step. If you'd rather skip that, plain <code>uv sync</code> will install just the runtime.</p>
+<p><code>uv sync</code> reads <code>pyproject.toml</code> + <code>uv.lock</code> and materializes the exact locked versions into <code>.venv/</code>. If you already have a system Python but no <code>uv</code>, the <a href="https://github.com/astral-sh/uv#installation">uv install script</a> is a single-line <code>curl | sh</code> (or <code>brew install uv</code> on macOS). uv also manages the interpreter itself, so you don't need to pre-install Python 3.12 or 3.13 — it'll fetch a compatible build the first time you run <code>uv sync</code>.</p>
+<div class="admonition tip">
+<p class="admonition-title">Building docs locally</p>
+<p>Prefer to preview these docs while reading them? <code>uv sync --extra docs</code> installs mkdocs + the Material theme, and <code>uv run --extra docs mkdocs serve</code> boots the site on <code>http://127.0.0.1:8000/</code> with live reload as you edit.</p>
+</div>
+<h2 id="2-verify-install">2. Verify install</h2>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-1-1">1</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1"></a>uv<span class="w"> </span>run<span class="w"> </span>--extra<span class="w"> </span><span class="nb">test</span><span class="w"> </span>pytest<span class="w"> </span>-q
+</code></pre></div></td></tr></table></div>
+<p>Expected output:</p>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-2-1">1</a></span>
+<span class="normal"><a href="#__codelineno-2-2">2</a></span>
+<span class="normal"><a href="#__codelineno-2-3">3</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1"></a>........................................................................ [ 86%]
+<a id="__codelineno-2-2" name="__codelineno-2-2"></a>...........                                                              [100%]
+<a id="__codelineno-2-3" name="__codelineno-2-3"></a>83 passed in 0.94s
+</code></pre></div></td></tr></table></div>
+<p>The exact test count grows as the suite grows; what matters is that there are no failures. The first invocation of <code>uv run</code> also builds the virtualenv (<code>.venv/</code>), so expect a one-time delay of 5–20 seconds while wheels are resolved and installed. Subsequent invocations reuse the cached environment.</p>
+<h2 id="3-download-three-recent-months-of-yellow">3. Download three recent months of yellow</h2>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-3-1">1</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1"></a>./downloader/download_taxi_data.sh<span class="w"> </span>--recent<span class="w"> </span><span class="m">3</span><span class="w"> </span>yellow
+</code></pre></div></td></tr></table></div>
+<p>Expected output:</p>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-4-1"> 1</a></span>
+<span class="normal"><a href="#__codelineno-4-2"> 2</a></span>
+<span class="normal"><a href="#__codelineno-4-3"> 3</a></span>
+<span class="normal"><a href="#__codelineno-4-4"> 4</a></span>
+<span class="normal"><a href="#__codelineno-4-5"> 5</a></span>
+<span class="normal"><a href="#__codelineno-4-6"> 6</a></span>
+<span class="normal"><a href="#__codelineno-4-7"> 7</a></span>
+<span class="normal"><a href="#__codelineno-4-8"> 8</a></span>
+<span class="normal"><a href="#__codelineno-4-9"> 9</a></span>
+<span class="normal"><a href="#__codelineno-4-10">10</a></span>
+<span class="normal"><a href="#__codelineno-4-11">11</a></span>
+<span class="normal"><a href="#__codelineno-4-12">12</a></span>
+<span class="normal"><a href="#__codelineno-4-13">13</a></span>
+<span class="normal"><a href="#__codelineno-4-14">14</a></span>
+<span class="normal"><a href="#__codelineno-4-15">15</a></span>
+<span class="normal"><a href="#__codelineno-4-16">16</a></span>
+<span class="normal"><a href="#__codelineno-4-17">17</a></span>
+<span class="normal"><a href="#__codelineno-4-18">18</a></span>
+<span class="normal"><a href="#__codelineno-4-19">19</a></span>
+<span class="normal"><a href="#__codelineno-4-20">20</a></span>
+<span class="normal"><a href="#__codelineno-4-21">21</a></span>
+<span class="normal"><a href="#__codelineno-4-22">22</a></span>
+<span class="normal"><a href="#__codelineno-4-23">23</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1"></a>Checking for corrupt parquet files...
+<a id="__codelineno-4-2" name="__codelineno-4-2"></a>  No corrupt files found
+<a id="__codelineno-4-3" name="__codelineno-4-3"></a>
+<a id="__codelineno-4-4" name="__codelineno-4-4"></a>NYC TLC Trip Data Downloader
+<a id="__codelineno-4-5" name="__codelineno-4-5"></a>Generating URL list up to: 2026-06
+<a id="__codelineno-4-6" name="__codelineno-4-6"></a>
+<a id="__codelineno-4-7" name="__codelineno-4-7"></a>Downloading recent 3 months (yellow)...
+<a id="__codelineno-4-8" name="__codelineno-4-8"></a>Will walk back through older not-yet-published months, and stop
+<a id="__codelineno-4-9" name="__codelineno-4-9"></a>at the first locally-existing file (assumes prior runs are caught up).
+<a id="__codelineno-4-10" name="__codelineno-4-10"></a>
+<a id="__codelineno-4-11" name="__codelineno-4-11"></a>--- yellow: looking for 3 recent months ---
+<a id="__codelineno-4-12" name="__codelineno-4-12"></a>  Trying yellow_tripdata_2026-06.parquet...
+<a id="__codelineno-4-13" name="__codelineno-4-13"></a>    Not published yet, trying older month
+<a id="__codelineno-4-14" name="__codelineno-4-14"></a>  Trying yellow_tripdata_2026-05.parquet...
+<a id="__codelineno-4-15" name="__codelineno-4-15"></a>    Saved to yellow/2026/yellow_tripdata_2026-05.parquet
+<a id="__codelineno-4-16" name="__codelineno-4-16"></a>  Trying yellow_tripdata_2026-04.parquet...
+<a id="__codelineno-4-17" name="__codelineno-4-17"></a>    Saved to yellow/2026/yellow_tripdata_2026-04.parquet
+<a id="__codelineno-4-18" name="__codelineno-4-18"></a>  Trying yellow_tripdata_2026-03.parquet...
+<a id="__codelineno-4-19" name="__codelineno-4-19"></a>    Saved to yellow/2026/yellow_tripdata_2026-03.parquet
+<a id="__codelineno-4-20" name="__codelineno-4-20"></a>  Downloaded 3 new file(s) for yellow (walked back 4 month(s))
+<a id="__codelineno-4-21" name="__codelineno-4-21"></a>
+<a id="__codelineno-4-22" name="__codelineno-4-22"></a>Download complete!
+<a id="__codelineno-4-23" name="__codelineno-4-23"></a>Files saved to: raw/&lt;type&gt;/&lt;year&gt;/
+</code></pre></div></td></tr></table></div>
+<p>Here's what happened: the walker started at the previous month (2026-06 in this example), found it wasn't published yet, then walked backward and downloaded the three most recent published months. Total: ~200 MB in ~1–2 min on a typical connection.</p>
+<p>The <code>--recent N</code> flag differs from <code>--from</code> / <code>--to</code>: it always anchors to "today minus one month" and walks backward until it either finds <code>N</code> new files or hits a locally-existing file (which signals it can stop, because prior runs already caught up to that point). That makes it the right flag for a nightly cron; use <code>--from YYYY-MM --to YYYY-MM</code> when you want an explicit window instead.</p>
+<p>The downloader also skips corrupt local files by silently overwriting them, and it validates each new download by opening it with a lightweight parquet reader before declaring it saved. The <a href="../guides/downloader/">Downloader guide</a> covers the WAF classifier that distinguishes "not published yet" from "throttled" from "hard 4xx" — a distinction that matters when you're building automation on top.</p>
+<div class="admonition warning">
+<p class="admonition-title">Windows / WSL disk usage</p>
+<p>On WSL2 the raw parquet lands on the Linux filesystem and permanently grows your WSL2 VHDX. See the <a href="../guides/downloader/#windows-wsl">Downloader guide</a> for the <code>OUTPUT_DIR</code> workaround.</p>
+</div>
+<h2 id="4-look-at-what-you-got">4. Look at what you got</h2>
+<p><strong>Find the files:</strong></p>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-5-1">1</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1"></a>find<span class="w"> </span>raw/yellow<span class="w"> </span>-name<span class="w"> </span><span class="s1">&#39;*.parquet&#39;</span>
+</code></pre></div></td></tr></table></div>
+<p>Expected output:</p>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-6-1">1</a></span>
+<span class="normal"><a href="#__codelineno-6-2">2</a></span>
+<span class="normal"><a href="#__codelineno-6-3">3</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1"></a>raw/yellow/2026/yellow_tripdata_2026-03.parquet
+<a id="__codelineno-6-2" name="__codelineno-6-2"></a>raw/yellow/2026/yellow_tripdata_2026-04.parquet
+<a id="__codelineno-6-3" name="__codelineno-6-3"></a>raw/yellow/2026/yellow_tripdata_2026-05.parquet
+</code></pre></div></td></tr></table></div>
+<p><strong>Check disk usage:</strong></p>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-7-1">1</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1"></a>du<span class="w"> </span>-sh<span class="w"> </span>raw/yellow
+</code></pre></div></td></tr></table></div>
+<p>Expected: <code>200M raw/yellow</code> (or similar, depending on the specific months).</p>
+<p><strong>Peek at the schema via DuckDB (no CLI needed):</strong></p>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-8-1">1</a></span>
+<span class="normal"><a href="#__codelineno-8-2">2</a></span>
+<span class="normal"><a href="#__codelineno-8-3">3</a></span>
+<span class="normal"><a href="#__codelineno-8-4">4</a></span>
+<span class="normal"><a href="#__codelineno-8-5">5</a></span>
+<span class="normal"><a href="#__codelineno-8-6">6</a></span>
+<span class="normal"><a href="#__codelineno-8-7">7</a></span>
+<span class="normal"><a href="#__codelineno-8-8">8</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1"></a>uv<span class="w"> </span>run<span class="w"> </span>python<span class="w"> </span>-c<span class="w"> </span><span class="s2">&quot;</span>
+<a id="__codelineno-8-2" name="__codelineno-8-2"></a><span class="s2">import duckdb, glob</span>
+<a id="__codelineno-8-3" name="__codelineno-8-3"></a><span class="s2">f = sorted(glob.glob(&#39;raw/yellow/**/*.parquet&#39;, recursive=True))[-1]</span>
+<a id="__codelineno-8-4" name="__codelineno-8-4"></a><span class="s2">print(f)</span>
+<a id="__codelineno-8-5" name="__codelineno-8-5"></a><span class="s2">print(&#39;---&#39;)</span>
+<a id="__codelineno-8-6" name="__codelineno-8-6"></a><span class="s2">for r in duckdb.execute(f\&quot;DESCRIBE SELECT * FROM &#39;{f}&#39;\&quot;).fetchall():</span>
+<a id="__codelineno-8-7" name="__codelineno-8-7"></a><span class="s2">    print(r)</span>
+<a id="__codelineno-8-8" name="__codelineno-8-8"></a><span class="s2">&quot;</span>
+</code></pre></div></td></tr></table></div>
+<p>Expected output (truncated):</p>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-9-1"> 1</a></span>
+<span class="normal"><a href="#__codelineno-9-2"> 2</a></span>
+<span class="normal"><a href="#__codelineno-9-3"> 3</a></span>
+<span class="normal"><a href="#__codelineno-9-4"> 4</a></span>
+<span class="normal"><a href="#__codelineno-9-5"> 5</a></span>
+<span class="normal"><a href="#__codelineno-9-6"> 6</a></span>
+<span class="normal"><a href="#__codelineno-9-7"> 7</a></span>
+<span class="normal"><a href="#__codelineno-9-8"> 8</a></span>
+<span class="normal"><a href="#__codelineno-9-9"> 9</a></span>
+<span class="normal"><a href="#__codelineno-9-10">10</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1"></a>raw/yellow/2026/yellow_tripdata_2026-05.parquet
+<a id="__codelineno-9-2" name="__codelineno-9-2"></a>---
+<a id="__codelineno-9-3" name="__codelineno-9-3"></a>(&#39;VendorID&#39;, &#39;INTEGER&#39;, &#39;YES&#39;, None, None, None)
+<a id="__codelineno-9-4" name="__codelineno-9-4"></a>(&#39;tpep_pickup_datetime&#39;, &#39;TIMESTAMP&#39;, &#39;YES&#39;, None, None, None)
+<a id="__codelineno-9-5" name="__codelineno-9-5"></a>(&#39;tpep_dropoff_datetime&#39;, &#39;TIMESTAMP&#39;, &#39;YES&#39;, None, None, None)
+<a id="__codelineno-9-6" name="__codelineno-9-6"></a>(&#39;passenger_count&#39;, &#39;BIGINT&#39;, &#39;YES&#39;, None, None, None)
+<a id="__codelineno-9-7" name="__codelineno-9-7"></a>(&#39;trip_distance&#39;, &#39;DOUBLE&#39;, &#39;YES&#39;, None, None, None)
+<a id="__codelineno-9-8" name="__codelineno-9-8"></a>(&#39;RatecodeID&#39;, &#39;BIGINT&#39;, &#39;YES&#39;, None, None, None)
+<a id="__codelineno-9-9" name="__codelineno-9-9"></a>(&#39;store_and_fwd_flag&#39;, &#39;VARCHAR&#39;, &#39;YES&#39;, None, None, None)
+<a id="__codelineno-9-10" name="__codelineno-9-10"></a>...
+</code></pre></div></td></tr></table></div>
+<p>Each tuple is <code>(column_name, type, nullable, key, default, extra)</code>. Note that <code>passenger_count</code> is <code>BIGINT</code> here — in older files (pre-2015) it was <code>INTEGER</code>, which is the sort of transition the schema-drift tool detects and the normalizer resolves.</p>
+<p>If you installed the DuckDB CLI, the equivalent one-liner is:</p>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-10-1">1</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1"></a>duckdb<span class="w"> </span>-c<span class="w"> </span><span class="s2">&quot;DESCRIBE SELECT * FROM &#39;raw/yellow/2026/yellow_tripdata_2026-05.parquet&#39;&quot;</span>
+</code></pre></div></td></tr></table></div>
+<p>Same output, tabulated. Either approach works.</p>
+<h2 id="5-optional-run-schema-drift">5. (Optional) Run schema-drift</h2>
+<p>Schema-drift walks the full parquet family for a taxi type and reports each transition where columns were added, removed, renamed, or type-changed. Even on our tiny 3-month sample it's a good smoke test.</p>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-11-1">1</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1"></a>uv<span class="w"> </span>run<span class="w"> </span>schema-drift<span class="w"> </span>--types<span class="w"> </span>yellow
+</code></pre></div></td></tr></table></div>
+<p>Expected output (excerpt):</p>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-12-1"> 1</a></span>
+<span class="normal"><a href="#__codelineno-12-2"> 2</a></span>
+<span class="normal"><a href="#__codelineno-12-3"> 3</a></span>
+<span class="normal"><a href="#__codelineno-12-4"> 4</a></span>
+<span class="normal"><a href="#__codelineno-12-5"> 5</a></span>
+<span class="normal"><a href="#__codelineno-12-6"> 6</a></span>
+<span class="normal"><a href="#__codelineno-12-7"> 7</a></span>
+<span class="normal"><a href="#__codelineno-12-8"> 8</a></span>
+<span class="normal"><a href="#__codelineno-12-9"> 9</a></span>
+<span class="normal"><a href="#__codelineno-12-10">10</a></span>
+<span class="normal"><a href="#__codelineno-12-11">11</a></span>
+<span class="normal"><a href="#__codelineno-12-12">12</a></span>
+<span class="normal"><a href="#__codelineno-12-13">13</a></span>
+<span class="normal"><a href="#__codelineno-12-14">14</a></span>
+<span class="normal"><a href="#__codelineno-12-15">15</a></span>
+<span class="normal"><a href="#__codelineno-12-16">16</a></span>
+<span class="normal"><a href="#__codelineno-12-17">17</a></span>
+<span class="normal"><a href="#__codelineno-12-18">18</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1"></a>================================================================================
+<a id="__codelineno-12-2" name="__codelineno-12-2"></a>SCHEMA DRIFT REPORT
+<a id="__codelineno-12-3" name="__codelineno-12-3"></a>================================================================================
+<a id="__codelineno-12-4" name="__codelineno-12-4"></a>Taxi type: yellow
+<a id="__codelineno-12-5" name="__codelineno-12-5"></a>Files scanned: 3
+<a id="__codelineno-12-6" name="__codelineno-12-6"></a>Transitions detected: 0
+<a id="__codelineno-12-7" name="__codelineno-12-7"></a>
+<a id="__codelineno-12-8" name="__codelineno-12-8"></a>--------------------------------------------------------------------------------
+<a id="__codelineno-12-9" name="__codelineno-12-9"></a>(Illustrative excerpt from a full multi-year run)
+<a id="__codelineno-12-10" name="__codelineno-12-10"></a>--------------------------------------------------------------------------------
+<a id="__codelineno-12-11" name="__codelineno-12-11"></a>Transition: 2015-06 -&gt; 2015-07
+<a id="__codelineno-12-12" name="__codelineno-12-12"></a>  Added columns:
+<a id="__codelineno-12-13" name="__codelineno-12-13"></a>    - improvement_surcharge (DOUBLE)
+<a id="__codelineno-12-14" name="__codelineno-12-14"></a>  Renamed columns (high confidence):
+<a id="__codelineno-12-15" name="__codelineno-12-15"></a>    - pickup_longitude -&gt; PULocationID  [type change: DOUBLE -&gt; BIGINT]
+<a id="__codelineno-12-16" name="__codelineno-12-16"></a>  Unresolved:
+<a id="__codelineno-12-17" name="__codelineno-12-17"></a>    - dropoff_latitude (removed; no obvious rename target — needs human review)
+<a id="__codelineno-12-18" name="__codelineno-12-18"></a>================================================================================
+</code></pre></div></td></tr></table></div>
+<p>Read the report top-to-bottom: each transition block corresponds to one month-to-month schema change. Look for high-confidence rename pairs (those are safe to accept), and pay special attention to the "Unresolved" section — those items need a human to decide whether the column was dropped, renamed to something the heuristic missed, or something else.</p>
+<p>Rename detection uses a combination of positional overlap (adjacent-in-file-order), type compatibility, and name similarity — so <code>pickup_longitude -&gt; PULocationID</code> is flagged high-confidence only when the surrounding columns line up in a way that makes accidental co-occurrence unlikely. On real historical data the yellow trips schema went through three major transitions (2015-07, 2016-07, and the 2016 payment-column split); running <code>schema-drift --types yellow</code> against a full mirror surfaces all three.</p>
+<p>The <a href="../guides/schema-drift/">Schema Drift guide</a> covers the report format in detail and describes all three modes (report / mapping / diff).</p>
+<h2 id="6-optional-normalize">6. (Optional) Normalize</h2>
+<p>Normalize rewrites historical parquet so every file matches the latest schema. It halts on data loss (lossy casts, dropped columns) unless you explicitly acknowledge each such change by filling in an <code>ack_date:</code> in the mapping file. On first run for a taxi type it bootstraps a mapping and asks you to review it — even when there's nothing to review.</p>
+<p><strong>First run:</strong></p>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-13-1">1</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1"></a>uv<span class="w"> </span>run<span class="w"> </span>normalize<span class="w"> </span>yellow
+</code></pre></div></td></tr></table></div>
+<p>Expected output:</p>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-14-1">1</a></span>
+<span class="normal"><a href="#__codelineno-14-2">2</a></span>
+<span class="normal"><a href="#__codelineno-14-3">3</a></span>
+<span class="normal"><a href="#__codelineno-14-4">4</a></span>
+<span class="normal"><a href="#__codelineno-14-5">5</a></span>
+<span class="normal"><a href="#__codelineno-14-6">6</a></span>
+<span class="normal"><a href="#__codelineno-14-7">7</a></span>
+<span class="normal"><a href="#__codelineno-14-8">8</a></span>
+<span class="normal"><a href="#__codelineno-14-9">9</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-14-1" name="__codelineno-14-1"></a>yellow: no mapping found — analyzed raw data and wrote normalize/mappings/yellow.yaml.
+<a id="__codelineno-14-2" name="__codelineno-14-2"></a>  Detected 0 drift transition(s) — see file header.
+<a id="__codelineno-14-3" name="__codelineno-14-3"></a>  0 SUGGESTED/TODO item(s) need your review.
+<a id="__codelineno-14-4" name="__codelineno-14-4"></a>
+<a id="__codelineno-14-5" name="__codelineno-14-5"></a>Next steps:
+<a id="__codelineno-14-6" name="__codelineno-14-6"></a>  1. Review normalize/mappings/yellow.yaml
+<a id="__codelineno-14-7" name="__codelineno-14-7"></a>  2. Uncomment SUGGESTED entries you accept, delete the rest
+<a id="__codelineno-14-8" name="__codelineno-14-8"></a>  3. Fill in `ack_date:` for each TODO to acknowledge lossy casts or data loss
+<a id="__codelineno-14-9" name="__codelineno-14-9"></a>  4. Re-run: uv run normalize yellow
+</code></pre></div></td></tr></table></div>
+<p>On a small <code>--recent 3</code> sample, all three months sit inside the stable-schema era (2015+), so there are no drift transitions and no <code>SUGGESTED</code>/<code>TODO</code> items to review. The tool still exits with status 3 the first time — it wants a human confirmation that the empty mapping is what you intended before it writes any output.</p>
+<p>Open <code>normalize/mappings/yellow.yaml</code> in your editor if you're curious: the file header lists the detected transitions (none in this case), the target schema (the latest month), and a <code>mappings:</code> block containing one entry per transition. On a full multi-year run this file is where you'd uncomment accepted rename suggestions and fill in <code>ack_date:</code> fields for anything lossy. See the <a href="../guides/normalize/">Normalize guide</a> for the full anatomy.</p>
+<p><strong>Second run</strong> (re-running is the confirmation):</p>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-15-1">1</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-15-1" name="__codelineno-15-1"></a>uv<span class="w"> </span>run<span class="w"> </span>normalize<span class="w"> </span>yellow
+</code></pre></div></td></tr></table></div>
+<p>Expected output:</p>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-16-1">1</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-16-1" name="__codelineno-16-1"></a>yellow: 3 file(s) normalized, 0 skipped (already present).
+</code></pre></div></td></tr></table></div>
+<p><strong>Verify:</strong></p>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-17-1">1</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-17-1" name="__codelineno-17-1"></a>find<span class="w"> </span>raw-normalized/yellow<span class="w"> </span>-name<span class="w"> </span><span class="s1">&#39;*.parquet&#39;</span>
+</code></pre></div></td></tr></table></div>
+<p>Expected: three normalized files under <code>raw-normalized/yellow/2026/</code>.</p>
+<p>On this tiny recent sample the tool is essentially a passthrough — the target schema equals the raw schema, so files copy over unchanged. In production, <code>raw-normalized/</code> is the layer downstream tools should point at: the K6 load test reads from it, and the DuckDB <code>httpfs</code> recipes in the cookbook query it. Rerunning normalize is idempotent — files already present in <code>raw-normalized/</code> are skipped, so nightly cron jobs stay cheap.</p>
+<p>The <a href="../guides/normalize/">Normalize guide</a> walks through the real-world case where drift exists and the mapping is nontrivial (renames, type coercions, dropped columns, and the <code>ack_date:</code> gate).</p>
+<h2 id="where-to-next">Where to next</h2>
+<ul>
+<li><strong><a href="../guides/downloader/">Downloader guide</a></strong> — WAF classifier, disk sizing table, WSL warning explained in detail.</li>
+<li><strong><a href="../guides/schema-drift/">Schema Drift guide</a></strong> — three modes, how rename detection works, programmatic API.</li>
+<li><strong><a href="../guides/normalize/">Normalize guide</a></strong> — three-state model, bootstrap+amend semantics, two worked examples.</li>
+<li><strong><a href="../guides/k6-loadtest/">K6 Load Test guide</a></strong> — building the custom K6 binary, config, running against a local Docker SQL Server.</li>
+<li><strong><a href="../cookbook/">Cookbook</a></strong> — nightly cron, DuckDB <code>httpfs</code>, corporate proxy, populating a fresh dev SQL Server.</li>
+<li><strong><a href="../architecture/">Architecture</a></strong> — the four-tool DAG and the core design principles.</li>
+</ul>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var labels=set.querySelector(".tabbed-labels");for(var tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["content.code.copy", "content.tabs.link", "navigation.tracking", "navigation.top", "search.highlight", "search.share"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+    
+  </body>
+</html>

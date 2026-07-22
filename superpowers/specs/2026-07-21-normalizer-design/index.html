@@ -1,0 +1,1981 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Downloader, schema-drift analyzer, and K6 SQL Server load tester for NYC TLC taxi trip data">
+      
+      
+      
+        <link rel="canonical" href="https://andrekamman.github.io/taxi/superpowers/specs/2026-07-21-normalizer-design/">
+      
+      
+        <link rel="prev" href="../2026-07-19-monorepo-restructure-design/">
+      
+      
+        <link rel="next" href="../2026-03-25-k6-sql-load-testing-design/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>Normalizer - taxi</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.ec1eaa64.min.css">
+      
+        
+        <link rel="stylesheet" href="../../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#normalizer-design" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../../.." title="taxi" class="md-header__button md-logo" aria-label="taxi" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            taxi
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Normalizer
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+          <a href="javascript:void(0)" class="md-search__icon md-icon" title="Share" aria-label="Share" data-clipboard data-clipboard-text="" data-md-component="search-share" tabindex="-1">
+            
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9a3 3 0 0 0-3 3 3 3 0 0 0 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.15c-.05.21-.08.43-.08.66 0 1.61 1.31 2.91 2.92 2.91s2.92-1.3 2.92-2.91A2.92 2.92 0 0 0 18 16.08"/></svg>
+          </a>
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/andrekamman/taxi" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    andrekamman/taxi
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../../.." title="taxi" class="md-nav__button md-logo" aria-label="taxi" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    taxi
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/andrekamman/taxi" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    andrekamman/taxi
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../getting-started/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Guides
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Guides
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../guides/downloader/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Downloader
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../guides/schema-drift/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Schema Drift
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../guides/normalize/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Normalize
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../guides/k6-loadtest/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    K6 Load Test
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../cookbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Cookbook
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reference
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Reference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/configuration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Configuration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/exit-codes/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Exit codes
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Design Specs
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Design Specs
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../2026-07-19-monorepo-restructure-design/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Monorepo restructure
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Normalizer
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Normalizer
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#amendment-2026-07-22-implicit-bootstrap-amend" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Amendment: 2026-07-22 — implicit bootstrap + amend
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#motivation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Motivation
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#non-goals" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Non-goals
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#core-contract" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Core contract
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#directory-layout" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Directory layout
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#mapping-yaml" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Mapping YAML
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Mapping YAML">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#automatic-behavior-no-yaml-entry-needed" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Automatic behavior (no YAML entry needed)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#error-triggers-require-yaml-entry" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Error triggers (require YAML entry)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#cli" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        CLI
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="CLI">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#normalize-bootstrap-type" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        normalize bootstrap &lt;type&gt;
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#normalize-type-or-normalize-for-all" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        normalize &lt;type&gt; (or normalize for all)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#error-report-format" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Error report format
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#exit-codes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Exit codes
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#incremental-re-runs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Incremental re-runs
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#implementation-approach-duckdb" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Implementation approach (DuckDB)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Implementation approach (DuckDB)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#metadata-only-checks-fast-no-data-scan" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Metadata-only checks (fast — no data scan)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#value-scans-only-when-metadata-cannot-answer-precision" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Value scans (only when metadata cannot answer — precision)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#transform-sql-per-file-generated-by-planner" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Transform SQL (per file, generated by planner)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#bootstrap-analysis" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Bootstrap analysis
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#testing-strategy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Testing strategy
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#success-criteria" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Success criteria
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#out-of-scope" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Out of scope
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../2026-03-25-k6-sql-load-testing-design/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    K6 SQL load testing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../2026-07-22-documentation-design/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Documentation site
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../contributing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Contributing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#amendment-2026-07-22-implicit-bootstrap-amend" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Amendment: 2026-07-22 — implicit bootstrap + amend
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#motivation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Motivation
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#non-goals" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Non-goals
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#core-contract" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Core contract
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#directory-layout" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Directory layout
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#mapping-yaml" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Mapping YAML
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Mapping YAML">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#automatic-behavior-no-yaml-entry-needed" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Automatic behavior (no YAML entry needed)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#error-triggers-require-yaml-entry" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Error triggers (require YAML entry)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#cli" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        CLI
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="CLI">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#normalize-bootstrap-type" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        normalize bootstrap &lt;type&gt;
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#normalize-type-or-normalize-for-all" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        normalize &lt;type&gt; (or normalize for all)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#error-report-format" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Error report format
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#exit-codes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Exit codes
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#incremental-re-runs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Incremental re-runs
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#implementation-approach-duckdb" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Implementation approach (DuckDB)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Implementation approach (DuckDB)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#metadata-only-checks-fast-no-data-scan" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Metadata-only checks (fast — no data scan)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#value-scans-only-when-metadata-cannot-answer-precision" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Value scans (only when metadata cannot answer — precision)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#transform-sql-per-file-generated-by-planner" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Transform SQL (per file, generated by planner)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#bootstrap-analysis" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Bootstrap analysis
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#testing-strategy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Testing strategy
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#success-criteria" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Success criteria
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#out-of-scope" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Out of scope
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="normalizer-design">Normalizer Design</h1>
+<p><strong>Date:</strong> 2026-07-21
+<strong>Status:</strong> Implemented; amended 2026-07-22 to collapse the CLI to a single command with implicit bootstrap + amend semantics.
+<strong>Sub-project of:</strong> the four-part expansion (normalizer, SQL Server loader, orchestrator, CI/CD)</p>
+<h2 id="amendment-2026-07-22-implicit-bootstrap-amend">Amendment: 2026-07-22 — implicit bootstrap + amend</h2>
+<p>The originally-shipped CLI exposed two subcommands: <code>normalize bootstrap &lt;type&gt;</code> (explicit scaffold generation) and <code>normalize &lt;type&gt;</code> (actual normalization). The bootstrap step turned out to be a friction point in the docs and the user experience — a two-step "first bootstrap, then normalize" flow every user has to learn, when the tool could simply do the right thing automatically.</p>
+<p><strong>Revised behavior:</strong></p>
+<ul>
+<li>The <code>bootstrap</code> subcommand is removed. <code>normalize &lt;type&gt;</code> is the only user-facing command.</li>
+<li><strong>First run</strong> (no mapping YAML exists): <code>normalize &lt;type&gt;</code> runs the schema-drift analysis, writes <code>normalize/mappings/&lt;type&gt;.yaml</code> with the full scaffold, prints next-step instructions, and exits with code <strong>3</strong>.</li>
+<li><strong>Subsequent run with unresolved items in an existing mapping</strong>: <code>normalize &lt;type&gt;</code> <strong>amends</strong> the existing YAML by appending new SUGGESTED/TODO entries for each unresolved column (schema-drift's rename detector is invoked again to seed new suggestions). The human's existing entries are preserved verbatim. Prints the consolidated unresolved report + a note about the amendment, exits with code <strong>1</strong>.</li>
+<li><strong>Subsequent run with a complete mapping</strong>: normalizes and exits <strong>0</strong>.</li>
+<li><code>--sample &lt;N|N%&gt;</code> moves to the top-level <code>normalize</code> command; it only takes effect when analysis actually runs (first-run bootstrap or amendment).</li>
+</ul>
+<p><strong>Mapping YAML additions:</strong></p>
+<ul>
+<li>A machine-generated <strong>timeline header</strong> now precedes the mapping. The header lists each schema-drift transition as a one-line summary (e.g. <code># 2013-01 -&gt; 2015-01: renamed pu_datetime-&gt;tpep_pickup_datetime; added PULocationID</code>). The header is regenerated on every amend based on the current data.</li>
+<li>The header also declares whether the file was "Generated" (first run) or "Amended" (subsequent run), with a date stamp.</li>
+</ul>
+<p><strong>Amend mechanics:</strong></p>
+<p>The existing mapping is loaded via <code>load_mapping()</code> (semantic content only — comments are stripped as part of PyYAML parsing). The tool then computes the set of columns already handled by any of <code>renames:</code>, <code>lossy_casts:</code>, or <code>acknowledged_data_loss:</code>, and only emits SUGGESTED/TODO items for columns not in that set. The YAML is fully rewritten: header + preserved semantic entries (as regular YAML) + new commented entries appended per section. Human-written comments in the body of the YAML are NOT preserved across amends — this is an accepted trade-off in exchange for keeping the amend logic simple. Uncommented decisions always survive.</p>
+<p><strong>Regenerating from scratch:</strong> delete the mapping file and re-run.</p>
+<p><strong>Orchestrator implications:</strong> the amend behavior is what makes the "keep the database up to date on a schedule" story work. When TLC ships a new drift months from now, the orchestrator's scheduled run will detect unresolved items, amend the YAML in place, and the human wakes up to a diff / notification with new SUGGESTED/TODO entries needing review — rather than a silent failure or a wholesale scaffold regeneration.</p>
+<p><strong>Test coverage delta:</strong> removed the "refuses to overwrite" test; added tests for timeline header emission, amend-preserves-existing-content, amend-reports-zero-new-items-when-fully-resolved, amend-flags-only-new-items, first-run-bootstraps-and-exits-3, and unresolved-mapping-amends-and-exits-1. Full suite grew from 78 to 83 tests.</p>
+<p>Everything below this amendment describes the original design and remains accurate except for the CLI shape (single command instead of <code>bootstrap</code> + <code>normalize</code> subcommands) and the mapping file's header block.</p>
+<hr />
+<h2 id="motivation">Motivation</h2>
+<p>TLC parquet files drift heavily over the years — especially the first decade. Column renames, type changes, entirely different location schemes (lat/lon replaced by LocationID). The <code>schema-drift</code> component identifies this drift. The normalizer turns the drift into a resolved dataset: every historical parquet file rewritten to conform to the latest schema, so downstream consumers (the SQL Server loader, ad-hoc analysts, DuckDB queries) get one uniform dataset.</p>
+<h2 id="non-goals">Non-goals</h2>
+<ul>
+<li>Preserving multiple schema versions in the output. The output is single-schema.</li>
+<li>Handling schema drift automatically without human input on ambiguous cases. Data loss requires explicit acknowledgment.</li>
+<li>Alternative target schemas (e.g., "normalize to 2015 schema instead of latest"). Latest wins; no configuration for target era.</li>
+<li>Anything about the loader, orchestrator, or CI/CD sub-projects — those have their own specs.</li>
+</ul>
+<h2 id="core-contract">Core contract</h2>
+<p>The normalizer reads historical parquet + a curated YAML mapping per data type, and writes normalized parquet files that all conform to the latest schema.</p>
+<p><strong>Data loss is a first-class error, not a warning.</strong> If applying the mapping would drop a column that had non-null data in any historical file, or perform a lossy cast (e.g., <code>DOUBLE → BIGINT</code> where the source has fractional values, <code>VARCHAR(50) → VARCHAR(10)</code> where source strings exceed 10 chars), the tool halts with an error. The human must add an explicit entry to the YAML with an <code>ack_date</code> before the tool will proceed. <code>ack_by</code> and <code>reason</code> are optional but recommended for git-history documentation.</p>
+<p><strong>Latest data is a no-op.</strong> Once caught up, historical files already match the target schema; the tool only re-engages when TLC introduces a new drift.</p>
+<h2 id="directory-layout">Directory layout</h2>
+<p>New component <code>normalize/</code>, matching the monorepo pattern:</p>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-1"> 1</a></span>
+<span class="normal"><a href="#__codelineno-0-2"> 2</a></span>
+<span class="normal"><a href="#__codelineno-0-3"> 3</a></span>
+<span class="normal"><a href="#__codelineno-0-4"> 4</a></span>
+<span class="normal"><a href="#__codelineno-0-5"> 5</a></span>
+<span class="normal"><a href="#__codelineno-0-6"> 6</a></span>
+<span class="normal"><a href="#__codelineno-0-7"> 7</a></span>
+<span class="normal"><a href="#__codelineno-0-8"> 8</a></span>
+<span class="normal"><a href="#__codelineno-0-9"> 9</a></span>
+<span class="normal"><a href="#__codelineno-0-10">10</a></span>
+<span class="normal"><a href="#__codelineno-0-11">11</a></span>
+<span class="normal"><a href="#__codelineno-0-12">12</a></span>
+<span class="normal"><a href="#__codelineno-0-13">13</a></span>
+<span class="normal"><a href="#__codelineno-0-14">14</a></span>
+<span class="normal"><a href="#__codelineno-0-15">15</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1"></a>normalize/
+<a id="__codelineno-0-2" name="__codelineno-0-2"></a>├── README.md
+<a id="__codelineno-0-3" name="__codelineno-0-3"></a>├── mappings/                         # checked-in per-type YAMLs
+<a id="__codelineno-0-4" name="__codelineno-0-4"></a>│   ├── yellow.yaml
+<a id="__codelineno-0-5" name="__codelineno-0-5"></a>│   ├── green.yaml
+<a id="__codelineno-0-6" name="__codelineno-0-6"></a>│   ├── fhv.yaml
+<a id="__codelineno-0-7" name="__codelineno-0-7"></a>│   └── fhvhv.yaml
+<a id="__codelineno-0-8" name="__codelineno-0-8"></a>└── src/taxi_normalize/
+<a id="__codelineno-0-9" name="__codelineno-0-9"></a>    ├── __init__.py
+<a id="__codelineno-0-10" name="__codelineno-0-10"></a>    ├── cli.py                        # entry point: `normalize`
+<a id="__codelineno-0-11" name="__codelineno-0-11"></a>    ├── bootstrap.py                  # generates starter YAML with schema-drift suggestions
+<a id="__codelineno-0-12" name="__codelineno-0-12"></a>    ├── mapping.py                    # loads + validates YAML, detects unresolved items
+<a id="__codelineno-0-13" name="__codelineno-0-13"></a>    ├── planner.py                    # compares raw schema vs target, decides per-column action
+<a id="__codelineno-0-14" name="__codelineno-0-14"></a>    ├── executor.py                   # runs DuckDB SQL, writes normalized parquet
+<a id="__codelineno-0-15" name="__codelineno-0-15"></a>    └── data_check.py                 # metadata-driven presence/range checks
+</code></pre></div></td></tr></table></div>
+<p><strong>Output:</strong>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-1-1">1</a></span>
+<span class="normal"><a href="#__codelineno-1-2">2</a></span>
+<span class="normal"><a href="#__codelineno-1-3">3</a></span>
+<span class="normal"><a href="#__codelineno-1-4">4</a></span>
+<span class="normal"><a href="#__codelineno-1-5">5</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1"></a>raw-normalized/
+<a id="__codelineno-1-2" name="__codelineno-1-2"></a>  yellow/2009/yellow_tripdata_2009-01.parquet
+<a id="__codelineno-1-3" name="__codelineno-1-3"></a>  ...
+<a id="__codelineno-1-4" name="__codelineno-1-4"></a>  yellow/2024/yellow_tripdata_2024-01.parquet
+<a id="__codelineno-1-5" name="__codelineno-1-5"></a>  green/  fhv/  fhvhv/
+</code></pre></div></td></tr></table></div></p>
+<p><strong>Tests:</strong> <code>tests/taxi_normalize/</code> (mirrors existing <code>tests/{k6_loadtest,schema_drift,taxi_shared}/</code>).</p>
+<p><strong>pyproject.toml additions:</strong>
+- Add <code>normalize/src/taxi_normalize</code> to <code>[tool.hatch.build.targets.wheel] packages</code>.
+- Add <code>normalize = "taxi_normalize.cli:main"</code> to <code>[project.scripts]</code>.</p>
+<h2 id="mapping-yaml">Mapping YAML</h2>
+<p>The mapping file at <code>normalize/mappings/&lt;type&gt;.yaml</code> has four top-level keys, all optional. The normalizer only requires entries for <strong>ambiguous</strong> cases; safe transformations are automatic.</p>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-2-1"> 1</a></span>
+<span class="normal"><a href="#__codelineno-2-2"> 2</a></span>
+<span class="normal"><a href="#__codelineno-2-3"> 3</a></span>
+<span class="normal"><a href="#__codelineno-2-4"> 4</a></span>
+<span class="normal"><a href="#__codelineno-2-5"> 5</a></span>
+<span class="normal"><a href="#__codelineno-2-6"> 6</a></span>
+<span class="normal"><a href="#__codelineno-2-7"> 7</a></span>
+<span class="normal"><a href="#__codelineno-2-8"> 8</a></span>
+<span class="normal"><a href="#__codelineno-2-9"> 9</a></span>
+<span class="normal"><a href="#__codelineno-2-10">10</a></span>
+<span class="normal"><a href="#__codelineno-2-11">11</a></span>
+<span class="normal"><a href="#__codelineno-2-12">12</a></span>
+<span class="normal"><a href="#__codelineno-2-13">13</a></span>
+<span class="normal"><a href="#__codelineno-2-14">14</a></span>
+<span class="normal"><a href="#__codelineno-2-15">15</a></span>
+<span class="normal"><a href="#__codelineno-2-16">16</a></span>
+<span class="normal"><a href="#__codelineno-2-17">17</a></span>
+<span class="normal"><a href="#__codelineno-2-18">18</a></span>
+<span class="normal"><a href="#__codelineno-2-19">19</a></span>
+<span class="normal"><a href="#__codelineno-2-20">20</a></span>
+<span class="normal"><a href="#__codelineno-2-21">21</a></span>
+<span class="normal"><a href="#__codelineno-2-22">22</a></span>
+<span class="normal"><a href="#__codelineno-2-23">23</a></span>
+<span class="normal"><a href="#__codelineno-2-24">24</a></span>
+<span class="normal"><a href="#__codelineno-2-25">25</a></span>
+<span class="normal"><a href="#__codelineno-2-26">26</a></span>
+<span class="normal"><a href="#__codelineno-2-27">27</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1"></a><span class="nt">target</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">yellow_tripdata_2024-01.parquet</span><span class="w">     </span><span class="c1"># pinned; bootstrap picks newest, human bumps</span>
+<a id="__codelineno-2-2" name="__codelineno-2-2"></a>
+<a id="__codelineno-2-3" name="__codelineno-2-3"></a><span class="c1"># Data-preserving renames: old column name -&gt; latest column name</span>
+<a id="__codelineno-2-4" name="__codelineno-2-4"></a><span class="nt">renames</span><span class="p">:</span>
+<a id="__codelineno-2-5" name="__codelineno-2-5"></a><span class="w">  </span><span class="nt">pu_datetime</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">tpep_pickup_datetime</span>
+<a id="__codelineno-2-6" name="__codelineno-2-6"></a><span class="w">  </span><span class="nt">do_datetime</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">tpep_dropoff_datetime</span>
+<a id="__codelineno-2-7" name="__codelineno-2-7"></a>
+<a id="__codelineno-2-8" name="__codelineno-2-8"></a><span class="c1"># Lossy type casts requiring human ack. Safe widening casts (INT-&gt;BIGINT,</span>
+<a id="__codelineno-2-9" name="__codelineno-2-9"></a><span class="c1"># DOUBLE-&gt;DECIMAL, VARCHAR(10)-&gt;VARCHAR(50)) are auto-applied; only list</span>
+<a id="__codelineno-2-10" name="__codelineno-2-10"></a><span class="c1"># casts that could lose data. `ack_date` is required; `ack_by` and `reason`</span>
+<a id="__codelineno-2-11" name="__codelineno-2-11"></a><span class="c1"># are optional but recommended.</span>
+<a id="__codelineno-2-12" name="__codelineno-2-12"></a><span class="nt">lossy_casts</span><span class="p">:</span>
+<a id="__codelineno-2-13" name="__codelineno-2-13"></a><span class="w">  </span><span class="nt">passenger_count</span><span class="p">:</span>
+<a id="__codelineno-2-14" name="__codelineno-2-14"></a><span class="w">    </span><span class="nt">from</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">DOUBLE</span>
+<a id="__codelineno-2-15" name="__codelineno-2-15"></a><span class="w">    </span><span class="nt">to</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">BIGINT</span>
+<a id="__codelineno-2-16" name="__codelineno-2-16"></a><span class="w">    </span><span class="nt">ack_date</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2026-07-21</span>
+<a id="__codelineno-2-17" name="__codelineno-2-17"></a><span class="w">    </span><span class="nt">ack_by</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">andrekamman</span><span class="w">                            </span><span class="c1"># optional</span>
+<a id="__codelineno-2-18" name="__codelineno-2-18"></a><span class="w">    </span><span class="nt">reason</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Fractional</span><span class="nv"> </span><span class="s">values</span><span class="nv"> </span><span class="s">are</span><span class="nv"> </span><span class="s">data-entry</span><span class="nv"> </span><span class="s">noise;</span><span class="nv"> </span><span class="s">passenger_count</span><span class="nv"> </span><span class="s">is</span><span class="nv"> </span><span class="s">logically</span><span class="nv"> </span><span class="s">integer.&quot;</span><span class="w">  </span><span class="c1"># optional</span>
+<a id="__codelineno-2-19" name="__codelineno-2-19"></a>
+<a id="__codelineno-2-20" name="__codelineno-2-20"></a><span class="c1"># Columns present in historical data with non-null values, absent from the target</span>
+<a id="__codelineno-2-21" name="__codelineno-2-21"></a><span class="c1"># schema, and not renamed to anything. `ack_date` alone is sufficient acknowledgment;</span>
+<a id="__codelineno-2-22" name="__codelineno-2-22"></a><span class="c1"># `ack_by` and `reason` are optional but recommended for future readers.</span>
+<a id="__codelineno-2-23" name="__codelineno-2-23"></a><span class="nt">acknowledged_data_loss</span><span class="p">:</span>
+<a id="__codelineno-2-24" name="__codelineno-2-24"></a><span class="w">  </span><span class="nt">pickup_latitude</span><span class="p">:</span>
+<a id="__codelineno-2-25" name="__codelineno-2-25"></a><span class="w">    </span><span class="nt">ack_date</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2026-07-21</span>
+<a id="__codelineno-2-26" name="__codelineno-2-26"></a><span class="w">    </span><span class="nt">ack_by</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">andrekamman</span><span class="w">                            </span><span class="c1"># optional</span>
+<a id="__codelineno-2-27" name="__codelineno-2-27"></a><span class="w">    </span><span class="nt">reason</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Replaced</span><span class="nv"> </span><span class="s">by</span><span class="nv"> </span><span class="s">PULocationID</span><span class="nv"> </span><span class="s">in</span><span class="nv"> </span><span class="s">2016;</span><span class="nv"> </span><span class="s">lat/lon</span><span class="nv"> </span><span class="s">has</span><span class="nv"> </span><span class="s">no</span><span class="nv"> </span><span class="s">equivalent</span><span class="nv"> </span><span class="s">in</span><span class="nv"> </span><span class="s">new</span><span class="nv"> </span><span class="s">schema.&quot;</span><span class="w">  </span><span class="c1"># optional</span>
+</code></pre></div></td></tr></table></div>
+<h3 id="automatic-behavior-no-yaml-entry-needed">Automatic behavior (no YAML entry needed)</h3>
+<ul>
+<li>Column always-null across all historical files, missing from target → auto-drop.</li>
+<li>Column missing from historical files but present in target → filled with NULL.</li>
+<li>Type widening that cannot lose data (<code>INT → BIGINT</code>, <code>FLOAT → DOUBLE</code>, <code>VARCHAR(N) → VARCHAR(M&gt;N)</code>) → auto-cast.</li>
+<li>Column present unchanged in historical and target → passthrough.</li>
+</ul>
+<h3 id="error-triggers-require-yaml-entry">Error triggers (require YAML entry)</h3>
+<ul>
+<li>Historical column has non-null data, is missing from target, and has no entry in <code>renames:</code> or <code>acknowledged_data_loss:</code>.</li>
+<li>Type cast between historical and target could lose data (either range overflow or precision loss), and no entry in <code>lossy_casts:</code>.</li>
+<li>Entry in <code>lossy_casts:</code> or <code>acknowledged_data_loss:</code> is missing the required <code>ack_date</code>.</li>
+</ul>
+<h2 id="cli">CLI</h2>
+<p>Two subcommands, one no-arg mode:</p>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-3-1">1</a></span>
+<span class="normal"><a href="#__codelineno-3-2">2</a></span>
+<span class="normal"><a href="#__codelineno-3-3">3</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1"></a>normalize bootstrap &lt;type&gt; [--sample &lt;N|N%&gt;]   # generate normalize/mappings/&lt;type&gt;.yaml
+<a id="__codelineno-3-2" name="__codelineno-3-2"></a>normalize &lt;type&gt;                               # normalize raw/&lt;type&gt;/ -&gt; raw-normalized/&lt;type&gt;/
+<a id="__codelineno-3-3" name="__codelineno-3-3"></a>normalize                                      # (no arg) run all four types
+</code></pre></div></td></tr></table></div>
+<p><strong><code>--sample &lt;N|N%&gt;</code></strong> controls how many rows are read when comparing candidate rename pairs (schema-drift's data-driven rename verification). Format is either an absolute row count (<code>--sample 5000</code>) or a percentage (<code>--sample 10%</code>). Default is <code>100%</code> (full scan) — err on the safe side, only reduce for massive datasets where bootstrap runtime becomes a problem. The flag does NOT affect metadata-only checks (schema, null counts, min/max ranges) or the precision-loss check for lossy casts — both always use the complete file, since sampling those risks false-negative data-loss decisions.</p>
+<h3 id="normalize-bootstrap-type"><code>normalize bootstrap &lt;type&gt;</code></h3>
+<p>Scans <code>raw/&lt;type&gt;/**/*.parquet</code>, calls <code>schema_drift.analyze.analyze_data_type()</code> and <code>schema_drift.renames.detect_renames_by_data()</code> internally to identify rename candidates and data-driven verification, runs the presence/range checks (metadata-only), and writes <code>normalize/mappings/&lt;type&gt;.yaml</code>:</p>
+<ul>
+<li><strong>YAML doesn't exist yet:</strong> write it fresh with the scaffold below.</li>
+<li><strong>YAML exists:</strong> refuse to overwrite. Print: <code>&lt;type&gt;.yaml already exists. Delete it or edit manually. Re-run bootstrap after deletion to regenerate scaffolding.</code></li>
+</ul>
+<p><strong>Scaffold shape</strong> (with schema-drift suggestions pre-filled as commented entries):</p>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-4-1"> 1</a></span>
+<span class="normal"><a href="#__codelineno-4-2"> 2</a></span>
+<span class="normal"><a href="#__codelineno-4-3"> 3</a></span>
+<span class="normal"><a href="#__codelineno-4-4"> 4</a></span>
+<span class="normal"><a href="#__codelineno-4-5"> 5</a></span>
+<span class="normal"><a href="#__codelineno-4-6"> 6</a></span>
+<span class="normal"><a href="#__codelineno-4-7"> 7</a></span>
+<span class="normal"><a href="#__codelineno-4-8"> 8</a></span>
+<span class="normal"><a href="#__codelineno-4-9"> 9</a></span>
+<span class="normal"><a href="#__codelineno-4-10">10</a></span>
+<span class="normal"><a href="#__codelineno-4-11">11</a></span>
+<span class="normal"><a href="#__codelineno-4-12">12</a></span>
+<span class="normal"><a href="#__codelineno-4-13">13</a></span>
+<span class="normal"><a href="#__codelineno-4-14">14</a></span>
+<span class="normal"><a href="#__codelineno-4-15">15</a></span>
+<span class="normal"><a href="#__codelineno-4-16">16</a></span>
+<span class="normal"><a href="#__codelineno-4-17">17</a></span>
+<span class="normal"><a href="#__codelineno-4-18">18</a></span>
+<span class="normal"><a href="#__codelineno-4-19">19</a></span>
+<span class="normal"><a href="#__codelineno-4-20">20</a></span>
+<span class="normal"><a href="#__codelineno-4-21">21</a></span>
+<span class="normal"><a href="#__codelineno-4-22">22</a></span>
+<span class="normal"><a href="#__codelineno-4-23">23</a></span>
+<span class="normal"><a href="#__codelineno-4-24">24</a></span>
+<span class="normal"><a href="#__codelineno-4-25">25</a></span>
+<span class="normal"><a href="#__codelineno-4-26">26</a></span>
+<span class="normal"><a href="#__codelineno-4-27">27</a></span>
+<span class="normal"><a href="#__codelineno-4-28">28</a></span>
+<span class="normal"><a href="#__codelineno-4-29">29</a></span>
+<span class="normal"><a href="#__codelineno-4-30">30</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1"></a><span class="c1"># Generated by `normalize bootstrap yellow`. Review each SUGGESTED entry:</span>
+<a id="__codelineno-4-2" name="__codelineno-4-2"></a><span class="c1"># uncomment to accept, delete to reject. Fill in each TODO before running.</span>
+<a id="__codelineno-4-3" name="__codelineno-4-3"></a><span class="nt">target</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">yellow_tripdata_2024-01.parquet</span>
+<a id="__codelineno-4-4" name="__codelineno-4-4"></a>
+<a id="__codelineno-4-5" name="__codelineno-4-5"></a><span class="nt">renames</span><span class="p">:</span>
+<a id="__codelineno-4-6" name="__codelineno-4-6"></a><span class="w">  </span><span class="c1"># SUGGESTED (confidence 92%, data-verified) — uncomment to accept:</span>
+<a id="__codelineno-4-7" name="__codelineno-4-7"></a><span class="w">  </span><span class="c1"># pu_datetime: tpep_pickup_datetime</span>
+<a id="__codelineno-4-8" name="__codelineno-4-8"></a><span class="w">  </span><span class="c1"># SUGGESTED (confidence 92%, data-verified) — uncomment to accept:</span>
+<a id="__codelineno-4-9" name="__codelineno-4-9"></a><span class="w">  </span><span class="c1"># do_datetime: tpep_dropoff_datetime</span>
+<a id="__codelineno-4-10" name="__codelineno-4-10"></a><span class="w">  </span><span class="c1"># SUGGESTED (confidence 68%, NOT data-verified — review carefully):</span>
+<a id="__codelineno-4-11" name="__codelineno-4-11"></a><span class="w">  </span><span class="c1"># pu_location: PULocationID</span>
+<a id="__codelineno-4-12" name="__codelineno-4-12"></a>
+<a id="__codelineno-4-13" name="__codelineno-4-13"></a><span class="nt">lossy_casts</span><span class="p">:</span>
+<a id="__codelineno-4-14" name="__codelineno-4-14"></a><span class="w">  </span><span class="c1"># DETECTED: passenger_count changed DOUBLE -&gt; BIGINT.</span>
+<a id="__codelineno-4-15" name="__codelineno-4-15"></a><span class="w">  </span><span class="c1"># 12,384 non-integer values across 84 files would truncate.</span>
+<a id="__codelineno-4-16" name="__codelineno-4-16"></a><span class="w">  </span><span class="c1"># Set ack_date to accept (ack_by and reason are optional):</span>
+<a id="__codelineno-4-17" name="__codelineno-4-17"></a><span class="w">  </span><span class="c1"># passenger_count:</span>
+<a id="__codelineno-4-18" name="__codelineno-4-18"></a><span class="w">  </span><span class="c1">#   from: DOUBLE</span>
+<a id="__codelineno-4-19" name="__codelineno-4-19"></a><span class="w">  </span><span class="c1">#   to: BIGINT</span>
+<a id="__codelineno-4-20" name="__codelineno-4-20"></a><span class="w">  </span><span class="c1">#   ack_date: TODO</span>
+<a id="__codelineno-4-21" name="__codelineno-4-21"></a>
+<a id="__codelineno-4-22" name="__codelineno-4-22"></a><span class="nt">acknowledged_data_loss</span><span class="p">:</span>
+<a id="__codelineno-4-23" name="__codelineno-4-23"></a><span class="w">  </span><span class="c1"># DETECTED: pickup_latitude has non-null data in 84 files (2009-01 to 2016-06),</span>
+<a id="__codelineno-4-24" name="__codelineno-4-24"></a><span class="w">  </span><span class="c1"># no rename candidate above the confidence threshold.</span>
+<a id="__codelineno-4-25" name="__codelineno-4-25"></a><span class="w">  </span><span class="c1"># Set ack_date to accept the loss (ack_by and reason are optional):</span>
+<a id="__codelineno-4-26" name="__codelineno-4-26"></a><span class="w">  </span><span class="c1"># pickup_latitude:</span>
+<a id="__codelineno-4-27" name="__codelineno-4-27"></a><span class="w">  </span><span class="c1">#   ack_date: TODO</span>
+<a id="__codelineno-4-28" name="__codelineno-4-28"></a><span class="w">  </span><span class="c1"># DETECTED: pickup_longitude has non-null data in 84 files (2009-01 to 2016-06):</span>
+<a id="__codelineno-4-29" name="__codelineno-4-29"></a><span class="w">  </span><span class="c1"># pickup_longitude:</span>
+<a id="__codelineno-4-30" name="__codelineno-4-30"></a><span class="w">  </span><span class="c1">#   ack_date: TODO</span>
+</code></pre></div></td></tr></table></div>
+<p>Rationale for the SUGGESTED-with-comment pattern: schema-drift's rename detection is heuristic + data-verification, not perfect. Emitting commented suggestions preserves the human-in-the-loop philosophy while doing the tedious work of listing candidates. High-confidence data-verified suggestions get flagged as safe; low-confidence ones get flagged as needing careful review.</p>
+<p>Confidence threshold for emitting a SUGGESTED rename: 60% (same as schema-drift's default). Below that, the column goes into <code>acknowledged_data_loss:</code> as a TODO instead.</p>
+<h3 id="normalize-type-or-normalize-for-all"><code>normalize &lt;type&gt;</code> (or <code>normalize</code> for all)</h3>
+<ol>
+<li>Load <code>normalize/mappings/&lt;type&gt;.yaml</code>. Error if missing — direct user to <code>normalize bootstrap &lt;type&gt;</code>.</li>
+<li>Load target parquet schema via <code>parquet_schema(target)</code>.</li>
+<li>For each <code>raw/&lt;type&gt;/&lt;year&gt;/*.parquet</code> in chronological order:
+   a. Skip if <code>raw-normalized/&lt;type&gt;/&lt;year&gt;/&lt;same-name&gt;</code> already exists (idempotent, matches downloader pattern).
+   b. Read raw schema + metadata (<code>parquet_schema</code>, <code>parquet_metadata</code>) — footer only, no data scan.
+   c. Planner compares raw schema vs target using the mapping, produces a plan per column: passthrough / rename / cast / drop / null-fill.
+   d. Collect unresolved items (unmapped drops with data, unacked lossy casts). Don't halt on the first file — accumulate across all files in this data type for a single consolidated error.</li>
+<li>If any unresolved items exist: skip this data type entirely, print consolidated error report, exit code 1. Nothing is written.</li>
+<li>Otherwise, for each raw file: generate the transform SQL, execute it writing to <code>&lt;output&gt;.tmp.parquet</code>, then atomic rename to final path.</li>
+<li>Print per-type summary.</li>
+</ol>
+<h3 id="error-report-format">Error report format</h3>
+<p>Single consolidated report per data type. Sample:</p>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-5-1"> 1</a></span>
+<span class="normal"><a href="#__codelineno-5-2"> 2</a></span>
+<span class="normal"><a href="#__codelineno-5-3"> 3</a></span>
+<span class="normal"><a href="#__codelineno-5-4"> 4</a></span>
+<span class="normal"><a href="#__codelineno-5-5"> 5</a></span>
+<span class="normal"><a href="#__codelineno-5-6"> 6</a></span>
+<span class="normal"><a href="#__codelineno-5-7"> 7</a></span>
+<span class="normal"><a href="#__codelineno-5-8"> 8</a></span>
+<span class="normal"><a href="#__codelineno-5-9"> 9</a></span>
+<span class="normal"><a href="#__codelineno-5-10">10</a></span>
+<span class="normal"><a href="#__codelineno-5-11">11</a></span>
+<span class="normal"><a href="#__codelineno-5-12">12</a></span>
+<span class="normal"><a href="#__codelineno-5-13">13</a></span>
+<span class="normal"><a href="#__codelineno-5-14">14</a></span>
+<span class="normal"><a href="#__codelineno-5-15">15</a></span>
+<span class="normal"><a href="#__codelineno-5-16">16</a></span>
+<span class="normal"><a href="#__codelineno-5-17">17</a></span>
+<span class="normal"><a href="#__codelineno-5-18">18</a></span>
+<span class="normal"><a href="#__codelineno-5-19">19</a></span>
+<span class="normal"><a href="#__codelineno-5-20">20</a></span>
+<span class="normal"><a href="#__codelineno-5-21">21</a></span>
+<span class="normal"><a href="#__codelineno-5-22">22</a></span>
+<span class="normal"><a href="#__codelineno-5-23">23</a></span>
+<span class="normal"><a href="#__codelineno-5-24">24</a></span>
+<span class="normal"><a href="#__codelineno-5-25">25</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1"></a>ERROR: yellow — 4 unresolved items in normalize/mappings/yellow.yaml
+<a id="__codelineno-5-2" name="__codelineno-5-2"></a>  Cannot normalize this data type until these are handled.
+<a id="__codelineno-5-3" name="__codelineno-5-3"></a>
+<a id="__codelineno-5-4" name="__codelineno-5-4"></a>  Missing renames or acknowledged_data_loss entries:
+<a id="__codelineno-5-5" name="__codelineno-5-5"></a>    - pu_datetime           (present in 2009-01 through 2016-06, has data)
+<a id="__codelineno-5-6" name="__codelineno-5-6"></a>    - do_datetime           (present in 2009-01 through 2016-06, has data)
+<a id="__codelineno-5-7" name="__codelineno-5-7"></a>    - pickup_latitude       (present in 2009-01 through 2016-06, has data)
+<a id="__codelineno-5-8" name="__codelineno-5-8"></a>    - pickup_longitude      (present in 2009-01 through 2016-06, has data)
+<a id="__codelineno-5-9" name="__codelineno-5-9"></a>
+<a id="__codelineno-5-10" name="__codelineno-5-10"></a>  Unacknowledged lossy casts:
+<a id="__codelineno-5-11" name="__codelineno-5-11"></a>    - passenger_count       DOUBLE -&gt; BIGINT
+<a id="__codelineno-5-12" name="__codelineno-5-12"></a>                            (12,384 non-integer values across 84 files would truncate)
+<a id="__codelineno-5-13" name="__codelineno-5-13"></a>
+<a id="__codelineno-5-14" name="__codelineno-5-14"></a>  Options for each unresolved item:
+<a id="__codelineno-5-15" name="__codelineno-5-15"></a>    * add to `renames:` if the data moved to another column
+<a id="__codelineno-5-16" name="__codelineno-5-16"></a>    * add to `lossy_casts:` with ack_date (ack_by / reason optional) if the cast is acceptable
+<a id="__codelineno-5-17" name="__codelineno-5-17"></a>    * add to `acknowledged_data_loss:` with ack_date (ack_by / reason optional) if the data has no destination
+<a id="__codelineno-5-18" name="__codelineno-5-18"></a>
+<a id="__codelineno-5-19" name="__codelineno-5-19"></a>  Nothing was written. Re-run after updating yellow.yaml.
+<a id="__codelineno-5-20" name="__codelineno-5-20"></a>
+<a id="__codelineno-5-21" name="__codelineno-5-21"></a>green:  ok, nothing to normalize (all outputs present)
+<a id="__codelineno-5-22" name="__codelineno-5-22"></a>fhv:    ok, 3 files normalized
+<a id="__codelineno-5-23" name="__codelineno-5-23"></a>fhvhv:  ok, 12 files normalized
+<a id="__codelineno-5-24" name="__codelineno-5-24"></a>
+<a id="__codelineno-5-25" name="__codelineno-5-25"></a>1 data type had errors. Exit code 1.
+</code></pre></div></td></tr></table></div>
+<h3 id="exit-codes">Exit codes</h3>
+<ul>
+<li><code>0</code> — all types processed cleanly (may include no-ops due to idempotency skips).</li>
+<li><code>1</code> — one or more data types had unresolved mapping items. Nothing written for those types.</li>
+<li><code>2</code> — transient/system errors (YAML syntax invalid, DuckDB failure, disk full).</li>
+</ul>
+<h3 id="incremental-re-runs">Incremental re-runs</h3>
+<ul>
+<li>Existing output files are skipped (idempotent).</li>
+<li>To force re-normalize (e.g., after editing a rename): <code>rm -rf raw-normalized/&lt;type&gt;/</code> and re-run. No auto-invalidation based on mapping mtime — magic like that is wrong more often than right.</li>
+</ul>
+<h2 id="implementation-approach-duckdb">Implementation approach (DuckDB)</h2>
+<h3 id="metadata-only-checks-fast-no-data-scan">Metadata-only checks (fast — no data scan)</h3>
+<p>All use <code>parquet_metadata('file.parquet')</code> and <code>parquet_schema('file.parquet')</code>, reading only the footer:</p>
+<table>
+<thead>
+<tr>
+<th>Check</th>
+<th>Metadata used</th>
+<th>Outcome</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Column always null → safe auto-drop</td>
+<td><code>null_count</code> summed across row groups vs <code>num_rows</code></td>
+<td>All-null → auto-drop</td>
+</tr>
+<tr>
+<td>Numeric range fits smaller type</td>
+<td>per-row-group <code>min</code> / <code>max</code></td>
+<td>Range fits → auto-cast; range exceeds → lossy_cast ack required</td>
+</tr>
+<tr>
+<td>VARCHAR max length fits smaller VARCHAR</td>
+<td>per-row-group <code>max</code> (string)</td>
+<td>Fits → auto-cast; exceeds → lossy_cast ack required</td>
+</tr>
+<tr>
+<td>Presence periods for the error report</td>
+<td>filename-derived + <code>null_count</code> per file</td>
+<td>Purely metadata</td>
+</tr>
+</tbody>
+</table>
+<h3 id="value-scans-only-when-metadata-cannot-answer-precision">Value scans (only when metadata cannot answer — precision)</h3>
+<ul>
+<li><code>DOUBLE → BIGINT</code> truncation:
+  <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-6-1">1</a></span>
+<span class="normal"><a href="#__codelineno-6-2">2</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1"></a><span class="k">SELECT</span><span class="w"> </span><span class="k">count</span><span class="p">(</span><span class="o">*</span><span class="p">)</span><span class="w"> </span><span class="n">FILTER</span><span class="w"> </span><span class="p">(</span><span class="k">WHERE</span><span class="w"> </span><span class="n">val</span><span class="w"> </span><span class="k">IS</span><span class="w"> </span><span class="k">NOT</span><span class="w"> </span><span class="k">NULL</span><span class="w"> </span><span class="k">AND</span><span class="w"> </span><span class="n">val</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="k">CAST</span><span class="p">(</span><span class="n">val</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="nb">BIGINT</span><span class="p">))</span>
+<a id="__codelineno-6-2" name="__codelineno-6-2"></a><span class="k">FROM</span><span class="w"> </span><span class="n">read_parquet</span><span class="p">(</span><span class="s1">&#39;...&#39;</span><span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+  DuckDB scans the parquet column vectorized. Only runs after the range check has passed — otherwise range failure alone is sufficient reason to demand an ack.</li>
+<li><code>DECIMAL</code> scale reduction: analogous.</li>
+</ul>
+<p><strong>These precision-check scans always read the full column, regardless of the <code>--sample</code> flag.</strong> Sampling could return a false negative (no fractional values seen in the sample even though the file contains some), which would silently discard user data. Correctness beats speed here.</p>
+<p>For TLC data, most columns settle from metadata alone; the precision-scan path fires only when a column crosses a range boundary between historical and target types.</p>
+<h3 id="transform-sql-per-file-generated-by-planner">Transform SQL (per file, generated by planner)</h3>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-7-1"> 1</a></span>
+<span class="normal"><a href="#__codelineno-7-2"> 2</a></span>
+<span class="normal"><a href="#__codelineno-7-3"> 3</a></span>
+<span class="normal"><a href="#__codelineno-7-4"> 4</a></span>
+<span class="normal"><a href="#__codelineno-7-5"> 5</a></span>
+<span class="normal"><a href="#__codelineno-7-6"> 6</a></span>
+<span class="normal"><a href="#__codelineno-7-7"> 7</a></span>
+<span class="normal"><a href="#__codelineno-7-8"> 8</a></span>
+<span class="normal"><a href="#__codelineno-7-9"> 9</a></span>
+<span class="normal"><a href="#__codelineno-7-10">10</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1"></a><span class="k">COPY</span><span class="w"> </span><span class="p">(</span>
+<a id="__codelineno-7-2" name="__codelineno-7-2"></a><span class="w">  </span><span class="k">SELECT</span>
+<a id="__codelineno-7-3" name="__codelineno-7-3"></a><span class="w">    </span><span class="n">tpep_pickup_datetime</span><span class="p">,</span><span class="w">                                    </span><span class="c1">-- passthrough</span>
+<a id="__codelineno-7-4" name="__codelineno-7-4"></a><span class="w">    </span><span class="n">pu_datetime</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">tpep_pickup_datetime</span><span class="p">,</span><span class="w">                     </span><span class="c1">-- rename</span>
+<a id="__codelineno-7-5" name="__codelineno-7-5"></a><span class="w">    </span><span class="k">CAST</span><span class="p">(</span><span class="n">passenger_count</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="nb">BIGINT</span><span class="p">)</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">passenger_count</span><span class="p">,</span><span class="w">      </span><span class="c1">-- cast</span>
+<a id="__codelineno-7-6" name="__codelineno-7-6"></a><span class="w">    </span><span class="k">NULL</span><span class="p">::</span><span class="nb">VARCHAR</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">airport_fee</span><span class="w">                             </span><span class="c1">-- added since; null in old data</span>
+<a id="__codelineno-7-7" name="__codelineno-7-7"></a><span class="w">    </span><span class="c1">-- pickup_latitude, pickup_longitude: dropped (auto or acknowledged)</span>
+<a id="__codelineno-7-8" name="__codelineno-7-8"></a><span class="w">  </span><span class="k">FROM</span><span class="w"> </span><span class="n">read_parquet</span><span class="p">(</span><span class="s1">&#39;raw/yellow/2013/yellow_tripdata_2013-01.parquet&#39;</span><span class="p">)</span>
+<a id="__codelineno-7-9" name="__codelineno-7-9"></a><span class="p">)</span><span class="w"> </span><span class="k">TO</span><span class="w"> </span><span class="s1">&#39;raw-normalized/yellow/2013/yellow_tripdata_2013-01.tmp.parquet&#39;</span>
+<a id="__codelineno-7-10" name="__codelineno-7-10"></a><span class="w">  </span><span class="p">(</span><span class="n">FORMAT</span><span class="w"> </span><span class="n">PARQUET</span><span class="p">,</span><span class="w"> </span><span class="n">COMPRESSION</span><span class="w"> </span><span class="n">ZSTD</span><span class="p">);</span>
+</code></pre></div></td></tr></table></div>
+<p>Then <code>os.rename(tmp, final)</code> — atomic on POSIX. An interrupted run leaves no half-written file.</p>
+<p>Column order in output matches the target file's schema exactly.</p>
+<h3 id="bootstrap-analysis">Bootstrap analysis</h3>
+<p><code>bootstrap.py</code> imports schema-drift's Python API directly (no shelling out, no parsing text):</p>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-8-1">1</a></span>
+<span class="normal"><a href="#__codelineno-8-2">2</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">schema_drift.analyze</span><span class="w"> </span><span class="kn">import</span> <span class="n">analyze_data_type</span>
+<a id="__codelineno-8-2" name="__codelineno-8-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">schema_drift.renames</span><span class="w"> </span><span class="kn">import</span> <span class="n">detect_renames_by_data</span>
+</code></pre></div></td></tr></table></div>
+<p>Flow:
+1. Discover raw files under <code>raw/&lt;type&gt;/</code>.
+2. Call <code>analyze_data_type()</code> with <code>generic_mode=True</code> to get transitions + rename candidates.
+3. Union all column names across all historical files (via <code>parquet_schema()</code> per file).
+4. Per-column: null-count aggregation across files (via <code>parquet_metadata()</code>).
+5. Compare each historical column vs target file's schema; classify as passthrough / auto-safe-cast / lossy-cast / drop-candidate / rename-candidate.
+6. Emit YAML scaffold with SUGGESTED lines from rename candidates (annotated with confidence + data-verified boolean) and TODO placeholders for lossy_casts + acknowledged_data_loss items.</p>
+<p>Bootstrap is a one-shot per data type.</p>
+<p><strong>Runtime scaling with <code>--sample</code>:</strong></p>
+<ul>
+<li>Metadata checks (schema, null counts, min/max) run per file in constant time regardless of file size — footer only, no data scan. Same cost at any <code>--sample</code> value.</li>
+<li>Rename-detection data verification (schema-drift's <code>detect_renames_by_data()</code>) samples rows per candidate pair. At the default <code>--sample 100%</code>, this becomes a full column scan per pair — DuckDB-vectorized, but scales with row count. Yellow bootstrap (~200 files, ~50M rows per recent file, roughly 10–20 candidate pairs at transition points) at 100% takes several minutes. At <code>--sample 10%</code> it drops to under a minute. At <code>--sample 5000</code> it's near-instant, at the cost of noisier rename suggestions.</li>
+</ul>
+<p>The <code>--sample</code> flag is passed through to <code>detect_renames_by_data(sample_size=...)</code>. Values ending in <code>%</code> become DuckDB's <code>USING SAMPLE X PERCENT</code>; bare integers become <code>USING SAMPLE N ROWS</code>.</p>
+<h2 id="testing-strategy">Testing strategy</h2>
+<p>Test tree matches the monorepo pattern:</p>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-9-1">1</a></span>
+<span class="normal"><a href="#__codelineno-9-2">2</a></span>
+<span class="normal"><a href="#__codelineno-9-3">3</a></span>
+<span class="normal"><a href="#__codelineno-9-4">4</a></span>
+<span class="normal"><a href="#__codelineno-9-5">5</a></span>
+<span class="normal"><a href="#__codelineno-9-6">6</a></span>
+<span class="normal"><a href="#__codelineno-9-7">7</a></span>
+<span class="normal"><a href="#__codelineno-9-8">8</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1"></a>tests/taxi_normalize/
+<a id="__codelineno-9-2" name="__codelineno-9-2"></a>  conftest.py            # fixture: builds synthetic parquet families via DuckDB
+<a id="__codelineno-9-3" name="__codelineno-9-3"></a>  test_mapping.py        # YAML loading, validation, missing-field errors
+<a id="__codelineno-9-4" name="__codelineno-9-4"></a>  test_planner.py        # (raw schema, target schema, mapping) -&gt; correct plan
+<a id="__codelineno-9-5" name="__codelineno-9-5"></a>  test_data_check.py     # metadata-only checks (all-null detection, range fit)
+<a id="__codelineno-9-6" name="__codelineno-9-6"></a>  test_executor.py       # runs the transform SQL, verifies output parquet
+<a id="__codelineno-9-7" name="__codelineno-9-7"></a>  test_bootstrap.py      # synthetic family -&gt; verifies emitted YAML shape
+<a id="__codelineno-9-8" name="__codelineno-9-8"></a>  test_cli_smoke.py      # `normalize --help`, missing-type error paths, end-to-end
+</code></pre></div></td></tr></table></div>
+<p><strong>No dependency on real <code>raw/</code> data.</strong> <code>conftest.py</code> builds tiny synthetic 3-era parquet families programmatically via DuckDB (era 1 = 2009-ish old schema, era 2 = 2015-ish mid-drift, era 3 = 2024-ish target).</p>
+<p><strong>Planner test cases to cover explicitly:</strong></p>
+<ul>
+<li>Pure passthrough (raw == target).</li>
+<li>Simple rename applied.</li>
+<li>Rename + type cast combined.</li>
+<li>Safe auto-drop (all-null column, not in target).</li>
+<li>Unsafe drop with data → planner returns "unresolved".</li>
+<li>Safe widening auto-cast (INT → BIGINT).</li>
+<li>Lossy cast without any ack → planner returns "unresolved".</li>
+<li>Lossy cast with only <code>ack_date</code> (no <code>ack_by</code>, no <code>reason</code>) → applied (minimum viable ack).</li>
+<li>Lossy cast entry with <code>ack_by</code> but no <code>ack_date</code> → planner returns "unresolved" (ack_date is required).</li>
+<li><code>acknowledged_data_loss</code> entry with only <code>ack_date</code> → drop applied.</li>
+</ul>
+<p><strong>Data-check tests</strong> verify metadata-only paths actually take the metadata-only path (no data scan issued for range checks); only precision cases (DOUBLE → BIGINT truncation with fractional values) trigger a value scan.</p>
+<p><strong>Bootstrap tests</strong>:</p>
+<ul>
+<li>Empty mapping input + synthetic family → emitted YAML has correct <code>target:</code>, correct SUGGESTED renames from schema-drift, correct set of TODO items, no extra keys.</li>
+<li>Refuses to overwrite an existing YAML.</li>
+<li><code>--sample 5000</code> passes sample_size=5000 through to <code>detect_renames_by_data()</code>.</li>
+<li><code>--sample 10%</code> translates to DuckDB <code>USING SAMPLE 10 PERCENT</code> in the underlying query.</li>
+<li>No <code>--sample</code> flag → full scan (default behavior, no sampling clause).</li>
+</ul>
+<p><strong>CLI smoke tests</strong> (subprocess-based, minimal):</p>
+<ul>
+<li><code>normalize --help</code> exits 0 with usage text.</li>
+<li><code>normalize nonexistent-type</code> exits non-zero with helpful message.</li>
+<li>End-to-end: bootstrap → hand-edit YAML fixture → normalize → verify output parquet schema matches target.</li>
+</ul>
+<p><strong>Target test count for launch:</strong> roughly 20–25 tests. Proportional to expected ~600–800 LOC.</p>
+<h2 id="success-criteria">Success criteria</h2>
+<ul>
+<li><code>normalize bootstrap yellow</code> runs against the checked-in <code>raw/yellow/</code> and produces a <code>normalize/mappings/yellow.yaml</code> scaffold with SUGGESTED renames from schema-drift's detectors and TODO placeholders for data-loss items.</li>
+<li>After a human completes the YAML, <code>normalize yellow</code> writes <code>raw-normalized/yellow/**/*.parquet</code> where every file's schema matches the target file.</li>
+<li><code>normalize</code> with no argument runs all four data types.</li>
+<li>Re-running <code>normalize yellow</code> is a no-op if <code>raw-normalized/yellow/</code> is already populated.</li>
+<li>Attempting to run <code>normalize &lt;type&gt;</code> with an incomplete YAML fails with a consolidated error report; nothing is written.</li>
+<li><code>uv run --extra test pytest tests/taxi_normalize/</code> passes with ≥20 tests.</li>
+</ul>
+<h2 id="out-of-scope">Out of scope</h2>
+<ul>
+<li>The SQL Server loader (separate sub-project).</li>
+<li>The orchestrator (separate sub-project).</li>
+<li>CI/CD pipelines (separate sub-project).</li>
+<li>Auto-invalidation of normalized outputs when the mapping YAML changes. Users delete <code>raw-normalized/&lt;type&gt;/</code> to force re-run.</li>
+<li>Alternative target schemas (era pinning is fine, but no "normalize to 2015 schema").</li>
+<li>Producing a report of what changed per file (beyond the per-file progress line and the final summary).</li>
+</ul>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var labels=set.querySelector(".tabbed-labels");for(var tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["content.code.copy", "content.tabs.link", "navigation.tracking", "navigation.top", "search.highlight", "search.share"], "search": "../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+    
+  </body>
+</html>

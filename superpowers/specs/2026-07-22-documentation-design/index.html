@@ -1,0 +1,1958 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Downloader, schema-drift analyzer, and K6 SQL Server load tester for NYC TLC taxi trip data">
+      
+      
+      
+        <link rel="canonical" href="https://andrekamman.github.io/taxi/superpowers/specs/2026-07-22-documentation-design/">
+      
+      
+        <link rel="prev" href="../2026-03-25-k6-sql-load-testing-design/">
+      
+      
+        <link rel="next" href="../../../contributing/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>Documentation site - taxi</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.ec1eaa64.min.css">
+      
+        
+        <link rel="stylesheet" href="../../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#documentation-design" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../../.." title="taxi" class="md-header__button md-logo" aria-label="taxi" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            taxi
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Documentation site
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+          <a href="javascript:void(0)" class="md-search__icon md-icon" title="Share" aria-label="Share" data-clipboard data-clipboard-text="" data-md-component="search-share" tabindex="-1">
+            
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9a3 3 0 0 0-3 3 3 3 0 0 0 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.15c-.05.21-.08.43-.08.66 0 1.61 1.31 2.91 2.92 2.91s2.92-1.3 2.92-2.91A2.92 2.92 0 0 0 18 16.08"/></svg>
+          </a>
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/andrekamman/taxi" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    andrekamman/taxi
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../../.." title="taxi" class="md-nav__button md-logo" aria-label="taxi" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    taxi
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/andrekamman/taxi" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    andrekamman/taxi
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../getting-started/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Guides
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Guides
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../guides/downloader/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Downloader
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../guides/schema-drift/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Schema Drift
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../guides/normalize/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Normalize
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../guides/k6-loadtest/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    K6 Load Test
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../cookbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Cookbook
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reference
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Reference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/configuration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Configuration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/exit-codes/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Exit codes
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Design Specs
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Design Specs
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../2026-07-19-monorepo-restructure-design/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Monorepo restructure
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../2026-07-21-normalizer-design/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Normalizer
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../2026-03-25-k6-sql-load-testing-design/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    K6 SQL load testing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Documentation site
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Documentation site
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#motivation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Motivation
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#non-goals" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Non-goals
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#in-scope-code-change-recent-semantics-per-type-support" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        In-scope code change: --recent semantics + per-type support
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#audience" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Audience
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#site-structure" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Site structure
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#per-page-content-plan" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Per-page content plan
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Per-page content plan">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#docsindexmd-home-150-lines" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        docs/index.md (Home) — ~150 lines
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#docsgetting-startedmd-300-lines-10-minute-tutorial" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        docs/getting-started.md — ~300 lines, ~10 minute tutorial
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#docsguidesdownloadermd-250-lines" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        docs/guides/downloader.md — ~250 lines
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#docsguidesschema-driftmd-200-lines" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        docs/guides/schema-drift.md — ~200 lines
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#docsguidesnormalizemd-350-lines-the-deepest-guide" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        docs/guides/normalize.md — ~350 lines (the deepest guide)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#docsguidesk6-loadtestmd-250-lines" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        docs/guides/k6-loadtest.md — ~250 lines
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#docscookbookmd-58-recipes-50-lines-each" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        docs/cookbook.md — 5–8 recipes, ~50 lines each
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#docsarchitecturemd-200-lines" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        docs/architecture.md — ~200 lines
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#docsreferenceconfigurationmd-reference-grade-no-editorializing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        docs/reference/configuration.md — reference-grade, no editorializing
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#docsreferenceexit-codesmd-one-table-per-tool" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        docs/reference/exit-codes.md — one table per tool
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#docscontributingmd-150-lines" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        docs/contributing.md — ~150 lines
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#docssuperpowersspecs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        docs/superpowers/specs/
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#examples-strategy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Examples strategy
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#mkdocs-setup" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        MkDocs setup
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dependencies" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Dependencies
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#ci" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        CI
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#github-pages" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        GitHub Pages
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#rollout-plan" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Rollout plan
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#success-criteria" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Success criteria
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#operational-notes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Operational notes
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#out-of-scope" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Out of scope
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../contributing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Contributing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#motivation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Motivation
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#non-goals" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Non-goals
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#in-scope-code-change-recent-semantics-per-type-support" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        In-scope code change: --recent semantics + per-type support
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#audience" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Audience
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#site-structure" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Site structure
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#per-page-content-plan" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Per-page content plan
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Per-page content plan">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#docsindexmd-home-150-lines" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        docs/index.md (Home) — ~150 lines
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#docsgetting-startedmd-300-lines-10-minute-tutorial" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        docs/getting-started.md — ~300 lines, ~10 minute tutorial
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#docsguidesdownloadermd-250-lines" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        docs/guides/downloader.md — ~250 lines
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#docsguidesschema-driftmd-200-lines" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        docs/guides/schema-drift.md — ~200 lines
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#docsguidesnormalizemd-350-lines-the-deepest-guide" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        docs/guides/normalize.md — ~350 lines (the deepest guide)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#docsguidesk6-loadtestmd-250-lines" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        docs/guides/k6-loadtest.md — ~250 lines
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#docscookbookmd-58-recipes-50-lines-each" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        docs/cookbook.md — 5–8 recipes, ~50 lines each
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#docsarchitecturemd-200-lines" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        docs/architecture.md — ~200 lines
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#docsreferenceconfigurationmd-reference-grade-no-editorializing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        docs/reference/configuration.md — reference-grade, no editorializing
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#docsreferenceexit-codesmd-one-table-per-tool" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        docs/reference/exit-codes.md — one table per tool
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#docscontributingmd-150-lines" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        docs/contributing.md — ~150 lines
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#docssuperpowersspecs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        docs/superpowers/specs/
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#examples-strategy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Examples strategy
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#mkdocs-setup" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        MkDocs setup
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dependencies" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Dependencies
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#ci" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        CI
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#github-pages" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        GitHub Pages
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#rollout-plan" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Rollout plan
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#success-criteria" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Success criteria
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#operational-notes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Operational notes
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#out-of-scope" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Out of scope
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="documentation-design">Documentation Design</h1>
+<p><strong>Date:</strong> 2026-07-22
+<strong>Status:</strong> Approved, ready for implementation planning
+<strong>Sub-project of:</strong> the four-part expansion (this doubles as sub-project #4 "CI testing pipeline" — the docs-build CI workflow uses the same GitHub Actions setup that tests will).</p>
+<h2 id="motivation">Motivation</h2>
+<p>The current documentation reads as a summary for readers who already know what they're looking at. Total footprint is 222 lines across 5 READMEs. The top-level README is 23 lines and its installation section says only <code>uv sync</code>, which is not enough to actually get a working setup (Python 3.12+, uv itself, curl for the downloader, Go 1.22+ for the K6 build, a SQL Server target for the load-tester, sensible disk provisioning for the raw parquet mirror, and OS-specific gotchas like the WSL VHDX warning). For a repo being evaluated by data engineers considering adoption, this is inadequate.</p>
+<p>This spec turns the docs into something a data engineer can use to decide "is this worth trying?" in five minutes, "how do I get it working end-to-end?" in fifteen, and "how do I extend it or integrate it?" as a reference. The output is a Material for MkDocs site published to GitHub Pages.</p>
+<h2 id="non-goals">Non-goals</h2>
+<ul>
+<li>Sweeping code refactoring or renaming. <strong>One targeted downloader change is in scope</strong> (below); nothing else.</li>
+<li>API-reference documentation auto-generated from docstrings. The audience wants task-oriented guides, not autodoc.</li>
+<li>Multi-language localization.</li>
+<li>A custom domain.</li>
+<li>Documenting sub-projects that haven't been built yet (SQL Server loader, orchestrator, dev/test/prod promotion). Placeholder pages linking to their spec docs are acceptable; full content is not required.</li>
+<li>Writing a "history of the project" narrative. The commit log and design specs already tell that story for readers who want it.</li>
+</ul>
+<h2 id="in-scope-code-change-recent-semantics-per-type-support">In-scope code change: <code>--recent</code> semantics + per-type support</h2>
+<p>The current <code>--recent N</code> flag has two shortcomings that the doc-writing work surfaced:</p>
+<ol>
+<li><strong>Fixed to all four types.</strong> No way to say "just yellow" — a common request since many users only care about one dataset. Full-catch-up mode has the same limitation.</li>
+<li><strong>Ambiguous meaning of "N".</strong> Today the counter increments both when an existing file is found on disk and when a new file downloads successfully. It also uses a fixed <code>max_lookback_months</code> cap. A user running <code>--recent 3</code> on a fresh checkout could end up with two files (if only two are actually published yet) or three files (including up to two months of unpublished-but-eventually-there gaps that the walker skipped past). The behavior isn't consistent, especially for the "keep me caught up on a schedule" use case.</li>
+</ol>
+<p><strong>New semantics:</strong></p>
+<p>Usage: <code>./downloader/download_taxi_data.sh --recent [N] [TYPE]</code></p>
+<ul>
+<li>Both <code>N</code> and <code>TYPE</code> are optional, order-sensitive (N first, then TYPE). Defaults: N=3, TYPE=all four types.</li>
+<li><code>TYPE</code> is one of <code>yellow</code>, <code>green</code>, <code>fhv</code>, <code>fhvhv</code>.</li>
+<li>Argument parsing: after <code>--recent</code>, peek at the next arg: if it's numeric, treat as N; then peek again: if it's a known type, treat as TYPE; else pass through.</li>
+<li><strong>Walker behavior</strong> (per data type):</li>
+<li>Start at previous month (current − 1). Walk backward one month at a time.</li>
+<li><strong>Remote file successfully downloaded</strong> → increment counter.</li>
+<li><strong>Remote responds "not published yet"</strong> (403 AccessDenied) → skip, don't count, continue walking back. This handles the common case of "current month not published yet, walk back one".</li>
+<li><strong>Local file already exists at that path</strong> → STOP walking. The assumption is that the user has previously downloaded up to some earlier point, so anything older is already local. This gives clean incremental catch-up semantics: run it on a cron and each execution fetches only the new months since last run.</li>
+<li>Stop conditions: counter reaches N, OR local file encountered, OR <code>max_lookback_months</code> reached (safety cap for genuinely-empty-series edge case).</li>
+</ul>
+<p><strong>Example scenarios</strong> (using yellow, which publishes with ~2 month lag; suppose today is 2026-07-22):</p>
+<ul>
+<li>Fresh checkout, <code>--recent 3 yellow</code>: tries 2026-06 (not published), 2026-05 (downloads), 2026-04 (downloads), 2026-03 (downloads). Result: 3 files.</li>
+<li>Same setup a month later, <code>--recent 3 yellow</code>: tries 2026-07 (not published), 2026-06 (downloads new), 2026-05 (already local → stop). Result: 1 new file. This is the keep-up-to-date incremental case.</li>
+<li>User already caught up, <code>--recent 3 yellow</code>: tries 2026-06 (not published), 2026-05 (already local → stop). Result: 0 new files, exits cleanly.</li>
+</ul>
+<p><strong>Sequence in the rollout:</strong> this code change is commit #0 in the plan (before the MkDocs scaffolding), so that Getting Started and the Downloader guide can document the per-type flag as an actually-working feature. The change is small (~30 lines in <code>downloader/download_taxi_data.sh</code>) and self-contained.</p>
+<h2 id="audience">Audience</h2>
+<p><strong>Primary reader:</strong> data engineers evaluating this repo for their organization. They want:</p>
+<ul>
+<li>Solid technical depth (they know parquet, DuckDB, and basic SQL Server).</li>
+<li>Concrete install/ops details, not "run <code>uv sync</code>".</li>
+<li>Why-not-alternatives (comparison to <code>toddwschneider/nyc-taxi-data</code>, DuckDB <code>httpfs</code> direct queries, HuggingFace mirrors).</li>
+<li>Integration surface — "can I pipe this into my stack?".</li>
+</ul>
+<p>Secondary readers are analysts wanting quick data access and contributors wanting to understand the architecture. The site is layered so each finds their track: the top of the home page hooks the analyst quickly, the guides go deeper for the engineer, and the Design Specs section satisfies the contributor.</p>
+<h2 id="site-structure">Site structure</h2>
+<p>Published at <code>https://andrekamman.github.io/taxi/</code>. Navigation:</p>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-1"> 1</a></span>
+<span class="normal"><a href="#__codelineno-0-2"> 2</a></span>
+<span class="normal"><a href="#__codelineno-0-3"> 3</a></span>
+<span class="normal"><a href="#__codelineno-0-4"> 4</a></span>
+<span class="normal"><a href="#__codelineno-0-5"> 5</a></span>
+<span class="normal"><a href="#__codelineno-0-6"> 6</a></span>
+<span class="normal"><a href="#__codelineno-0-7"> 7</a></span>
+<span class="normal"><a href="#__codelineno-0-8"> 8</a></span>
+<span class="normal"><a href="#__codelineno-0-9"> 9</a></span>
+<span class="normal"><a href="#__codelineno-0-10">10</a></span>
+<span class="normal"><a href="#__codelineno-0-11">11</a></span>
+<span class="normal"><a href="#__codelineno-0-12">12</a></span>
+<span class="normal"><a href="#__codelineno-0-13">13</a></span>
+<span class="normal"><a href="#__codelineno-0-14">14</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1"></a>Home                              docs/index.md
+<a id="__codelineno-0-2" name="__codelineno-0-2"></a>Getting Started                   docs/getting-started.md
+<a id="__codelineno-0-3" name="__codelineno-0-3"></a>Guides
+<a id="__codelineno-0-4" name="__codelineno-0-4"></a>  Downloader                      docs/guides/downloader.md
+<a id="__codelineno-0-5" name="__codelineno-0-5"></a>  Schema Drift                    docs/guides/schema-drift.md
+<a id="__codelineno-0-6" name="__codelineno-0-6"></a>  Normalize                       docs/guides/normalize.md
+<a id="__codelineno-0-7" name="__codelineno-0-7"></a>  K6 Load Test                    docs/guides/k6-loadtest.md
+<a id="__codelineno-0-8" name="__codelineno-0-8"></a>Cookbook                          docs/cookbook.md
+<a id="__codelineno-0-9" name="__codelineno-0-9"></a>Architecture                      docs/architecture.md
+<a id="__codelineno-0-10" name="__codelineno-0-10"></a>Reference
+<a id="__codelineno-0-11" name="__codelineno-0-11"></a>  Configuration                   docs/reference/configuration.md
+<a id="__codelineno-0-12" name="__codelineno-0-12"></a>  Exit codes                      docs/reference/exit-codes.md
+<a id="__codelineno-0-13" name="__codelineno-0-13"></a>Design Specs                      docs/superpowers/specs/… (existing files surfaced in nav)
+<a id="__codelineno-0-14" name="__codelineno-0-14"></a>Contributing                      docs/contributing.md
+</code></pre></div></td></tr></table></div>
+<p><strong>Top-level <code>README.md</code></strong> shrinks to a concise GitHub landing page (~80 lines): what this is, three-bullet differentiators, badges (CI status, license, docs link), a big "→ Full documentation at …" pointer, the acknowledgments block. Not a duplicate of the site.</p>
+<p><strong>Per-component READMEs</strong> (<code>downloader/</code>, <code>schema-drift/</code>, <code>k6-loadtest/</code>, <code>normalize/</code>) collapse to one-paragraph pointers: purpose + "See <a href="https://andrekamman.github.io/taxi/guides/&lt;component&gt;">full guide</a>". This avoids doc drift where the same content lives in two places.</p>
+<h2 id="per-page-content-plan">Per-page content plan</h2>
+<h3 id="docsindexmd-home-150-lines"><code>docs/index.md</code> (Home) — ~150 lines</h3>
+<p>Hooks the evaluator in 2 minutes.</p>
+<ul>
+<li>Hero paragraph: what this is, one sentence.</li>
+<li>Three-bullet differentiators (WAF-aware downloader, human-in-the-loop normalizer, K6 load-test bundle).</li>
+<li>Comparison snapshot table: rows for <code>toddwschneider/nyc-taxi-data</code>, DuckDB <code>httpfs</code> direct query, and this repo. Columns: primary use case, resumable, WAF-aware, schema handling, target audience.</li>
+<li>Quick Start block: 3 shell commands to first parquet (<code>git clone</code>, <code>uv sync</code>, <code>./downloader/download_taxi_data.sh --recent 3</code>).</li>
+<li>Requirements at a glance.</li>
+<li>"Where to next" grid: Getting Started (recommended path), or skip directly to a specific tool's guide.</li>
+<li>Acknowledgments (Todd Schneider link).</li>
+</ul>
+<h3 id="docsgetting-startedmd-300-lines-10-minute-tutorial"><code>docs/getting-started.md</code> — ~300 lines, ~10 minute tutorial</h3>
+<p>End-to-end path from a clean laptop to normalized parquet.</p>
+<ul>
+<li>Prerequisites: Python 3.12+, uv (link to install), curl, ~300 MB free disk for the tutorial. Platform notes (macOS, Linux, Windows via Git Bash / WSL with the VHDX warning explained).</li>
+<li>Clone + install (<code>uv sync --extra test</code> to also get pytest, since we recommend running tests to verify install).</li>
+<li>Verify install: <code>uv run --extra test pytest -q</code> shows a green suite.</li>
+<li>Download the three most recent months of yellow: <code>./downloader/download_taxi_data.sh --recent 3 yellow</code>. Estimated download: ≈200 MB; time: 1–2 minutes on a residential connection. Explain that <code>TYPE</code> is optional (omitting it downloads all four types, which is ≈1.8 GB — mostly FHVHV — and takes longer). Cross-link to the Downloader guide for full-history sizing.</li>
+<li>Look at what you got: <code>find raw/ -name '*.parquet'</code>, <code>du -sh raw/</code>, <code>uv run python -c "import duckdb; print(duckdb.execute(\"DESCRIBE SELECT * FROM 'raw/yellow/2025/yellow_tripdata_2025-11.parquet'\").fetchall())"</code>.</li>
+<li>Optionally bootstrap a normalize mapping: <code>uv run normalize yellow</code> (first run — the tool auto-bootstraps). Show what the emitted YAML looks like. Explain the SUGGESTED / TODO lines. Uncomment / fill in a minimal mapping. Re-run: it produces <code>raw-normalized/yellow/…</code>.</li>
+<li>Optionally run schema-drift: <code>uv run schema-drift --types yellow</code>. Show a snippet of the report.</li>
+<li>"Where to next" links to per-tool guides.</li>
+</ul>
+<h3 id="docsguidesdownloadermd-250-lines"><code>docs/guides/downloader.md</code> — ~250 lines</h3>
+<ul>
+<li>What it does + why it exists (2 paragraphs).</li>
+<li>Prerequisites: bash 4+, curl, disk sized to intended footprint (see table below).</li>
+</ul>
+<p><strong>Disk sizing table</strong> (approximate, based on TLC file sizes as of mid-2026):</p>
+<table>
+<thead>
+<tr>
+<th>Scope</th>
+<th>Disk needed</th>
+<th>Time (residential connection)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>--recent 3 yellow</code></td>
+<td>≈200 MB</td>
+<td>1–2 min</td>
+</tr>
+<tr>
+<td><code>--recent 3 green</code></td>
+<td>≈15 MB</td>
+<td>seconds</td>
+</tr>
+<tr>
+<td><code>--recent 3 fhv</code></td>
+<td>≈120 MB</td>
+<td>1 min</td>
+</tr>
+<tr>
+<td><code>--recent 3 fhvhv</code></td>
+<td>≈1.5 GB</td>
+<td>5–10 min</td>
+</tr>
+<tr>
+<td><code>--recent 3</code> (all four)</td>
+<td>≈1.8 GB</td>
+<td>8–15 min</td>
+</tr>
+<tr>
+<td>Full history yellow only</td>
+<td>≈30 GB</td>
+<td>2–4 hours</td>
+</tr>
+<tr>
+<td>Full history green only</td>
+<td>≈1.2 GB</td>
+<td>5–10 min</td>
+</tr>
+<tr>
+<td>Full history fhv only</td>
+<td>≈6 GB</td>
+<td>30–60 min</td>
+</tr>
+<tr>
+<td>Full history fhvhv only</td>
+<td>≈37 GB</td>
+<td>2–4 hours</td>
+</tr>
+<tr>
+<td><strong>Full history (all four)</strong></td>
+<td><strong>≈75 GB</strong></td>
+<td><strong>6–10 hours</strong></td>
+</tr>
+</tbody>
+</table>
+<p>TLC adds roughly 2 GB/month across all types (mostly FHVHV). Plan capacity accordingly if you're building a long-lived mirror.
+- Install: nothing (bash script).
+- Windows note: Git for Windows; the script uses only curl and standard POSIX tools so no extra install is needed once Git Bash is present.
+- <strong>What makes it different</strong> section: WAF classifier explained with a mermaid decision-tree diagram (200/206→ok; 403+XML AccessDenied→notfound; 403+CloudFront HTML→ratelimit; 429/503→ratelimit); exponential backoff ladder (5 → 15 → 60 min, resets on success); boundary auto-termination; PAR1 head+tail validation.
+- Basic usage: <code>--recent N</code>, no-arg (full catch-up).
+- Config: <code>OUTPUT_DIR</code> env var — when to use it, WSL example.
+- WSL disk-usage warning explained (VHDX growth on C: drive; interactive <code>[y/N]</code> prompt; non-interactive proceed).
+- Output layout: <code>raw/&lt;type&gt;/&lt;year&gt;/&lt;type&gt;_tripdata_YYYY-MM.parquet</code>.
+- <strong>Alternatives table</strong>: <code>toddwschneider/nyc-taxi-data</code>, DuckDB <code>httpfs</code>, HuggingFace mirrors. Columns: what it is, when to use it, when NOT to use it.
+- Troubleshooting: "I'm being rate-limited constantly"; "Downloads keep failing with 403"; "The script says my WSL VHDX will grow — what does that mean?"; "I need to point downloads at S3 instead of local disk" (short answer: not supported, PR welcome).</p>
+<h3 id="docsguidesschema-driftmd-200-lines"><code>docs/guides/schema-drift.md</code> — ~200 lines</h3>
+<ul>
+<li>What it does + why.</li>
+<li>Prerequisites: uv-installed <code>schema-drift</code> command; a parquet family (either the downloader's <code>raw/</code> mirror or any directory of TLC-shaped parquet).</li>
+<li>Install: <code>uv sync</code>.</li>
+<li>Basic usage: <code>uv run schema-drift</code> (default: analyzes all four types in <code>raw/</code>).</li>
+<li>The three modes: default taxi mode (semantic-category-aware, uses NYC-TLC abbreviation dictionary), <code>--generic</code> (data-driven only, no domain knowledge, results require human review), <code>--verify-data</code> (sample data to verify low-confidence renames). Which to use when.</li>
+<li><strong>Reading the report</strong>: annotated example of an actual <code>schema-drift yellow</code> output with each block explained (INITIAL SCHEMA, CHANGES, RENAMES with confidence + verification status, CROSS-TYPE SUMMARY).</li>
+<li><strong>How rename detection works</strong>: semantic categories (pickup vs dropoff vs coordinate vs location_id), longest-common-subsequence similarity, token-based similarity with abbreviation expansion, data verification via column-stats comparison. Reasonable pseudocode / mermaid.</li>
+<li>Programmatic API: importing <code>schema_drift.analyze.analyze_data_type()</code> from a notebook, with a small worked example.</li>
+<li>Known limits: heuristic, not proof; needs human review; particularly weak when two columns are statistically indistinguishable (e.g., two timestamp columns with identical ranges).</li>
+</ul>
+<h3 id="docsguidesnormalizemd-350-lines-the-deepest-guide"><code>docs/guides/normalize.md</code> — ~350 lines (the deepest guide)</h3>
+<ul>
+<li>What it does + why. Explains the "data loss is a first-class error, not a warning" philosophy up front.</li>
+<li>Prerequisites: <code>raw/</code> mirror; <code>uv sync</code>.</li>
+<li>Install: <code>uv sync</code>.</li>
+<li><strong>The three-state model</strong> with a mermaid state diagram: first run (no mapping → auto-bootstrap → exit 3) → user edits YAML → subsequent run (unresolved → auto-amend → exit 1, OR complete → normalize → exit 0).</li>
+<li>Mapping YAML structure: brief inline, link to <code>docs/reference/configuration.md</code> for the exhaustive field-by-field reference.</li>
+<li><strong>Bootstrap-and-amend semantics</strong> explained: what "bootstrap" means (SUGGESTED renames from schema-drift, TODO ack items for lossy casts and data loss), what "amend" means (preserves existing entries, appends new SUGGESTED/TODO), the operational scenario (TLC ships new drift → orchestrator's scheduled run detects unresolved → amend adds new items → human reviews).</li>
+<li>The <code>ack_date</code>-is-the-only-required-field convention. <code>ack_by</code> and <code>reason</code> are optional but recommended.</li>
+<li>Exit codes table: 0 (success), 1 (unresolved), 2 (config error), 3 (first-run bootstrap needs review).</li>
+<li>The <code>--sample</code> flag: what it does, when to reduce below 100%.</li>
+<li><strong>Full worked example 1</strong>: first-time yellow. Show the actual bootstrap output for real yellow parquet, the SUGGESTED lines schema-drift produces, what a human's edits look like, the resulting normalize run.</li>
+<li><strong>Full worked example 2</strong>: TLC ships new drift months later; scheduled orchestrator run (foreshadowed) detects unresolved; amend adds new items; human reviews the diff in the mapping file.</li>
+</ul>
+<h3 id="docsguidesk6-loadtestmd-250-lines"><code>docs/guides/k6-loadtest.md</code> — ~250 lines</h3>
+<ul>
+<li>What it does + why.</li>
+<li>Prerequisites: Go 1.22+ for the custom K6 build (<code>xk6-sql</code> + SQL Server driver), a SQL Server instance to test against (Docker snippet inline; adjustments for cloud SQL Server).</li>
+<li>Full setup: build custom K6, copy <code>config.sample.yaml → config.yaml</code>, edit, run preprocess, apply CREATE TABLE scripts, run the K6 test.</li>
+<li>Both source modes with a decision guide (parquet: real data, real ratios, real distribution / synthetic: instant startup, unbounded scale, no data files needed).</li>
+<li>Config reference (brief; full YAML schema in <code>docs/reference/configuration.md</code>).</li>
+<li>Sample docker-compose for the SQL Server test target.</li>
+<li>Interpreting K6 output: what the built-in K6 metrics mean; SQL-specific metrics from <code>xk6-sql</code>; how to establish a baseline and detect regression.</li>
+</ul>
+<h3 id="docscookbookmd-58-recipes-50-lines-each"><code>docs/cookbook.md</code> — 5–8 recipes, ~50 lines each</h3>
+<ul>
+<li><strong>Nightly refresh via cron</strong>: full command, systemd timer / launchd plist snippets, logging.</li>
+<li><strong>DuckDB <code>httpfs</code> — no local mirror</strong>: query TLC parquet directly from CloudFront; when this is enough and you don't need the downloader at all.</li>
+<li><strong>Side-by-side comparison of multiple TLC years</strong>: DuckDB query examples that join yellow and green, or slice across schema versions post-normalization.</li>
+<li><strong>Load-testing the normalizer's output</strong>: chaining <code>normalize</code> → <code>k6-preprocess</code> on <code>raw-normalized/</code>.</li>
+<li><strong>Running behind a corporate proxy</strong>: env vars for curl, uv, gh; how to configure the downloader.</li>
+<li><strong>Populating a fresh dev SQL Server</strong>: docker-compose, K6 preprocess in parquet mode, running the load test as a bulk-load one-shot.</li>
+</ul>
+<h3 id="docsarchitecturemd-200-lines"><code>docs/architecture.md</code> — ~200 lines</h3>
+<ul>
+<li>Repo layout with tree diagram.</li>
+<li>The four-tool DAG: mermaid flowchart from <code>download → analyze → normalize → load</code>.</li>
+<li><strong>Core design principles</strong>:</li>
+<li>WAF-aware retry (why classifying 403 correctly matters).</li>
+<li>Data loss is an error (why the ack_date convention forces the human to think once).</li>
+<li>Per-file atomicity (<code>.tmp.parquet</code> → atomic rename).</li>
+<li>Metadata-only checks vs full-scan checks (parquet footer everywhere possible; only precision checks full-scan).</li>
+<li>Monorepo rationale (shared <code>taxi_shared</code> for DuckDB→SQL Server type mapping; simpler ops than three separate repos).</li>
+<li>The <code>taxi_shared</code> package's role.</li>
+<li>Testing philosophy: synthetic parquet fixtures built by DuckDB in <code>conftest.py</code>; no network or shared filesystem dependencies in tests.</li>
+</ul>
+<h3 id="docsreferenceconfigurationmd-reference-grade-no-editorializing"><code>docs/reference/configuration.md</code> — reference-grade, no editorializing</h3>
+<ul>
+<li>Mapping YAML (<code>normalize/mappings/&lt;type&gt;.yaml</code>): every field, its type, whether required, valid values, default.</li>
+<li>K6 <code>config.yaml</code> (<code>k6-loadtest/config.sample.yaml</code>): every field, per-mode (parquet vs synthetic).</li>
+<li>Env vars: <code>OUTPUT_DIR</code>, <code>MSSQL_PASSWORD</code>, <code>TZ</code> (if relevant), any others.</li>
+</ul>
+<h3 id="docsreferenceexit-codesmd-one-table-per-tool"><code>docs/reference/exit-codes.md</code> — one table per tool</h3>
+<p>Each row: exit code → meaning → suggested action.</p>
+<h3 id="docscontributingmd-150-lines"><code>docs/contributing.md</code> — ~150 lines</h3>
+<ul>
+<li>Dev setup (<code>uv sync --extra test</code>, <code>--extra docs</code>).</li>
+<li>Running the test suite; adding a new test.</li>
+<li>PR checklist (tests green, docs updated if user-facing, ack in commit message).</li>
+<li>Code style (existing informal conventions: single-quote SQL literals via f-strings for now; explicit exit-code semantics; error-first paths in CLI).</li>
+<li>Where design decisions live (link to <code>docs/superpowers/specs/</code>).</li>
+</ul>
+<h3 id="docssuperpowersspecs"><code>docs/superpowers/specs/</code></h3>
+<p>Existing files, surfaced in the sidebar under "Design Specs" for the contributor audience. No content changes required; the <code>mkdocs.yml</code> navigation lists each spec explicitly by filename (rather than auto-discovering) so new specs get an explicit add-to-nav step in their commit — this avoids the sidebar changing shape silently. Same policy for <code>docs/superpowers/plans/</code> if ever surfaced.</p>
+<h2 id="examples-strategy">Examples strategy</h2>
+<ul>
+<li><strong>Every code block is copy-pasteable and produces the shown output.</strong> No pseudocode. No <code>&lt;placeholder&gt;</code> values. If the reader can't verify a snippet worked, the doc has failed. Where an install command doesn't return output, the doc says so ("this command has no output on success — check <code>echo $?</code> for exit 0").</li>
+<li><strong>Real data over synthetic</strong> where feasible. Getting Started uses <code>--recent 3</code> (≈500 MB across all types, downloads in a minute or two). Guides use scaled real examples. Only the k6-loadtest guide leans on synthetic mode as an on-ramp.</li>
+<li><strong>Show real output</strong>, not sanitized ideal output. If <code>normalize yellow</code> prints <code>Detected 4 drift transition(s) — see file header.</code>, that's what the doc shows.</li>
+<li><strong>Full-history sections are clearly labeled</strong> with realistic disk + time expectations ("If you want to catch up on all history: <code>./downloader/download_taxi_data.sh</code> — this will download ≈75 GB across all four types and take 6–10 hours; or scope to one type with <code>./downloader/download_taxi_data.sh yellow</code> for ≈30 GB / 2–4 hours."). No surprise disk usage.</li>
+</ul>
+<h2 id="mkdocs-setup">MkDocs setup</h2>
+<ul>
+<li><strong>Theme</strong>: <a href="https://squidfunk.github.io/mkdocs-material">Material for MkDocs</a>.</li>
+<li><strong>Features</strong> enabled: <code>content.code.copy</code>, <code>content.tabs.link</code>, <code>navigation.tracking</code>, <code>navigation.top</code>, <code>search.highlight</code>, <code>search.share</code>.</li>
+<li><strong>Extensions</strong>:</li>
+<li><code>admonition</code> (callouts)</li>
+<li><code>pymdownx.superfences</code> (mermaid diagram support via <code>custom_fences</code>)</li>
+<li><code>pymdownx.tabbed</code> with <code>alternate_style: true</code> (per-OS install tabs)</li>
+<li><code>pymdownx.highlight</code> with <code>linenums: true</code> (numbered code blocks)</li>
+<li><code>attr_list</code> + <code>md_in_html</code> (badges, custom classes)</li>
+<li><code>footnotes</code></li>
+<li><strong>Diagrams</strong>: mermaid rendered inline via <code>pymdownx.superfences</code> + <code>custom_fences</code> config; used for the tool DAG, WAF-classifier decision tree, and normalize state model.</li>
+</ul>
+<h2 id="dependencies">Dependencies</h2>
+<p>Add a <code>docs</code> optional-dependencies group to <code>pyproject.toml</code>:</p>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-1-1">1</a></span>
+<span class="normal"><a href="#__codelineno-1-2">2</a></span>
+<span class="normal"><a href="#__codelineno-1-3">3</a></span>
+<span class="normal"><a href="#__codelineno-1-4">4</a></span>
+<span class="normal"><a href="#__codelineno-1-5">5</a></span>
+<span class="normal"><a href="#__codelineno-1-6">6</a></span>
+<span class="normal"><a href="#__codelineno-1-7">7</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1"></a><span class="k">[project.optional-dependencies]</span>
+<a id="__codelineno-1-2" name="__codelineno-1-2"></a><span class="n">test</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;pytest&gt;=8.0&quot;</span><span class="p">]</span>
+<a id="__codelineno-1-3" name="__codelineno-1-3"></a><span class="n">docs</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span>
+<a id="__codelineno-1-4" name="__codelineno-1-4"></a><span class="w">    </span><span class="s2">&quot;mkdocs&gt;=1.6&quot;</span><span class="p">,</span>
+<a id="__codelineno-1-5" name="__codelineno-1-5"></a><span class="w">    </span><span class="s2">&quot;mkdocs-material&gt;=9.5&quot;</span><span class="p">,</span>
+<a id="__codelineno-1-6" name="__codelineno-1-6"></a><span class="w">    </span><span class="s2">&quot;pymdown-extensions&gt;=10.7&quot;</span><span class="p">,</span>
+<a id="__codelineno-1-7" name="__codelineno-1-7"></a><span class="p">]</span>
+</code></pre></div></td></tr></table></div>
+<p>Local dev: <code>uv run --extra docs mkdocs serve</code> (auto-reload on port 8000).</p>
+<h2 id="ci">CI</h2>
+<p>Two workflows:</p>
+<p><strong><code>.github/workflows/test.yml</code></strong> — runs on every push and PR:
+- Ubuntu-latest.
+- Installs uv, syncs with <code>--extra test</code>.
+- Runs <code>uv run --extra test pytest -q</code>.
+- Matrix over Python 3.12 and 3.13.</p>
+<p><strong><code>.github/workflows/docs.yml</code></strong> — runs on push to <code>main</code> only:
+- Waits for <code>test.yml</code> to succeed (via <code>needs:</code> / job dependency).
+- Installs uv, syncs with <code>--extra docs</code>.
+- Runs <code>uv run --extra docs mkdocs gh-deploy --force</code>.
+- Deploys the built site to the <code>gh-pages</code> branch, which GitHub Pages serves.</p>
+<h2 id="github-pages">GitHub Pages</h2>
+<ul>
+<li>Enable Pages via <code>gh api -X POST repos/andrekamman/taxi/pages -f source[branch]=gh-pages -f source[path]=/</code> after the first successful <code>mkdocs gh-deploy</code> creates the <code>gh-pages</code> branch. Alternatively, enable via the GitHub UI: Settings → Pages → Source: Deploy from a branch → Branch: <code>gh-pages</code> → <code>/ (root)</code>.</li>
+<li>Site URL: <code>https://andrekamman.github.io/taxi/</code>.</li>
+<li>Add the site URL to the repo's <code>About</code> sidebar (via <code>gh repo edit andrekamman/taxi --homepage https://andrekamman.github.io/taxi/</code>) so it's prominent on the GitHub landing page.</li>
+<li>These are one-time manual steps; not part of any commit.</li>
+</ul>
+<h2 id="rollout-plan">Rollout plan</h2>
+<p>Split into eleven commits, each independently reviewable and each landing a coherent slice. The site improves incrementally as commits land after #1.</p>
+<ol>
+<li><strong>Downloader semantic change</strong>: <code>--recent [N] [TYPE]</code> argument parsing, walker stops on local-file-encountered instead of counting it. Update <code>download_recent_type</code> accordingly. Adjust <code>download_full_type</code> invocation to also accept an optional TYPE argument (<code>./downloader/download_taxi_data.sh yellow</code> becomes valid; without argument, still walks all four). Update the top-level help output. Verify with a quick smoke run.</li>
+<li>MkDocs scaffolding: <code>pyproject.toml</code> <code>docs</code> extra, <code>mkdocs.yml</code>, <code>docs/index.md</code>, <code>.github/workflows/{test,docs}.yml</code>. Site is live and shows the home page.</li>
+<li><code>docs/getting-started.md</code>.</li>
+<li><code>docs/guides/downloader.md</code> + shrink <code>downloader/README.md</code> to pointer.</li>
+<li><code>docs/guides/schema-drift.md</code> + shrink <code>schema-drift/README.md</code>.</li>
+<li><code>docs/guides/normalize.md</code> + shrink <code>normalize/README.md</code>.</li>
+<li><code>docs/guides/k6-loadtest.md</code> + shrink <code>k6-loadtest/README.md</code>.</li>
+<li><code>docs/cookbook.md</code>.</li>
+<li><code>docs/architecture.md</code>.</li>
+<li><code>docs/reference/configuration.md</code> + <code>docs/reference/exit-codes.md</code>.</li>
+<li><code>docs/contributing.md</code> + top-level <code>README.md</code> rewrite.</li>
+</ol>
+<h2 id="success-criteria">Success criteria</h2>
+<ul>
+<li>The MkDocs site is live at <code>https://andrekamman.github.io/taxi/</code> and updates automatically on push to <code>main</code>.</li>
+<li>The GitHub landing page's <code>About</code> sidebar links to the site.</li>
+<li>A data engineer visiting the site can go from "I've never heard of this" to "I have a normalized parquet dataset locally" in under 30 minutes by following Getting Started.</li>
+<li>Every code block in every page is copy-pasteable and produces the shown output (spot-check during implementation).</li>
+<li>Every per-component README is ≤ 20 lines and points at its guide.</li>
+<li><code>docs/superpowers/specs/</code> files appear in the site nav under "Design Specs" (no content changes).</li>
+<li>CI test workflow runs on every PR; docs workflow runs on push to <code>main</code> and deploys automatically.</li>
+</ul>
+<h2 id="operational-notes">Operational notes</h2>
+<ul>
+<li>The local checkout at <code>/Users/andre/git/taxi/</code> points at the private <code>taxi-dev</code> remote. Docs work must land in the <strong>public</strong> <code>andrekamman/taxi</code> repo. Implementation begins with a fresh clone of the public repo into a separate directory (e.g., <code>/Users/andre/git/taxi-public/</code>) so we don't accidentally push docs commits into the private repo. The spec + plan themselves can live in either repo; keeping them in <code>taxi-dev</code> matches the existing pattern where <code>docs/superpowers/specs/</code> accumulates design records.</li>
+<li>Since the public and private repos have divergent commit SHAs (filter-repo rewrite), cherry-picking between them uses <code>git cherry-pick &lt;sha&gt;</code> with the source specified explicitly.</li>
+</ul>
+<h2 id="out-of-scope">Out of scope</h2>
+<ul>
+<li>Auto-generated API reference (docstring → HTML). If needed later, add <code>mkdocstrings</code>.</li>
+<li>Search over commit history or issue links.</li>
+<li>CI running on multiple OSes (matrix on Ubuntu + macOS + Windows). Nice-to-have; adds cost and flakiness. Ubuntu-only for now.</li>
+<li>Rewriting the design specs themselves. They're kept as-is and surfaced in the nav.</li>
+<li>Building the SQL Server loader, orchestrator, or dev/test/prod promotion sub-projects. Placeholder mentions in the cookbook / architecture pages are fine; full guides await those sub-projects being built.</li>
+<li>Per-type support in the schema-drift, normalize, and k6-preprocess tools. Only the downloader gets the code change in this sub-project. (Normalize already supports per-type via <code>normalize &lt;type&gt;</code>; the other tools have <code>--types</code> flags already.)</li>
+</ul>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var labels=set.querySelector(".tabbed-labels");for(var tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["content.code.copy", "content.tabs.link", "navigation.tracking", "navigation.top", "search.highlight", "search.share"], "search": "../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+    
+  </body>
+</html>

@@ -1,0 +1,1577 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Downloader, schema-drift analyzer, and K6 SQL Server load tester for NYC TLC taxi trip data">
+      
+      
+      
+        <link rel="canonical" href="https://andrekamman.github.io/taxi/guides/k6-loadtest/">
+      
+      
+        <link rel="prev" href="../normalize/">
+      
+      
+        <link rel="next" href="../../cookbook/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>K6 Load Test - taxi</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.ec1eaa64.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#k6-load-test" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="taxi" class="md-header__button md-logo" aria-label="taxi" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            taxi
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              K6 Load Test
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+          <a href="javascript:void(0)" class="md-search__icon md-icon" title="Share" aria-label="Share" data-clipboard data-clipboard-text="" data-md-component="search-share" tabindex="-1">
+            
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9a3 3 0 0 0-3 3 3 3 0 0 0 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.15c-.05.21-.08.43-.08.66 0 1.61 1.31 2.91 2.92 2.91s2.92-1.3 2.92-2.91A2.92 2.92 0 0 0 18 16.08"/></svg>
+          </a>
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/andrekamman/taxi" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    andrekamman/taxi
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="taxi" class="md-nav__button md-logo" aria-label="taxi" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    taxi
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/andrekamman/taxi" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    andrekamman/taxi
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../getting-started/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Guides
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Guides
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../downloader/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Downloader
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../schema-drift/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Schema Drift
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../normalize/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Normalize
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    K6 Load Test
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    K6 Load Test
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#prerequisites" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Prerequisites
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-step-setup" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5-step setup
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="5-step setup">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-build-the-custom-k6-binary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Build the custom K6 binary
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-copy-the-sample-config" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Copy the sample config
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-edit-k6-loadtestconfigyaml" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Edit k6-loadtest/config.yaml
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-preprocess-data-into-k6-inputs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Preprocess data into K6 inputs
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#5-apply-the-create-table-ddl" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. Apply the CREATE TABLE DDL
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#6-run-the-k6-test" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. Run the K6 test
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#source-modes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Source modes
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Source modes">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#mode-parquet-real-data-from-parquet" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        mode: parquet — real data from parquet
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#mode-synthetic-k6-generates-rows-at-runtime" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        mode: synthetic — K6 generates rows at runtime
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#when-to-use-each" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        When to use each
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#sample-local-sql-server-docker" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Sample local SQL Server (Docker)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#config-summary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Config summary
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#interpreting-k6-output" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Interpreting K6 output
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#troubleshooting" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Troubleshooting
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../cookbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Cookbook
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reference
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Reference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/configuration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Configuration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/exit-codes/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Exit codes
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Design Specs
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Design Specs
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../superpowers/specs/2026-07-19-monorepo-restructure-design/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Monorepo restructure
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../superpowers/specs/2026-07-21-normalizer-design/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Normalizer
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../superpowers/specs/2026-03-25-k6-sql-load-testing-design/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    K6 SQL load testing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../superpowers/specs/2026-07-22-documentation-design/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Documentation site
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../contributing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Contributing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#prerequisites" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Prerequisites
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-step-setup" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5-step setup
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="5-step setup">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-build-the-custom-k6-binary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Build the custom K6 binary
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-copy-the-sample-config" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Copy the sample config
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-edit-k6-loadtestconfigyaml" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Edit k6-loadtest/config.yaml
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-preprocess-data-into-k6-inputs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Preprocess data into K6 inputs
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#5-apply-the-create-table-ddl" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. Apply the CREATE TABLE DDL
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#6-run-the-k6-test" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. Run the K6 test
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#source-modes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Source modes
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Source modes">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#mode-parquet-real-data-from-parquet" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        mode: parquet — real data from parquet
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#mode-synthetic-k6-generates-rows-at-runtime" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        mode: synthetic — K6 generates rows at runtime
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#when-to-use-each" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        When to use each
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#sample-local-sql-server-docker" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Sample local SQL Server (Docker)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#config-summary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Config summary
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#interpreting-k6-output" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Interpreting K6 output
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#troubleshooting" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Troubleshooting
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="k6-load-test">K6 Load Test</h1>
+<p><code>k6-loadtest</code> is a K6-based SQL Server load tester with a Python preprocessor. It turns parquet files (or synthetic data specs) into a K6 test bundle: CREATE TABLE DDL, chunked JSON payloads, a K6 <code>test.js</code>, and a manifest. Point it at a SQL Server (local Docker, on-prem VM, Azure SQL) and it exercises insert, update, and delete workloads under a configurable virtual-user (VU) profile.</p>
+<p>Why the extra preprocessing step and a custom K6 binary? SQL Server support in K6 does not ship out of the box — it comes via the <a href="https://github.com/grafana/xk6-sql">xk6-sql</a> extension plus Grafana's <a href="https://github.com/grafana/xk6-sql-driver-sqlserver"><code>xk6-sql-driver-sqlserver</code></a> driver, both of which have to be compiled into a custom K6 binary using <a href="https://github.com/grafana/xk6"><code>xk6</code></a>. The preprocessor's job is to bridge parquet or synthetic-mode configs into the JSON-and-JavaScript shape K6 actually expects at runtime.</p>
+<h2 id="prerequisites">Prerequisites</h2>
+<ul>
+<li><strong>Go 1.22+</strong> so <code>xk6</code> can build the custom K6 binary. Install via the <a href="https://go.dev/doc/install">official Go installer</a> or Homebrew (<code>brew install go</code>).</li>
+<li><strong>A SQL Server instance</strong> to test against. Options include:<ul>
+<li>Local Docker container (recommended for a first test — sample <code>docker-compose.yml</code> below).</li>
+<li>SQL Server 2019+ VM on-prem.</li>
+<li>Azure SQL Database or Azure SQL Managed Instance.</li>
+<li>Any other cloud SQL Server. SQL Edge and SQL Server 2022 both work.</li>
+</ul>
+</li>
+<li><strong><code>uv sync</code></strong> in the repo root so the <code>k6-preprocess</code> entry point is on your PATH.</li>
+</ul>
+<h2 id="5-step-setup">5-step setup</h2>
+<h3 id="1-build-the-custom-k6-binary">1. Build the custom K6 binary</h3>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-1">1</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1"></a>./k6-loadtest/build_k6.sh
+</code></pre></div></td></tr></table></div>
+<p>This script runs <code>xk6 build --with github.com/grafana/xk6-sql --with github.com/grafana/xk6-sql-driver-sqlserver --output ./k6</code>. It installs <code>xk6</code> itself (via <code>go install</code>) if it is not already on your PATH, then produces <code>./k6-loadtest/k6</code> — the binary lands next to the build script regardless of where you invoke it from. Build takes 30 seconds to 2 minutes depending on the state of your Go module cache.</p>
+<p>Verify with:</p>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-1-1">1</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1"></a>./k6-loadtest/k6<span class="w"> </span>version
+</code></pre></div></td></tr></table></div>
+<h3 id="2-copy-the-sample-config">2. Copy the sample config</h3>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-2-1">1</a></span>
+<span class="normal"><a href="#__codelineno-2-2">2</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1"></a>cp<span class="w"> </span>k6-loadtest/config.sample.yaml<span class="w"> </span>k6-loadtest/config.yaml
+<a id="__codelineno-2-2" name="__codelineno-2-2"></a><span class="nv">$EDITOR</span><span class="w"> </span>k6-loadtest/config.yaml
+</code></pre></div></td></tr></table></div>
+<p>See the <a href="../../reference/configuration/">Reference → Configuration</a> page for the field-by-field schema. <code>config.sample.yaml</code> itself is also a canonical reference — every option is commented inline.</p>
+<h3 id="3-edit-k6-loadtestconfigyaml">3. Edit <code>k6-loadtest/config.yaml</code></h3>
+<p>At minimum you need to set three things:</p>
+<ul>
+<li><strong>A data source.</strong> Pick your source mode (parquet or synthetic — see <a href="#source-modes">Source modes</a> below). For a first test, keep the <code>yellow_trips</code> synthetic block from <code>config.sample.yaml</code> — it needs no external files.</li>
+<li><strong>A target.</strong> Set <code>host</code>, <code>port</code>, <code>database</code>, <code>username</code>, and the <code>password</code> reference (leave it as <code>${MSSQL_PASSWORD}</code> so the value stays out of git).</li>
+<li><strong>A scenario.</strong> Wire a <code>target</code> and <code>data_source</code> together and pick your VU profile. A VU is a virtual user — one concurrent SQL connection driving one iteration loop. Ramp up gradually if you're testing a fresh server; ten VUs on a laptop-Docker SQL Server is already a real load.</li>
+</ul>
+<h3 id="4-preprocess-data-into-k6-inputs">4. Preprocess data into K6 inputs</h3>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-3-1">1</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1"></a>uv<span class="w"> </span>run<span class="w"> </span>k6-preprocess<span class="w"> </span>--config<span class="w"> </span>k6-loadtest/config.yaml<span class="w"> </span>--output<span class="w"> </span>k6-loadtest/output/
+</code></pre></div></td></tr></table></div>
+<p>The preprocessor writes:</p>
+<ul>
+<li><code>k6-loadtest/output/schema/&lt;datasource&gt;.sql</code> — one CREATE TABLE DDL per data source, with columns mapped from parquet (or synthetic) types to SQL Server types.</li>
+<li><code>k6-loadtest/output/data/&lt;datasource&gt;/chunk_*.json</code> — chunked JSON payloads (parquet mode only). Each chunk becomes one bulk-insert batch at runtime. Chunk size is controlled by <code>chunk_size:</code> in the data source config.</li>
+<li><code>k6-loadtest/output/test.js</code> — the K6 test script. It loads chunks via K6's <code>SharedArray</code> (so they are read once and shared across VUs), wires up scenarios, and drives the SQL Server target.</li>
+<li><code>k6-loadtest/output/manifest.json</code> — a machine-readable summary of every scenario, its target connection string (with <code>${MSSQL_PASSWORD}</code> preserved for runtime substitution), and its data source metadata.</li>
+</ul>
+<h3 id="5-apply-the-create-table-ddl">5. Apply the CREATE TABLE DDL</h3>
+<p>The generated schema file for a yellow-taxi source looks roughly like this:</p>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-4-1"> 1</a></span>
+<span class="normal"><a href="#__codelineno-4-2"> 2</a></span>
+<span class="normal"><a href="#__codelineno-4-3"> 3</a></span>
+<span class="normal"><a href="#__codelineno-4-4"> 4</a></span>
+<span class="normal"><a href="#__codelineno-4-5"> 5</a></span>
+<span class="normal"><a href="#__codelineno-4-6"> 6</a></span>
+<span class="normal"><a href="#__codelineno-4-7"> 7</a></span>
+<span class="normal"><a href="#__codelineno-4-8"> 8</a></span>
+<span class="normal"><a href="#__codelineno-4-9"> 9</a></span>
+<span class="normal"><a href="#__codelineno-4-10">10</a></span>
+<span class="normal"><a href="#__codelineno-4-11">11</a></span>
+<span class="normal"><a href="#__codelineno-4-12">12</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1"></a><span class="k">IF</span><span class="w"> </span><span class="n">OBJECT_ID</span><span class="p">(</span><span class="s1">&#39;yellow_trips&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;U&#39;</span><span class="p">)</span><span class="w"> </span><span class="k">IS</span><span class="w"> </span><span class="k">NULL</span>
+<a id="__codelineno-4-2" name="__codelineno-4-2"></a><span class="k">CREATE</span><span class="w"> </span><span class="k">TABLE</span><span class="w"> </span><span class="n">yellow_trips</span><span class="w"> </span><span class="p">(</span>
+<a id="__codelineno-4-3" name="__codelineno-4-3"></a><span class="w">    </span><span class="n">VendorID</span><span class="w"> </span><span class="nb">INT</span><span class="p">,</span>
+<a id="__codelineno-4-4" name="__codelineno-4-4"></a><span class="w">    </span><span class="n">tpep_pickup_datetime</span><span class="w"> </span><span class="n">DATETIME2</span><span class="p">,</span>
+<a id="__codelineno-4-5" name="__codelineno-4-5"></a><span class="w">    </span><span class="n">tpep_dropoff_datetime</span><span class="w"> </span><span class="n">DATETIME2</span><span class="p">,</span>
+<a id="__codelineno-4-6" name="__codelineno-4-6"></a><span class="w">    </span><span class="n">passenger_count</span><span class="w"> </span><span class="nb">BIGINT</span><span class="p">,</span>
+<a id="__codelineno-4-7" name="__codelineno-4-7"></a><span class="w">    </span><span class="n">trip_distance</span><span class="w"> </span><span class="nb">FLOAT</span><span class="p">,</span>
+<a id="__codelineno-4-8" name="__codelineno-4-8"></a><span class="w">    </span><span class="n">fare_amount</span><span class="w"> </span><span class="nb">FLOAT</span><span class="p">,</span>
+<a id="__codelineno-4-9" name="__codelineno-4-9"></a><span class="w">    </span><span class="n">tip_amount</span><span class="w"> </span><span class="nb">FLOAT</span><span class="p">,</span>
+<a id="__codelineno-4-10" name="__codelineno-4-10"></a><span class="w">    </span><span class="n">PULocationID</span><span class="w"> </span><span class="nb">INT</span><span class="p">,</span>
+<a id="__codelineno-4-11" name="__codelineno-4-11"></a><span class="w">    </span><span class="n">DOLocationID</span><span class="w"> </span><span class="nb">INT</span>
+<a id="__codelineno-4-12" name="__codelineno-4-12"></a><span class="p">);</span>
+</code></pre></div></td></tr></table></div>
+<p>Apply it via <code>sqlcmd</code>:</p>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-5-1">1</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1"></a>sqlcmd<span class="w"> </span>-S<span class="w"> </span>localhost<span class="w"> </span>-U<span class="w"> </span>sa<span class="w"> </span>-P<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$MSSQL_PASSWORD</span><span class="s2">&quot;</span><span class="w"> </span>-i<span class="w"> </span>k6-loadtest/output/schema/yellow_trips.sql
+</code></pre></div></td></tr></table></div>
+<p>Or paste the file's contents into Azure Data Studio, DBeaver, or SSMS.</p>
+<h3 id="6-run-the-k6-test">6. Run the K6 test</h3>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-6-1">1</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1"></a><span class="nv">MSSQL_PASSWORD</span><span class="o">=</span><span class="s1">&#39;YourStrong@Passw0rd&#39;</span><span class="w"> </span>./k6-loadtest/k6<span class="w"> </span>run<span class="w"> </span>k6-loadtest/output/test.js
+</code></pre></div></td></tr></table></div>
+<p>The K6 binary spins up VUs, each opens a SQL Server connection, and every VU iterates through its scenario — inserting, updating, or deleting rows according to the workload mix you configured. K6 prints a live progress banner and, on completion, a summary of every metric (see <a href="#interpreting-k6-output">Interpreting K6 output</a>).</p>
+<h2 id="source-modes">Source modes</h2>
+<p><code>k6-loadtest</code> supports two data source modes. Pick per data source in <code>config.yaml</code> under <code>data_sources: &lt;name&gt;: mode:</code>.</p>
+<h3 id="mode-parquet-real-data-from-parquet"><code>mode: parquet</code> — real data from parquet</h3>
+<ul>
+<li>Reads real data from parquet files — typically the <code>raw/</code> mirror produced by the <a href="../downloader/">downloader</a>, or <code>raw-normalized/</code> from <a href="../normalize/">normalize</a>.</li>
+<li>Preserves real ratios, real cardinalities, real value distributions.</li>
+<li>Slower startup: preprocess has to read parquet and chunk into JSON before K6 can start.</li>
+<li><code>chunk_size:</code> shapes the memory/network trade-off — larger chunks mean fewer round-trips but more RAM held by each VU's <code>SharedArray</code> slice.</li>
+<li>Best for: bulk-load benchmarks that need to mimic the production data path, or reproducing a specific real-world write pattern.</li>
+</ul>
+<h3 id="mode-synthetic-k6-generates-rows-at-runtime"><code>mode: synthetic</code> — K6 generates rows at runtime</h3>
+<ul>
+<li>K6 generates rows at runtime from column value ranges declared in <code>config.yaml</code> (<code>type: int/float/datetime/string/bool/date</code> plus <code>min:</code>/<code>max:</code>).</li>
+<li>Instant startup — no parquet reading, no preprocessing bottleneck, no chunk files on disk.</li>
+<li>Unlimited scale — every VU generates its own rows independently, so you can never exhaust a fixture.</li>
+<li>No parquet mirror needed, so you can smoke-test a fresh SQL Server without downloading anything first.</li>
+<li>Best for: first-time smoke tests, unbounded-scale runs, and measuring pure SQL Server insertion throughput without being bound by dataset size.</li>
+</ul>
+<h3 id="when-to-use-each">When to use each</h3>
+<ul>
+<li>First-time smoke test → <strong>synthetic</strong> (fast iteration, no downloader dependency).</li>
+<li>Realistic bulk-load benchmark → <strong>parquet</strong> (real ratios, real cardinalities).</li>
+<li>Testing insertion ceiling under unbounded load → <strong>synthetic</strong> (VUs never run out of rows).</li>
+<li>Testing insertion plus realistic distribution → <strong>parquet</strong>.</li>
+</ul>
+<h2 id="sample-local-sql-server-docker">Sample local SQL Server (Docker)</h2>
+<p>A minimal <code>docker-compose.yml</code> that gets you a SQL Server 2022 instance on <code>localhost:1433</code>:</p>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-7-1"> 1</a></span>
+<span class="normal"><a href="#__codelineno-7-2"> 2</a></span>
+<span class="normal"><a href="#__codelineno-7-3"> 3</a></span>
+<span class="normal"><a href="#__codelineno-7-4"> 4</a></span>
+<span class="normal"><a href="#__codelineno-7-5"> 5</a></span>
+<span class="normal"><a href="#__codelineno-7-6"> 6</a></span>
+<span class="normal"><a href="#__codelineno-7-7"> 7</a></span>
+<span class="normal"><a href="#__codelineno-7-8"> 8</a></span>
+<span class="normal"><a href="#__codelineno-7-9"> 9</a></span>
+<span class="normal"><a href="#__codelineno-7-10">10</a></span>
+<span class="normal"><a href="#__codelineno-7-11">11</a></span>
+<span class="normal"><a href="#__codelineno-7-12">12</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1"></a><span class="nt">services</span><span class="p">:</span>
+<a id="__codelineno-7-2" name="__codelineno-7-2"></a><span class="w">  </span><span class="nt">sqlserver</span><span class="p">:</span>
+<a id="__codelineno-7-3" name="__codelineno-7-3"></a><span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">mcr.microsoft.com/mssql/server:2022-latest</span>
+<a id="__codelineno-7-4" name="__codelineno-7-4"></a><span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
+<a id="__codelineno-7-5" name="__codelineno-7-5"></a><span class="w">      </span><span class="nt">MSSQL_SA_PASSWORD</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;YourStrong@Passw0rd&quot;</span>
+<a id="__codelineno-7-6" name="__codelineno-7-6"></a><span class="w">      </span><span class="nt">ACCEPT_EULA</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Y&quot;</span>
+<a id="__codelineno-7-7" name="__codelineno-7-7"></a><span class="w">    </span><span class="nt">ports</span><span class="p">:</span>
+<a id="__codelineno-7-8" name="__codelineno-7-8"></a><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;1433:1433&quot;</span>
+<a id="__codelineno-7-9" name="__codelineno-7-9"></a><span class="w">    </span><span class="nt">volumes</span><span class="p">:</span>
+<a id="__codelineno-7-10" name="__codelineno-7-10"></a><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">sqlserver-data:/var/opt/mssql</span>
+<a id="__codelineno-7-11" name="__codelineno-7-11"></a><span class="nt">volumes</span><span class="p">:</span>
+<a id="__codelineno-7-12" name="__codelineno-7-12"></a><span class="w">  </span><span class="nt">sqlserver-data</span><span class="p">:</span>
+</code></pre></div></td></tr></table></div>
+<p>Bring it up:</p>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-8-1">1</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1"></a>docker<span class="w"> </span>compose<span class="w"> </span>up<span class="w"> </span>-d
+</code></pre></div></td></tr></table></div>
+<p>Verify:</p>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-9-1">1</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1"></a>sqlcmd<span class="w"> </span>-S<span class="w"> </span>localhost<span class="w"> </span>-U<span class="w"> </span>sa<span class="w"> </span>-P<span class="w"> </span><span class="s1">&#39;YourStrong@Passw0rd&#39;</span><span class="w"> </span>-Q<span class="w"> </span><span class="s2">&quot;SELECT @@VERSION&quot;</span>
+</code></pre></div></td></tr></table></div>
+<p>Matching <code>config.yaml</code> target stub:</p>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-10-1">1</a></span>
+<span class="normal"><a href="#__codelineno-10-2">2</a></span>
+<span class="normal"><a href="#__codelineno-10-3">3</a></span>
+<span class="normal"><a href="#__codelineno-10-4">4</a></span>
+<span class="normal"><a href="#__codelineno-10-5">5</a></span>
+<span class="normal"><a href="#__codelineno-10-6">6</a></span>
+<span class="normal"><a href="#__codelineno-10-7">7</a></span>
+<span class="normal"><a href="#__codelineno-10-8">8</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1"></a><span class="nt">targets</span><span class="p">:</span>
+<a id="__codelineno-10-2" name="__codelineno-10-2"></a><span class="w">  </span><span class="nt">local_server</span><span class="p">:</span>
+<a id="__codelineno-10-3" name="__codelineno-10-3"></a><span class="w">    </span><span class="nt">host</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">localhost</span>
+<a id="__codelineno-10-4" name="__codelineno-10-4"></a><span class="w">    </span><span class="nt">port</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1433</span>
+<a id="__codelineno-10-5" name="__codelineno-10-5"></a><span class="w">    </span><span class="nt">database</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">loadtest_db</span>
+<a id="__codelineno-10-6" name="__codelineno-10-6"></a><span class="w">    </span><span class="nt">username</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">sa</span>
+<a id="__codelineno-10-7" name="__codelineno-10-7"></a><span class="w">    </span><span class="nt">password</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">${MSSQL_PASSWORD}</span>
+<a id="__codelineno-10-8" name="__codelineno-10-8"></a><span class="w">    </span><span class="nt">table</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">yellow_trips</span>
+</code></pre></div></td></tr></table></div>
+<p><code>MSSQL_PASSWORD</code> must be exported in the environment when you run K6 (<code>MSSQL_PASSWORD='YourStrong@Passw0rd' ./k6-loadtest/k6 run …</code>). The preprocessor preserves the <code>${VAR}</code> placeholder in the manifest so K6 does the substitution at runtime, not at preprocess time. This keeps passwords out of the generated <code>test.js</code> and out of your git history.</p>
+<h2 id="config-summary">Config summary</h2>
+<p>Top-level keys in <code>config.yaml</code>:</p>
+<ul>
+<li><code>data_sources:</code> — dict keyed by source name. Each has a <code>mode:</code> (<code>parquet</code> or <code>synthetic</code>) plus mode-specific keys (<code>path:</code> and <code>chunk_size:</code> for parquet, <code>columns:</code> with type/min/max blocks for synthetic).</li>
+<li><code>targets:</code> — dict of connection targets. Each entry declares <code>host</code>, <code>port</code>, <code>database</code>, <code>username</code>, <code>password</code> (use <code>${MSSQL_PASSWORD}</code> for runtime substitution), and <code>table</code>.</li>
+<li><code>scenarios:</code> — dict of K6 scenarios. Each ties a <code>data_source</code> to a <code>target</code>, sets a workload mix (<code>insert</code>/<code>update</code>/<code>delete</code> percentages), think-time bounds, and a K6 executor block (<code>executor:</code>, <code>startVUs:</code>, <code>stages:</code> or <code>duration:</code>).</li>
+</ul>
+<p>See the <a href="../../reference/configuration/">Reference → Configuration</a> page for the exhaustive schema. <code>config.sample.yaml</code> in the repo is also a canonical reference.</p>
+<h2 id="interpreting-k6-output">Interpreting K6 output</h2>
+<p>At the end of a run, K6 prints a summary block that looks like this:</p>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-11-1">1</a></span>
+<span class="normal"><a href="#__codelineno-11-2">2</a></span>
+<span class="normal"><a href="#__codelineno-11-3">3</a></span>
+<span class="normal"><a href="#__codelineno-11-4">4</a></span>
+<span class="normal"><a href="#__codelineno-11-5">5</a></span>
+<span class="normal"><a href="#__codelineno-11-6">6</a></span>
+<span class="normal"><a href="#__codelineno-11-7">7</a></span>
+<span class="normal"><a href="#__codelineno-11-8">8</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1"></a>     data_received..............: 4.2 kB  70 B/s
+<a id="__codelineno-11-2" name="__codelineno-11-2"></a>     data_sent..................: 8.1 MB  135 kB/s
+<a id="__codelineno-11-3" name="__codelineno-11-3"></a>     iteration_duration.........: avg=203.4ms  min=45ms  med=195ms  max=1.2s
+<a id="__codelineno-11-4" name="__codelineno-11-4"></a>     iterations.................: 296    4.93/s
+<a id="__codelineno-11-5" name="__codelineno-11-5"></a>     sql_query_duration.........: avg=198.1ms  min=42ms  med=190ms  max=1.19s
+<a id="__codelineno-11-6" name="__codelineno-11-6"></a>     sql_rows_affected..........: 296000  4930/s
+<a id="__codelineno-11-7" name="__codelineno-11-7"></a>     vus........................: 5      min=5      max=5
+<a id="__codelineno-11-8" name="__codelineno-11-8"></a>     vus_max....................: 5      min=5      max=5
+</code></pre></div></td></tr></table></div>
+<p>Line-by-line:</p>
+<ul>
+<li><code>data_received</code> / <code>data_sent</code> — network throughput for the run. SQL Server bulk-insert workloads are send-heavy, so <code>data_sent</code> will dwarf <code>data_received</code>.</li>
+<li><code>iteration_duration</code> — how long one scenario iteration took end-to-end (open connection, execute SQL, tear down). Includes think time.</li>
+<li><code>iterations</code> — total scenario runs, plus per-second rate. Multiply by rows-per-iteration to reason about total row throughput.</li>
+<li><code>sql_query_duration</code> — server-side query latency reported by <code>xk6-sql</code>. This is the number to compare against SQL Server DMV latency to isolate client-side overhead.</li>
+<li><code>sql_rows_affected</code> — total rows inserted, updated, or deleted across all iterations.</li>
+<li><code>vus</code> / <code>vus_max</code> — active virtual users during the test. For ramping scenarios, <code>vus_max</code> is your peak concurrency.</li>
+</ul>
+<p><strong>Bulk-insert scenarios.</strong> <code>iteration_duration</code> should be roughly equal to <code>sql_query_duration</code> — if the gap is large, client-side setup (connection open, JSON parsing) is dominating and you may want larger chunks or fewer VUs. Watch <code>sql_rows_affected / duration</code> for the throughput number to publish.</p>
+<p><strong>Query-latency scenarios.</strong> For read or update workloads, <code>sql_query_duration</code> p95 and p99 matter more than the mean. Add K6 <a href="https://grafana.com/docs/k6/latest/using-k6/thresholds/">thresholds</a> to your scenario config to fail the run automatically if p99 regresses beyond your SLO.</p>
+<p>For long-running tests, export metrics to InfluxDB (or Prometheus) so you can chart them in Grafana:</p>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-12-1">1</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1"></a>./k6-loadtest/k6<span class="w"> </span>run<span class="w"> </span>--out<span class="w"> </span><span class="nv">influxdb</span><span class="o">=</span>http://localhost:8086/k6<span class="w"> </span>k6-loadtest/output/test.js
+</code></pre></div></td></tr></table></div>
+<p>Grafana's <a href="https://grafana.com/grafana/dashboards/?search=k6">official K6 dashboards</a> render <code>sql_query_duration</code> percentiles, VU ramps, and iteration rates out of the box.</p>
+<h2 id="troubleshooting">Troubleshooting</h2>
+<ul>
+<li><strong><code>build_k6.sh</code> fails with <code>go: command not found</code>.</strong> <code>xk6</code> needs Go on the PATH. Install Go 1.22+ and re-open your shell so <code>go env GOPATH</code> resolves, then re-run the build script.</li>
+<li><strong><code>build_k6.sh</code> fails on <code>xk6 build</code>.</strong> Usually a stale Go module cache. Clear it with <code>go clean -modcache</code> and retry. The build script always fetches the latest <code>xk6-sql</code> and <code>xk6-sql-driver-sqlserver</code> from Grafana's GitHub org.</li>
+<li><strong>K6 exits with <code>unable to connect to SQL Server</code>.</strong> Confirm the target is reachable (<code>sqlcmd -S &lt;host&gt; -U &lt;user&gt; -P "$MSSQL_PASSWORD" -Q "SELECT 1"</code>). For Docker on macOS/Windows, use <code>localhost</code> from the host and the container name from other containers. For Azure SQL, whitelist your client IP in the firewall.</li>
+<li><strong><code>sql_query_duration</code> is orders of magnitude higher than expected.</strong> You are probably measuring cold-cache first-iteration effects. Run a short warmup scenario before the measured one, or discard the first N iterations when computing your throughput number.</li>
+<li><strong><code>iterations</code> is much lower than expected.</strong> Either your think-time is dominating (drop <code>think_time.max</code>), or the scenario is bottlenecked on SQL Server (check DMVs for waits). Compare <code>iteration_duration</code> against <code>sql_query_duration</code> to tell which side is slow.</li>
+</ul>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var labels=set.querySelector(".tabbed-labels");for(var tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["content.code.copy", "content.tabs.link", "navigation.tracking", "navigation.top", "search.highlight", "search.share"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+    
+  </body>
+</html>

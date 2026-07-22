@@ -1,0 +1,1540 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Downloader, schema-drift analyzer, and K6 SQL Server load tester for NYC TLC taxi trip data">
+      
+      
+      
+        <link rel="canonical" href="https://andrekamman.github.io/taxi/cookbook/">
+      
+      
+        <link rel="prev" href="../guides/k6-loadtest/">
+      
+      
+        <link rel="next" href="../architecture/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>Cookbook - taxi</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.ec1eaa64.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#cookbook" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="taxi" class="md-header__button md-logo" aria-label="taxi" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            taxi
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Cookbook
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+          <a href="javascript:void(0)" class="md-search__icon md-icon" title="Share" aria-label="Share" data-clipboard data-clipboard-text="" data-md-component="search-share" tabindex="-1">
+            
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9a3 3 0 0 0-3 3 3 3 0 0 0 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.15c-.05.21-.08.43-.08.66 0 1.61 1.31 2.91 2.92 2.91s2.92-1.3 2.92-2.91A2.92 2.92 0 0 0 18 16.08"/></svg>
+          </a>
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/andrekamman/taxi" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    andrekamman/taxi
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="taxi" class="md-nav__button md-logo" aria-label="taxi" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    taxi
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/andrekamman/taxi" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    andrekamman/taxi
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../getting-started/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Guides
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Guides
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../guides/downloader/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Downloader
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../guides/schema-drift/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Schema Drift
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../guides/normalize/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Normalize
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../guides/k6-loadtest/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    K6 Load Test
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Cookbook
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Cookbook
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#nightly-refresh-via-cron" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Nightly refresh via cron
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#duckdb-httpfs-no-local-mirror" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        DuckDB httpfs — no local mirror
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#side-by-side-comparison-of-multiple-tlc-years" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Side-by-side comparison of multiple TLC years
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#load-testing-the-normalizers-output" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Load-testing the normalizer's output
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#running-behind-a-corporate-proxy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Running behind a corporate proxy
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#populating-a-fresh-dev-sql-server" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Populating a fresh dev SQL Server
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reference
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Reference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reference/configuration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Configuration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reference/exit-codes/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Exit codes
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Design Specs
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Design Specs
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../superpowers/specs/2026-07-19-monorepo-restructure-design/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Monorepo restructure
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../superpowers/specs/2026-07-21-normalizer-design/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Normalizer
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../superpowers/specs/2026-03-25-k6-sql-load-testing-design/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    K6 SQL load testing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../superpowers/specs/2026-07-22-documentation-design/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Documentation site
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../contributing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Contributing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#nightly-refresh-via-cron" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Nightly refresh via cron
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#duckdb-httpfs-no-local-mirror" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        DuckDB httpfs — no local mirror
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#side-by-side-comparison-of-multiple-tlc-years" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Side-by-side comparison of multiple TLC years
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#load-testing-the-normalizers-output" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Load-testing the normalizer's output
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#running-behind-a-corporate-proxy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Running behind a corporate proxy
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#populating-a-fresh-dev-sql-server" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Populating a fresh dev SQL Server
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="cookbook">Cookbook</h1>
+<p>Scenario-oriented recipes that combine the four tools — downloader, schema-drift, normalize, and K6 load test — into end-to-end workflows. Each recipe is self-contained and copy-pasteable, aimed at data engineers running the stack in a real environment. Where a recipe overlaps with a per-tool guide, this page focuses on the glue between tools and the operational details (cron, proxies, dev bootstraps).</p>
+<h2 id="nightly-refresh-via-cron">Nightly refresh via cron</h2>
+<p><strong>Goal:</strong> keep the local TLC mirror caught up on new months, refresh normalized parquet, and log any schema drift.</p>
+<p><strong>Recipe</strong> — a shell script plus a scheduler entry.</p>
+<ol>
+<li>
+<p>Create <code>/srv/taxi/bin/nightly-refresh.sh</code>:</p>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-1"> 1</a></span>
+<span class="normal"><a href="#__codelineno-0-2"> 2</a></span>
+<span class="normal"><a href="#__codelineno-0-3"> 3</a></span>
+<span class="normal"><a href="#__codelineno-0-4"> 4</a></span>
+<span class="normal"><a href="#__codelineno-0-5"> 5</a></span>
+<span class="normal"><a href="#__codelineno-0-6"> 6</a></span>
+<span class="normal"><a href="#__codelineno-0-7"> 7</a></span>
+<span class="normal"><a href="#__codelineno-0-8"> 8</a></span>
+<span class="normal"><a href="#__codelineno-0-9"> 9</a></span>
+<span class="normal"><a href="#__codelineno-0-10">10</a></span>
+<span class="normal"><a href="#__codelineno-0-11">11</a></span>
+<span class="normal"><a href="#__codelineno-0-12">12</a></span>
+<span class="normal"><a href="#__codelineno-0-13">13</a></span>
+<span class="normal"><a href="#__codelineno-0-14">14</a></span>
+<span class="normal"><a href="#__codelineno-0-15">15</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1"></a><span class="ch">#!/bin/bash</span>
+<a id="__codelineno-0-2" name="__codelineno-0-2"></a><span class="nb">set</span><span class="w"> </span>-euo<span class="w"> </span>pipefail
+<a id="__codelineno-0-3" name="__codelineno-0-3"></a><span class="nb">cd</span><span class="w"> </span>/srv/taxi
+<a id="__codelineno-0-4" name="__codelineno-0-4"></a>
+<a id="__codelineno-0-5" name="__codelineno-0-5"></a><span class="c1"># 1. Fetch any newly-published months (walker stops at first local file)</span>
+<a id="__codelineno-0-6" name="__codelineno-0-6"></a>./downloader/download_taxi_data.sh<span class="w"> </span>--recent<span class="w"> </span><span class="m">3</span><span class="w"> </span>yellow
+<a id="__codelineno-0-7" name="__codelineno-0-7"></a>./downloader/download_taxi_data.sh<span class="w"> </span>--recent<span class="w"> </span><span class="m">3</span><span class="w"> </span>green
+<a id="__codelineno-0-8" name="__codelineno-0-8"></a>./downloader/download_taxi_data.sh<span class="w"> </span>--recent<span class="w"> </span><span class="m">3</span><span class="w"> </span>fhv
+<a id="__codelineno-0-9" name="__codelineno-0-9"></a>./downloader/download_taxi_data.sh<span class="w"> </span>--recent<span class="w"> </span><span class="m">3</span><span class="w"> </span>fhvhv
+<a id="__codelineno-0-10" name="__codelineno-0-10"></a>
+<a id="__codelineno-0-11" name="__codelineno-0-11"></a><span class="c1"># 2. Normalize; auto-amends the mapping if new drift showed up</span>
+<a id="__codelineno-0-12" name="__codelineno-0-12"></a>uv<span class="w"> </span>run<span class="w"> </span>normalize
+<a id="__codelineno-0-13" name="__codelineno-0-13"></a>
+<a id="__codelineno-0-14" name="__codelineno-0-14"></a><span class="c1"># 3. Snapshot schema-drift report for later diffing</span>
+<a id="__codelineno-0-15" name="__codelineno-0-15"></a>uv<span class="w"> </span>run<span class="w"> </span>schema-drift<span class="w"> </span>--output<span class="w"> </span>/var/log/taxi/drift-<span class="k">$(</span>date<span class="w"> </span>+%Y%m%d<span class="k">)</span>.txt
+</code></pre></div></td></tr></table></div>
+</li>
+<li>
+<p>Wire it into cron (<code>crontab -e</code>):</p>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-1-1">1</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1"></a>0 4 * * * /srv/taxi/bin/nightly-refresh.sh &gt;&gt; /var/log/taxi/refresh.log 2&gt;&amp;1
+</code></pre></div></td></tr></table></div>
+</li>
+<li>
+<p>Or use a systemd timer + service instead. <code>/etc/systemd/system/taxi-refresh.service</code>:</p>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-2-1">1</a></span>
+<span class="normal"><a href="#__codelineno-2-2">2</a></span>
+<span class="normal"><a href="#__codelineno-2-3">3</a></span>
+<span class="normal"><a href="#__codelineno-2-4">4</a></span>
+<span class="normal"><a href="#__codelineno-2-5">5</a></span>
+<span class="normal"><a href="#__codelineno-2-6">6</a></span>
+<span class="normal"><a href="#__codelineno-2-7">7</a></span>
+<span class="normal"><a href="#__codelineno-2-8">8</a></span>
+<span class="normal"><a href="#__codelineno-2-9">9</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1"></a><span class="k">[Unit]</span>
+<a id="__codelineno-2-2" name="__codelineno-2-2"></a><span class="na">Description</span><span class="o">=</span><span class="s">Nightly TLC data refresh</span>
+<a id="__codelineno-2-3" name="__codelineno-2-3"></a>
+<a id="__codelineno-2-4" name="__codelineno-2-4"></a><span class="k">[Service]</span>
+<a id="__codelineno-2-5" name="__codelineno-2-5"></a><span class="na">Type</span><span class="o">=</span><span class="s">oneshot</span>
+<a id="__codelineno-2-6" name="__codelineno-2-6"></a><span class="na">ExecStart</span><span class="o">=</span><span class="s">/srv/taxi/bin/nightly-refresh.sh</span>
+<a id="__codelineno-2-7" name="__codelineno-2-7"></a><span class="na">User</span><span class="o">=</span><span class="s">taxi</span>
+<a id="__codelineno-2-8" name="__codelineno-2-8"></a><span class="na">StandardOutput</span><span class="o">=</span><span class="s">append:/var/log/taxi/refresh.log</span>
+<a id="__codelineno-2-9" name="__codelineno-2-9"></a><span class="na">StandardError</span><span class="o">=</span><span class="s">append:/var/log/taxi/refresh.log</span>
+</code></pre></div></td></tr></table></div>
+<p><code>/etc/systemd/system/taxi-refresh.timer</code>:</p>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-3-1">1</a></span>
+<span class="normal"><a href="#__codelineno-3-2">2</a></span>
+<span class="normal"><a href="#__codelineno-3-3">3</a></span>
+<span class="normal"><a href="#__codelineno-3-4">4</a></span>
+<span class="normal"><a href="#__codelineno-3-5">5</a></span>
+<span class="normal"><a href="#__codelineno-3-6">6</a></span>
+<span class="normal"><a href="#__codelineno-3-7">7</a></span>
+<span class="normal"><a href="#__codelineno-3-8">8</a></span>
+<span class="normal"><a href="#__codelineno-3-9">9</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1"></a><span class="k">[Unit]</span>
+<a id="__codelineno-3-2" name="__codelineno-3-2"></a><span class="na">Description</span><span class="o">=</span><span class="s">Nightly TLC data refresh</span>
+<a id="__codelineno-3-3" name="__codelineno-3-3"></a>
+<a id="__codelineno-3-4" name="__codelineno-3-4"></a><span class="k">[Timer]</span>
+<a id="__codelineno-3-5" name="__codelineno-3-5"></a><span class="na">OnCalendar</span><span class="o">=</span><span class="s">*-*-* 04:00:00</span>
+<a id="__codelineno-3-6" name="__codelineno-3-6"></a><span class="na">Persistent</span><span class="o">=</span><span class="s">true</span>
+<a id="__codelineno-3-7" name="__codelineno-3-7"></a>
+<a id="__codelineno-3-8" name="__codelineno-3-8"></a><span class="k">[Install]</span>
+<a id="__codelineno-3-9" name="__codelineno-3-9"></a><span class="na">WantedBy</span><span class="o">=</span><span class="s">timers.target</span>
+</code></pre></div></td></tr></table></div>
+<p>Enable:</p>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-4-1">1</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1"></a>systemctl<span class="w"> </span><span class="nb">enable</span><span class="w"> </span>--now<span class="w"> </span>taxi-refresh.timer
+</code></pre></div></td></tr></table></div>
+</li>
+</ol>
+<p><strong>Notes:</strong></p>
+<ul>
+<li><code>--recent</code>'s stop-on-local semantic makes this fully idempotent — running it twice in the same day just skips everything.</li>
+<li>If normalize amends the mapping (new drift detected), the script exits non-zero on that day. Consider paging on exit=1 vs. logging-only on exit=0.</li>
+<li><code>raw/</code> grows monotonically — plan capacity via the <a href="../guides/downloader/#disk-sizing">Downloader guide's sizing table</a>.</li>
+<li>Prefer systemd timers over cron on modern hosts: <code>Persistent=true</code> catches up missed runs after downtime, and logs land in the journal automatically.</li>
+</ul>
+<h2 id="duckdb-httpfs-no-local-mirror">DuckDB <code>httpfs</code> — no local mirror</h2>
+<p><strong>Goal:</strong> run one-off analytics queries against TLC parquet without downloading anything.</p>
+<p><strong>Recipe:</strong></p>
+<ol>
+<li>
+<p>Start DuckDB:</p>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-5-1">1</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1"></a>duckdb
+</code></pre></div></td></tr></table></div>
+</li>
+<li>
+<p>Load the <code>httpfs</code> extension and query directly:</p>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-6-1"> 1</a></span>
+<span class="normal"><a href="#__codelineno-6-2"> 2</a></span>
+<span class="normal"><a href="#__codelineno-6-3"> 3</a></span>
+<span class="normal"><a href="#__codelineno-6-4"> 4</a></span>
+<span class="normal"><a href="#__codelineno-6-5"> 5</a></span>
+<span class="normal"><a href="#__codelineno-6-6"> 6</a></span>
+<span class="normal"><a href="#__codelineno-6-7"> 7</a></span>
+<span class="normal"><a href="#__codelineno-6-8"> 8</a></span>
+<span class="normal"><a href="#__codelineno-6-9"> 9</a></span>
+<span class="normal"><a href="#__codelineno-6-10">10</a></span>
+<span class="normal"><a href="#__codelineno-6-11">11</a></span>
+<span class="normal"><a href="#__codelineno-6-12">12</a></span>
+<span class="normal"><a href="#__codelineno-6-13">13</a></span>
+<span class="normal"><a href="#__codelineno-6-14">14</a></span>
+<span class="normal"><a href="#__codelineno-6-15">15</a></span>
+<span class="normal"><a href="#__codelineno-6-16">16</a></span>
+<span class="normal"><a href="#__codelineno-6-17">17</a></span>
+<span class="normal"><a href="#__codelineno-6-18">18</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1"></a><span class="n">INSTALL</span><span class="w"> </span><span class="n">httpfs</span><span class="p">;</span>
+<a id="__codelineno-6-2" name="__codelineno-6-2"></a><span class="k">LOAD</span><span class="w"> </span><span class="n">httpfs</span><span class="p">;</span>
+<a id="__codelineno-6-3" name="__codelineno-6-3"></a>
+<a id="__codelineno-6-4" name="__codelineno-6-4"></a><span class="c1">-- Simple count</span>
+<a id="__codelineno-6-5" name="__codelineno-6-5"></a><span class="k">SELECT</span><span class="w"> </span><span class="k">count</span><span class="p">(</span><span class="o">*</span><span class="p">)</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">trips</span>
+<a id="__codelineno-6-6" name="__codelineno-6-6"></a><span class="k">FROM</span><span class="w"> </span><span class="n">read_parquet</span><span class="p">(</span><span class="s1">&#39;https://d37ci6vzurychx.cloudfront.net/trip-data/yellow_tripdata_2024-01.parquet&#39;</span><span class="p">);</span>
+<a id="__codelineno-6-7" name="__codelineno-6-7"></a>
+<a id="__codelineno-6-8" name="__codelineno-6-8"></a><span class="c1">-- Average trip distance by day of week</span>
+<a id="__codelineno-6-9" name="__codelineno-6-9"></a><span class="k">SELECT</span><span class="w"> </span><span class="n">strftime</span><span class="p">(</span><span class="n">tpep_pickup_datetime</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;%A&#39;</span><span class="p">)</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">day_of_week</span><span class="p">,</span>
+<a id="__codelineno-6-10" name="__codelineno-6-10"></a><span class="w">       </span><span class="k">avg</span><span class="p">(</span><span class="n">trip_distance</span><span class="p">)</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">avg_distance</span><span class="p">,</span>
+<a id="__codelineno-6-11" name="__codelineno-6-11"></a><span class="w">       </span><span class="k">count</span><span class="p">(</span><span class="o">*</span><span class="p">)</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">trips</span>
+<a id="__codelineno-6-12" name="__codelineno-6-12"></a><span class="k">FROM</span><span class="w"> </span><span class="n">read_parquet</span><span class="p">(</span><span class="s1">&#39;https://d37ci6vzurychx.cloudfront.net/trip-data/yellow_tripdata_2024-01.parquet&#39;</span><span class="p">)</span>
+<a id="__codelineno-6-13" name="__codelineno-6-13"></a><span class="k">GROUP</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span><span class="n">day_of_week</span>
+<a id="__codelineno-6-14" name="__codelineno-6-14"></a><span class="k">ORDER</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span><span class="n">avg_distance</span><span class="w"> </span><span class="k">DESC</span><span class="p">;</span>
+<a id="__codelineno-6-15" name="__codelineno-6-15"></a>
+<a id="__codelineno-6-16" name="__codelineno-6-16"></a><span class="c1">-- Query multiple months in one shot with a glob</span>
+<a id="__codelineno-6-17" name="__codelineno-6-17"></a><span class="k">SELECT</span><span class="w"> </span><span class="k">count</span><span class="p">(</span><span class="o">*</span><span class="p">)</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">trips_2024</span>
+<a id="__codelineno-6-18" name="__codelineno-6-18"></a><span class="k">FROM</span><span class="w"> </span><span class="n">read_parquet</span><span class="p">(</span><span class="s1">&#39;https://d37ci6vzurychx.cloudfront.net/trip-data/yellow_tripdata_2024-*.parquet&#39;</span><span class="p">);</span>
+</code></pre></div></td></tr></table></div>
+</li>
+</ol>
+<p><strong>Notes:</strong></p>
+<ul>
+<li>First query downloads the file; subsequent queries in the same session hit DuckDB's in-memory cache. Across sessions, use the on-disk cache: <code>SET enable_external_file_cache=true; PRAGMA cache_directory='/tmp/duckdb-cache';</code></li>
+<li>Costs: TLC's CloudFront is unmetered from the requester side, but repeated full-scans of a 50 MB file are wasteful. Use the downloader for anything you'll query more than a couple of times.</li>
+<li>Schema drift is on you here — DuckDB will happily union files with different schemas via <code>union_by_name=true</code>, but drops columns silently. Cross-reference with <code>schema-drift</code> output.</li>
+<li>The glob pattern hits CloudFront's directory listing, which requires HTTP range requests — some corporate proxies mangle these. If globs fail, list the URLs explicitly.</li>
+</ul>
+<h2 id="side-by-side-comparison-of-multiple-tlc-years">Side-by-side comparison of multiple TLC years</h2>
+<p><strong>Goal:</strong> compute trips-per-year and average fare across a decade of yellow taxi data using the normalized mirror.</p>
+<p><strong>Recipe:</strong> with a full history mirror at <code>raw-normalized/yellow/</code>:</p>
+<ol>
+<li>
+<p>Start DuckDB in the taxi directory:</p>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-7-1">1</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1"></a>duckdb
+</code></pre></div></td></tr></table></div>
+</li>
+<li>
+<p>Aggregate across every year:</p>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-8-1"> 1</a></span>
+<span class="normal"><a href="#__codelineno-8-2"> 2</a></span>
+<span class="normal"><a href="#__codelineno-8-3"> 3</a></span>
+<span class="normal"><a href="#__codelineno-8-4"> 4</a></span>
+<span class="normal"><a href="#__codelineno-8-5"> 5</a></span>
+<span class="normal"><a href="#__codelineno-8-6"> 6</a></span>
+<span class="normal"><a href="#__codelineno-8-7"> 7</a></span>
+<span class="normal"><a href="#__codelineno-8-8"> 8</a></span>
+<span class="normal"><a href="#__codelineno-8-9"> 9</a></span>
+<span class="normal"><a href="#__codelineno-8-10">10</a></span>
+<span class="normal"><a href="#__codelineno-8-11">11</a></span>
+<span class="normal"><a href="#__codelineno-8-12">12</a></span>
+<span class="normal"><a href="#__codelineno-8-13">13</a></span>
+<span class="normal"><a href="#__codelineno-8-14">14</a></span>
+<span class="normal"><a href="#__codelineno-8-15">15</a></span>
+<span class="normal"><a href="#__codelineno-8-16">16</a></span>
+<span class="normal"><a href="#__codelineno-8-17">17</a></span>
+<span class="normal"><a href="#__codelineno-8-18">18</a></span>
+<span class="normal"><a href="#__codelineno-8-19">19</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1"></a><span class="c1">-- Every year with total trips and average fare</span>
+<a id="__codelineno-8-2" name="__codelineno-8-2"></a><span class="k">SELECT</span><span class="w"> </span><span class="k">extract</span><span class="p">(</span><span class="k">year</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">tpep_pickup_datetime</span><span class="p">)</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="k">year</span><span class="p">,</span>
+<a id="__codelineno-8-3" name="__codelineno-8-3"></a><span class="w">       </span><span class="k">count</span><span class="p">(</span><span class="o">*</span><span class="p">)</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">trips</span><span class="p">,</span>
+<a id="__codelineno-8-4" name="__codelineno-8-4"></a><span class="w">       </span><span class="k">avg</span><span class="p">(</span><span class="n">fare_amount</span><span class="p">)</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">avg_fare</span>
+<a id="__codelineno-8-5" name="__codelineno-8-5"></a><span class="k">FROM</span><span class="w"> </span><span class="n">read_parquet</span><span class="p">(</span><span class="s1">&#39;raw-normalized/yellow/**/*.parquet&#39;</span><span class="p">)</span>
+<a id="__codelineno-8-6" name="__codelineno-8-6"></a><span class="k">GROUP</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span><span class="k">year</span>
+<a id="__codelineno-8-7" name="__codelineno-8-7"></a><span class="k">ORDER</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span><span class="k">year</span><span class="p">;</span>
+<a id="__codelineno-8-8" name="__codelineno-8-8"></a>
+<a id="__codelineno-8-9" name="__codelineno-8-9"></a><span class="c1">-- Top 10 pickup locations across the whole history (post-2015)</span>
+<a id="__codelineno-8-10" name="__codelineno-8-10"></a><span class="k">SELECT</span><span class="w"> </span><span class="n">PULocationID</span><span class="p">,</span>
+<a id="__codelineno-8-11" name="__codelineno-8-11"></a><span class="w">       </span><span class="k">count</span><span class="p">(</span><span class="o">*</span><span class="p">)</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">trips</span><span class="p">,</span>
+<a id="__codelineno-8-12" name="__codelineno-8-12"></a><span class="w">       </span><span class="k">avg</span><span class="p">(</span><span class="n">trip_distance</span><span class="p">)</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">avg_distance</span><span class="p">,</span>
+<a id="__codelineno-8-13" name="__codelineno-8-13"></a><span class="w">       </span><span class="k">avg</span><span class="p">(</span><span class="n">fare_amount</span><span class="p">)</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">avg_fare</span>
+<a id="__codelineno-8-14" name="__codelineno-8-14"></a><span class="k">FROM</span><span class="w"> </span><span class="n">read_parquet</span><span class="p">(</span><span class="s1">&#39;raw-normalized/yellow/**/*.parquet&#39;</span><span class="p">)</span>
+<a id="__codelineno-8-15" name="__codelineno-8-15"></a><span class="k">WHERE</span><span class="w"> </span><span class="n">PULocationID</span><span class="w"> </span><span class="k">IS</span><span class="w"> </span><span class="k">NOT</span><span class="w"> </span><span class="k">NULL</span>
+<a id="__codelineno-8-16" name="__codelineno-8-16"></a><span class="w">  </span><span class="k">AND</span><span class="w"> </span><span class="k">extract</span><span class="p">(</span><span class="k">year</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">tpep_pickup_datetime</span><span class="p">)</span><span class="w"> </span><span class="o">&gt;=</span><span class="w"> </span><span class="mi">2015</span>
+<a id="__codelineno-8-17" name="__codelineno-8-17"></a><span class="k">GROUP</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span><span class="n">PULocationID</span>
+<a id="__codelineno-8-18" name="__codelineno-8-18"></a><span class="k">ORDER</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span><span class="n">trips</span><span class="w"> </span><span class="k">DESC</span>
+<a id="__codelineno-8-19" name="__codelineno-8-19"></a><span class="k">LIMIT</span><span class="w"> </span><span class="mi">10</span><span class="p">;</span>
+</code></pre></div></td></tr></table></div>
+</li>
+</ol>
+<p><strong>Notes:</strong></p>
+<ul>
+<li>Uses <code>raw-normalized/</code> (post-normalize output), not <code>raw/</code> — schemas are uniform, no need to reason about pre-2015 <code>pickup_latitude</code> vs post-2015 <code>PULocationID</code>.</li>
+<li>Pre-2015 rows have NULL for <code>PULocationID</code> (they were represented as lat/lon in the raw and dropped during normalize per the mapping's <code>acknowledged_data_loss:</code> entry). The <code>WHERE PULocationID IS NOT NULL</code> handles that.</li>
+<li>~30 GB of parquet queried in one DuckDB command takes seconds — parquet + DuckDB scale surprisingly well on a laptop with plenty of RAM.</li>
+<li>If you're memory-bound, add <code>SET memory_limit='8GB'; SET threads=4;</code> before running — DuckDB will spill to disk rather than OOM.</li>
+</ul>
+<h2 id="load-testing-the-normalizers-output">Load-testing the normalizer's output</h2>
+<p><strong>Goal:</strong> stress-test SQL Server with normalized parquet instead of raw — closer to your production data path.</p>
+<p><strong>Recipe:</strong></p>
+<ol>
+<li>
+<p>Edit <code>k6-loadtest/config.yaml</code> to point at <code>raw-normalized/</code>:</p>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-9-1">1</a></span>
+<span class="normal"><a href="#__codelineno-9-2">2</a></span>
+<span class="normal"><a href="#__codelineno-9-3">3</a></span>
+<span class="normal"><a href="#__codelineno-9-4">4</a></span>
+<span class="normal"><a href="#__codelineno-9-5">5</a></span>
+<span class="normal"><a href="#__codelineno-9-6">6</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1"></a><span class="nt">data_sources</span><span class="p">:</span>
+<a id="__codelineno-9-2" name="__codelineno-9-2"></a><span class="w">  </span><span class="nt">yellow_trips</span><span class="p">:</span>
+<a id="__codelineno-9-3" name="__codelineno-9-3"></a><span class="w">    </span><span class="nt">mode</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">parquet</span>
+<a id="__codelineno-9-4" name="__codelineno-9-4"></a><span class="w">    </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">raw-normalized/yellow/**/*.parquet</span>
+<a id="__codelineno-9-5" name="__codelineno-9-5"></a><span class="w">    </span><span class="nt">key_columns</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">tpep_pickup_datetime</span><span class="p p-Indicator">]</span>
+<a id="__codelineno-9-6" name="__codelineno-9-6"></a><span class="w">    </span><span class="nt">max_rows</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">500000</span>
+</code></pre></div></td></tr></table></div>
+</li>
+<li>
+<p>Preprocess parquet into K6 fixtures:</p>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-10-1">1</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1"></a>uv<span class="w"> </span>run<span class="w"> </span>k6-preprocess<span class="w"> </span>--config<span class="w"> </span>k6-loadtest/config.yaml<span class="w"> </span>--output<span class="w"> </span>k6-loadtest/output/
+</code></pre></div></td></tr></table></div>
+</li>
+<li>
+<p>Apply DDL and run K6:</p>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-11-1">1</a></span>
+<span class="normal"><a href="#__codelineno-11-2">2</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1"></a>sqlcmd<span class="w"> </span>-S<span class="w"> </span>localhost<span class="w"> </span>-U<span class="w"> </span>sa<span class="w"> </span>-P<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$MSSQL_PASSWORD</span><span class="s2">&quot;</span><span class="w"> </span>-i<span class="w"> </span>k6-loadtest/output/schema/yellow_trips.sql
+<a id="__codelineno-11-2" name="__codelineno-11-2"></a><span class="nv">MSSQL_PASSWORD</span><span class="o">=</span><span class="s1">&#39;YourStrong@Passw0rd&#39;</span><span class="w"> </span>./k6-loadtest/k6<span class="w"> </span>run<span class="w"> </span>k6-loadtest/output/test.js
+</code></pre></div></td></tr></table></div>
+</li>
+</ol>
+<p><strong>Notes:</strong></p>
+<ul>
+<li>Load-testing normalized data is more representative if your production pipeline normalizes before loading. If you load raw parquet directly and never normalize, load-test with <code>raw/</code> paths instead.</li>
+<li><code>max_rows: 500000</code> caps the fixture size; K6 will iterate through it. Set based on how long you want the test to run and your available VU-hours.</li>
+<li>SQL Server bulk-insert throughput is often bounded by the client-side JSON parsing + network before the server itself. Watch <code>sql_query_duration</code> vs total <code>iteration_duration</code> to see where time goes.</li>
+<li>If throughput plateaus, try lowering <code>vus</code> — SQL Server's lock contention on a single table can make more concurrency slower, not faster.</li>
+</ul>
+<h2 id="running-behind-a-corporate-proxy">Running behind a corporate proxy</h2>
+<p><strong>Goal:</strong> get the downloader, uv, and gh to work behind a corporate HTTP proxy at <code>http://proxy.corp.internal:3128</code>.</p>
+<p><strong>Recipe:</strong></p>
+<ol>
+<li>
+<p>Export the standard proxy env vars once per shell:</p>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-12-1">1</a></span>
+<span class="normal"><a href="#__codelineno-12-2">2</a></span>
+<span class="normal"><a href="#__codelineno-12-3">3</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1"></a><span class="nb">export</span><span class="w"> </span><span class="nv">HTTPS_PROXY</span><span class="o">=</span>http://proxy.corp.internal:3128
+<a id="__codelineno-12-2" name="__codelineno-12-2"></a><span class="nb">export</span><span class="w"> </span><span class="nv">HTTP_PROXY</span><span class="o">=</span>http://proxy.corp.internal:3128
+<a id="__codelineno-12-3" name="__codelineno-12-3"></a><span class="nb">export</span><span class="w"> </span><span class="nv">NO_PROXY</span><span class="o">=</span>localhost,127.0.0.1,.corp.internal
+</code></pre></div></td></tr></table></div>
+</li>
+<li>
+<p>Then everything just works:</p>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-13-1">1</a></span>
+<span class="normal"><a href="#__codelineno-13-2">2</a></span>
+<span class="normal"><a href="#__codelineno-13-3">3</a></span>
+<span class="normal"><a href="#__codelineno-13-4">4</a></span>
+<span class="normal"><a href="#__codelineno-13-5">5</a></span>
+<span class="normal"><a href="#__codelineno-13-6">6</a></span>
+<span class="normal"><a href="#__codelineno-13-7">7</a></span>
+<span class="normal"><a href="#__codelineno-13-8">8</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1"></a><span class="c1"># Downloader uses curl, honors HTTPS_PROXY</span>
+<a id="__codelineno-13-2" name="__codelineno-13-2"></a>./downloader/download_taxi_data.sh<span class="w"> </span>--recent<span class="w"> </span><span class="m">3</span><span class="w"> </span>yellow
+<a id="__codelineno-13-3" name="__codelineno-13-3"></a>
+<a id="__codelineno-13-4" name="__codelineno-13-4"></a><span class="c1"># uv also honors it</span>
+<a id="__codelineno-13-5" name="__codelineno-13-5"></a>uv<span class="w"> </span>sync<span class="w"> </span>--extra<span class="w"> </span><span class="nb">test</span>
+<a id="__codelineno-13-6" name="__codelineno-13-6"></a>
+<a id="__codelineno-13-7" name="__codelineno-13-7"></a><span class="c1"># gh honors it too (for API + PR operations)</span>
+<a id="__codelineno-13-8" name="__codelineno-13-8"></a>gh<span class="w"> </span>auth<span class="w"> </span>login
+</code></pre></div></td></tr></table></div>
+</li>
+<li>
+<p>Persist across sessions by adding to <code>~/.bashrc</code> / <code>~/.zshrc</code>:</p>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-14-1">1</a></span>
+<span class="normal"><a href="#__codelineno-14-2">2</a></span>
+<span class="normal"><a href="#__codelineno-14-3">3</a></span>
+<span class="normal"><a href="#__codelineno-14-4">4</a></span>
+<span class="normal"><a href="#__codelineno-14-5">5</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-14-1" name="__codelineno-14-1"></a><span class="k">if</span><span class="w"> </span><span class="o">[</span><span class="w"> </span>-z<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$HTTPS_PROXY</span><span class="s2">&quot;</span><span class="w"> </span><span class="o">]</span><span class="p">;</span><span class="w"> </span><span class="k">then</span>
+<a id="__codelineno-14-2" name="__codelineno-14-2"></a><span class="w">    </span><span class="nb">export</span><span class="w"> </span><span class="nv">HTTPS_PROXY</span><span class="o">=</span>http://proxy.corp.internal:3128
+<a id="__codelineno-14-3" name="__codelineno-14-3"></a><span class="w">    </span><span class="nb">export</span><span class="w"> </span><span class="nv">HTTP_PROXY</span><span class="o">=</span>http://proxy.corp.internal:3128
+<a id="__codelineno-14-4" name="__codelineno-14-4"></a><span class="w">    </span><span class="nb">export</span><span class="w"> </span><span class="nv">NO_PROXY</span><span class="o">=</span>localhost,127.0.0.1,.corp.internal
+<a id="__codelineno-14-5" name="__codelineno-14-5"></a><span class="k">fi</span>
+</code></pre></div></td></tr></table></div>
+</li>
+</ol>
+<p><strong>Notes:</strong></p>
+<ul>
+<li>If your proxy requires authentication: <code>http://user:pass@proxy.corp.internal:3128</code>. Prefer a keychain-backed helper over hardcoding.</li>
+<li>Some corporate proxies MITM HTTPS with a self-signed CA. Point curl at the CA bundle via <code>CURL_CA_BUNDLE=/path/to/corp-ca.pem</code>; python via <code>SSL_CERT_FILE</code>; uv reads <code>UV_NATIVE_TLS=true</code> for OS trust store on Windows/macOS.</li>
+<li><code>NO_PROXY=localhost</code> matters if you're running SQL Server locally — you don't want K6 hitting the proxy for <code>localhost:1433</code>.</li>
+<li>Docker's daemon has its own proxy configuration (<code>/etc/systemd/system/docker.service.d/http-proxy.conf</code>) — env vars in your shell don't affect image pulls.</li>
+</ul>
+<h2 id="populating-a-fresh-dev-sql-server">Populating a fresh dev SQL Server</h2>
+<p><strong>Goal:</strong> go from an empty Docker-hosted SQL Server to a populated <code>yellow_trips</code> table in ~30 minutes.</p>
+<p><strong>Recipe:</strong></p>
+<ol>
+<li>
+<p>Start SQL Server (from the <a href="../guides/k6-loadtest/">K6 Load Test guide</a>):</p>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-15-1"> 1</a></span>
+<span class="normal"><a href="#__codelineno-15-2"> 2</a></span>
+<span class="normal"><a href="#__codelineno-15-3"> 3</a></span>
+<span class="normal"><a href="#__codelineno-15-4"> 4</a></span>
+<span class="normal"><a href="#__codelineno-15-5"> 5</a></span>
+<span class="normal"><a href="#__codelineno-15-6"> 6</a></span>
+<span class="normal"><a href="#__codelineno-15-7"> 7</a></span>
+<span class="normal"><a href="#__codelineno-15-8"> 8</a></span>
+<span class="normal"><a href="#__codelineno-15-9"> 9</a></span>
+<span class="normal"><a href="#__codelineno-15-10">10</a></span>
+<span class="normal"><a href="#__codelineno-15-11">11</a></span>
+<span class="normal"><a href="#__codelineno-15-12">12</a></span>
+<span class="normal"><a href="#__codelineno-15-13">13</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-15-1" name="__codelineno-15-1"></a>cat<span class="w"> </span>&gt;<span class="w"> </span>docker-compose.yml<span class="w"> </span><span class="s">&lt;&lt;&#39;EOF&#39;</span>
+<a id="__codelineno-15-2" name="__codelineno-15-2"></a><span class="s">services:</span>
+<a id="__codelineno-15-3" name="__codelineno-15-3"></a><span class="s">  sqlserver:</span>
+<a id="__codelineno-15-4" name="__codelineno-15-4"></a><span class="s">    image: mcr.microsoft.com/mssql/server:2022-latest</span>
+<a id="__codelineno-15-5" name="__codelineno-15-5"></a><span class="s">    environment:</span>
+<a id="__codelineno-15-6" name="__codelineno-15-6"></a><span class="s">      MSSQL_SA_PASSWORD: &quot;YourStrong@Passw0rd&quot;</span>
+<a id="__codelineno-15-7" name="__codelineno-15-7"></a><span class="s">      ACCEPT_EULA: &quot;Y&quot;</span>
+<a id="__codelineno-15-8" name="__codelineno-15-8"></a><span class="s">    ports: [ &quot;1433:1433&quot; ]</span>
+<a id="__codelineno-15-9" name="__codelineno-15-9"></a><span class="s">    volumes: [ &quot;sqlserver-data:/var/opt/mssql&quot; ]</span>
+<a id="__codelineno-15-10" name="__codelineno-15-10"></a><span class="s">volumes:</span>
+<a id="__codelineno-15-11" name="__codelineno-15-11"></a><span class="s">  sqlserver-data:</span>
+<a id="__codelineno-15-12" name="__codelineno-15-12"></a><span class="s">EOF</span>
+<a id="__codelineno-15-13" name="__codelineno-15-13"></a>docker<span class="w"> </span>compose<span class="w"> </span>up<span class="w"> </span>-d
+</code></pre></div></td></tr></table></div>
+</li>
+<li>
+<p>Fetch three months of yellow (small enough to complete in a couple of minutes):</p>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-16-1">1</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-16-1" name="__codelineno-16-1"></a>./downloader/download_taxi_data.sh<span class="w"> </span>--recent<span class="w"> </span><span class="m">3</span><span class="w"> </span>yellow
+</code></pre></div></td></tr></table></div>
+</li>
+<li>
+<p>Normalize (first-run bootstrap + human ack pass omitted for brevity — on a stable-schema <code>--recent 3</code> window it's typically a no-op):</p>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-17-1">1</a></span>
+<span class="normal"><a href="#__codelineno-17-2">2</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-17-1" name="__codelineno-17-1"></a>uv<span class="w"> </span>run<span class="w"> </span>normalize<span class="w"> </span>yellow
+<a id="__codelineno-17-2" name="__codelineno-17-2"></a>uv<span class="w"> </span>run<span class="w"> </span>normalize<span class="w"> </span>yellow<span class="w">    </span><span class="c1"># 2nd run once mapping is fine</span>
+</code></pre></div></td></tr></table></div>
+</li>
+<li>
+<p>Configure <code>k6-preprocess</code> to load normalized parquet as a one-shot bulk load. Edit <code>k6-loadtest/config.yaml</code>:</p>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-18-1"> 1</a></span>
+<span class="normal"><a href="#__codelineno-18-2"> 2</a></span>
+<span class="normal"><a href="#__codelineno-18-3"> 3</a></span>
+<span class="normal"><a href="#__codelineno-18-4"> 4</a></span>
+<span class="normal"><a href="#__codelineno-18-5"> 5</a></span>
+<span class="normal"><a href="#__codelineno-18-6"> 6</a></span>
+<span class="normal"><a href="#__codelineno-18-7"> 7</a></span>
+<span class="normal"><a href="#__codelineno-18-8"> 8</a></span>
+<span class="normal"><a href="#__codelineno-18-9"> 9</a></span>
+<span class="normal"><a href="#__codelineno-18-10">10</a></span>
+<span class="normal"><a href="#__codelineno-18-11">11</a></span>
+<span class="normal"><a href="#__codelineno-18-12">12</a></span>
+<span class="normal"><a href="#__codelineno-18-13">13</a></span>
+<span class="normal"><a href="#__codelineno-18-14">14</a></span>
+<span class="normal"><a href="#__codelineno-18-15">15</a></span>
+<span class="normal"><a href="#__codelineno-18-16">16</a></span>
+<span class="normal"><a href="#__codelineno-18-17">17</a></span>
+<span class="normal"><a href="#__codelineno-18-18">18</a></span>
+<span class="normal"><a href="#__codelineno-18-19">19</a></span>
+<span class="normal"><a href="#__codelineno-18-20">20</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-18-1" name="__codelineno-18-1"></a><span class="nt">data_sources</span><span class="p">:</span>
+<a id="__codelineno-18-2" name="__codelineno-18-2"></a><span class="w">  </span><span class="nt">yellow_trips</span><span class="p">:</span>
+<a id="__codelineno-18-3" name="__codelineno-18-3"></a><span class="w">    </span><span class="nt">mode</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">parquet</span>
+<a id="__codelineno-18-4" name="__codelineno-18-4"></a><span class="w">    </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">raw-normalized/yellow/**/*.parquet</span>
+<a id="__codelineno-18-5" name="__codelineno-18-5"></a><span class="w">    </span><span class="nt">key_columns</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">tpep_pickup_datetime</span><span class="p p-Indicator">]</span>
+<a id="__codelineno-18-6" name="__codelineno-18-6"></a>
+<a id="__codelineno-18-7" name="__codelineno-18-7"></a><span class="nt">targets</span><span class="p">:</span>
+<a id="__codelineno-18-8" name="__codelineno-18-8"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">local</span>
+<a id="__codelineno-18-9" name="__codelineno-18-9"></a><span class="w">    </span><span class="nt">host</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">localhost</span>
+<a id="__codelineno-18-10" name="__codelineno-18-10"></a><span class="w">    </span><span class="nt">port</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1433</span>
+<a id="__codelineno-18-11" name="__codelineno-18-11"></a><span class="w">    </span><span class="nt">database</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">master</span>
+<a id="__codelineno-18-12" name="__codelineno-18-12"></a><span class="w">    </span><span class="nt">user</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">sa</span>
+<a id="__codelineno-18-13" name="__codelineno-18-13"></a><span class="w">    </span><span class="nt">password_env</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">MSSQL_PASSWORD</span>
+<a id="__codelineno-18-14" name="__codelineno-18-14"></a>
+<a id="__codelineno-18-15" name="__codelineno-18-15"></a><span class="nt">scenarios</span><span class="p">:</span>
+<a id="__codelineno-18-16" name="__codelineno-18-16"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bulk_load</span>
+<a id="__codelineno-18-17" name="__codelineno-18-17"></a><span class="w">    </span><span class="nt">data_source</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">yellow_trips</span>
+<a id="__codelineno-18-18" name="__codelineno-18-18"></a><span class="w">    </span><span class="nt">target</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">local</span>
+<a id="__codelineno-18-19" name="__codelineno-18-19"></a><span class="w">    </span><span class="nt">vus</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">4</span>
+<a id="__codelineno-18-20" name="__codelineno-18-20"></a><span class="w">    </span><span class="nt">iterations</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">-1</span>
+</code></pre></div></td></tr></table></div>
+</li>
+<li>
+<p>Preprocess, apply DDL, run:</p>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-19-1">1</a></span>
+<span class="normal"><a href="#__codelineno-19-2">2</a></span>
+<span class="normal"><a href="#__codelineno-19-3">3</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-19-1" name="__codelineno-19-1"></a>uv<span class="w"> </span>run<span class="w"> </span>k6-preprocess<span class="w"> </span>--config<span class="w"> </span>k6-loadtest/config.yaml<span class="w"> </span>--output<span class="w"> </span>k6-loadtest/output/
+<a id="__codelineno-19-2" name="__codelineno-19-2"></a>sqlcmd<span class="w"> </span>-S<span class="w"> </span>localhost<span class="w"> </span>-U<span class="w"> </span>sa<span class="w"> </span>-P<span class="w"> </span><span class="s1">&#39;YourStrong@Passw0rd&#39;</span><span class="w"> </span>-i<span class="w"> </span>k6-loadtest/output/schema/yellow_trips.sql
+<a id="__codelineno-19-3" name="__codelineno-19-3"></a><span class="nv">MSSQL_PASSWORD</span><span class="o">=</span><span class="s1">&#39;YourStrong@Passw0rd&#39;</span><span class="w"> </span>./k6-loadtest/k6<span class="w"> </span>run<span class="w"> </span>k6-loadtest/output/test.js
+</code></pre></div></td></tr></table></div>
+</li>
+<li>
+<p>Verify the load:</p>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-20-1">1</a></span>
+<span class="normal"><a href="#__codelineno-20-2">2</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-20-1" name="__codelineno-20-1"></a>sqlcmd<span class="w"> </span>-S<span class="w"> </span>localhost<span class="w"> </span>-U<span class="w"> </span>sa<span class="w"> </span>-P<span class="w"> </span><span class="s1">&#39;YourStrong@Passw0rd&#39;</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-20-2" name="__codelineno-20-2"></a><span class="w">  </span>-Q<span class="w"> </span><span class="s2">&quot;SELECT count(*) FROM master.dbo.yellow_trips;&quot;</span>
+</code></pre></div></td></tr></table></div>
+</li>
+</ol>
+<p><strong>Notes:</strong></p>
+<ul>
+<li><code>iterations: -1</code> means "keep iterating until the fixture is exhausted"; with <code>vus: 4</code>, four connections load in parallel.</li>
+<li>SQL Server's default <code>master</code> database is fine for a dev target. For anything real, <code>CREATE DATABASE taxi</code> and put the table there.</li>
+<li>Total time is dominated by network to CloudFront (parquet download) then network to SQL Server (bulk insert). On a residential gigabit link, ~30 minutes for <code>--recent 3 yellow</code>.</li>
+<li>If you're iterating on schema and want to reset without losing the container: <code>sqlcmd ... -Q "DROP TABLE yellow_trips;"</code> then re-apply the DDL — much faster than tearing down the volume.</li>
+</ul>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var labels=set.querySelector(".tabbed-labels");for(var tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["content.code.copy", "content.tabs.link", "navigation.tracking", "navigation.top", "search.highlight", "search.share"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+    
+  </body>
+</html>

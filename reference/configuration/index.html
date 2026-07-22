@@ -1,0 +1,1903 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Downloader, schema-drift analyzer, and K6 SQL Server load tester for NYC TLC taxi trip data">
+      
+      
+      
+        <link rel="canonical" href="https://andrekamman.github.io/taxi/reference/configuration/">
+      
+      
+        <link rel="prev" href="../../architecture/">
+      
+      
+        <link rel="next" href="../exit-codes/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>Configuration - taxi</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.ec1eaa64.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#configuration-reference" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="taxi" class="md-header__button md-logo" aria-label="taxi" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            taxi
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Configuration
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+          <a href="javascript:void(0)" class="md-search__icon md-icon" title="Share" aria-label="Share" data-clipboard data-clipboard-text="" data-md-component="search-share" tabindex="-1">
+            
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9a3 3 0 0 0-3 3 3 3 0 0 0 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.15c-.05.21-.08.43-.08.66 0 1.61 1.31 2.91 2.92 2.91s2.92-1.3 2.92-2.91A2.92 2.92 0 0 0 18 16.08"/></svg>
+          </a>
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/andrekamman/taxi" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    andrekamman/taxi
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="taxi" class="md-nav__button md-logo" aria-label="taxi" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    taxi
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/andrekamman/taxi" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    andrekamman/taxi
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../getting-started/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Guides
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Guides
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/downloader/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Downloader
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/schema-drift/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Schema Drift
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/normalize/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Normalize
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/k6-loadtest/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    K6 Load Test
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../cookbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Cookbook
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reference
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Reference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Configuration
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Configuration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#normalize-mapping-yaml" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Normalize mapping YAML
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Normalize mapping YAML">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#top-level-fields" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Top-level fields
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#lossycastentry-fields" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        LossyCastEntry fields
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#datalossentry-fields" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        DataLossEntry fields
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#automatic-behavior-no-mapping-entry-needed" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Automatic behavior (no mapping entry needed)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#what-triggers-an-error" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What triggers an error
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#emitted-yaml-shape" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Emitted YAML shape
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fully-worked-example" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Fully-worked example
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#loader-rejected-shapes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Loader-rejected shapes
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#k6-load-test-config-yaml" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        K6 load-test config YAML
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="K6 load-test config YAML">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#top-level-structure" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Top-level structure
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#data-source-config-per-source" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Data source config (per source)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#target-config" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Target config
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#scenario-config" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Scenario config
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#environment-variables" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Environment variables
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../exit-codes/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Exit codes
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Design Specs
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Design Specs
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../superpowers/specs/2026-07-19-monorepo-restructure-design/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Monorepo restructure
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../superpowers/specs/2026-07-21-normalizer-design/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Normalizer
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../superpowers/specs/2026-03-25-k6-sql-load-testing-design/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    K6 SQL load testing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../superpowers/specs/2026-07-22-documentation-design/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Documentation site
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../contributing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Contributing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#normalize-mapping-yaml" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Normalize mapping YAML
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Normalize mapping YAML">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#top-level-fields" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Top-level fields
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#lossycastentry-fields" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        LossyCastEntry fields
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#datalossentry-fields" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        DataLossEntry fields
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#automatic-behavior-no-mapping-entry-needed" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Automatic behavior (no mapping entry needed)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#what-triggers-an-error" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What triggers an error
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#emitted-yaml-shape" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Emitted YAML shape
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fully-worked-example" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Fully-worked example
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#loader-rejected-shapes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Loader-rejected shapes
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#k6-load-test-config-yaml" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        K6 load-test config YAML
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="K6 load-test config YAML">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#top-level-structure" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Top-level structure
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#data-source-config-per-source" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Data source config (per source)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#target-config" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Target config
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#scenario-config" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Scenario config
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#environment-variables" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Environment variables
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="configuration-reference">Configuration reference</h1>
+<p>Field-by-field schema for every YAML configuration file in the repo, plus the environment variables the tools honor. Guides in the <a href="../../guides/normalize/">Guides section</a> explain the <em>why</em> of each field; this page lists the <em>what</em>, the <em>type</em>, and the <em>default</em>.</p>
+<h2 id="normalize-mapping-yaml">Normalize mapping YAML</h2>
+<p><strong>File path:</strong> <code>normalize/mappings/&lt;type&gt;.yaml</code> where <code>&lt;type&gt;</code> is one of <code>yellow</code>, <code>green</code>, <code>fhv</code>, <code>fhvhv</code>.</p>
+<p>Emitted by <code>normalize &lt;type&gt;</code> on bootstrap (first run against a type with no mapping) and amended in place on subsequent runs with unresolved items. Hand-edited by the user between runs to accept or reject SUGGESTED entries and to fill in <code>ack_date:</code> on TODO blocks. Consumed by every subsequent <code>normalize &lt;type&gt;</code> run.</p>
+<h3 id="top-level-fields">Top-level fields</h3>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Required</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>target</code></td>
+<td>string</td>
+<td>yes</td>
+<td>Filename (basename) of the target parquet in <code>raw/&lt;type&gt;/**/</code>. Pins the schema that every historical file will be conformed to. Bootstrap picks the newest file at generation time; humans can bump it manually when a new "latest" appears.</td>
+</tr>
+<tr>
+<td><code>renames</code></td>
+<td>dict[str, str]</td>
+<td>no</td>
+<td>Map of <code>&lt;old_name&gt;: &lt;new_name&gt;</code>. Both must be strings. Applies when the historical column name is <code>&lt;old_name&gt;</code> and the target has <code>&lt;new_name&gt;</code>.</td>
+</tr>
+<tr>
+<td><code>lossy_casts</code></td>
+<td>dict[str, LossyCastEntry]</td>
+<td>no</td>
+<td>Explicit acknowledgments for type casts that could lose data (range or precision). Keyed by the target column name.</td>
+</tr>
+<tr>
+<td><code>acknowledged_data_loss</code></td>
+<td>dict[str, DataLossEntry]</td>
+<td>no</td>
+<td>Explicit acknowledgments for historical columns that have data but no place to land in the target schema (and no rename mapping). Keyed by the historical column name.</td>
+</tr>
+</tbody>
+</table>
+<p>Unknown top-level keys are rejected by the loader.</p>
+<h3 id="lossycastentry-fields"><code>LossyCastEntry</code> fields</h3>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Required</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>from</code></td>
+<td>string</td>
+<td>yes</td>
+<td>Historical column's DuckDB type (<code>DOUBLE</code>, <code>INTEGER</code>, <code>VARCHAR</code>, etc.).</td>
+</tr>
+<tr>
+<td><code>to</code></td>
+<td>string</td>
+<td>yes</td>
+<td>Target column's DuckDB type. Cast target used at runtime.</td>
+</tr>
+<tr>
+<td><code>ack_date</code></td>
+<td>string (ISO-8601 date)</td>
+<td><strong>yes</strong></td>
+<td>Anything truthy counts as acknowledgment; convention is <code>YYYY-MM-DD</code>. Its presence is what the tool enforces.</td>
+</tr>
+<tr>
+<td><code>ack_by</code></td>
+<td>string</td>
+<td>no</td>
+<td>Recommended for audit trails. Any identifier (GitHub handle, email, name).</td>
+</tr>
+<tr>
+<td><code>reason</code></td>
+<td>string</td>
+<td>no</td>
+<td>Recommended. One-sentence justification. Survives amend cycles; free-form YAML body comments do not.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="datalossentry-fields"><code>DataLossEntry</code> fields</h3>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Required</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>ack_date</code></td>
+<td>string (ISO-8601 date)</td>
+<td><strong>yes</strong></td>
+<td>Same convention as <code>LossyCastEntry.ack_date</code>.</td>
+</tr>
+<tr>
+<td><code>ack_by</code></td>
+<td>string</td>
+<td>no</td>
+<td>Recommended.</td>
+</tr>
+<tr>
+<td><code>reason</code></td>
+<td>string</td>
+<td>no</td>
+<td>Recommended.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="automatic-behavior-no-mapping-entry-needed">Automatic behavior (no mapping entry needed)</h3>
+<ul>
+<li><strong>All-null column drop.</strong> Historical column always-null across every file AND missing from target → dropped. No data lost.</li>
+<li><strong>Missing-in-historical null-fill.</strong> Column present in target but missing from a given historical file → filled with <code>NULL</code>.</li>
+<li><strong>Safe widening cast.</strong> Type change where the target can represent every possible source value (<code>INT</code> → <code>BIGINT</code>, <code>FLOAT</code> → <code>DOUBLE</code>, <code>VARCHAR(10)</code> → <code>VARCHAR(50)</code>) → auto-cast.</li>
+</ul>
+<h3 id="what-triggers-an-error">What triggers an error</h3>
+<ul>
+<li>Historical column has non-null data, is missing from target, and has no entry in <code>renames:</code> or <code>acknowledged_data_loss:</code>.</li>
+<li>Type cast between historical and target could lose data (range or precision) and has no entry in <code>lossy_casts:</code>.</li>
+<li><code>lossy_casts:</code> or <code>acknowledged_data_loss:</code> entry missing <code>ack_date:</code>.</li>
+</ul>
+<p>On error, the tool amends the mapping file with new SUGGESTED/TODO entries for every unresolved item, prints the consolidated report, and exits <code>1</code>. Nothing is written to <code>raw-normalized/</code>.</p>
+<h3 id="emitted-yaml-shape">Emitted YAML shape</h3>
+<p>On bootstrap the tool writes a <strong>timeline header</strong> (one comment line per detected schema-drift transition) followed by <code>target:</code>, <code>renames:</code>, <code>lossy_casts:</code>, and <code>acknowledged_data_loss:</code>. Every SUGGESTED rename appears as a commented <code># SUGGESTED (confidence X%, data-verified) — uncomment to accept:</code> line above a commented <code># &lt;old&gt;: &lt;new&gt;</code> line. Every TODO ack appears as a commented block ending in <code># ack_date:</code> (empty — you fill it in).</p>
+<p>On amend, existing semantic entries survive, new SUGGESTED/TODO items are appended below them, and the timeline header is regenerated. <strong>Free-form body comments in the YAML do not survive</strong> — PyYAML strips them on parse. Put reasoning in the <code>reason:</code> field of an ack entry, or in the git commit message.</p>
+<h3 id="fully-worked-example">Fully-worked example</h3>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-1"> 1</a></span>
+<span class="normal"><a href="#__codelineno-0-2"> 2</a></span>
+<span class="normal"><a href="#__codelineno-0-3"> 3</a></span>
+<span class="normal"><a href="#__codelineno-0-4"> 4</a></span>
+<span class="normal"><a href="#__codelineno-0-5"> 5</a></span>
+<span class="normal"><a href="#__codelineno-0-6"> 6</a></span>
+<span class="normal"><a href="#__codelineno-0-7"> 7</a></span>
+<span class="normal"><a href="#__codelineno-0-8"> 8</a></span>
+<span class="normal"><a href="#__codelineno-0-9"> 9</a></span>
+<span class="normal"><a href="#__codelineno-0-10">10</a></span>
+<span class="normal"><a href="#__codelineno-0-11">11</a></span>
+<span class="normal"><a href="#__codelineno-0-12">12</a></span>
+<span class="normal"><a href="#__codelineno-0-13">13</a></span>
+<span class="normal"><a href="#__codelineno-0-14">14</a></span>
+<span class="normal"><a href="#__codelineno-0-15">15</a></span>
+<span class="normal"><a href="#__codelineno-0-16">16</a></span>
+<span class="normal"><a href="#__codelineno-0-17">17</a></span>
+<span class="normal"><a href="#__codelineno-0-18">18</a></span>
+<span class="normal"><a href="#__codelineno-0-19">19</a></span>
+<span class="normal"><a href="#__codelineno-0-20">20</a></span>
+<span class="normal"><a href="#__codelineno-0-21">21</a></span>
+<span class="normal"><a href="#__codelineno-0-22">22</a></span>
+<span class="normal"><a href="#__codelineno-0-23">23</a></span>
+<span class="normal"><a href="#__codelineno-0-24">24</a></span>
+<span class="normal"><a href="#__codelineno-0-25">25</a></span>
+<span class="normal"><a href="#__codelineno-0-26">26</a></span>
+<span class="normal"><a href="#__codelineno-0-27">27</a></span>
+<span class="normal"><a href="#__codelineno-0-28">28</a></span>
+<span class="normal"><a href="#__codelineno-0-29">29</a></span>
+<span class="normal"><a href="#__codelineno-0-30">30</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1"></a><span class="c1"># Generated by `normalize yellow` on 2026-07-22.</span>
+<a id="__codelineno-0-2" name="__codelineno-0-2"></a><span class="c1"># Detected drift transitions:</span>
+<a id="__codelineno-0-3" name="__codelineno-0-3"></a><span class="c1">#   2013-01 -&gt; 2015-01: renamed pu_datetime-&gt;tpep_pickup_datetime; added PULocationID</span>
+<a id="__codelineno-0-4" name="__codelineno-0-4"></a><span class="c1">#   2016-06 -&gt; 2016-07: dropped pickup_latitude, pickup_longitude</span>
+<a id="__codelineno-0-5" name="__codelineno-0-5"></a><span class="c1">#   2020-01 -&gt; 2020-02: added congestion_surcharge</span>
+<a id="__codelineno-0-6" name="__codelineno-0-6"></a><span class="c1">#   2023-01 -&gt; 2023-02: added airport_fee</span>
+<a id="__codelineno-0-7" name="__codelineno-0-7"></a>
+<a id="__codelineno-0-8" name="__codelineno-0-8"></a><span class="nt">target</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">yellow_tripdata_2024-01.parquet</span>
+<a id="__codelineno-0-9" name="__codelineno-0-9"></a>
+<a id="__codelineno-0-10" name="__codelineno-0-10"></a><span class="nt">renames</span><span class="p">:</span>
+<a id="__codelineno-0-11" name="__codelineno-0-11"></a><span class="w">  </span><span class="nt">pu_datetime</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">tpep_pickup_datetime</span>
+<a id="__codelineno-0-12" name="__codelineno-0-12"></a><span class="w">  </span><span class="nt">do_datetime</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">tpep_dropoff_datetime</span>
+<a id="__codelineno-0-13" name="__codelineno-0-13"></a>
+<a id="__codelineno-0-14" name="__codelineno-0-14"></a><span class="nt">lossy_casts</span><span class="p">:</span>
+<a id="__codelineno-0-15" name="__codelineno-0-15"></a><span class="w">  </span><span class="nt">passenger_count</span><span class="p">:</span>
+<a id="__codelineno-0-16" name="__codelineno-0-16"></a><span class="w">    </span><span class="nt">from</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">DOUBLE</span>
+<a id="__codelineno-0-17" name="__codelineno-0-17"></a><span class="w">    </span><span class="nt">to</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">BIGINT</span>
+<a id="__codelineno-0-18" name="__codelineno-0-18"></a><span class="w">    </span><span class="nt">ack_date</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2026-07-21</span>
+<a id="__codelineno-0-19" name="__codelineno-0-19"></a><span class="w">    </span><span class="nt">ack_by</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">andrekamman</span>
+<a id="__codelineno-0-20" name="__codelineno-0-20"></a><span class="w">    </span><span class="nt">reason</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Values</span><span class="nv"> </span><span class="s">are</span><span class="nv"> </span><span class="s">logically</span><span class="nv"> </span><span class="s">integer;</span><span class="nv"> </span><span class="s">the</span><span class="nv"> </span><span class="s">2011-2014</span><span class="nv"> </span><span class="s">DOUBLE</span><span class="nv"> </span><span class="s">was</span><span class="nv"> </span><span class="s">a</span><span class="nv"> </span><span class="s">data-entry</span><span class="nv"> </span><span class="s">choice.&quot;</span>
+<a id="__codelineno-0-21" name="__codelineno-0-21"></a>
+<a id="__codelineno-0-22" name="__codelineno-0-22"></a><span class="nt">acknowledged_data_loss</span><span class="p">:</span>
+<a id="__codelineno-0-23" name="__codelineno-0-23"></a><span class="w">  </span><span class="nt">pickup_latitude</span><span class="p">:</span>
+<a id="__codelineno-0-24" name="__codelineno-0-24"></a><span class="w">    </span><span class="nt">ack_date</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2026-07-21</span>
+<a id="__codelineno-0-25" name="__codelineno-0-25"></a><span class="w">    </span><span class="nt">ack_by</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">andrekamman</span>
+<a id="__codelineno-0-26" name="__codelineno-0-26"></a><span class="w">    </span><span class="nt">reason</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Coarse-grained</span><span class="nv"> </span><span class="s">location</span><span class="nv"> </span><span class="s">data</span><span class="nv"> </span><span class="s">superseded</span><span class="nv"> </span><span class="s">by</span><span class="nv"> </span><span class="s">PULocationID</span><span class="nv"> </span><span class="s">zones.&quot;</span>
+<a id="__codelineno-0-27" name="__codelineno-0-27"></a><span class="w">  </span><span class="nt">pickup_longitude</span><span class="p">:</span>
+<a id="__codelineno-0-28" name="__codelineno-0-28"></a><span class="w">    </span><span class="nt">ack_date</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2026-07-21</span>
+<a id="__codelineno-0-29" name="__codelineno-0-29"></a><span class="w">    </span><span class="nt">ack_by</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">andrekamman</span>
+<a id="__codelineno-0-30" name="__codelineno-0-30"></a><span class="w">    </span><span class="nt">reason</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Same</span><span class="nv"> </span><span class="s">rationale</span><span class="nv"> </span><span class="s">as</span><span class="nv"> </span><span class="s">pickup_latitude.&quot;</span>
+</code></pre></div></td></tr></table></div>
+<h3 id="loader-rejected-shapes">Loader-rejected shapes</h3>
+<p>The loader is strict — anything outside the listed structure raises <code>MappingError</code>:</p>
+<ul>
+<li>Missing file → <code>Mapping file not found: {path}</code>.</li>
+<li>Empty file → <code>Empty mapping file: {path}</code>.</li>
+<li>YAML that parses to something other than a dict → <code>Mapping file must be a YAML mapping</code>.</li>
+<li>Unknown top-level key → <code>Unknown top-level key: {key}</code> (only <code>target</code>, <code>renames</code>, <code>lossy_casts</code>, <code>acknowledged_data_loss</code> are allowed).</li>
+<li>Missing <code>target:</code> → <code>Missing required field: target</code>.</li>
+<li><code>renames:</code> where a key or value is not a string → <code>Rename entry must be string-&gt;string, got {…}: {…}</code>.</li>
+<li><code>lossy_casts.&lt;col&gt;</code> that is not a dict → <code>lossy_casts.{col} must be a dict</code>.</li>
+<li><code>lossy_casts.&lt;col&gt;</code> missing <code>from:</code>, <code>to:</code>, or <code>ack_date:</code> → <code>lossy_casts.{col}: missing required field {field}</code>.</li>
+</ul>
+<p>The strictness is deliberate: silent tolerance of a mistyped field name would defeat the whole "explicit acknowledgment" model.</p>
+<h2 id="k6-load-test-config-yaml">K6 load-test config YAML</h2>
+<p><strong>File path:</strong> <code>k6-loadtest/config.yaml</code>. Typically copied from <code>k6-loadtest/config.sample.yaml</code> and edited.</p>
+<p>Consumed by <code>uv run k6-preprocess</code>, which validates the file, exports data, and writes a K6 test bundle to <code>k6-loadtest/output/</code>. Validation failures raise <code>ConfigError</code> and the tool exits <code>1</code>.</p>
+<h3 id="top-level-structure">Top-level structure</h3>
+<p>Three required top-level keys:</p>
+<ul>
+<li><code>data_sources:</code> — dict of <code>&lt;name&gt;: &lt;SourceConfig&gt;</code>. One entry per logical dataset (e.g. <code>yellow_trips</code>, <code>green_trips</code>).</li>
+<li><code>targets:</code> — dict of <code>&lt;name&gt;: &lt;TargetConfig&gt;</code>. One entry per SQL Server connection.</li>
+<li><code>scenarios:</code> — dict of <code>&lt;name&gt;: &lt;ScenarioConfig&gt;</code>. Each scenario ties one data source to one target and defines the K6 workload.</li>
+</ul>
+<p>Missing any of the three raises <code>Missing required section: &lt;name&gt;</code>.</p>
+<h3 id="data-source-config-per-source">Data source config (per source)</h3>
+<p>Fields common to both modes:</p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Required</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>mode</code></td>
+<td>string</td>
+<td>no</td>
+<td><code>parquet</code> (default) or <code>synthetic</code>. Anything else raises a <code>ConfigError</code>.</td>
+</tr>
+<tr>
+<td><code>key_columns</code></td>
+<td>list[str]</td>
+<td><strong>yes</strong></td>
+<td>Columns used as primary key for UPDATE and DELETE statements. Every name listed here must exist as a key in <code>columns:</code>.</td>
+</tr>
+<tr>
+<td><code>columns</code></td>
+<td>dict</td>
+<td><strong>yes</strong></td>
+<td>Column definitions. Shape differs per mode — see below.</td>
+</tr>
+</tbody>
+</table>
+<p>Parquet-mode-only fields:</p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Required</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>path</code></td>
+<td>string (glob)</td>
+<td><strong>yes</strong></td>
+<td>Glob pattern like <code>raw/yellow/**/*.parquet</code>. Validated at preprocess time; if the glob matches zero files, preprocess raises <code>path {…} matches no files</code>.</td>
+</tr>
+<tr>
+<td><code>chunk_size</code></td>
+<td>int</td>
+<td>no</td>
+<td>Rows per output JSON chunk. Larger chunks mean fewer bulk-insert round-trips at runtime but more RAM held by each VU's <code>SharedArray</code> slice.</td>
+</tr>
+<tr>
+<td><code>max_rows</code></td>
+<td>int</td>
+<td>no</td>
+<td>Optional cap on rows loaded from parquet. Useful for reducing preprocess time on very large datasets.</td>
+</tr>
+</tbody>
+</table>
+<p>Synthetic-mode-only fields:</p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Required</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>columns</code></td>
+<td>dict[str, ColumnSpec]</td>
+<td><strong>yes</strong></td>
+<td>Every column entry must be a dict with at least a <code>type:</code> key; missing <code>type</code> raises <code>synthetic column {…} must have a 'type' field</code>.</td>
+</tr>
+</tbody>
+</table>
+<p><code>ColumnSpec</code> fields (synthetic mode):</p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Required</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>type</code></td>
+<td>string</td>
+<td><strong>yes</strong></td>
+<td>One of <code>int</code>, <code>bigint</code>, <code>float</code>, <code>datetime</code>, <code>date</code>, <code>string</code>, <code>bool</code>. Maps to SQL Server types: <code>INT</code>, <code>BIGINT</code>, <code>FLOAT</code>, <code>DATETIME2</code>, <code>DATE</code>, <code>NVARCHAR(MAX)</code>, <code>BIT</code>.</td>
+</tr>
+<tr>
+<td><code>min</code></td>
+<td>number or ISO-8601 string</td>
+<td>no</td>
+<td>Lower bound for random generation. For <code>datetime</code>/<code>date</code>, use quoted ISO-8601 strings.</td>
+</tr>
+<tr>
+<td><code>max</code></td>
+<td>number or ISO-8601 string</td>
+<td>no</td>
+<td>Upper bound. Same shape as <code>min</code>.</td>
+</tr>
+</tbody>
+</table>
+<p>In parquet mode, <code>columns</code> is a dict of <code>&lt;canonical_name&gt;: &lt;parquet_column_name&gt;</code> — a rename map from the source parquet's column name to the name used in the generated SQL.</p>
+<p><strong>Synthetic-mode example:</strong></p>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-1-1"> 1</a></span>
+<span class="normal"><a href="#__codelineno-1-2"> 2</a></span>
+<span class="normal"><a href="#__codelineno-1-3"> 3</a></span>
+<span class="normal"><a href="#__codelineno-1-4"> 4</a></span>
+<span class="normal"><a href="#__codelineno-1-5"> 5</a></span>
+<span class="normal"><a href="#__codelineno-1-6"> 6</a></span>
+<span class="normal"><a href="#__codelineno-1-7"> 7</a></span>
+<span class="normal"><a href="#__codelineno-1-8"> 8</a></span>
+<span class="normal"><a href="#__codelineno-1-9"> 9</a></span>
+<span class="normal"><a href="#__codelineno-1-10">10</a></span>
+<span class="normal"><a href="#__codelineno-1-11">11</a></span>
+<span class="normal"><a href="#__codelineno-1-12">12</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1"></a><span class="nt">yellow_trips</span><span class="p">:</span>
+<a id="__codelineno-1-2" name="__codelineno-1-2"></a><span class="w">  </span><span class="nt">mode</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">synthetic</span>
+<a id="__codelineno-1-3" name="__codelineno-1-3"></a><span class="w">  </span><span class="nt">key_columns</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">pickup_time</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">dropoff_time</span><span class="p p-Indicator">]</span>
+<a id="__codelineno-1-4" name="__codelineno-1-4"></a><span class="w">  </span><span class="nt">columns</span><span class="p">:</span>
+<a id="__codelineno-1-5" name="__codelineno-1-5"></a><span class="w">    </span><span class="nt">pickup_time</span><span class="p">:</span>
+<a id="__codelineno-1-6" name="__codelineno-1-6"></a><span class="w">      </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">datetime</span>
+<a id="__codelineno-1-7" name="__codelineno-1-7"></a><span class="w">      </span><span class="nt">min</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;2026-01-01&quot;</span>
+<a id="__codelineno-1-8" name="__codelineno-1-8"></a><span class="w">      </span><span class="nt">max</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;2026-03-01&quot;</span>
+<a id="__codelineno-1-9" name="__codelineno-1-9"></a><span class="w">    </span><span class="nt">passenger_count</span><span class="p">:</span>
+<a id="__codelineno-1-10" name="__codelineno-1-10"></a><span class="w">      </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">int</span>
+<a id="__codelineno-1-11" name="__codelineno-1-11"></a><span class="w">      </span><span class="nt">min</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
+<a id="__codelineno-1-12" name="__codelineno-1-12"></a><span class="w">      </span><span class="nt">max</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">6</span>
+</code></pre></div></td></tr></table></div>
+<p><strong>Parquet-mode example:</strong></p>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-2-1"> 1</a></span>
+<span class="normal"><a href="#__codelineno-2-2"> 2</a></span>
+<span class="normal"><a href="#__codelineno-2-3"> 3</a></span>
+<span class="normal"><a href="#__codelineno-2-4"> 4</a></span>
+<span class="normal"><a href="#__codelineno-2-5"> 5</a></span>
+<span class="normal"><a href="#__codelineno-2-6"> 6</a></span>
+<span class="normal"><a href="#__codelineno-2-7"> 7</a></span>
+<span class="normal"><a href="#__codelineno-2-8"> 8</a></span>
+<span class="normal"><a href="#__codelineno-2-9"> 9</a></span>
+<span class="normal"><a href="#__codelineno-2-10">10</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1"></a><span class="nt">green_trips</span><span class="p">:</span>
+<a id="__codelineno-2-2" name="__codelineno-2-2"></a><span class="w">  </span><span class="nt">mode</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">parquet</span>
+<a id="__codelineno-2-3" name="__codelineno-2-3"></a><span class="w">  </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">raw/green/2026/*.parquet</span>
+<a id="__codelineno-2-4" name="__codelineno-2-4"></a><span class="w">  </span><span class="nt">chunk_size</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5000</span>
+<a id="__codelineno-2-5" name="__codelineno-2-5"></a><span class="w">  </span><span class="nt">max_rows</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1000000</span>
+<a id="__codelineno-2-6" name="__codelineno-2-6"></a><span class="w">  </span><span class="nt">key_columns</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">pickup_time</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">dropoff_time</span><span class="p p-Indicator">]</span>
+<a id="__codelineno-2-7" name="__codelineno-2-7"></a><span class="w">  </span><span class="nt">columns</span><span class="p">:</span>
+<a id="__codelineno-2-8" name="__codelineno-2-8"></a><span class="w">    </span><span class="nt">pickup_time</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">lpep_pickup_datetime</span>
+<a id="__codelineno-2-9" name="__codelineno-2-9"></a><span class="w">    </span><span class="nt">dropoff_time</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">lpep_dropoff_datetime</span>
+<a id="__codelineno-2-10" name="__codelineno-2-10"></a><span class="w">    </span><span class="nt">passenger_count</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">passenger_count</span>
+</code></pre></div></td></tr></table></div>
+<h3 id="target-config">Target config</h3>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Required</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>host</code></td>
+<td>string</td>
+<td><strong>yes</strong></td>
+<td>Hostname or IP address of the SQL Server.</td>
+</tr>
+<tr>
+<td><code>port</code></td>
+<td>int</td>
+<td><strong>yes</strong></td>
+<td>Typically <code>1433</code>.</td>
+</tr>
+<tr>
+<td><code>database</code></td>
+<td>string</td>
+<td><strong>yes</strong></td>
+<td>Target database name. Must already exist.</td>
+</tr>
+<tr>
+<td><code>username</code></td>
+<td>string</td>
+<td><strong>yes</strong></td>
+<td>SQL Server login.</td>
+</tr>
+<tr>
+<td><code>password</code></td>
+<td>string</td>
+<td><strong>yes</strong></td>
+<td>Password value or a <code>${VAR}</code> placeholder. The preprocessor preserves <code>${VAR}</code> verbatim in the generated manifest so K6 does the substitution at runtime — passwords never enter <code>test.js</code> or the generated manifest.</td>
+</tr>
+<tr>
+<td><code>table</code></td>
+<td>string</td>
+<td><strong>yes</strong></td>
+<td>Target table name for INSERT/UPDATE/DELETE statements.</td>
+</tr>
+</tbody>
+</table>
+<p>Missing any of these fields raises <code>Target {…}: missing required field {…}</code>.</p>
+<h3 id="scenario-config">Scenario config</h3>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Required</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>target</code></td>
+<td>string</td>
+<td><strong>yes</strong></td>
+<td>Name of an entry in the top-level <code>targets:</code> dict. Reference is validated.</td>
+</tr>
+<tr>
+<td><code>data_source</code></td>
+<td>string</td>
+<td><strong>yes</strong></td>
+<td>Name of an entry in the top-level <code>data_sources:</code> dict. Reference is validated.</td>
+</tr>
+<tr>
+<td><code>ordering</code></td>
+<td>string</td>
+<td>no</td>
+<td><code>parallel</code> (default) or <code>sequential</code>. Controls whether insert/update/delete phases run interleaved or in order.</td>
+</tr>
+<tr>
+<td><code>workload</code></td>
+<td>dict[str, int]</td>
+<td><strong>yes</strong></td>
+<td>Percentages for <code>insert</code>, <code>update</code>, <code>delete</code>. <strong>Must sum to exactly 100</strong> or preprocess raises <code>workload percentages must sum to 100, got {N}</code>.</td>
+</tr>
+<tr>
+<td><code>think_time</code></td>
+<td>dict</td>
+<td>no</td>
+<td>Bounds for random per-iteration sleep. Keys: <code>min:</code>, <code>max:</code>. Values are duration strings like <code>200ms</code> or <code>1.5s</code> — the parser rejects anything else.</td>
+</tr>
+<tr>
+<td><code>k6</code></td>
+<td>dict</td>
+<td><strong>yes</strong></td>
+<td>K6 executor configuration passed through verbatim to the generated <code>test.js</code>. Fields depend on executor; commonly <code>executor:</code> (<code>ramping-vus</code>, <code>constant-vus</code>, <code>shared-iterations</code>, etc.), <code>startVUs:</code>, <code>stages:</code> (list of <code>{duration, target}</code>), or <code>duration:</code>.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Scenario example:</strong></p>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-3-1"> 1</a></span>
+<span class="normal"><a href="#__codelineno-3-2"> 2</a></span>
+<span class="normal"><a href="#__codelineno-3-3"> 3</a></span>
+<span class="normal"><a href="#__codelineno-3-4"> 4</a></span>
+<span class="normal"><a href="#__codelineno-3-5"> 5</a></span>
+<span class="normal"><a href="#__codelineno-3-6"> 6</a></span>
+<span class="normal"><a href="#__codelineno-3-7"> 7</a></span>
+<span class="normal"><a href="#__codelineno-3-8"> 8</a></span>
+<span class="normal"><a href="#__codelineno-3-9"> 9</a></span>
+<span class="normal"><a href="#__codelineno-3-10">10</a></span>
+<span class="normal"><a href="#__codelineno-3-11">11</a></span>
+<span class="normal"><a href="#__codelineno-3-12">12</a></span>
+<span class="normal"><a href="#__codelineno-3-13">13</a></span>
+<span class="normal"><a href="#__codelineno-3-14">14</a></span>
+<span class="normal"><a href="#__codelineno-3-15">15</a></span>
+<span class="normal"><a href="#__codelineno-3-16">16</a></span>
+<span class="normal"><a href="#__codelineno-3-17">17</a></span>
+<span class="normal"><a href="#__codelineno-3-18">18</a></span>
+<span class="normal"><a href="#__codelineno-3-19">19</a></span>
+<span class="normal"><a href="#__codelineno-3-20">20</a></span>
+<span class="normal"><a href="#__codelineno-3-21">21</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1"></a><span class="nt">cdc_stress_test</span><span class="p">:</span>
+<a id="__codelineno-3-2" name="__codelineno-3-2"></a><span class="w">  </span><span class="nt">target</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">local_server</span>
+<a id="__codelineno-3-3" name="__codelineno-3-3"></a><span class="w">  </span><span class="nt">data_source</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">yellow_trips</span>
+<a id="__codelineno-3-4" name="__codelineno-3-4"></a><span class="w">  </span><span class="nt">ordering</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">parallel</span>
+<a id="__codelineno-3-5" name="__codelineno-3-5"></a><span class="w">  </span><span class="nt">workload</span><span class="p">:</span>
+<a id="__codelineno-3-6" name="__codelineno-3-6"></a><span class="w">    </span><span class="nt">insert</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">80</span>
+<a id="__codelineno-3-7" name="__codelineno-3-7"></a><span class="w">    </span><span class="nt">update</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">15</span>
+<a id="__codelineno-3-8" name="__codelineno-3-8"></a><span class="w">    </span><span class="nt">delete</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5</span>
+<a id="__codelineno-3-9" name="__codelineno-3-9"></a><span class="w">  </span><span class="nt">think_time</span><span class="p">:</span>
+<a id="__codelineno-3-10" name="__codelineno-3-10"></a><span class="w">    </span><span class="nt">min</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">200ms</span>
+<a id="__codelineno-3-11" name="__codelineno-3-11"></a><span class="w">    </span><span class="nt">max</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1s</span>
+<a id="__codelineno-3-12" name="__codelineno-3-12"></a><span class="w">  </span><span class="nt">k6</span><span class="p">:</span>
+<a id="__codelineno-3-13" name="__codelineno-3-13"></a><span class="w">    </span><span class="nt">executor</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ramping-vus</span>
+<a id="__codelineno-3-14" name="__codelineno-3-14"></a><span class="w">    </span><span class="nt">startVUs</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2</span>
+<a id="__codelineno-3-15" name="__codelineno-3-15"></a><span class="w">    </span><span class="nt">stages</span><span class="p">:</span>
+<a id="__codelineno-3-16" name="__codelineno-3-16"></a><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">duration</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1m</span>
+<a id="__codelineno-3-17" name="__codelineno-3-17"></a><span class="w">        </span><span class="nt">target</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">20</span>
+<a id="__codelineno-3-18" name="__codelineno-3-18"></a><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">duration</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5m</span>
+<a id="__codelineno-3-19" name="__codelineno-3-19"></a><span class="w">        </span><span class="nt">target</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">20</span>
+<a id="__codelineno-3-20" name="__codelineno-3-20"></a><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">duration</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1m</span>
+<a id="__codelineno-3-21" name="__codelineno-3-21"></a><span class="w">        </span><span class="nt">target</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0</span>
+</code></pre></div></td></tr></table></div>
+<h2 id="environment-variables">Environment variables</h2>
+<table>
+<thead>
+<tr>
+<th>Variable</th>
+<th>Used by</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>OUTPUT_DIR</code></td>
+<td>downloader</td>
+<td>Overrides the default <code>raw/</code> output directory. Absolute or relative to CWD. Common WSL usage: <code>OUTPUT_DIR=/mnt/c/Users/$USER/taxi-data</code> to write to the Windows filesystem instead of the WSL2 VHDX.</td>
+</tr>
+<tr>
+<td><code>MSSQL_PASSWORD</code></td>
+<td>K6 <code>test.js</code> (via <code>${MSSQL_PASSWORD}</code> in the sample <code>password:</code> value)</td>
+<td>SQL Server password. The variable name is a convention — any <code>${VAR}</code> placeholder in the target's <code>password:</code> field is preserved through preprocess and expanded by K6 at runtime, so you can name it anything.</td>
+</tr>
+<tr>
+<td><code>HTTPS_PROXY</code> / <code>HTTP_PROXY</code></td>
+<td>curl (downloader), uv, gh</td>
+<td>Standard HTTP proxy env vars. The downloader honors them implicitly via curl.</td>
+</tr>
+<tr>
+<td><code>NO_PROXY</code></td>
+<td>curl (downloader), uv, gh</td>
+<td>Standard bypass list. Include <code>localhost</code> if you run SQL Server locally and need it to bypass a corporate proxy.</td>
+</tr>
+</tbody>
+</table>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var labels=set.querySelector(".tabbed-labels");for(var tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["content.code.copy", "content.tabs.link", "navigation.tracking", "navigation.top", "search.highlight", "search.share"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+    
+  </body>
+</html>
