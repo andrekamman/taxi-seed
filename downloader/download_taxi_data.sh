@@ -7,25 +7,62 @@
 recent_only=0
 recent_months=3
 max_lookback_months=18  # in --recent mode, how far back to look per type before giving up
+recent_type=""          # empty = all four types
+full_type=""            # empty = all four types (full-history mode)
+
+DATA_TYPES=("yellow" "green" "fhv" "fhvhv")
+
+is_data_type() {
+    local candidate="$1"
+    for t in "${DATA_TYPES[@]}"; do
+        [[ "$candidate" == "$t" ]] && return 0
+    done
+    return 1
+}
 
 while [[ $# -gt 0 ]]; do
     case $1 in
         --recent)
             recent_only=1
-            if [[ -n "$2" && "$2" =~ ^[0-9]+$ ]]; then
-                recent_months=$2
+            shift
+            # Optional numeric N
+            if [[ $# -gt 0 && "$1" =~ ^[0-9]+$ ]]; then
+                recent_months=$1
                 shift
             fi
-            shift
+            # Optional TYPE
+            if [[ $# -gt 0 ]] && is_data_type "$1"; then
+                recent_type=$1
+                shift
+            fi
             ;;
         -h|--help)
-            echo "Usage: $0 [--recent [N]]"
-            echo "  --recent [N]  Download only the last N months (default 3) per data type, newest first"
+            cat <<'HELP'
+Usage:
+  ./download_taxi_data.sh                          Full history, all four types
+  ./download_taxi_data.sh TYPE                     Full history, one type only
+  ./download_taxi_data.sh --recent [N]             Recent N months (default 3), all types
+  ./download_taxi_data.sh --recent [N] TYPE        Recent N months (default 3), one type only
+  ./download_taxi_data.sh --recent TYPE            Recent 3 months, one type only
+
+TYPE is one of: yellow, green, fhv, fhvhv.
+
+Recent-mode walker semantics:
+  Walks backward from the previous month. A remotely-not-yet-published month
+  is skipped without counting. A locally-already-existing file stops the walker
+  (assumes prior runs downloaded everything older). Downloads count toward N.
+HELP
             exit 0
             ;;
         *)
-            echo "Unknown option: $1"
-            exit 1
+            if is_data_type "$1"; then
+                full_type=$1
+                shift
+            else
+                echo "Unknown option: $1" >&2
+                echo "Run '$0 --help' for usage." >&2
+                exit 1
+            fi
             ;;
     esac
 done
@@ -347,39 +384,38 @@ download_recent_type() {
         target_path="$output_dir/$data_type/$year/$filename"
 
         if [ -f "$target_path" ]; then
-            echo "  Already have $filename"
-            ((got++))
-        else
-            local url="https://d37ci6vzurychx.cloudfront.net/trip-data/${filename}"
-            echo "  Trying $filename..."
-            local status
-            status=$(download_one "$url" "$target_path")
-
-            case "$status" in
-                ok)
-                    echo "    Saved to $data_type/$year/$filename"
-                    ((got++))
-                    ratelimit_hits=0
-                    sleep 2
-                    ;;
-                notfound)
-                    echo "    Not published yet, trying older month"
-                    # No sleep — cheap probe, keep walking back.
-                    ;;
-                ratelimit)
-                    if handle_rate_limit; then
-                        # Retry the SAME month after backing off.
-                        walked=$((walked - 1))
-                    else
-                        return
-                    fi
-                    ;;
-                neterror)
-                    echo "    Transient error, brief pause then continue"
-                    sleep 10
-                    ;;
-            esac
+            echo "  Already have $filename — stopping (assume prior runs are caught up)"
+            break
         fi
+        local url="https://d37ci6vzurychx.cloudfront.net/trip-data/${filename}"
+        echo "  Trying $filename..."
+        local status
+        status=$(download_one "$url" "$target_path")
+
+        case "$status" in
+            ok)
+                echo "    Saved to $data_type/$year/$filename"
+                ((got++))
+                ratelimit_hits=0
+                sleep 2
+                ;;
+            notfound)
+                echo "    Not published yet, trying older month"
+                # No sleep — cheap probe, keep walking back.
+                ;;
+            ratelimit)
+                if handle_rate_limit; then
+                    # Retry the SAME month after backing off.
+                    walked=$((walked - 1))
+                else
+                    return
+                fi
+                ;;
+            neterror)
+                echo "    Transient error, brief pause then continue"
+                sleep 10
+                ;;
+        esac
 
         # Move to previous month
         ((month--))
@@ -389,39 +425,49 @@ download_recent_type() {
         fi
     done
 
-    if [ $got -lt $want ]; then
-        echo "  Got $got/$want months for $data_type (looked back $walked months)"
-    else
-        echo "  Got $got/$want months for $data_type"
-    fi
+    echo "  Downloaded $got new file(s) for $data_type (walked back $walked month(s))"
     echo ""
 }
 
-# Recent mode: download inline per type, walking back for unpublished months.
+# Recent mode: download inline per type, walking back for unpublished months,
+# stopping when a local file is encountered (incremental catch-up).
 if [ $recent_only -eq 1 ]; then
-    echo "Downloading recent $recent_months months per data type (newest first)..."
-    echo "Will walk back through older months for anything not yet published."
+    echo "Downloading recent $recent_months months$([ -n "$recent_type" ] && echo " ($recent_type)")..."
+    echo "Will walk back through older not-yet-published months, and stop"
+    echo "at the first locally-existing file (assumes prior runs are caught up)."
     echo ""
 
-    download_recent_type "yellow"
-    download_recent_type "green"
-    download_recent_type "fhv"
-    download_recent_type "fhvhv"
+    if [ -n "$recent_type" ]; then
+        download_recent_type "$recent_type"
+    else
+        download_recent_type "yellow"
+        download_recent_type "green"
+        download_recent_type "fhv"
+        download_recent_type "fhvhv"
+    fi
 
     echo "Download complete!"
     echo "Files saved to: ${output_dir}/<type>/<year>/"
     exit 0
 fi
 
-# Full mode: catch up on all history, per type. Each walker stops when it hits
-# the end of that type's published series and moves on.
-echo "Catching up all history per data type..."
+# Full mode: catch up on all history. Each walker stops when it hits the
+# end of that type's published series and moves on.
+echo "Catching up all history$([ -n "$full_type" ] && echo " ($full_type)")..."
 echo "Files saved to: ${output_dir}/<type>/<year>/"
 echo ""
 
-download_full_type "yellow" 2009 1
-download_full_type "green"  2013 8
-download_full_type "fhv"    2015 1
-download_full_type "fhvhv"  2019 2
+case "$full_type" in
+    "")
+        download_full_type "yellow" 2009 1
+        download_full_type "green"  2013 8
+        download_full_type "fhv"    2015 1
+        download_full_type "fhvhv"  2019 2
+        ;;
+    yellow)  download_full_type "yellow" 2009 1 ;;
+    green)   download_full_type "green"  2013 8 ;;
+    fhv)     download_full_type "fhv"    2015 1 ;;
+    fhvhv)   download_full_type "fhvhv"  2019 2 ;;
+esac
 
 echo "Download complete!"
