@@ -1068,11 +1068,11 @@ loss unless the operator explicitly acknowledges the drift. A full-history
 mirror is roughly 40 GB of parquet and takes 6–10 hours to download end-to-end
 on residential broadband, so the pipeline is designed to be resumable,
 incremental, and cheap to re-run on a schedule rather than something you kick
-off once and hope survives. The project is MIT-licensed and grew out of — but
-improves substantially on —
-<a href="https://github.com/toddwschneider/nyc-taxi-data"><code>toddwschneider/nyc-taxi-data</code></a>,
-replacing its one-shot loader script with an auditable pipeline that survives
-WAF rate limits, schema changes, and multi-year backfills.</p>
+off once and hope survives. The project is MIT-licensed. The downloader
+shell script was loosely based on
+<a href="https://github.com/toddwschneider/nyc-taxi-data"><code>toddwschneider/nyc-taxi-data</code></a>;
+the other three tools are original to this repo. See
+<a href="#acknowledgments">Acknowledgments</a> for details.</p>
 <h2 id="why-this-repo">Why this repo</h2>
 <ul>
 <li><strong>WAF-aware downloading</strong> — the CloudFront classifier distinguishes real
@@ -1170,15 +1170,14 @@ WAF rate limits, schema changes, and multi-year backfills.</p>
 </code></pre></div></td></tr></table></div>
 <div class="admonition tip">
 <p class="admonition-title">Tip</p>
-<p>Downloads ~200 MB in 1–2 minutes on residential broadband. See <a href="getting-started/">Getting Started</a> for the full end-to-end path from clone to normalized parquet.</p>
+<p>Downloads ~200 MB in 1–2 minutes on residential broadband. This Quick Start only exercises the downloader (bash + curl — no Python needed). To use the other three tools (schema-drift, normalize, k6-preprocess) you'll additionally need <code>uv sync</code> for the Python side; <a href="getting-started/">Getting Started</a> walks the full end-to-end path from clone to normalized parquet.</p>
 </div>
 <h2 id="requirements">Requirements</h2>
 <ul>
-<li>Python 3.12 or 3.13.</li>
-<li><a href="https://github.com/astral-sh/uv">uv</a> for Python environment management.</li>
-<li><code>bash</code> 4+ and <code>curl</code> (macOS/Linux ship both; on Windows install <a href="https://gitforwindows.org/">Git for Windows</a> and run in Git Bash).</li>
+<li><code>bash</code> 4+ and <code>curl</code> (macOS/Linux ship both; on Windows install <a href="https://gitforwindows.org/">Git for Windows</a> and run in Git Bash). Required by the downloader; that's all the downloader needs.</li>
+<li>Python 3.12 or 3.13, and <a href="https://github.com/astral-sh/uv">uv</a> for Python environment management. Required by the other three tools (schema-drift, normalize, k6-preprocess), which are all Python.</li>
 <li>Disk sized to intent — see the <a href="guides/downloader/#disk-sizing">Downloader guide</a> for a sizing table.</li>
-<li>Individual tools list per-guide prerequisites (Go 1.22+ for the K6 build, SQL Server for load testing, etc.).</li>
+<li>Individual tools list per-guide prerequisites (Go 1.22+ for the K6 binary build, SQL Server for load testing, etc.).</li>
 </ul>
 <h2 id="where-to-next">Where to next</h2>
 <ul>
@@ -1196,15 +1195,11 @@ WAF rate limits, schema changes, and multi-year backfills.</p>
   data at scale, and running the whole pipeline behind a corporate proxy.</li>
 </ul>
 <h2 id="acknowledgments">Acknowledgments</h2>
-<p>Originally inspired by
+<p>The <strong>downloader</strong> shell script was loosely based on
 <a href="https://github.com/toddwschneider/nyc-taxi-data"><code>toddwschneider/nyc-taxi-data</code></a>
-(MIT), whose one-shot Postgres loader was the reference point for what a
-public TLC pipeline should look like end-to-end. This repo diverges from
-Todd's in scope: instead of a single-target load script it is a parquet-first
-mirror-plus-normalize-plus-benchmark pipeline, and the schema-drift heuristic
-— column-name matching cross-validated against actual column data to catch
-renames the analyzer would otherwise miss — was developed here rather than
-inherited. See
+(MIT) — specifically its convention for organizing TLC parquet by type and
+year. The rest of the repo (schema-drift analyzer, normalizer, k6-loadtest rig)
+is original work and shares no code with Todd's project. See
 <a href="https://github.com/andrekamman/taxi/blob/main/THIRD_PARTY_NOTICES">THIRD_PARTY_NOTICES</a>
 for the full attribution.</p>
 
