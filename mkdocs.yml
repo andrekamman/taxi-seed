@@ -50,4 +50,8 @@ nav:
   - Getting Started: getting-started.md
   - Guides:
       - Downloader: guides/downloader.md
+      - Schema Drift: guides/schema-drift.md
+      - Normalize: guides/normalize.md
+      - K6 Load Test: guides/k6-loadtest.md
   - Cookbook: cookbook.md
+  - Architecture: architecture.md
