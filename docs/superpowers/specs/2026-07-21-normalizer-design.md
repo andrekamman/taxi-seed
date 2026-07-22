@@ -1,8 +1,39 @@
 # Normalizer Design
 
 **Date:** 2026-07-21
-**Status:** Approved, ready for implementation planning
+**Status:** Implemented; amended 2026-07-22 to collapse the CLI to a single command with implicit bootstrap + amend semantics.
 **Sub-project of:** the four-part expansion (normalizer, SQL Server loader, orchestrator, CI/CD)
+
+## Amendment: 2026-07-22 — implicit bootstrap + amend
+
+The originally-shipped CLI exposed two subcommands: `normalize bootstrap <type>` (explicit scaffold generation) and `normalize <type>` (actual normalization). The bootstrap step turned out to be a friction point in the docs and the user experience — a two-step "first bootstrap, then normalize" flow every user has to learn, when the tool could simply do the right thing automatically.
+
+**Revised behavior:**
+
+- The `bootstrap` subcommand is removed. `normalize <type>` is the only user-facing command.
+- **First run** (no mapping YAML exists): `normalize <type>` runs the schema-drift analysis, writes `normalize/mappings/<type>.yaml` with the full scaffold, prints next-step instructions, and exits with code **3**.
+- **Subsequent run with unresolved items in an existing mapping**: `normalize <type>` **amends** the existing YAML by appending new SUGGESTED/TODO entries for each unresolved column (schema-drift's rename detector is invoked again to seed new suggestions). The human's existing entries are preserved verbatim. Prints the consolidated unresolved report + a note about the amendment, exits with code **1**.
+- **Subsequent run with a complete mapping**: normalizes and exits **0**.
+- `--sample <N|N%>` moves to the top-level `normalize` command; it only takes effect when analysis actually runs (first-run bootstrap or amendment).
+
+**Mapping YAML additions:**
+
+- A machine-generated **timeline header** now precedes the mapping. The header lists each schema-drift transition as a one-line summary (e.g. `# 2013-01 -> 2015-01: renamed pu_datetime->tpep_pickup_datetime; added PULocationID`). The header is regenerated on every amend based on the current data.
+- The header also declares whether the file was "Generated" (first run) or "Amended" (subsequent run), with a date stamp.
+
+**Amend mechanics:**
+
+The existing mapping is loaded via `load_mapping()` (semantic content only — comments are stripped as part of PyYAML parsing). The tool then computes the set of columns already handled by any of `renames:`, `lossy_casts:`, or `acknowledged_data_loss:`, and only emits SUGGESTED/TODO items for columns not in that set. The YAML is fully rewritten: header + preserved semantic entries (as regular YAML) + new commented entries appended per section. Human-written comments in the body of the YAML are NOT preserved across amends — this is an accepted trade-off in exchange for keeping the amend logic simple. Uncommented decisions always survive.
+
+**Regenerating from scratch:** delete the mapping file and re-run.
+
+**Orchestrator implications:** the amend behavior is what makes the "keep the database up to date on a schedule" story work. When TLC ships a new drift months from now, the orchestrator's scheduled run will detect unresolved items, amend the YAML in place, and the human wakes up to a diff / notification with new SUGGESTED/TODO entries needing review — rather than a silent failure or a wholesale scaffold regeneration.
+
+**Test coverage delta:** removed the "refuses to overwrite" test; added tests for timeline header emission, amend-preserves-existing-content, amend-reports-zero-new-items-when-fully-resolved, amend-flags-only-new-items, first-run-bootstraps-and-exits-3, and unresolved-mapping-amends-and-exits-1. Full suite grew from 78 to 83 tests.
+
+Everything below this amendment describes the original design and remains accurate except for the CLI shape (single command instead of `bootstrap` + `normalize` subcommands) and the mapping file's header block.
+
+---
 
 ## Motivation
 
