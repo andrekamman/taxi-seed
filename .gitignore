@@ -215,3 +215,6 @@ k6-loadtest/k6
 # Superpowers session/plugin state (git worktrees, UI server pids, etc.)
 .claude/worktrees/
 .superpowers/
+
+# MkDocs build output
+site/
