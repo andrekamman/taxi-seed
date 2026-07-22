@@ -19,7 +19,7 @@ TLC parquet files drift heavily over the years — especially the first decade. 
 
 The normalizer reads historical parquet + a curated YAML mapping per data type, and writes normalized parquet files that all conform to the latest schema.
 
-**Data loss is a first-class error, not a warning.** If applying the mapping would drop a column that had non-null data in any historical file, or perform a lossy cast (e.g., `DOUBLE → BIGINT` where the source has fractional values, `VARCHAR(50) → VARCHAR(10)` where source strings exceed 10 chars), the tool halts with an error. The human must add an explicit entry to the YAML — with `ack_by`, `ack_date`, and `reason` — before the tool will proceed.
+**Data loss is a first-class error, not a warning.** If applying the mapping would drop a column that had non-null data in any historical file, or perform a lossy cast (e.g., `DOUBLE → BIGINT` where the source has fractional values, `VARCHAR(50) → VARCHAR(10)` where source strings exceed 10 chars), the tool halts with an error. The human must add an explicit entry to the YAML with an `ack_date` before the tool will proceed. `ack_by` and `reason` are optional but recommended for git-history documentation.
 
 **Latest data is a no-op.** Once caught up, historical files already match the target schema; the tool only re-engages when TLC introduces a new drift.
 
@@ -74,22 +74,24 @@ renames:
 
 # Lossy type casts requiring human ack. Safe widening casts (INT->BIGINT,
 # DOUBLE->DECIMAL, VARCHAR(10)->VARCHAR(50)) are auto-applied; only list
-# casts that could lose data.
+# casts that could lose data. `ack_date` is required; `ack_by` and `reason`
+# are optional but recommended.
 lossy_casts:
   passenger_count:
     from: DOUBLE
     to: BIGINT
-    ack_by: andrekamman
     ack_date: 2026-07-21
-    reason: "Fractional values are data-entry noise; passenger_count is logically integer."
+    ack_by: andrekamman                            # optional
+    reason: "Fractional values are data-entry noise; passenger_count is logically integer."  # optional
 
 # Columns present in historical data with non-null values, absent from the target
-# schema, and not renamed to anything. Must be explicitly acknowledged.
+# schema, and not renamed to anything. `ack_date` alone is sufficient acknowledgment;
+# `ack_by` and `reason` are optional but recommended for future readers.
 acknowledged_data_loss:
   pickup_latitude:
-    reason: "Replaced by PULocationID in 2016; lat/lon has no equivalent in new schema."
-    ack_by: andrekamman
     ack_date: 2026-07-21
+    ack_by: andrekamman                            # optional
+    reason: "Replaced by PULocationID in 2016; lat/lon has no equivalent in new schema."  # optional
 ```
 
 ### Automatic behavior (no YAML entry needed)
@@ -102,17 +104,20 @@ acknowledged_data_loss:
 ### Error triggers (require YAML entry)
 
 - Historical column has non-null data, is missing from target, and has no entry in `renames:` or `acknowledged_data_loss:`.
-- Type cast between historical and target could lose data (either range overflow or precision loss), and no entry in `lossy_casts:` (or entry missing any of `ack_by` / `ack_date` / `reason`).
+- Type cast between historical and target could lose data (either range overflow or precision loss), and no entry in `lossy_casts:`.
+- Entry in `lossy_casts:` or `acknowledged_data_loss:` is missing the required `ack_date`.
 
 ## CLI
 
 Two subcommands, one no-arg mode:
 
 ```
-normalize bootstrap <type>       # generate normalize/mappings/<type>.yaml
-normalize <type>                 # normalize raw/<type>/ -> raw-normalized/<type>/
-normalize                        # (no arg) run all four types
+normalize bootstrap <type> [--sample <N|N%>]   # generate normalize/mappings/<type>.yaml
+normalize <type>                               # normalize raw/<type>/ -> raw-normalized/<type>/
+normalize                                      # (no arg) run all four types
 ```
+
+**`--sample <N|N%>`** controls how many rows are read when comparing candidate rename pairs (schema-drift's data-driven rename verification). Format is either an absolute row count (`--sample 5000`) or a percentage (`--sample 10%`). Default is `100%` (full scan) — err on the safe side, only reduce for massive datasets where bootstrap runtime becomes a problem. The flag does NOT affect metadata-only checks (schema, null counts, min/max ranges) or the precision-loss check for lossy casts — both always use the complete file, since sampling those risks false-negative data-loss decisions.
 
 ### `normalize bootstrap <type>`
 
@@ -139,24 +144,20 @@ renames:
 lossy_casts:
   # DETECTED: passenger_count changed DOUBLE -> BIGINT.
   # 12,384 non-integer values across 84 files would truncate.
+  # Set ack_date to accept (ack_by and reason are optional):
   # passenger_count:
   #   from: DOUBLE
   #   to: BIGINT
-  #   ack_by: TODO
   #   ack_date: TODO
-  #   reason: TODO
 
 acknowledged_data_loss:
   # DETECTED: pickup_latitude has non-null data in 84 files (2009-01 to 2016-06),
-  # no rename candidate above the confidence threshold. Fill in to accept loss:
+  # no rename candidate above the confidence threshold.
+  # Set ack_date to accept the loss (ack_by and reason are optional):
   # pickup_latitude:
-  #   reason: TODO
-  #   ack_by: TODO
   #   ack_date: TODO
   # DETECTED: pickup_longitude has non-null data in 84 files (2009-01 to 2016-06):
   # pickup_longitude:
-  #   reason: TODO
-  #   ack_by: TODO
   #   ack_date: TODO
 ```
 
@@ -197,8 +198,8 @@ ERROR: yellow — 4 unresolved items in normalize/mappings/yellow.yaml
 
   Options for each unresolved item:
     * add to `renames:` if the data moved to another column
-    * add to `lossy_casts:` with ack_by/ack_date/reason if the cast is acceptable
-    * add to `acknowledged_data_loss:` with reason if the data has no destination
+    * add to `lossy_casts:` with ack_date (ack_by / reason optional) if the cast is acceptable
+    * add to `acknowledged_data_loss:` with ack_date (ack_by / reason optional) if the data has no destination
 
   Nothing was written. Re-run after updating yellow.yaml.
 
@@ -243,7 +244,9 @@ All use `parquet_metadata('file.parquet')` and `parquet_schema('file.parquet')`,
   DuckDB scans the parquet column vectorized. Only runs after the range check has passed — otherwise range failure alone is sufficient reason to demand an ack.
 - `DECIMAL` scale reduction: analogous.
 
-For TLC data, most columns settle from metadata alone.
+**These precision-check scans always read the full column, regardless of the `--sample` flag.** Sampling could return a false negative (no fractional values seen in the sample even though the file contains some), which would silently discard user data. Correctness beats speed here.
+
+For TLC data, most columns settle from metadata alone; the precision-scan path fires only when a column crosses a range boundary between historical and target types.
 
 ### Transform SQL (per file, generated by planner)
 
@@ -281,7 +284,14 @@ Flow:
 5. Compare each historical column vs target file's schema; classify as passthrough / auto-safe-cast / lossy-cast / drop-candidate / rename-candidate.
 6. Emit YAML scaffold with SUGGESTED lines from rename candidates (annotated with confidence + data-verified boolean) and TODO placeholders for lossy_casts + acknowledged_data_loss items.
 
-Bootstrap is a one-shot per data type. Expected runtime for a full type (~200 files): a minute or two — schema-drift's data-verification samples 5000 rows per candidate pair, and the rest is metadata-only.
+Bootstrap is a one-shot per data type.
+
+**Runtime scaling with `--sample`:**
+
+- Metadata checks (schema, null counts, min/max) run per file in constant time regardless of file size — footer only, no data scan. Same cost at any `--sample` value.
+- Rename-detection data verification (schema-drift's `detect_renames_by_data()`) samples rows per candidate pair. At the default `--sample 100%`, this becomes a full column scan per pair — DuckDB-vectorized, but scales with row count. Yellow bootstrap (~200 files, ~50M rows per recent file, roughly 10–20 candidate pairs at transition points) at 100% takes several minutes. At `--sample 10%` it drops to under a minute. At `--sample 5000` it's near-instant, at the cost of noisier rename suggestions.
+
+The `--sample` flag is passed through to `detect_renames_by_data(sample_size=...)`. Values ending in `%` become DuckDB's `USING SAMPLE X PERCENT`; bare integers become `USING SAMPLE N ROWS`.
 
 ## Testing strategy
 
@@ -308,8 +318,10 @@ tests/taxi_normalize/
 - Safe auto-drop (all-null column, not in target).
 - Unsafe drop with data → planner returns "unresolved".
 - Safe widening auto-cast (INT → BIGINT).
-- Lossy cast without ack → planner returns "unresolved".
-- Lossy cast with proper ack → applied.
+- Lossy cast without any ack → planner returns "unresolved".
+- Lossy cast with only `ack_date` (no `ack_by`, no `reason`) → applied (minimum viable ack).
+- Lossy cast entry with `ack_by` but no `ack_date` → planner returns "unresolved" (ack_date is required).
+- `acknowledged_data_loss` entry with only `ack_date` → drop applied.
 
 **Data-check tests** verify metadata-only paths actually take the metadata-only path (no data scan issued for range checks); only precision cases (DOUBLE → BIGINT truncation with fractional values) trigger a value scan.
 
@@ -317,6 +329,9 @@ tests/taxi_normalize/
 
 - Empty mapping input + synthetic family → emitted YAML has correct `target:`, correct SUGGESTED renames from schema-drift, correct set of TODO items, no extra keys.
 - Refuses to overwrite an existing YAML.
+- `--sample 5000` passes sample_size=5000 through to `detect_renames_by_data()`.
+- `--sample 10%` translates to DuckDB `USING SAMPLE 10 PERCENT` in the underlying query.
+- No `--sample` flag → full scan (default behavior, no sampling clause).
 
 **CLI smoke tests** (subprocess-based, minimal):
 
