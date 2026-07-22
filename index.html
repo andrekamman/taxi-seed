@@ -1061,7 +1061,8 @@
 <h1 id="taxi">taxi</h1>
 <p><code>taxi</code> is one repo, four tools for working with the NYC Taxi &amp; Limousine
 Commission (TLC) trip record data set: a WAF-aware CloudFront downloader that
-recovers from block pages, a schema-drift analyzer that combines column-name
+recovers from block pages (WAF = Web Application Firewall — the layer AWS uses
+to block traffic that looks like a scraper), a schema-drift analyzer that combines column-name
 heuristics with data-verified rename detection, a K6-based SQL Server load
 tester with real and synthetic modes, and a normalizer that halts on any data
 loss unless the operator explicitly acknowledges the drift. A full-history
