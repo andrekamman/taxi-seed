@@ -9,11 +9,11 @@ loss unless the operator explicitly acknowledges the drift. A full-history
 mirror is roughly 40 GB of parquet and takes 6–10 hours to download end-to-end
 on residential broadband, so the pipeline is designed to be resumable,
 incremental, and cheap to re-run on a schedule rather than something you kick
-off once and hope survives. The project is MIT-licensed and grew out of — but
-improves substantially on —
-[`toddwschneider/nyc-taxi-data`](https://github.com/toddwschneider/nyc-taxi-data),
-replacing its one-shot loader script with an auditable pipeline that survives
-WAF rate limits, schema changes, and multi-year backfills.
+off once and hope survives. The project is MIT-licensed. The downloader
+shell script was loosely based on
+[`toddwschneider/nyc-taxi-data`](https://github.com/toddwschneider/nyc-taxi-data);
+the other three tools are original to this repo. See
+[Acknowledgments](#acknowledgments) for details.
 
 ## Why this repo
 
@@ -69,15 +69,14 @@ cd taxi
 ```
 
 !!! tip
-    Downloads ~200 MB in 1–2 minutes on residential broadband. See [Getting Started](getting-started.md) for the full end-to-end path from clone to normalized parquet.
+    Downloads ~200 MB in 1–2 minutes on residential broadband. This Quick Start only exercises the downloader (bash + curl — no Python needed). To use the other three tools (schema-drift, normalize, k6-preprocess) you'll additionally need `uv sync` for the Python side; [Getting Started](getting-started.md) walks the full end-to-end path from clone to normalized parquet.
 
 ## Requirements
 
-- Python 3.12 or 3.13.
-- [uv](https://github.com/astral-sh/uv) for Python environment management.
-- `bash` 4+ and `curl` (macOS/Linux ship both; on Windows install [Git for Windows](https://gitforwindows.org/) and run in Git Bash).
+- `bash` 4+ and `curl` (macOS/Linux ship both; on Windows install [Git for Windows](https://gitforwindows.org/) and run in Git Bash). Required by the downloader; that's all the downloader needs.
+- Python 3.12 or 3.13, and [uv](https://github.com/astral-sh/uv) for Python environment management. Required by the other three tools (schema-drift, normalize, k6-preprocess), which are all Python.
 - Disk sized to intent — see the [Downloader guide](guides/downloader.md#disk-sizing) for a sizing table.
-- Individual tools list per-guide prerequisites (Go 1.22+ for the K6 build, SQL Server for load testing, etc.).
+- Individual tools list per-guide prerequisites (Go 1.22+ for the K6 binary build, SQL Server for load testing, etc.).
 
 ## Where to next
 
@@ -96,14 +95,10 @@ cd taxi
 
 ## Acknowledgments
 
-Originally inspired by
+The **downloader** shell script was loosely based on
 [`toddwschneider/nyc-taxi-data`](https://github.com/toddwschneider/nyc-taxi-data)
-(MIT), whose one-shot Postgres loader was the reference point for what a
-public TLC pipeline should look like end-to-end. This repo diverges from
-Todd's in scope: instead of a single-target load script it is a parquet-first
-mirror-plus-normalize-plus-benchmark pipeline, and the schema-drift heuristic
-— column-name matching cross-validated against actual column data to catch
-renames the analyzer would otherwise miss — was developed here rather than
-inherited. See
+(MIT) — specifically its convention for organizing TLC parquet by type and
+year. The rest of the repo (schema-drift analyzer, normalizer, k6-loadtest rig)
+is original work and shares no code with Todd's project. See
 [THIRD_PARTY_NOTICES](https://github.com/andrekamman/taxi/blob/main/THIRD_PARTY_NOTICES)
 for the full attribution.

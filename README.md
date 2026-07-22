@@ -4,7 +4,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Docs](https://img.shields.io/badge/docs-online-brightgreen)](https://andrekamman.github.io/taxi/)
 
-`taxi` is one repo, four tools for working with the NYC Taxi & Limousine Commission (TLC) trip record data set: a WAF-aware CloudFront **downloader**, a **schema-drift** analyzer, a **normalize** step that halts on any data loss unless the operator explicitly acknowledges the drift, and a **k6-loadtest** rig that drives SQL Server from real parquet or a synthetic generator. The project is MIT-licensed and grew out of — but improves substantially on — [`toddwschneider/nyc-taxi-data`](https://github.com/toddwschneider/nyc-taxi-data), replacing its one-shot loader script with an auditable pipeline that survives WAF rate limits, schema changes, and multi-year backfills.
+`taxi` is one repo, four tools for working with the NYC Taxi & Limousine Commission (TLC) trip record data set: a WAF-aware CloudFront **downloader**, a **schema-drift** analyzer, a **normalize** step that halts on any data loss unless the operator explicitly acknowledges the drift, and a **k6-loadtest** rig that drives SQL Server from real parquet or a synthetic generator. The project is MIT-licensed. The downloader script was loosely based on [`toddwschneider/nyc-taxi-data`](https://github.com/toddwschneider/nyc-taxi-data); the other three tools are original to this repo. See [Acknowledgments](#acknowledgments) for details.
 
 - **WAF-aware CloudFront downloader** with a 5 / 15 / 60 minute exponential backoff ladder and stop-on-local incremental catch-up so nightly crons stay cheap once the mirror is warm.
 - **Normalizer that treats data loss as a first-class error** — missing columns, lossy casts, and silent renames halt the run; explicit `ack_date` acknowledgment is required before drift is written through.
@@ -33,16 +33,16 @@ cd taxi
 ./downloader/download_taxi_data.sh --recent 3 yellow
 ```
 
-Downloads ~200 MB in 1–2 minutes on residential broadband. See the [Getting Started tutorial](https://andrekamman.github.io/taxi/getting-started/) for the full end-to-end path from clone to normalized parquet.
+Downloads ~200 MB in 1–2 minutes on residential broadband. This Quick Start only exercises the downloader (bash + curl — no Python needed). To use the other three tools (schema-drift, normalize, k6-preprocess) you'll additionally need `uv sync` for the Python side; the [Getting Started tutorial](https://andrekamman.github.io/taxi/getting-started/) walks the full end-to-end path from clone to normalized parquet.
 
 A full-history mirror is roughly 40 GB and takes 6–10 hours end-to-end; the downloader is designed to be resumable, incremental, and cheap to re-run on a schedule rather than something you kick off once and hope survives.
 
 ## Requirements
 
-- Python 3.12 or 3.13, [uv](https://github.com/astral-sh/uv).
-- `bash` 4+, `curl` (Git for Windows on Windows).
+- `bash` 4+, `curl` (Git for Windows on Windows). Required by the downloader; that's all the downloader needs.
+- Python 3.12 or 3.13, [uv](https://github.com/astral-sh/uv). Required by the other three tools (schema-drift, normalize, k6-preprocess), which are all Python.
 - Disk sized to intent — see the [Downloader guide](https://andrekamman.github.io/taxi/guides/downloader/#disk-sizing).
-- Individual tools list per-guide prerequisites (Go 1.22+ for the K6 build, SQL Server for load testing, etc.).
+- Individual tools list per-guide prerequisites (Go 1.22+ for the K6 binary build, SQL Server for load testing, etc.).
 
 Everything runs on macOS, Linux, and Windows (via Git Bash). CI runs the test suite and the strict docs build on every PR.
 
@@ -67,4 +67,4 @@ MIT — see [`LICENSE`](LICENSE).
 
 ## Acknowledgments
 
-Originally inspired by [`toddwschneider/nyc-taxi-data`](https://github.com/toddwschneider/nyc-taxi-data) (MIT), whose one-shot Postgres loader was the reference point for what a public TLC pipeline should look like end-to-end. This repo diverges from Todd's in scope — parquet-first mirror plus normalize plus benchmark rather than a single-target loader — but the shape of the data plumbing was informed by it. See [`THIRD_PARTY_NOTICES`](THIRD_PARTY_NOTICES) for the full attribution.
+The **downloader** shell script was loosely based on [`toddwschneider/nyc-taxi-data`](https://github.com/toddwschneider/nyc-taxi-data) (MIT) — specifically its convention for organizing TLC parquet by type and year. The rest of the repo (schema-drift analyzer, normalizer, k6-loadtest rig) is original work and shares no code with Todd's project. See [`THIRD_PARTY_NOTICES`](THIRD_PARTY_NOTICES) for the full attribution.
