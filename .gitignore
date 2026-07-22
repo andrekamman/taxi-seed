@@ -211,3 +211,7 @@ __marimo__/
 # K6 load testing output and binary
 k6-loadtest/output/
 k6-loadtest/k6
+
+# Superpowers session/plugin state (git worktrees, UI server pids, etc.)
+.claude/worktrees/
+.superpowers/
