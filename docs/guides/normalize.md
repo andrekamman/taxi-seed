@@ -73,7 +73,7 @@ acknowledged_data_loss:
     ack_date: 2026-07-21
 ```
 
-See the Reference -> Configuration page (added in a subsequent commit) for the field-by-field schema.
+See the [Reference → Configuration](../reference/configuration.md) page for the field-by-field schema.
 
 ## Bootstrap and amend
 

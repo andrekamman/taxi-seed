@@ -55,3 +55,6 @@ nav:
       - K6 Load Test: guides/k6-loadtest.md
   - Cookbook: cookbook.md
   - Architecture: architecture.md
+  - Reference:
+      - Configuration: reference/configuration.md
+      - Exit codes: reference/exit-codes.md

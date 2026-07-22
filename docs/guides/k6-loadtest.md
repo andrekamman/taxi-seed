@@ -37,7 +37,7 @@ cp k6-loadtest/config.sample.yaml k6-loadtest/config.yaml
 $EDITOR k6-loadtest/config.yaml
 ```
 
-See the Reference → Configuration page (added in a subsequent commit) for the field-by-field schema. Until then, `config.sample.yaml` itself is the canonical reference — every option is commented inline.
+See the [Reference → Configuration](../reference/configuration.md) page for the field-by-field schema. `config.sample.yaml` itself is also a canonical reference — every option is commented inline.
 
 ### 3. Edit `k6-loadtest/config.yaml`
 
@@ -176,7 +176,7 @@ Top-level keys in `config.yaml`:
 - `targets:` — dict of connection targets. Each entry declares `host`, `port`, `database`, `username`, `password` (use `${MSSQL_PASSWORD}` for runtime substitution), and `table`.
 - `scenarios:` — dict of K6 scenarios. Each ties a `data_source` to a `target`, sets a workload mix (`insert`/`update`/`delete` percentages), think-time bounds, and a K6 executor block (`executor:`, `startVUs:`, `stages:` or `duration:`).
 
-See the Reference → Configuration page (added in a subsequent commit) for the exhaustive schema. Until then, `config.sample.yaml` in the repo is the canonical reference.
+See the [Reference → Configuration](../reference/configuration.md) page for the exhaustive schema. `config.sample.yaml` in the repo is also a canonical reference.
 
 ## Interpreting K6 output
 
