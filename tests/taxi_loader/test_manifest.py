@@ -17,9 +17,10 @@ def test_manifest_columns_are_pk_compatible():
 
 
 def test_build_manifest_ddl_has_create_and_pk():
-    create, pk = build_manifest_ddl("dbo")
-    assert create.startswith("CREATE TABLE dbo._load_manifest (")
-    assert "data_type NVARCHAR(16)" in create
-    assert not create.rstrip().endswith(";")
-    assert "ALTER TABLE dbo._load_manifest ADD CONSTRAINT" in pk
-    assert "PRIMARY KEY (data_type, year, month)" in pk
+    stmts = build_manifest_ddl("dbo")
+    assert len(stmts) == 1
+    ddl = stmts[0]
+    assert ddl.startswith("CREATE TABLE dbo._load_manifest (")
+    assert "data_type NVARCHAR(16)" in ddl
+    assert "PRIMARY KEY (data_type, year, month)" in ddl
+    assert not ddl.rstrip().endswith(";")

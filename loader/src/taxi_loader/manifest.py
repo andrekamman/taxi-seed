@@ -33,11 +33,19 @@ def manifest_fq(schema: str) -> str:
 def build_manifest_ddl(schema: str) -> list[str]:
     fq = manifest_fq(schema)
     create = generate_create_table_sql(fq, MANIFEST_COLUMNS).rstrip(";\n ")
-    pk = (
-        f"ALTER TABLE {fq} ADD CONSTRAINT PK_{schema}_{MANIFEST_TABLE} "
-        f"PRIMARY KEY (data_type, year, month)"
+    # `create` ends with the closing paren of the column list, e.g.:
+    #   CREATE TABLE dbo._load_manifest (\n    data_type NVARCHAR(16),\n    ...\n)
+    # Splice the PK constraint in as a table constraint before that paren so
+    # the whole table (including its PK) is created atomically in one
+    # statement -- see ensure_manifest_table's OBJECT_ID guard.
+    body = create.removesuffix(")").rstrip()
+    pk_name = f"PK_{schema}_{MANIFEST_TABLE}"
+    ddl = (
+        f"{body},\n"
+        f"    CONSTRAINT {pk_name} PRIMARY KEY (data_type, year, month)\n"
+        f")"
     )
-    return [create, pk]
+    return [ddl]
 
 
 def _exec(conn: duckdb.DuckDBPyConnection, sql: str) -> None:

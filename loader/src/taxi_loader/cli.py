@@ -31,7 +31,7 @@ def parse_args(argv=None) -> argparse.Namespace:
         prog="taxi-load",
         description="Bulk-load normalized TLC parquet into SQL Server.",
     )
-    p.add_argument("data_type", nargs="?",
+    p.add_argument("data_type", nargs="?", choices=DATA_TYPES,
                    help="yellow/green/fhv/fhvhv. Omit to load all four.")
     p.add_argument("--host", default="localhost")
     p.add_argument("--port", type=int, default=1433)

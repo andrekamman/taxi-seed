@@ -35,3 +35,9 @@ def test_bad_schema_is_exit_2(monkeypatch, normalized_family):
     monkeypatch.setenv("MSSQL_PASSWORD", "pw")
     rc = main(["yellow", "--schema", "bad-schema", "--input-dir", str(normalized_family)])
     assert rc == 2
+
+
+def test_invalid_data_type_is_rejected():
+    with pytest.raises(SystemExit) as exc:
+        parse_args(["yello"])
+    assert exc.value.code == 2
