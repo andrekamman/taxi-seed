@@ -43,7 +43,7 @@ markdown_extensions:
       alternate_style: true
 
 exclude_docs: |
-  superpowers/
+  superpowers/plans/
 
 nav:
   - Home: index.md
@@ -58,3 +58,9 @@ nav:
   - Reference:
       - Configuration: reference/configuration.md
       - Exit codes: reference/exit-codes.md
+  - Design Specs:
+      - Monorepo restructure: superpowers/specs/2026-07-19-monorepo-restructure-design.md
+      - Normalizer: superpowers/specs/2026-07-21-normalizer-design.md
+      - K6 SQL load testing: superpowers/specs/2026-03-25-k6-sql-load-testing-design.md
+      - Documentation site: superpowers/specs/2026-07-22-documentation-design.md
+  - Contributing: contributing.md
