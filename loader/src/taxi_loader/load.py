@@ -17,7 +17,7 @@ def describe_parquet_types(conn: duckdb.DuckDBPyConnection,
                            parquet_path: str | Path) -> dict[str, str]:
     """{column_name: duckdb_type} from one parquet file, in file column order."""
     rows = conn.execute(
-        f"DESCRIBE SELECT * FROM read_parquet('{parquet_path}')"
+        f"DESCRIBE SELECT * FROM read_parquet('{_sql_str(str(parquet_path))}')"
     ).fetchall()
     return {row[0]: row[1] for row in rows}
 
@@ -57,7 +57,7 @@ def build_copy_sql(parquet_paths, dest, *, create_table: bool, replace: bool,
 
 def parquet_row_count(conn: duckdb.DuckDBPyConnection, path) -> int:
     row = conn.execute(
-        f"SELECT num_rows FROM parquet_file_metadata('{path}')"
+        f"SELECT num_rows FROM parquet_file_metadata('{_sql_str(str(path))}')"
     ).fetchone()
     return int(row[0]) if row and row[0] is not None else 0
 
