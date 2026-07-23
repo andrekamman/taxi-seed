@@ -1,8 +1,9 @@
 # SQL Server Loader Design
 
 **Date:** 2026-07-22
-**Status:** Approved, ready for implementation planning
-**Sub-project of:** the four-part expansion (normalizer ✅, docs ✅, **loader** ← this, orchestrator, CI/fake-data)
+**Status:** Implemented and merged to `main` (2026-07-23). Reconciled with the shipped
+implementation — passages that changed during the build are marked **[as-built]**.
+**Sub-project of:** the four-part expansion (normalizer ✅, docs ✅, **loader ✅**, orchestrator, CI/fake-data)
 
 ## Motivation
 
@@ -20,30 +21,47 @@ batching in application code.
 
 Loading is done entirely inside a DuckDB session via the
 [`mssql` community extension](https://duckdb.org/community_extensions/extensions/mssql)
-(hugr-lab, native TDS protocol, **pinned to v0.2.1**). Relevant capabilities, all verified
-against the extension README:
+([hugr-lab/mssql-extension](https://github.com/hugr-lab/mssql-extension), native TDS protocol).
+**[as-built]** The community registry versions this extension by **commit hash**, not semver:
+`INSTALL mssql FROM community` on DuckDB 1.4.4 installs `extension_version = "7e57d24"` (the spec
+originally nominated `v0.2.1`, which the registry does not serve). Relevant capabilities, all
+verified against the extension README and confirmed end-to-end against SQL Server 2022:
 
 - **Install/load at runtime:** `INSTALL mssql FROM community; LOAD mssql;` — no external
   system dependency. This is what keeps the "clone and run" story intact.
-- **Attach:** `ATTACH 'Server=host,1433;Database=taxi;User Id=sa;Password=…' AS mssql (TYPE mssql)`.
-  Credentials can also come from a DuckDB `SECRET`.
+- **Attach:** `ATTACH 'Server=host,1433;Database=taxi;User Id=sa;Password=…;Encrypt=yes;TrustServerCertificate=yes' AS mssql (TYPE mssql)`.
+  **[as-built]** DuckDB does **not** accept bind parameters in `ATTACH`, so the connection
+  string is interpolated as an escaped single-quoted literal (it is never logged). The extension's
+  ATTACH "context" is **process-global** — it survives across DuckDB connections, so the CLI
+  `DETACH`es and closes on exit to avoid a leaked context colliding with the next run in the
+  same process. Credentials can also come from a DuckDB `SECRET` (unused here).
 - **Bulk load via BCP:** `COPY (<query>) TO 'mssql://mssql/<schema>/<table>' (FORMAT 'bcp', …)`,
-  using the native TDS `BulkLoadBCP` path (~1.2M rows/s benchmarked). Options used here:
-  - `CREATE_TABLE` (bool, default true) — auto-create target if absent.
-  - `REPLACE` (bool, default false) — **drop and recreate** the table before load. This is
-    the loader's "truncate the whole year and reload" primitive.
+  using the native TDS `BulkLoadBCP` path (~1.2M rows/s benchmarked). Options:
+  - `CREATE_TABLE` (bool, default true) — auto-create target if absent. **[as-built]** the loader
+    always passes `CREATE_TABLE false` and builds the DDL explicitly (see *Table DDL* below).
+  - `REPLACE` (bool, default false) — drop and recreate the table before load. **[as-built]**
+    **not used** — the loader does its own explicit `DROP TABLE IF EXISTS` + `CREATE TABLE` for the
+    truncate-and-reload path, so the year table keeps its deterministic `taxi_shared` column types
+    instead of the extension's auto-DDL (which defaults strings to `NVARCHAR(MAX)`).
   - `FLUSH_ROWS` (bigint, default 100000) — rows per commit batch.
-  - `TABLOCK` (bool, default false) — bulk-load table lock; faster into an empty table.
-- **Arbitrary SQL** for provisioning (CREATE DATABASE / CREATE SCHEMA / row counts) via the
-  extension's scan/exec function (`mssql_scan()` / equivalent — exact spelling confirmed in
-  implementation commit #0).
-- **Platform matrix:** macOS ARM64 (primary dev), Linux x86_64 (CI-validated → matches the
-  `ubuntu-latest` CI runner), Linux ARM64, Windows x64. Requires DuckDB ≥ 1.4.1; the repo
-  pins `duckdb>=1.4.4`. ✅
+  - `TABLOCK` (bool, default false) — bulk-load table lock; the loader passes `TABLOCK true`.
+- **Arbitrary SQL** for provisioning and reads. **[as-built]** confirmed function names:
+  - `mssql_exec(catalog, sql)` — scalar; runs DDL/DML (CREATE DATABASE / CREATE SCHEMA /
+    CREATE TABLE / INSERT / DELETE), returns affected-row count. `CREATE DATABASE` is wrapped as
+    `IF DB_ID('taxi') IS NULL EXEC('CREATE DATABASE [taxi]')` against a `master` attach.
+  - `mssql_scan(catalog, query)` — table function; runs a read query and returns rows. Used for
+    all reads (manifest, per-year `COUNT(*)`, `OBJECT_ID` existence checks) because it runs live
+    SQL and sidesteps the extension's metadata cache returning stale results within a session.
+- **Platform matrix:** macOS ARM64 (primary dev; SQL Server 2022 image runs under amd64
+  emulation), Linux x86_64 (matches the `ubuntu-latest` CI runner), Linux ARM64, Windows x64.
+  Requires DuckDB ≥ 1.4.1; the repo pins `duckdb>=1.4.4`. ✅
 
 **Risk acknowledgment:** the extension is marked *experimental* and its API may shift between
-releases. Mitigation: pin `INSTALL mssql FROM community` to v0.2.1 and assert the loaded
-version at startup; a version bump is a deliberate, tested change.
+releases. Mitigation: the constant `EXPECTED_MSSQL_EXT_VERSION` (`connection.py`) is asserted at
+startup against the installed `extension_version`; a mismatch is a hard error (exit 2). **[as-built]**
+because the registry pins by commit hash (`7e57d24`), a rebuild changes the hash and trips the
+assertion until the constant is deliberately bumped — noisier than a semver pin, but faithful to
+"a version bump is a deliberate, tested change." Relaxing to a warning is a future option.
 
 ## Non-goals
 
@@ -95,10 +113,16 @@ taxi-load [TYPE]                      # TYPE optional; omit = all four types
 ```
 
 - `TYPE` is one of `yellow`, `green`, `fhv`, `fhvhv`; omitting it processes all four.
+  **[as-built]** the positional arg is restricted with `choices=DATA_TYPES`, so a typo
+  (`taxi-load yello`) is a usage error (exit 2), not a silent no-op — and `data_type` never
+  reaches a SQL identifier position unvalidated.
 - **Password comes from the `MSSQL_PASSWORD` environment variable only** (matches the K6
   component's convention). It is never accepted on the command line and never logged.
 - `--dry-run` prints, per `(type, year)`, the decided action (skip / append which months /
-  truncate+reload) and exits 0 without connecting for writes.
+  truncate+reload) and exits 0. **[as-built]** it is **fully read-only**: it performs no
+  provisioning (no CREATE DATABASE/SCHEMA/TABLE) and no COPY/manifest writes. It attaches
+  read-only and tolerates an absent database or manifest table by treating that year as fresh, so
+  the plan is still accurate against a virgin server.
 
 ## Database, schema, and table naming
 
@@ -134,16 +158,21 @@ A single bookkeeping table `<schema>._load_manifest`, one row per loaded month:
 
 | Column        | Type          | Notes                                  |
 |---------------|---------------|----------------------------------------|
-| `data_type`   | `VARCHAR`     | `yellow` / `green` / `fhv` / `fhvhv`   |
+| `data_type`   | `NVARCHAR(16)` | `yellow` / `green` / `fhv` / `fhvhv`. **[as-built]** bounded (not `NVARCHAR(MAX)`) so it can sit in the PK. |
 | `year`        | `INT`         |                                        |
 | `month`       | `INT`         | 1–12                                   |
 | `source_file` | `NVARCHAR(400)` | path of the loaded parquet file      |
 | `row_count`   | `BIGINT`      | rows actually loaded for this month    |
-| `loaded_at`   | `DATETIME2`   | write time                             |
+| `loaded_at`   | `DATETIME2`   | write time (`SYSUTCDATETIME()`)        |
 
-Primary key `(data_type, year, month)`. Created on first run if absent (DDL via
-`taxi_shared.generate_create_table_sql`). It is read into DuckDB with a single
-`SELECT * FROM mssql.<schema>._load_manifest`.
+Primary key `(data_type, year, month)`. **[as-built]** the column types are a hand-chosen ordered
+dict (not derived from `map_duckdb_to_mssql`, which maps `VARCHAR → NVARCHAR(MAX)` and so cannot
+sit in a PK) fed to `taxi_shared.generate_create_table_sql`; the PK is spliced in as an inline
+`CONSTRAINT … PRIMARY KEY (data_type, year, month)` so the whole table is created by a **single
+atomic statement** (a CREATE-then-ALTER pair could leave a permanently PK-less table if the ALTER
+failed). Created on first run if absent. **[as-built]** it is read into DuckDB via
+`mssql_scan('mssql', 'SELECT year, month, row_count FROM <schema>._load_manifest WHERE data_type = …')`
+(live SQL, cache-safe), not a catalog `SELECT * FROM mssql.<schema>._load_manifest`.
 
 **Why a manifest table and not a lineage column in the data:** the data tables stay a pure
 mirror of the normalized schema — nothing extra injected into `yellow_2026` — which matches
@@ -187,11 +216,14 @@ parquet **footer metadata** (`parquet_metadata` / `parquet_file_metadata`), not 
 | Manifest month no longer present on disk                         | **truncate + reload year**                      |
 | `--full-refresh` set                                             | **truncate + reload year** (unconditional)      |
 
-- **Append** = `COPY (SELECT * FROM read_parquet('<month file>')) TO 'mssql://mssql/<schema>/<type>_<year>' (FORMAT 'bcp', CREATE_TABLE false, FLUSH_ROWS …, TABLOCK true)`,
-  then insert the manifest row.
-- **Truncate + reload** = create-or-`REPLACE` the year table and
-  `COPY (SELECT * FROM read_parquet(['<all month files of the year>'])) TO '…' (FORMAT 'bcp', REPLACE true, …)`,
-  then delete and rewrite the manifest rows for that year.
+- **Append** = ensure the year table exists (fresh year → explicit `CREATE TABLE` first), then per
+  month `COPY (SELECT * FROM read_parquet(['<month file>'])) TO 'mssql://mssql/<schema>/<type>_<year>' (FORMAT 'bcp', CREATE_TABLE false, FLUSH_ROWS …, TABLOCK true)`,
+  and insert that month's manifest row **only after its COPY succeeds**.
+- **Truncate + reload** **[as-built, no `REPLACE`]** = `DROP TABLE IF EXISTS <schema>.<type>_<year>`
+  → explicit `CREATE TABLE` (from `taxi_shared`) → delete the year's manifest rows →
+  `COPY (SELECT * FROM read_parquet(['<all month files of the year>'])) TO '…' (FORMAT 'bcp', CREATE_TABLE false, FLUSH_ROWS …, TABLOCK true)`
+  → rewrite the manifest rows for that year. This ordering (drop → create → clear-manifest → copy →
+  write-manifest) makes any mid-load crash self-heal on the next run via the integrity check.
 
 This is exactly the requested behavior: *a month not there → add it; there and complete →
 skip; there and incomplete → truncate the whole year and reload* — and the always-partial
@@ -246,6 +278,12 @@ tests/taxi_loader/
 **Target test count:** ~20–25, weighted toward the pure `reconcile` cases.
 
 ## Implementation sequence (for the plan)
+
+> **[as-built]** Historical planning order. The build followed
+> `docs/superpowers/plans/2026-07-22-sql-loader.md` (9 tasks, subagent-driven). The spike ran in
+> two parts (extension install/version without Docker, then full behavior against SQL Server 2022);
+> its findings are in `docs/superpowers/notes/2026-07-22-mssql-extension-spike.md`. The `REPLACE true`
+> path below was investigated but **not** adopted — see the *[as-built]* notes above.
 
 0. **Extension spike:** confirm `INSTALL mssql FROM community` v0.2.1 loads, the ATTACH +
    `CREATE DATABASE` provisioning path, the exact scan/exec function name, and that
