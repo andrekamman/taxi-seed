@@ -1,0 +1,7 @@
+# Auto-curated by `taxi-curate-mappings fhvhv` on 2026-07-23.
+# Every acknowledgment is machine-accepted; see CURATION-REPORT.md to verify.
+
+target: fhvhv_tripdata_2026-05.parquet
+renames: {}
+lossy_casts: {}
+acknowledged_data_loss: {}

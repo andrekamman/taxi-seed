@@ -1,0 +1,115 @@
+# Auto-curated by `taxi-curate-mappings yellow` on 2026-07-23.
+# Every acknowledgment is machine-accepted; see CURATION-REPORT.md to verify.
+
+target: yellow_tripdata_2026-05.parquet
+renames:
+  airport_fee: Airport_fee
+  Total_Amt: total_amount
+  Payment_Type: payment_type
+  Passenger_Count: passenger_count
+  Tolls_Amt: tolls_amount
+  Tip_Amt: tip_amount
+  surcharge: extra
+  Fare_Amt: fare_amount
+  Trip_Distance: trip_distance
+lossy_casts:
+  passenger_count:
+    from: DOUBLE
+    to: BIGINT
+    ack_date: '2026-07-23'
+    ack_by: auto-curated
+    reason: 'DOUBLE -> BIGINT: DOUBLE -> BIGINT would lose data (range/precision)'
+  RatecodeID:
+    from: DOUBLE
+    to: BIGINT
+    ack_date: '2026-07-23'
+    ack_by: auto-curated
+    reason: 'DOUBLE -> BIGINT: DOUBLE -> BIGINT would lose data (range/precision)'
+acknowledged_data_loss:
+  vendor_name:
+    ack_date: '2026-07-23'
+    ack_by: auto-curated
+    reason: column dropped; had data in 12 file(s)
+  Trip_Dropoff_DateTime:
+    ack_date: '2026-07-23'
+    ack_by: auto-curated
+    reason: column dropped; had data in 12 file(s)
+  Start_Lon:
+    ack_date: '2026-07-23'
+    ack_by: auto-curated
+    reason: column dropped; had data in 12 file(s)
+  store_and_forward:
+    ack_date: '2026-07-23'
+    ack_by: auto-curated
+    reason: column dropped; had data in 12 file(s)
+  End_Lon:
+    ack_date: '2026-07-23'
+    ack_by: auto-curated
+    reason: column dropped; had data in 12 file(s)
+  Trip_Pickup_DateTime:
+    ack_date: '2026-07-23'
+    ack_by: auto-curated
+    reason: column dropped; had data in 12 file(s)
+  End_Lat:
+    ack_date: '2026-07-23'
+    ack_by: auto-curated
+    reason: column dropped; had data in 12 file(s)
+  Start_Lat:
+    ack_date: '2026-07-23'
+    ack_by: auto-curated
+    reason: column dropped; had data in 12 file(s)
+  rate_code:
+    ack_date: '2026-07-23'
+    ack_by: auto-curated
+    reason: column dropped; had data in 12 file(s)
+  pickup_latitude:
+    ack_date: '2026-07-23'
+    ack_by: auto-curated
+    reason: column dropped; had data in 12 file(s)
+  dropoff_datetime:
+    ack_date: '2026-07-23'
+    ack_by: auto-curated
+    reason: column dropped; had data in 12 file(s)
+  dropoff_latitude:
+    ack_date: '2026-07-23'
+    ack_by: auto-curated
+    reason: column dropped; had data in 12 file(s)
+  pickup_longitude:
+    ack_date: '2026-07-23'
+    ack_by: auto-curated
+    reason: column dropped; had data in 12 file(s)
+  dropoff_longitude:
+    ack_date: '2026-07-23'
+    ack_by: auto-curated
+    reason: column dropped; had data in 12 file(s)
+  pickup_datetime:
+    ack_date: '2026-07-23'
+    ack_by: auto-curated
+    reason: column dropped; had data in 12 file(s)
+  vendor_id:
+    ack_date: '2026-07-23'
+    ack_by: auto-curated
+    reason: column dropped; had data in 12 file(s)
+  __index_level_0__:
+    ack_date: '2026-07-23'
+    ack_by: auto-curated
+    reason: column dropped; had data in 2 file(s)
+value_maps:
+  payment_type:
+    CRD: 1
+    CRE: 1
+    CREDIT: 1
+    Cre: 1
+    Credit: 1
+    CAS: 2
+    CASH: 2
+    CSH: 2
+    Cas: 2
+    Cash: 2
+    NOC: 3
+    'No ': 3
+    No Charge: 3
+    DIS: 4
+    Dis: 4
+    Dispute: 4
+    'NA ': 5

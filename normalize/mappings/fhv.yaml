@@ -1,0 +1,25 @@
+# Auto-curated by `taxi-curate-mappings fhv` on 2026-07-23.
+# Every acknowledgment is machine-accepted; see CURATION-REPORT.md to verify.
+
+target: fhv_tripdata_2026-04.parquet
+renames: {}
+lossy_casts:
+  PUlocationID:
+    from: DOUBLE
+    to: BIGINT
+    ack_date: '2026-07-23'
+    ack_by: auto-curated
+    reason: 'DOUBLE -> BIGINT: DOUBLE -> BIGINT would lose data (range/precision)'
+  DOlocationID:
+    from: DOUBLE
+    to: BIGINT
+    ack_date: '2026-07-23'
+    ack_by: auto-curated
+    reason: 'DOUBLE -> BIGINT: DOUBLE -> BIGINT would lose data (range/precision)'
+  SR_Flag:
+    from: DOUBLE
+    to: BIGINT
+    ack_date: '2026-07-23'
+    ack_by: auto-curated
+    reason: 'DOUBLE -> BIGINT: DOUBLE -> BIGINT would lose data (range/precision)'
+acknowledged_data_loss: {}
