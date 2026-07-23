@@ -161,9 +161,10 @@ def fits_in_target_type(col_stats: dict[str, Any], target_type: str) -> tuple[bo
                 return False, f"max value {max_v} exceeds {target_upper} range (max {hi})"
         except TypeError:
             # min/max aren't comparable to an integer range (e.g. a string-typed
-            # column whose values drifted vs a numeric target). Metadata can't
-            # judge the range; defer to the per-file cast-safety check.
-            return True, ""
+            # column vs a numeric target). A non-numeric value does not fit a
+            # numeric type — treat as NOT fitting so the cast is flagged unsafe
+            # rather than silently attempted (a string->int CAST fails at runtime).
+            return False, f"value {min_v!r}/{max_v!r} is not comparable to {target_upper} (type mismatch)"
         return True, ""
     # VARCHAR(N)
     if target_upper.startswith("VARCHAR(") and target_upper.endswith(")"):

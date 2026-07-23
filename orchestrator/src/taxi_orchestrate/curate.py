@@ -77,6 +77,44 @@ def _unresolved_total(conn, files, target_md, mapping: Mapping) -> int:
                for f in files)
 
 
+_STRING_TYPES = ("VARCHAR", "CHAR", "TEXT", "STRING", "BPCHAR")
+_NUMERIC_TYPES = ("TINYINT", "SMALLINT", "INTEGER", "INT", "BIGINT", "HUGEINT",
+                  "UTINYINT", "USMALLINT", "UINTEGER", "UBIGINT",
+                  "DOUBLE", "FLOAT", "REAL", "DECIMAL")
+_TEMPORAL_TYPES = ("DATE", "TIME", "TIMESTAMP")
+
+
+def _family(sql_type: str) -> str:
+    t = (sql_type or "").upper()
+    if t.startswith(_STRING_TYPES):
+        return "string"
+    if t.startswith(_NUMERIC_TYPES):
+        return "numeric"
+    if t.startswith(_TEMPORAL_TYPES):
+        return "temporal"
+    if t.startswith("BOOL"):
+        return "bool"
+    return "other"
+
+
+def _cast_executable(src_type: str, tgt_type: str) -> bool:
+    """Whether CAST(src -> tgt) will run for arbitrary values (metadata-level, conservative).
+
+    Executable when: target is string (anything casts to string), same family, or
+    numeric -> numeric. A string -> numeric/temporal cast can fail at runtime
+    (e.g. early yellow Payment_Type 'CASH' -> BIGINT), so it is NOT executable —
+    such a rename is dropped (data-loss) instead of producing a crashing mapping.
+    """
+    sf, tf = _family(src_type), _family(tgt_type)
+    if tf == "string":
+        return True
+    if sf == tf:
+        return True
+    if sf == "numeric" and tf == "numeric":
+        return True
+    return False
+
+
 def curate_type(data_type: str, raw_dir: Path, mapping_path: Path,
                 today: Optional[str] = None) -> CurationResult:
     today = today or date.today().isoformat()
@@ -111,7 +149,7 @@ def curate_type(data_type: str, raw_dir: Path, mapping_path: Path,
         mapping = load_mapping(mapping_path)
 
         lossy_needed: dict[str, dict] = {}     # col -> {from, to, count, details}
-        drop_needed: dict[str, int] = {}       # col -> files count
+        drop_needed: dict[str, dict] = {}      # col -> {count, src}
         for f in files:
             md = get_file_metadata(conn, f)
             for u in plan_file(md, target_md, mapping).unresolved:
@@ -127,28 +165,44 @@ def curate_type(data_type: str, raw_dir: Path, mapping_path: Path,
                         u.column, {"from": from_type, "to": to_type, "count": 0, "details": u.details})
                     e["count"] += 1
                 elif u.kind == "unmapped_drop":
-                    drop_needed[u.column] = drop_needed.get(u.column, 0) + 1
+                    d = drop_needed.setdefault(u.column, {"count": 0, "src": md.get(u.column, {}).get("type", "UNKNOWN")})
+                    d["count"] += 1
 
         if not lossy_needed and not drop_needed:
             break
 
         lc = mapping_dict["lossy_casts"]
+        blocked: list[str] = []
         for col, e in lossy_needed.items():
-            if col not in lc:
-                reason = f"{e['from']} -> {e['to']}: {e['details']}"
-                lc[col] = {"from": e["from"], "to": e["to"], "ack_date": today,
-                           "ack_by": ACK_BY, "reason": reason}
-                result.lossy.append(AckDecision("lossy", col, f"{e['from']} -> {e['to']}", e["count"]))
+            if col in lc:
+                continue
+            if not _cast_executable(e["from"], e["to"]):
+                # A non-executable same-name cast (e.g. string -> numeric) cannot be
+                # auto-acked without producing a crashing mapping; surface it.
+                blocked.append(f"{col} ({e['from']} -> {e['to']})")
+                continue
+            reason = f"{e['from']} -> {e['to']}: {e['details']}"
+            lc[col] = {"from": e["from"], "to": e["to"], "ack_date": today,
+                       "ack_by": ACK_BY, "reason": reason}
+            result.lossy.append(AckDecision("lossy", col, f"{e['from']} -> {e['to']}", e["count"]))
+        if blocked:
+            raise RuntimeError(
+                f"{data_type}: non-executable cast(s) need manual mapping: {', '.join(blocked)}"
+            )
 
         renames = mapping_dict["renames"]
         dl = mapping_dict["acknowledged_data_loss"]
-        for col, nfiles in drop_needed.items():
+        for col, d in drop_needed.items():
             if col in renames or col in dl:
                 continue
-            if col in rename_new:
-                renames[col] = rename_new[col]
-                result.renames.append((col, rename_new[col], rename_conf.get(col, 0.0)))
+            new = rename_new.get(col)
+            # Only accept a rename whose cast to the target column will actually run;
+            # otherwise drop the column (data-loss) rather than emit a crashing cast.
+            if new is not None and _cast_executable(d["src"], target_md.get(new, {}).get("type", "")):
+                renames[col] = new
+                result.renames.append((col, new, rename_conf.get(col, 0.0)))
             else:
+                nfiles = d["count"]
                 dl[col] = {"ack_date": today, "ack_by": ACK_BY,
                            "reason": f"column dropped; had data in {nfiles} file(s)"}
                 result.data_loss.append(AckDecision("data_loss", col, f"had data in {nfiles} file(s)", nfiles))

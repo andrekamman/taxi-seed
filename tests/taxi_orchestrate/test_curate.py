@@ -52,3 +52,12 @@ def test_render_report_lists_ack_required(drift_family, tmp_path):
     text = render_report([result], today="2026-07-23")
     assert "passenger_count" in text and "pickup_latitude" in text and "yellow" in text
     assert "Acknowledgments required" in text
+
+
+def test_cast_executable_rules():
+    from taxi_orchestrate.curate import _cast_executable
+    assert _cast_executable("DOUBLE", "BIGINT") is True       # numeric -> numeric
+    assert _cast_executable("VARCHAR", "BIGINT") is False     # string -> numeric (e.g. 'CASH')
+    assert _cast_executable("TIMESTAMP", "TIMESTAMP") is True # same family
+    assert _cast_executable("BIGINT", "VARCHAR") is True      # anything -> string
+    assert _cast_executable("VARCHAR", "TIMESTAMP") is False  # string -> temporal

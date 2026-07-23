@@ -23,10 +23,11 @@ def test_aggregate_int_then_string_keeps_first_and_survives():
     assert agg["c"]["min_range"] == 1  # int first-seen kept; str ignored
 
 
-def test_fits_in_target_type_string_min_vs_int_target_defers():
-    # A string min/max against an INTEGER target can't be range-judged; assume fit.
-    fits, _ = fits_in_target_type({"min": "N", "max": "Y"}, "INTEGER")
-    assert fits is True
+def test_fits_in_target_type_string_min_vs_int_target_is_unsafe():
+    # A string min/max against an INTEGER target does NOT fit — a string->int cast
+    # would fail at runtime, so it must be flagged unsafe (not silently attempted).
+    fits, reason = fits_in_target_type({"min": "N", "max": "Y"}, "INTEGER")
+    assert fits is False and "type mismatch" in reason
 
 
 def test_fits_in_target_type_still_flags_real_overflow():
