@@ -16,7 +16,7 @@ import duckdb
 
 from taxi_loader import load, manifest
 from taxi_loader.connection import (
-    ConnConfig, LoaderConfigError, LoaderConnectionError, LoaderError,
+    ATTACH_NAME, ConnConfig, LoaderConfigError, LoaderConnectionError, LoaderError,
     attach_target, connect_duckdb, ensure_database, validate_identifier,
 )
 from taxi_loader.reconcile import APPEND, RELOAD, SKIP, MonthFile, reconcile
@@ -164,17 +164,28 @@ def main(argv=None) -> int:
         return 2
 
     overall = 0
-    for data_type in types:
-        try:
-            _process_type(conn, cfg, data_type, args.input_dir,
-                          args.flush_rows, args.full_refresh, args.dry_run,
-                          attached)
-        except TypeMappingError as e:
-            print(f"error: {data_type}: {e}", file=sys.stderr)
-            overall = max(overall, 2)
-        except (duckdb.Error, LoaderError) as e:
-            print(f"error: {data_type} failed mid-load: {e}", file=sys.stderr)
-            overall = max(overall, 1)
+    try:
+        for data_type in types:
+            try:
+                _process_type(conn, cfg, data_type, args.input_dir,
+                              args.flush_rows, args.full_refresh, args.dry_run,
+                              attached)
+            except TypeMappingError as e:
+                print(f"error: {data_type}: {e}", file=sys.stderr)
+                overall = max(overall, 2)
+            except (duckdb.Error, LoaderError) as e:
+                print(f"error: {data_type} failed mid-load: {e}", file=sys.stderr)
+                overall = max(overall, 1)
+    finally:
+        # Release the process-global mssql attach context; the extension keeps
+        # it alive across DuckDB connections, so a leaked attach would collide
+        # with the next run in the same process.
+        if attached:
+            try:
+                conn.execute(f"DETACH {ATTACH_NAME}")
+            except duckdb.Error:
+                pass
+        conn.close()
     return overall
 
 

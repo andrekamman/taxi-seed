@@ -90,9 +90,11 @@ def connect_duckdb() -> duckdb.DuckDBPyConnection:
 def ensure_database(conn: duckdb.DuckDBPyConnection, cfg: ConnConfig) -> None:
     """Create cfg.database if absent, by attaching master and running CREATE DATABASE."""
     try:
+        # DuckDB does not accept bind parameters in ATTACH; interpolate the
+        # connection string as an escaped literal. It is never logged.
         conn.execute(
-            f"ATTACH ? AS {BOOT_ATTACH_NAME} (TYPE mssql)",
-            [build_conn_string(cfg, "master")],
+            f"ATTACH '{_sql_str(build_conn_string(cfg, 'master'))}' "
+            f"AS {BOOT_ATTACH_NAME} (TYPE mssql)"
         )
         stmt = (
             f"IF DB_ID('{_sql_str(cfg.database)}') IS NULL "
@@ -117,9 +119,11 @@ def attach_target(conn: duckdb.DuckDBPyConnection, cfg: ConnConfig, *,
     target database itself does not exist).
     """
     try:
+        # DuckDB does not accept bind parameters in ATTACH; interpolate the
+        # connection string as an escaped literal. It is never logged.
         conn.execute(
-            f"ATTACH ? AS {ATTACH_NAME} (TYPE mssql)",
-            [build_conn_string(cfg, cfg.database)],
+            f"ATTACH '{_sql_str(build_conn_string(cfg, cfg.database))}' "
+            f"AS {ATTACH_NAME} (TYPE mssql)"
         )
         if create_schema and cfg.schema != "dbo":
             stmt = (
