@@ -43,6 +43,11 @@ class Plan:
 
 _FLOAT_TYPE_PREFIXES = ("DOUBLE", "FLOAT", "REAL", "DECIMAL")
 _INT_TYPE_PREFIXES = ("TINYINT", "SMALLINT", "INTEGER", "BIGINT", "HUGEINT")
+_STRING_TYPE_PREFIXES = ("VARCHAR", "CHAR", "TEXT", "STRING", "BPCHAR")
+
+
+def _is_string_type(t: str) -> bool:
+    return str(t).upper().startswith(_STRING_TYPE_PREFIXES)
 
 
 def _column_has_data(stats: dict) -> bool:
@@ -98,7 +103,12 @@ def plan_file(
             raw_type = raw_stats["type"]
             if raw_type == tgt_type:
                 actions.append(ColumnAction(action="passthrough", source_column=tgt_col, target_column=tgt_col))
-            elif tgt_col in mapping.value_maps:
+            elif tgt_col in mapping.value_maps and _is_string_type(raw_type):
+                # value_map on a SAME-NAME column applies only to string-typed data
+                # (discrete historical codes). A numeric same-name variant (e.g.
+                # DOUBLE RatecodeID 2018-2023, values 1.0..6.0/99.0) must NOT be
+                # value-mapped — it just casts. Renamed sources (Case B) always
+                # value-map, so store_and_forward (DOUBLE->flag) is unaffected.
                 actions.append(ColumnAction(action="value_map", source_column=tgt_col, target_column=tgt_col,
                                             target_type=tgt_type, value_map=mapping.value_maps[tgt_col],
                                             value_map_unmapped=mapping.value_map_unmapped.get(tgt_col, "error")))

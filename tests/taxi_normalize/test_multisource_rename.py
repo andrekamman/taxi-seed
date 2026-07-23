@@ -55,3 +55,26 @@ def test_single_source_rename_unchanged():
     mapping = Mapping(target="t.parquet", renames={"old": "new"})
     a = next(a for a in plan_file(raw, target, mapping).actions if a.target_column == "new")
     assert a.action == "rename" and a.source_column == "old"
+
+
+def test_value_map_skips_numeric_same_name_column():
+    # A DOUBLE same-name column with a value_map defined must CAST, not value_map
+    # (fixes: DOUBLE RatecodeID 1.0..6.0 would be NULLed by string-keyed value_map).
+    from taxi_normalize.mapping import Mapping
+    raw = _md({"RatecodeID": "DOUBLE"})
+    target = _md({"RatecodeID": "BIGINT"})
+    mapping = Mapping(target="t.parquet",
+                      value_maps={"RatecodeID": {"1": 1, "6": 6}},
+                      value_map_unmapped={"RatecodeID": "null"})
+    plan = plan_file(raw, target, mapping)
+    # numeric same-name is NOT value-mapped (it casts, or is unresolved needing an ack)
+    assert not any(a.action == "value_map" for a in plan.actions if a.target_column == "RatecodeID")
+
+
+def test_value_map_applies_to_string_same_name_column():
+    from taxi_normalize.mapping import Mapping
+    raw = _md({"payment_type": "VARCHAR"})
+    target = _md({"payment_type": "BIGINT"})
+    mapping = Mapping(target="t.parquet", value_maps={"payment_type": {"CASH": 2}})
+    a = next(a for a in plan_file(raw, target, mapping).actions if a.target_column == "payment_type")
+    assert a.action == "value_map"   # string same-name still value-maps
