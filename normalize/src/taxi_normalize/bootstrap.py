@@ -39,6 +39,16 @@ class BootstrapResult:
     timeline: list[str] = field(default_factory=list)
 
 
+@dataclass
+class DriftReport:
+    """Structured drift detection for a data type, relative to an existing mapping."""
+    target_name: str
+    timeline: list[str]
+    rename_suggestions: list[tuple[str, str, float]]   # (old, new, confidence)
+    lossy: list[dict]         # {column, from, to, reason, files_present}
+    data_loss: list[dict]     # {column, files_present}
+
+
 def _parse_sample(sample: str) -> Union[int, str]:
     """Convert CLI --sample value into what schema-drift's get_column_stats expects."""
     s = sample.strip()
@@ -73,6 +83,107 @@ def _summarize_change(change) -> str:
     return f"{change.period_from} -> {change.period_to}: {detail}"
 
 
+def detect_drift(data_type: str, raw_dir: Path, existing: Optional[Mapping],
+                 sample: str = "100%") -> DriftReport:
+    """Detect drift for one data type relative to an existing mapping (or None).
+
+    Pure of any YAML emission — returns the structured suggestions/TODOs that
+    bootstrap would otherwise render as commented scaffold.
+    """
+    files = sorted(raw_dir.rglob(f"{data_type}_tripdata_*.parquet"))
+    if not files:
+        files = sorted(raw_dir.rglob("*.parquet"))
+    if not files:
+        raise FileNotFoundError(f"No parquet files found under {raw_dir} for {data_type}")
+
+    if existing is not None:
+        target_name = existing.target
+        target_candidates = [f for f in files if f.name == target_name]
+        if not target_candidates:
+            raise FileNotFoundError(
+                f"target file {target_name} (pinned mapping) not found under {raw_dir}"
+            )
+        target_file = target_candidates[0]
+    else:
+        target_file = files[-1]
+        target_name = target_file.name
+
+    conn = duckdb.connect(":memory:")
+    files_md = [get_file_metadata(conn, f) for f in files]
+    agg = aggregate_across_files(files_md)
+    target_md = get_file_metadata(conn, target_file)
+    target_cols = set(target_md.keys())
+
+    if raw_dir.name == data_type:
+        data_dir = raw_dir.parent
+    else:
+        data_dir = raw_dir
+    analysis = analyze_data_type(
+        conn, data_dir, data_type, verify_data=False, generic_mode=True,
+        sample_size=_parse_sample(sample),
+    )
+    timeline = [_summarize_change(c) for c in analysis["changes"]]
+
+    rename_candidates: dict[tuple[str, str], float] = {}
+    for change in analysis["changes"]:
+        for rename in change.columns_renamed:
+            old, new, conf = rename.old_col.name, rename.new_col.name, rename.confidence
+            if conf > rename_candidates.get((old, new), 0):
+                rename_candidates[(old, new)] = conf
+
+    existing_rename_sources: set[str] = set()
+    existing_rename_targets: set[str] = set()
+    existing_lossy_cols: set[str] = set()
+    existing_dataloss_cols: set[str] = set()
+    if existing is not None:
+        existing_rename_sources = set(existing.renames.keys())
+        existing_rename_targets = set(existing.renames.values())
+        existing_lossy_cols = set(existing.lossy_casts.keys())
+        existing_dataloss_cols = set(existing.acknowledged_data_loss.keys())
+
+    rename_suggestions: list[tuple[str, str, float]] = []
+    for (old, new), conf in sorted(rename_candidates.items(), key=lambda x: -x[1]):
+        if new not in target_cols:
+            continue
+        if old in existing_rename_sources or new in existing_rename_targets:
+            continue
+        rename_suggestions.append((old, new, conf))
+
+    lossy: list[dict] = []
+    data_loss: list[dict] = []
+    for col, stats in agg.items():
+        if col in target_cols:
+            raw_type_seen = stats["types_seen"][0] if stats["types_seen"] else None
+            tgt_type = target_md[col]["type"]
+            if raw_type_seen and raw_type_seen != tgt_type:
+                fits, reason = fits_in_target_type(
+                    {"type": raw_type_seen, "min": stats["min_range"], "max": stats["max_range"]},
+                    tgt_type,
+                )
+                if not fits and col not in existing_lossy_cols:
+                    lossy.append({
+                        "column": col, "from": raw_type_seen, "to": tgt_type,
+                        "reason": reason, "files_present": stats["files_present"],
+                    })
+            continue
+        if stats["files_with_data"] == 0:
+            continue
+        has_candidate = any(
+            old == col and new in target_cols and conf >= RENAME_CONFIDENCE_THRESHOLD
+            for (old, new), conf in rename_candidates.items()
+        )
+        if has_candidate:
+            continue
+        if col in existing_rename_sources or col in existing_dataloss_cols:
+            continue
+        data_loss.append({"column": col, "files_present": stats["files_present"]})
+
+    return DriftReport(
+        target_name=target_name, timeline=timeline,
+        rename_suggestions=rename_suggestions, lossy=lossy, data_loss=data_loss,
+    )
+
+
 def bootstrap_type(
     data_type: str,
     raw_dir: Path,
@@ -90,134 +201,32 @@ def bootstrap_type(
     Never rewrites human comments in the file body — the timeline header is
     regenerated on every run based on the current data.
     """
-    existing: Optional[Mapping]
     if output_yaml.exists():
-        # If existing YAML is malformed, propagate the error rather than clobber.
         existing = load_mapping(output_yaml)
         was_new = False
     else:
         existing = None
         was_new = True
 
-    # Collect files. raw_dir may be the top-level "raw/" or a per-type dir.
-    files = sorted(raw_dir.rglob(f"{data_type}_tripdata_*.parquet"))
-    if not files:
-        files = sorted(raw_dir.rglob("*.parquet"))
-    if not files:
-        raise FileNotFoundError(f"No parquet files found under {raw_dir} for {data_type}")
+    report = detect_drift(data_type, raw_dir, existing, sample=sample)
 
-    # If amending, keep the existing target pin. If new, pin to the newest file.
-    if existing is not None:
-        target_name = existing.target
-        target_candidates = [f for f in files if f.name == target_name]
-        if not target_candidates:
-            raise FileNotFoundError(
-                f"target file {target_name} (pinned in {output_yaml}) "
-                f"not found under {raw_dir}"
-            )
-        target_file = target_candidates[0]
-    else:
-        target_file = files[-1]  # newest by filename sort
-        target_name = target_file.name
-
-    conn = duckdb.connect(":memory:")
-    files_md = [get_file_metadata(conn, f) for f in files]
-    agg = aggregate_across_files(files_md)
-    target_md = get_file_metadata(conn, target_file)
-    target_cols = set(target_md.keys())
-
-    # Ask schema-drift for rename candidates via its Python API.
-    # analyze_data_type expects data_dir to be the parent of raw/<type>/.
-    if raw_dir.name == data_type:
-        data_dir = raw_dir.parent
-    else:
-        data_dir = raw_dir
-    sample_arg = _parse_sample(sample)
-    analysis = analyze_data_type(
-        conn, data_dir, data_type, verify_data=False, generic_mode=True,
-        sample_size=sample_arg,
-    )
-
-    # Timeline of drift transitions
-    timeline = [_summarize_change(c) for c in analysis["changes"]]
-
-    # Rename candidates keyed by (old_col, new_col)
-    rename_candidates: dict[tuple[str, str], float] = {}
-    for change in analysis["changes"]:
-        for rename in change.columns_renamed:
-            old = rename.old_col.name
-            new = rename.new_col.name
-            conf = rename.confidence
-            if conf > rename_candidates.get((old, new), 0):
-                rename_candidates[(old, new)] = conf
-
-    # Sets of columns already handled by the existing mapping.
-    existing_rename_sources: set[str] = set()
-    existing_rename_targets: set[str] = set()
-    existing_lossy_cols: set[str] = set()
-    existing_dataloss_cols: set[str] = set()
-    if existing is not None:
-        existing_rename_sources = set(existing.renames.keys())
-        existing_rename_targets = set(existing.renames.values())
-        existing_lossy_cols = set(existing.lossy_casts.keys())
-        existing_dataloss_cols = set(existing.acknowledged_data_loss.keys())
-
-    # New SUGGESTED renames: rename candidates whose target is in the target
-    # schema and whose source column isn't already renamed by the human.
-    new_rename_suggestions: list[tuple[str, str, float]] = []
-    for (old, new), conf in sorted(rename_candidates.items(), key=lambda x: -x[1]):
-        if new not in target_cols:
-            continue
-        if old in existing_rename_sources or new in existing_rename_targets:
-            continue
-        new_rename_suggestions.append((old, new, conf))
-
-    # New lossy_casts TODOs: types don't fit, cast target from target file's type
-    new_lossy_todos: list[dict] = []
-    # New data_loss TODOs: columns with data, no target column, no rename candidate
-    new_data_loss_todos: list[dict] = []
-
-    for col, stats in agg.items():
-        if col in target_cols:
-            raw_type_seen = stats["types_seen"][0] if stats["types_seen"] else None
-            tgt_type = target_md[col]["type"]
-            if raw_type_seen and raw_type_seen != tgt_type:
-                fits, reason = fits_in_target_type(
-                    {"type": raw_type_seen, "min": stats["min_range"], "max": stats["max_range"]},
-                    tgt_type,
-                )
-                if not fits and col not in existing_lossy_cols:
-                    new_lossy_todos.append({
-                        "column": col, "from": raw_type_seen, "to": tgt_type, "reason": reason,
-                    })
-            continue
-        if stats["files_with_data"] == 0:
-            continue  # safe auto-drop
-        # Any rename candidate above threshold?
-        has_candidate = any(
-            old == col and new in target_cols and conf >= RENAME_CONFIDENCE_THRESHOLD
-            for (old, new), conf in rename_candidates.items()
-        )
-        if has_candidate:
-            continue  # will be emitted as SUGGESTED rename
-        if col in existing_rename_sources or col in existing_dataloss_cols:
-            continue  # already handled
-        new_data_loss_todos.append({"column": col, "files_present": stats["files_present"]})
-
-    new_items = len(new_rename_suggestions) + len(new_lossy_todos) + len(new_data_loss_todos)
+    new_lossy_todos = [
+        {"column": d["column"], "from": d["from"], "to": d["to"], "reason": d["reason"]}
+        for d in report.lossy
+    ]
+    new_data_loss_todos = [
+        {"column": d["column"], "files_present": d["files_present"]}
+        for d in report.data_loss
+    ]
+    new_items = len(report.rename_suggestions) + len(new_lossy_todos) + len(new_data_loss_todos)
 
     _emit_yaml(
-        output_yaml=output_yaml,
-        data_type=data_type,
-        target_name=target_name,
-        existing=existing,
-        timeline=timeline,
-        new_rename_suggestions=new_rename_suggestions,
-        new_lossy_todos=new_lossy_todos,
-        new_data_loss_todos=new_data_loss_todos,
+        output_yaml=output_yaml, data_type=data_type, target_name=report.target_name,
+        existing=existing, timeline=report.timeline,
+        new_rename_suggestions=report.rename_suggestions,
+        new_lossy_todos=new_lossy_todos, new_data_loss_todos=new_data_loss_todos,
     )
-
-    return BootstrapResult(was_new=was_new, new_items=new_items, timeline=timeline)
+    return BootstrapResult(was_new=was_new, new_items=new_items, timeline=report.timeline)
 
 
 def _emit_yaml(
