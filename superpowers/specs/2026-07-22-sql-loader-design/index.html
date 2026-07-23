@@ -1,0 +1,1472 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Downloader, schema-drift analyzer, and K6 SQL Server load tester for NYC TLC taxi trip data">
+      
+      
+      
+        <link rel="canonical" href="https://andrekamman.github.io/taxi/superpowers/specs/2026-07-22-sql-loader-design/">
+      
+      
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>SQL Server Loader Design - taxi</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.ec1eaa64.min.css">
+      
+        
+        <link rel="stylesheet" href="../../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#sql-server-loader-design" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../../.." title="taxi" class="md-header__button md-logo" aria-label="taxi" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            taxi
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              SQL Server Loader Design
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+          <a href="javascript:void(0)" class="md-search__icon md-icon" title="Share" aria-label="Share" data-clipboard data-clipboard-text="" data-md-component="search-share" tabindex="-1">
+            
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9a3 3 0 0 0-3 3 3 3 0 0 0 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.15c-.05.21-.08.43-.08.66 0 1.61 1.31 2.91 2.92 2.91s2.92-1.3 2.92-2.91A2.92 2.92 0 0 0 18 16.08"/></svg>
+          </a>
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/andrekamman/taxi" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    andrekamman/taxi
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../../.." title="taxi" class="md-nav__button md-logo" aria-label="taxi" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    taxi
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/andrekamman/taxi" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    andrekamman/taxi
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../getting-started/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Guides
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Guides
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../guides/downloader/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Downloader
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../guides/schema-drift/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Schema Drift
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../guides/normalize/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Normalize
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../guides/k6-loadtest/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    K6 Load Test
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../cookbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Cookbook
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reference
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Reference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/configuration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Configuration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/exit-codes/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Exit codes
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Design Specs
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Design Specs
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../2026-07-19-monorepo-restructure-design/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Monorepo restructure
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../2026-07-21-normalizer-design/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Normalizer
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../2026-03-25-k6-sql-load-testing-design/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    K6 SQL load testing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../2026-07-22-documentation-design/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Documentation site
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../contributing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Contributing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#motivation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Motivation
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#the-mssql-duckdb-extension" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The mssql DuckDB extension
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#non-goals" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Non-goals
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#component-layout" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Component layout
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#cli" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        CLI
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#database-schema-and-table-naming" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Database, schema, and table naming
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#table-ddl-deterministic-reusing-taxi_shared" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Table DDL — deterministic, reusing taxi_shared
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#idempotency-per-month-reconciliation-via-a-manifest" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Idempotency — per-month reconciliation via a manifest
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Idempotency — per-month reconciliation via a manifest">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#the-manifest-table" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The manifest table
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#durability-model-batched-commits-drop-the-year-on-partial-failure" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Durability model — batched commits, drop-the-year on partial failure
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#per-type-year-decision-table" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Per-(type, year) decision table
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#reconcilepy-as-a-pure-function" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        reconcile.py as a pure function
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#exit-codes-mirrors-normalize" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Exit codes (mirrors normalize)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#testing-strategy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Testing strategy
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#implementation-sequence-for-the-plan" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Implementation sequence (for the plan)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#success-criteria" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Success criteria
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#out-of-scope" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Out of scope
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="sql-server-loader-design">SQL Server Loader Design</h1>
+<p><strong>Date:</strong> 2026-07-22
+<strong>Status:</strong> Approved, ready for implementation planning
+<strong>Sub-project of:</strong> the four-part expansion (normalizer ✅, docs ✅, <strong>loader</strong> ← this, orchestrator, CI/fake-data)</p>
+<h2 id="motivation">Motivation</h2>
+<p>The normalizer produces <code>raw-normalized/&lt;type&gt;/&lt;year&gt;/*.parquet</code> where every file of a
+data type conforms to one uniform schema. The loader is the last hop of the pipeline: it
+bulk-loads those normalized parquet files into a SQL Server database so the data is
+queryable with ordinary T-SQL and usable as a load-test target for the K6 component.</p>
+<p>The loader is deliberately the narrowest useful thing: <strong>one database, one table per year
+per data type, DuckDB does the reading, the DuckDB <code>mssql</code> community extension does the
+writing.</strong> No pyodbc, no ODBC driver install, no <code>bcp</code> CLI, no CSV round-trip, no Arrow
+batching in application code.</p>
+<h2 id="the-mssql-duckdb-extension">The <code>mssql</code> DuckDB extension</h2>
+<p>Loading is done entirely inside a DuckDB session via the
+<a href="https://duckdb.org/community_extensions/extensions/mssql"><code>mssql</code> community extension</a>
+(hugr-lab, native TDS protocol, <strong>pinned to v0.2.1</strong>). Relevant capabilities, all verified
+against the extension README:</p>
+<ul>
+<li><strong>Install/load at runtime:</strong> <code>INSTALL mssql FROM community; LOAD mssql;</code> — no external
+  system dependency. This is what keeps the "clone and run" story intact.</li>
+<li><strong>Attach:</strong> <code>ATTACH 'Server=host,1433;Database=taxi;User Id=sa;Password=…' AS mssql (TYPE mssql)</code>.
+  Credentials can also come from a DuckDB <code>SECRET</code>.</li>
+<li><strong>Bulk load via BCP:</strong> <code>COPY (&lt;query&gt;) TO 'mssql://mssql/&lt;schema&gt;/&lt;table&gt;' (FORMAT 'bcp', …)</code>,
+  using the native TDS <code>BulkLoadBCP</code> path (~1.2M rows/s benchmarked). Options used here:</li>
+<li><code>CREATE_TABLE</code> (bool, default true) — auto-create target if absent.</li>
+<li><code>REPLACE</code> (bool, default false) — <strong>drop and recreate</strong> the table before load. This is
+    the loader's "truncate the whole year and reload" primitive.</li>
+<li><code>FLUSH_ROWS</code> (bigint, default 100000) — rows per commit batch.</li>
+<li><code>TABLOCK</code> (bool, default false) — bulk-load table lock; faster into an empty table.</li>
+<li><strong>Arbitrary SQL</strong> for provisioning (CREATE DATABASE / CREATE SCHEMA / row counts) via the
+  extension's scan/exec function (<code>mssql_scan()</code> / equivalent — exact spelling confirmed in
+  implementation commit #0).</li>
+<li><strong>Platform matrix:</strong> macOS ARM64 (primary dev), Linux x86_64 (CI-validated → matches the
+  <code>ubuntu-latest</code> CI runner), Linux ARM64, Windows x64. Requires DuckDB ≥ 1.4.1; the repo
+  pins <code>duckdb&gt;=1.4.4</code>. ✅</li>
+</ul>
+<p><strong>Risk acknowledgment:</strong> the extension is marked <em>experimental</em> and its API may shift between
+releases. Mitigation: pin <code>INSTALL mssql FROM community</code> to v0.2.1 and assert the loaded
+version at startup; a version bump is a deliberate, tested change.</p>
+<h2 id="non-goals">Non-goals</h2>
+<ul>
+<li>Any target other than SQL Server. One backend, no abstraction layer for "maybe Postgres later".</li>
+<li>Any table layout other than one-table-per-year-per-type. No single wide table, no partitioning scheme.</li>
+<li>Upserts / MERGE / CDC / incremental row-level updates. The unit of change is a <strong>month file</strong>
+  (append) or a <strong>year table</strong> (truncate + reload). Never a single-row or single-month <code>DELETE</code>.</li>
+<li>Reading anything but <code>raw-normalized/</code>. The loader does not normalize; it consumes the
+  normalizer's output. Loading un-normalized <code>raw/</code> is out of scope (schemas drift; tables wouldn't line up).</li>
+<li>Orchestration (download → normalize → load in one command) — that is the orchestrator sub-project.</li>
+<li>Committing the per-type mapping YAMLs that make the pipeline run unattended — that belongs to
+  the orchestrator/mappings sub-project.</li>
+</ul>
+<h2 id="component-layout">Component layout</h2>
+<p>New component <code>loader/</code>, matching the monorepo pattern:</p>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-1">1</a></span>
+<span class="normal"><a href="#__codelineno-0-2">2</a></span>
+<span class="normal"><a href="#__codelineno-0-3">3</a></span>
+<span class="normal"><a href="#__codelineno-0-4">4</a></span>
+<span class="normal"><a href="#__codelineno-0-5">5</a></span>
+<span class="normal"><a href="#__codelineno-0-6">6</a></span>
+<span class="normal"><a href="#__codelineno-0-7">7</a></span>
+<span class="normal"><a href="#__codelineno-0-8">8</a></span>
+<span class="normal"><a href="#__codelineno-0-9">9</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1"></a>loader/
+<a id="__codelineno-0-2" name="__codelineno-0-2"></a>├── README.md                      # one-paragraph pointer to the docs guide
+<a id="__codelineno-0-3" name="__codelineno-0-3"></a>└── src/taxi_loader/
+<a id="__codelineno-0-4" name="__codelineno-0-4"></a>    ├── __init__.py
+<a id="__codelineno-0-5" name="__codelineno-0-5"></a>    ├── cli.py          # entry point `taxi-load`
+<a id="__codelineno-0-6" name="__codelineno-0-6"></a>    ├── connection.py   # INSTALL/LOAD mssql, ensure `taxi` DB + schema, ATTACH
+<a id="__codelineno-0-7" name="__codelineno-0-7"></a>    ├── manifest.py     # the _load_manifest bookkeeping table: create / read / write
+<a id="__codelineno-0-8" name="__codelineno-0-8"></a>    ├── reconcile.py    # pure logic: per (type, year) -&gt; skip | append | truncate+reload
+<a id="__codelineno-0-9" name="__codelineno-0-9"></a>    └── load.py         # emits + runs the COPY(bcp) and CREATE TABLE statements
+</code></pre></div></td></tr></table></div>
+<p><strong>Tests:</strong> <code>tests/taxi_loader/</code> (mirrors <code>tests/{taxi_normalize,schema_drift,taxi_shared,…}/</code>).</p>
+<p><strong><code>pyproject.toml</code> additions:</strong>
+- Add <code>loader/src/taxi_loader</code> to <code>[tool.hatch.build.targets.wheel] packages</code>.
+- Add <code>taxi-load = "taxi_loader.cli:main"</code> to <code>[project.scripts]</code>.
+- <strong>No new runtime dependency.</strong> <code>duckdb</code> is already a dependency; the <code>mssql</code> extension is
+  installed at runtime via <code>INSTALL … FROM community</code>.</p>
+<h2 id="cli">CLI</h2>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-1-1">1</a></span>
+<span class="normal"><a href="#__codelineno-1-2">2</a></span>
+<span class="normal"><a href="#__codelineno-1-3">3</a></span>
+<span class="normal"><a href="#__codelineno-1-4">4</a></span>
+<span class="normal"><a href="#__codelineno-1-5">5</a></span>
+<span class="normal"><a href="#__codelineno-1-6">6</a></span>
+<span class="normal"><a href="#__codelineno-1-7">7</a></span>
+<span class="normal"><a href="#__codelineno-1-8">8</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1"></a>taxi-load [TYPE]                      # TYPE optional; omit = all four types
+<a id="__codelineno-1-2" name="__codelineno-1-2"></a>  --host HOST        --port 1433
+<a id="__codelineno-1-3" name="__codelineno-1-3"></a>  --database taxi    --schema dbo     # both configurable; these are the defaults
+<a id="__codelineno-1-4" name="__codelineno-1-4"></a>  --user sa
+<a id="__codelineno-1-5" name="__codelineno-1-5"></a>  --input-dir raw-normalized          # reads &lt;input-dir&gt;/&lt;type&gt;/&lt;year&gt;/*.parquet
+<a id="__codelineno-1-6" name="__codelineno-1-6"></a>  --flush-rows 100000                 # BCP commit batch size
+<a id="__codelineno-1-7" name="__codelineno-1-7"></a>  --full-refresh                      # force truncate+reload of every year
+<a id="__codelineno-1-8" name="__codelineno-1-8"></a>  --dry-run                           # print the reconciliation plan, touch nothing
+</code></pre></div></td></tr></table></div>
+<ul>
+<li><code>TYPE</code> is one of <code>yellow</code>, <code>green</code>, <code>fhv</code>, <code>fhvhv</code>; omitting it processes all four.</li>
+<li><strong>Password comes from the <code>MSSQL_PASSWORD</code> environment variable only</strong> (matches the K6
+  component's convention). It is never accepted on the command line and never logged.</li>
+<li><code>--dry-run</code> prints, per <code>(type, year)</code>, the decided action (skip / append which months /
+  truncate+reload) and exits 0 without connecting for writes.</li>
+</ul>
+<h2 id="database-schema-and-table-naming">Database, schema, and table naming</h2>
+<ul>
+<li><strong>Database:</strong> <code>taxi</code> by default (<code>--database</code>). The loader <strong>creates it if absent</strong>
+  (attach <code>master</code>, <code>CREATE DATABASE taxi</code> if <code>DB_ID('taxi') IS NULL</code>, detach, attach <code>taxi</code>).</li>
+<li><strong>Schema:</strong> <code>dbo</code> by default (<code>--schema</code>). If a non-<code>dbo</code> schema is given and missing, the
+  loader creates it.</li>
+<li><strong>Tables:</strong> one per <code>(type, year)</code>, named <code>&lt;schema&gt;.&lt;type&gt;_&lt;year&gt;</code> — e.g. <code>dbo.yellow_2026</code>,
+  <code>dbo.green_2015</code>. Years are derived from the <code>raw-normalized/&lt;type&gt;/&lt;year&gt;/</code> directory layout.</li>
+</ul>
+<h2 id="table-ddl-deterministic-reusing-taxi_shared">Table DDL — deterministic, reusing <code>taxi_shared</code></h2>
+<p>Normalization guarantees every file of a type shares one schema, so <strong>all year-tables for a
+type have identical columns</strong>. The loader therefore does not rely on the extension's
+auto-<code>CREATE TABLE</code> (which currently defaults strings to <code>NVARCHAR(MAX)</code>, which is not
+indexable and wastes space). Instead:</p>
+<ol>
+<li><code>DESCRIBE SELECT * FROM read_parquet('&lt;one file of the type&gt;')</code> to get column names + DuckDB types.</li>
+<li>Map each type with <code>taxi_shared.type_mapping.map_duckdb_to_mssql</code>.</li>
+<li>Build <code>CREATE TABLE &lt;schema&gt;.&lt;type&gt;_&lt;year&gt; (…)</code> with
+   <code>taxi_shared.sql_generator.generate_create_table_sql</code>.</li>
+<li>Execute the DDL through the extension, then bulk-load with <code>COPY … (FORMAT 'bcp', CREATE_TABLE false)</code>.</li>
+</ol>
+<p>This honors the intent to reuse <code>taxi_shared</code>, gives deterministic and bounded column types,
+and keeps column order aligned with the normalized parquet. (<code>TypeMappingError</code> from
+<code>taxi_shared</code> surfaces as a config-level failure — exit code 2 — naming the offending column.)</p>
+<h2 id="idempotency-per-month-reconciliation-via-a-manifest">Idempotency — per-month reconciliation via a manifest</h2>
+<h3 id="the-manifest-table">The manifest table</h3>
+<p>A single bookkeeping table <code>&lt;schema&gt;._load_manifest</code>, one row per loaded month:</p>
+<table>
+<thead>
+<tr>
+<th>Column</th>
+<th>Type</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>data_type</code></td>
+<td><code>VARCHAR</code></td>
+<td><code>yellow</code> / <code>green</code> / <code>fhv</code> / <code>fhvhv</code></td>
+</tr>
+<tr>
+<td><code>year</code></td>
+<td><code>INT</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>month</code></td>
+<td><code>INT</code></td>
+<td>1–12</td>
+</tr>
+<tr>
+<td><code>source_file</code></td>
+<td><code>NVARCHAR(400)</code></td>
+<td>path of the loaded parquet file</td>
+</tr>
+<tr>
+<td><code>row_count</code></td>
+<td><code>BIGINT</code></td>
+<td>rows actually loaded for this month</td>
+</tr>
+<tr>
+<td><code>loaded_at</code></td>
+<td><code>DATETIME2</code></td>
+<td>write time</td>
+</tr>
+</tbody>
+</table>
+<p>Primary key <code>(data_type, year, month)</code>. Created on first run if absent (DDL via
+<code>taxi_shared.generate_create_table_sql</code>). It is read into DuckDB with a single
+<code>SELECT * FROM mssql.&lt;schema&gt;._load_manifest</code>.</p>
+<p><strong>Why a manifest table and not a lineage column in the data:</strong> the data tables stay a pure
+mirror of the normalized schema — nothing extra injected into <code>yellow_2026</code> — which matches
+the normalizer's "output matches the target schema exactly" principle. All bookkeeping lives
+in one out-of-band table.</p>
+<h3 id="durability-model-batched-commits-drop-the-year-on-partial-failure">Durability model — batched commits, drop-the-year on partial failure</h3>
+<p>Bulk load uses BCP with <strong>batched commits</strong> (<code>FLUSH_ROWS</code>, default 100k, <code>--flush-rows</code>) and
+<code>TABLOCK</code>. There is <strong>no whole-file transaction</strong>. If a load dies mid-file, the committed
+batches remain in the table; recovery is a year rebuild, not a rollback. This is a deliberate
+choice: whole-file transactions over multi-GB loads are costly, and the truncate+reload path
+already exists for exactly this case.</p>
+<p>Two invariants make batched commits safe:</p>
+<ol>
+<li><strong>A month's manifest row is written only after that month's <code>COPY</code> fully succeeds</strong>, and
+   records the actual loaded row count.</li>
+<li><strong>Reconciliation runs an integrity check first, per <code>(type, year)</code>:</strong></li>
+</ol>
+<blockquote>
+<p><code>actual COUNT(*) of &lt;schema&gt;.&lt;type&gt;_&lt;year&gt;</code>  vs  <code>SUM(manifest.row_count)</code> for that year.
+<strong>Mismatch → truncate the whole year and reload.</strong></p>
+</blockquote>
+<p>Because this check <em>gates</em> the per-month decision, a partially-loaded month (rows committed,
+   no manifest row) makes the actual count exceed the manifest sum → the year is rebuilt →
+   the partial month is <strong>never</strong> mistaken for "missing" and re-appended. No duplicates, no
+   <code>DELETE</code>s.</p>
+<h3 id="per-type-year-decision-table">Per-<code>(type, year)</code> decision table</h3>
+<p>Evaluated after the integrity check passes (counts agree). Month row counts come from the
+parquet <strong>footer metadata</strong> (<code>parquet_metadata</code> / <code>parquet_file_metadata</code>), not a data scan.</p>
+<table>
+<thead>
+<tr>
+<th>Situation</th>
+<th>Action</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Integrity check failed (table count ≠ manifest sum)</td>
+<td><strong>truncate + reload year</strong></td>
+</tr>
+<tr>
+<td>Table missing but manifest has rows for the year (inconsistency)</td>
+<td><strong>truncate + reload year</strong></td>
+</tr>
+<tr>
+<td>Month file on disk with no manifest row</td>
+<td><strong>append</strong> that month (<code>COPY … CREATE_TABLE false</code>)</td>
+</tr>
+<tr>
+<td>Month present, manifest <code>row_count</code> == source metadata count</td>
+<td><strong>skip</strong></td>
+</tr>
+<tr>
+<td>Month present, manifest <code>row_count</code> ≠ source count (file changed)</td>
+<td><strong>truncate + reload year</strong></td>
+</tr>
+<tr>
+<td>Manifest month no longer present on disk</td>
+<td><strong>truncate + reload year</strong></td>
+</tr>
+<tr>
+<td><code>--full-refresh</code> set</td>
+<td><strong>truncate + reload year</strong> (unconditional)</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li><strong>Append</strong> = <code>COPY (SELECT * FROM read_parquet('&lt;month file&gt;')) TO 'mssql://mssql/&lt;schema&gt;/&lt;type&gt;_&lt;year&gt;' (FORMAT 'bcp', CREATE_TABLE false, FLUSH_ROWS …, TABLOCK true)</code>,
+  then insert the manifest row.</li>
+<li><strong>Truncate + reload</strong> = create-or-<code>REPLACE</code> the year table and
+  <code>COPY (SELECT * FROM read_parquet(['&lt;all month files of the year&gt;'])) TO '…' (FORMAT 'bcp', REPLACE true, …)</code>,
+  then delete and rewrite the manifest rows for that year.</li>
+</ul>
+<p>This is exactly the requested behavior: <em>a month not there → add it; there and complete →
+skip; there and incomplete → truncate the whole year and reload</em> — and the always-partial
+current year picks up each new month via the append path as it lands.</p>
+<h2 id="reconcilepy-as-a-pure-function"><code>reconcile.py</code> as a pure function</h2>
+<p>The decision logic is a pure function of two inputs:</p>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-2-1">1</a></span>
+<span class="normal"><a href="#__codelineno-2-2">2</a></span>
+<span class="normal"><a href="#__codelineno-2-3">3</a></span>
+<span class="normal"><a href="#__codelineno-2-4">4</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1"></a>reconcile(disk_months: list[MonthFile],        # (year, month, path, source_row_count)
+<a id="__codelineno-2-2" name="__codelineno-2-2"></a>          manifest_rows: list[ManifestRow],     # (year, month, row_count)
+<a id="__codelineno-2-3" name="__codelineno-2-3"></a>          table_row_counts: dict[int, int],     # year -&gt; actual COUNT(*) (0 if table absent)
+<a id="__codelineno-2-4" name="__codelineno-2-4"></a>          full_refresh: bool) -&gt; list[YearPlan] # per year: SKIP | APPEND[months] | RELOAD
+</code></pre></div></td></tr></table></div>
+<p>No database access inside <code>reconcile</code>; the CLI gathers the three inputs (disk metadata +
+manifest select + per-year <code>COUNT(*)</code>) and hands them in. This makes the core logic
+exhaustively unit-testable with zero infrastructure, and keeps <code>load.py</code> a thin executor of
+the returned plan.</p>
+<h2 id="exit-codes-mirrors-normalize">Exit codes (mirrors <code>normalize</code>)</h2>
+<ul>
+<li><code>0</code> — success, including all-skip no-ops and successful <code>--dry-run</code>.</li>
+<li><code>1</code> — one or more data types failed mid-load; the others were still processed. The failing
+  type's year is left in whatever state the batched commits reached (next run truncates+reloads it).</li>
+<li><code>2</code> — connection / auth / provisioning / config error (bad host, missing <code>MSSQL_PASSWORD</code>,
+  unmapped DuckDB type, extension load failure). Nothing loaded.</li>
+</ul>
+<h2 id="testing-strategy">Testing strategy</h2>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-3-1">1</a></span>
+<span class="normal"><a href="#__codelineno-3-2">2</a></span>
+<span class="normal"><a href="#__codelineno-3-3">3</a></span>
+<span class="normal"><a href="#__codelineno-3-4">4</a></span>
+<span class="normal"><a href="#__codelineno-3-5">5</a></span>
+<span class="normal"><a href="#__codelineno-3-6">6</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1"></a>tests/taxi_loader/
+<a id="__codelineno-3-2" name="__codelineno-3-2"></a>  conftest.py            # builds tiny synthetic normalized parquet families via DuckDB
+<a id="__codelineno-3-3" name="__codelineno-3-3"></a>  test_reconcile.py      # pure-function decision table — NO database
+<a id="__codelineno-3-4" name="__codelineno-3-4"></a>  test_ddl.py            # DESCRIBE -&gt; taxi_shared mapping -&gt; CREATE TABLE string shape
+<a id="__codelineno-3-5" name="__codelineno-3-5"></a>  test_manifest.py       # manifest read/write round-trips (against the container)
+<a id="__codelineno-3-6" name="__codelineno-3-6"></a>  test_load_integration.py  # end-to-end against SQL-Server-in-Docker
+</code></pre></div></td></tr></table></div>
+<ul>
+<li><strong><code>test_reconcile.py</code> (no DB, the bulk of the coverage):</strong> every row of the decision table —
+  fresh load, all-skip, append-one-new-month, source-count-changed → reload, manifest-month-
+  vanished → reload, integrity-mismatch → reload, <code>--full-refresh</code> → reload. Pure and fast.</li>
+<li><strong>Integration (<code>mcr.microsoft.com/mssql/server:2022-latest</code> in Docker):</strong> load synthetic
+  parquet, assert data-table row counts and manifest contents; then assert <strong>idempotency</strong>
+  (immediate re-run skips everything), <strong>append</strong> (drop in a new month file → only that month
+  loads, others skip), and <strong>truncate-reload</strong> (mutate a month's row count on disk → the whole
+  year rebuilds and the manifest is rewritten). These same tests are the loader's slice of the
+  CI SQL-Server-in-Docker job (CI sub-project). Locally they <strong>skip</strong> when <code>MSSQL_PASSWORD</code> /
+  host env is unset, so <code>pytest</code> stays green on a laptop with no SQL Server.</li>
+</ul>
+<p><strong>Target test count:</strong> ~20–25, weighted toward the pure <code>reconcile</code> cases.</p>
+<h2 id="implementation-sequence-for-the-plan">Implementation sequence (for the plan)</h2>
+<ol>
+<li><strong>Extension spike:</strong> confirm <code>INSTALL mssql FROM community</code> v0.2.1 loads, the ATTACH +
+   <code>CREATE DATABASE</code> provisioning path, the exact scan/exec function name, and that
+   <code>COPY … (FORMAT 'bcp')</code> append + <code>REPLACE true</code> behave as documented against a throwaway
+   Docker SQL Server. This de-risks every later step.</li>
+<li><code>taxi_shared</code>-backed DDL builder (<code>load.py</code> DDL half) + <code>test_ddl.py</code>.</li>
+<li><code>reconcile.py</code> pure function + exhaustive <code>test_reconcile.py</code>.</li>
+<li><code>connection.py</code> (install/load/attach/provision) + <code>manifest.py</code>.</li>
+<li><code>load.py</code> executor (append + truncate-reload) wiring <code>reconcile</code> plans to <code>COPY</code> statements.</li>
+<li><code>cli.py</code> (arg parsing, <code>--dry-run</code>, exit codes) + integration tests.</li>
+<li><code>pyproject.toml</code> wiring + <code>loader/README.md</code> pointer.</li>
+</ol>
+<h2 id="success-criteria">Success criteria</h2>
+<ul>
+<li><code>taxi-load yellow</code> against a populated <code>raw-normalized/yellow/</code> creates database <code>taxi</code>
+  (if absent) and <code>dbo.yellow_&lt;year&gt;</code> tables, bulk-loaded via the <code>mssql</code> extension's BCP path.</li>
+<li>Re-running <code>taxi-load yellow</code> immediately is a full no-op (every year skips).</li>
+<li>Dropping a new month file into <code>raw-normalized/yellow/&lt;year&gt;/</code> and re-running loads <strong>only</strong>
+  that month (append), leaving other years untouched.</li>
+<li>Changing a previously-loaded month's row count triggers a <strong>whole-year</strong> truncate + reload,
+  with no <code>DELETE</code> statements issued.</li>
+<li>A load interrupted mid-file leaves the table with committed batches; the next run detects the
+  table/manifest count mismatch and rebuilds that year cleanly (no duplicate rows).</li>
+<li><code>taxi-load</code> (no arg) processes all four types.</li>
+<li><code>--database</code> / <code>--schema</code> are honored; a non-<code>dbo</code> schema is created if missing.</li>
+<li><code>uv run --extra test pytest tests/taxi_loader/</code> passes; the pure-<code>reconcile</code> tests run with
+  no SQL Server, the integration tests skip without <code>MSSQL_PASSWORD</code>.</li>
+</ul>
+<h2 id="out-of-scope">Out of scope</h2>
+<ul>
+<li>The orchestrator (<code>download → normalize → load</code> in one command) — separate sub-project.</li>
+<li>Committing the per-type normalize mapping YAMLs for unattended runs — orchestrator sub-project.</li>
+<li>The broader CI fake-data end-to-end pipeline and K6 run — CI sub-project (this spec only owns
+  the loader's own Docker integration tests).</li>
+<li>Any non-SQL-Server backend, alternative table layouts, or row-level upsert/MERGE.</li>
+<li>Bounded/tuned string lengths beyond <code>taxi_shared</code>'s current mapping, indexes, or post-load
+  statistics — a later optimization pass, not v1.</li>
+</ul>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var labels=set.querySelector(".tabbed-labels");for(var tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["content.code.copy", "content.tabs.link", "navigation.tracking", "navigation.top", "search.highlight", "search.share"], "search": "../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+    
+  </body>
+</html>
