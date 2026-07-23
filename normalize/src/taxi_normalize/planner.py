@@ -25,12 +25,13 @@ class ColumnAction:
     cast_to: Optional[str] = None
     target_type: Optional[str] = None
     value_map: Optional[dict] = None  # for action == "value_map": {source_value: target_value}
+    value_map_unmapped: str = "error"  # for value_map actions: "error" | "null"
 
 
 @dataclass
 class Unresolved:
     column: str
-    kind: str  # "unmapped_drop" | "unacked_lossy_cast"
+    kind: str  # "unmapped_drop" | "unacked_lossy_cast" | "ambiguous_multisource_rename"
     details: str = ""
 
 
@@ -80,7 +81,9 @@ def plan_file(
     unresolved: list[Unresolved] = []
 
     rename_of = mapping.renames                          # raw -> target
-    inv_renames = {v: k for k, v in rename_of.items()}   # target -> raw
+    inv_renames: dict[str, list[str]] = {}               # target -> [sources]
+    for _old, _new in rename_of.items():
+        inv_renames.setdefault(_new, []).append(_old)
 
     raw_cols = set(raw_metadata.keys())
     target_cols = set(target_metadata.keys())
@@ -97,7 +100,8 @@ def plan_file(
                 actions.append(ColumnAction(action="passthrough", source_column=tgt_col, target_column=tgt_col))
             elif tgt_col in mapping.value_maps:
                 actions.append(ColumnAction(action="value_map", source_column=tgt_col, target_column=tgt_col,
-                                            target_type=tgt_type, value_map=mapping.value_maps[tgt_col]))
+                                            target_type=tgt_type, value_map=mapping.value_maps[tgt_col],
+                                            value_map_unmapped=mapping.value_map_unmapped.get(tgt_col, "error")))
             elif _cast_is_safe(raw_stats, tgt_type):
                 actions.append(ColumnAction(action="cast", source_column=tgt_col, target_column=tgt_col, cast_to=tgt_type))
             else:
@@ -112,15 +116,24 @@ def plan_file(
             continue
         # Case B: target column absent from raw, but mapping renames some raw col INTO it
         if tgt_col in inv_renames:
-            src = inv_renames[tgt_col]
-            if src in raw_cols:
+            present = [s for s in inv_renames[tgt_col] if s in raw_cols]
+            if len(present) > 1:
+                unresolved.append(Unresolved(
+                    column=tgt_col, kind="ambiguous_multisource_rename",
+                    details=f"multiple sources {present} present for target {tgt_col} in one file; "
+                            f"only one historical name should appear per file",
+                ))
+                continue
+            if present:
+                src = present[0]
                 raw_stats = raw_metadata[src]
                 raw_type = raw_stats["type"]
                 if raw_type == tgt_type:
                     actions.append(ColumnAction(action="rename", source_column=src, target_column=tgt_col))
                 elif tgt_col in mapping.value_maps:
                     actions.append(ColumnAction(action="value_map", source_column=src, target_column=tgt_col,
-                                                target_type=tgt_type, value_map=mapping.value_maps[tgt_col]))
+                                                target_type=tgt_type, value_map=mapping.value_maps[tgt_col],
+                                                value_map_unmapped=mapping.value_map_unmapped.get(tgt_col, "error")))
                 elif _cast_is_safe(raw_stats, tgt_type):
                     actions.append(ColumnAction(action="rename", source_column=src, target_column=tgt_col, cast_to=tgt_type))
                 else:
