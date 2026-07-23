@@ -17,6 +17,7 @@ packages = [
   "k6-loadtest/src/k6_loadtest",
   "loader/src/taxi_loader",
   "normalize/src/taxi_normalize",
+  "orchestrator/src/taxi_orchestrate",
   "schema-drift/src/schema_drift",
   "shared/src/taxi_shared",
 ]
@@ -33,4 +34,6 @@ docs = [
 k6-preprocess = "k6_loadtest.preprocess:main"
 normalize = "taxi_normalize.cli:main"
 schema-drift = "schema_drift.cli:main"
+taxi-curate-mappings = "taxi_orchestrate.curate:main"
 taxi-load = "taxi_loader.cli:main"
+taxi-run = "taxi_orchestrate.cli:main"
