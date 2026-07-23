@@ -27,11 +27,22 @@ but the practical cadence of hash churn is higher than a semver would be. Option
 noisy: (a) relax the assertion to a warning, or (b) pin the DuckDB extension repo/version. Left as
 spec'd (hard assert) for v1.
 
-## Pending — requires a live SQL Server (Docker daemon was not running at spike time)
+## Live validation — COMPLETE (SQL Server 2022 in Docker)
 
-Validated instead by the env-gated integration suite (`tests/taxi_loader/test_load_integration.py`,
-Tasks 6 & 8), which is the real gate. SQL spellings below are grounded in the extension's official
-README (fetched during planning) and are exercised end-to-end once a server is available:
+The full env-gated integration suite (`tests/taxi_loader/test_load_integration.py`, 7 tests) now
+passes end-to-end against `mcr.microsoft.com/mssql/server:2022-latest` (amd64 under emulation on
+ARM64). Full repo suite: 125 passed with the server available. Two real bugs the README-grounded
+SQL missed were found and fixed here:
+
+1. **DuckDB rejects bind parameters in `ATTACH`.** `ATTACH ? AS mssql (TYPE mssql)` → Parser Error.
+   Fix: interpolate the connection string as an escaped single-quoted literal (`_sql_str`); it is
+   still never logged. (`connection.py`)
+2. **The `mssql` extension's ATTACH "context" is process-global**, surviving across DuckDB
+   connections. A leaked attach collides with the next attach of the same name ("Context 'mssql'
+   already exists"). Fix: `main()` now `DETACH`es + closes on exit; integration tests hold only one
+   `mssql` attach at a time. (`cli.py`, tests)
+
+The following spellings are now confirmed working against the live server:
 
 - `ATTACH 'Server=host,1433;Database=db;User Id=sa;Password=…;Encrypt=yes;TrustServerCertificate=yes' AS mssql (TYPE mssql)`
 - Provisioning via `SELECT mssql_exec('<master-attach>', 'IF DB_ID(''taxi'') IS NULL EXEC(''CREATE DATABASE [taxi]'')')`
