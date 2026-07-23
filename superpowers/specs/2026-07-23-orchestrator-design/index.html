@@ -1,0 +1,1446 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Downloader, schema-drift analyzer, and K6 SQL Server load tester for NYC TLC taxi trip data">
+      
+      
+      
+        <link rel="canonical" href="https://andrekamman.github.io/taxi/superpowers/specs/2026-07-23-orchestrator-design/">
+      
+      
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>Orchestrator Design - taxi</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.ec1eaa64.min.css">
+      
+        
+        <link rel="stylesheet" href="../../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#orchestrator-design" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../../.." title="taxi" class="md-header__button md-logo" aria-label="taxi" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            taxi
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Orchestrator Design
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+          <a href="javascript:void(0)" class="md-search__icon md-icon" title="Share" aria-label="Share" data-clipboard data-clipboard-text="" data-md-component="search-share" tabindex="-1">
+            
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9a3 3 0 0 0-3 3 3 3 0 0 0 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.15c-.05.21-.08.43-.08.66 0 1.61 1.31 2.91 2.92 2.91s2.92-1.3 2.92-2.91A2.92 2.92 0 0 0 18 16.08"/></svg>
+          </a>
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/andrekamman/taxi" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    andrekamman/taxi
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../../.." title="taxi" class="md-nav__button md-logo" aria-label="taxi" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    taxi
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/andrekamman/taxi" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    andrekamman/taxi
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../getting-started/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Guides
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Guides
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../guides/downloader/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Downloader
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../guides/schema-drift/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Schema Drift
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../guides/normalize/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Normalize
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../guides/k6-loadtest/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    K6 Load Test
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../cookbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Cookbook
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reference
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Reference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/configuration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Configuration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/exit-codes/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Exit codes
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Design Specs
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Design Specs
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../2026-07-19-monorepo-restructure-design/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Monorepo restructure
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../2026-07-21-normalizer-design/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Normalizer
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../2026-03-25-k6-sql-load-testing-design/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    K6 SQL load testing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../2026-07-22-documentation-design/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Documentation site
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../contributing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Contributing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#motivation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Motivation
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#non-goals" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Non-goals
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#approach-subprocess-seam" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Approach — subprocess seam
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#component-layout" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Component layout
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#cli" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        CLI
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#stage-invocation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Stage invocation
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#exit-code-halt-semantics-the-core" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Exit-code &amp; halt semantics (the core)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#reporting" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Reporting
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#mapping-curation-second-deliverable" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Mapping curation (second deliverable)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#testing-strategy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Testing strategy
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#implementation-sequence-for-the-plan" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Implementation sequence (for the plan)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#success-criteria" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Success criteria
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#out-of-scope" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Out of scope
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="orchestrator-design">Orchestrator Design</h1>
+<p><strong>Date:</strong> 2026-07-23
+<strong>Status:</strong> Approved, ready for implementation planning
+<strong>Sub-project of:</strong> the four-part expansion (normalizer ✅, docs ✅, loader ✅, <strong>orchestrator</strong> ← this, CI/fake-data)</p>
+<h2 id="motivation">Motivation</h2>
+<p>The pipeline's four stages — download, (analyze,) normalize, load — each run as their own
+tool today, and a human runs them in sequence by hand. The orchestrator is the operational
+wrapper that runs them as <strong>one command</strong>, honoring each stage's exit-code contract, and — in
+keeping with the project's "data loss is an error / human-in-the-loop" philosophy — <strong>halting a
+data type and pulling the human in exactly when normalize flags new drift for review</strong>, rather
+than silently loading partially-normalized data.</p>
+<p>It is deliberately the narrowest useful thing: a thin coordinator, not a scheduler. Running on a
+cadence is left to system <code>cron</code> (<code>cron</code> + <code>taxi-run</code>); "notify a human" is the clear stdout
+summary plus a meaningful exit code that <code>cron</code> surfaces. No daemon, no state database, no
+built-in email/Slack.</p>
+<p>This sub-project has <strong>two deliverables</strong>:</p>
+<ol>
+<li><strong>The <code>taxi-run</code> orchestrator</strong> (code + tests).</li>
+<li><strong>A <code>taxi-curate-mappings</code> tool</strong> that auto-accepts all detected drift and emits an audit
+   report, plus the <strong>curated, committed mapping YAMLs</strong> it produces for all four types
+   (<code>normalize/mappings/{yellow,green,fhv,fhvhv}.yaml</code>) — without which a fresh clone cannot run
+   the pipeline unattended (normalize would stop on the first run to scaffold a mapping for
+   review). See <em>Mapping curation</em> below.</li>
+</ol>
+<h2 id="non-goals">Non-goals</h2>
+<ul>
+<li><strong>No scheduler / daemon.</strong> Cadence is <code>cron</code> invoking <code>taxi-run</code>. The orchestrator runs once and exits.</li>
+<li><strong>No state database.</strong> Every stage is already idempotent and disk-backed (downloader skips
+  existing files, normalize skips existing outputs, the loader has its <code>_load_manifest</code> table).
+  The orchestrator derives nothing it doesn't observe from the stage exit codes in a single run.</li>
+<li><strong>No built-in notifications.</strong> The exit code + printed summary are the notification surface.</li>
+<li><strong>No new in-memory pipeline.</strong> Stages communicate through the filesystem exactly as they do
+  today; the orchestrator shells out to each existing CLI and reads its exit code.</li>
+<li><strong>No reimplementation of stage logic.</strong> The orchestrator never parses parquet, never touches
+  SQL Server directly, never re-derives what a stage already decides. It sequences and reports.</li>
+<li><strong>The <code>analyze</code> (schema-drift) stage is not in the chain.</strong> normalize's bootstrap does its own
+  analysis; a standalone drift report is a separate, optional tool. (Possible future <code>--analyze</code>.)</li>
+</ul>
+<h2 id="approach-subprocess-seam">Approach — subprocess seam</h2>
+<p>The orchestrator <strong>invokes each existing CLI as a subprocess and reads its exit code.</strong> This
+preserves the architecture's core seam ("each stage writes its output to disk; the next stage
+reads from disk … individually restartable and individually inspectable") and keeps the
+orchestrator a thin coordinator with no shared process state.</p>
+<p>Rejected alternatives:</p>
+<ul>
+<li><em>Import and call each <code>main()</code> in-process</em> — couples the four tools into one process, breaks the
+  disk-seam model, shares CWD and global state (the loader's <code>mssql</code> attach context is
+  process-global), and makes a crash in one stage able to corrupt another.</li>
+<li><em>A bash wrapper</em> — cannot cleanly express the per-type exit-code halting logic, and is not
+  unit-testable.</li>
+</ul>
+<h2 id="component-layout">Component layout</h2>
+<p>New component <code>orchestrator/</code>, matching the monorepo pattern:</p>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-1">1</a></span>
+<span class="normal"><a href="#__codelineno-0-2">2</a></span>
+<span class="normal"><a href="#__codelineno-0-3">3</a></span>
+<span class="normal"><a href="#__codelineno-0-4">4</a></span>
+<span class="normal"><a href="#__codelineno-0-5">5</a></span>
+<span class="normal"><a href="#__codelineno-0-6">6</a></span>
+<span class="normal"><a href="#__codelineno-0-7">7</a></span>
+<span class="normal"><a href="#__codelineno-0-8">8</a></span>
+<span class="normal"><a href="#__codelineno-0-9">9</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1"></a>orchestrator/
+<a id="__codelineno-0-2" name="__codelineno-0-2"></a>├── README.md                        # one-paragraph pointer to the docs guide
+<a id="__codelineno-0-3" name="__codelineno-0-3"></a>└── src/taxi_orchestrate/
+<a id="__codelineno-0-4" name="__codelineno-0-4"></a>    ├── __init__.py
+<a id="__codelineno-0-5" name="__codelineno-0-5"></a>    ├── cli.py          # entry point `taxi-run`: arg parsing, the per-type loop
+<a id="__codelineno-0-6" name="__codelineno-0-6"></a>    ├── stages.py       # pure build_*_cmd() argv builders + a thin injected subprocess runner
+<a id="__codelineno-0-7" name="__codelineno-0-7"></a>    ├── pipeline.py     # PURE exit-code -&gt; outcome + halt/continue logic (the heart)
+<a id="__codelineno-0-8" name="__codelineno-0-8"></a>    ├── report.py       # per-type / per-stage summary rendering
+<a id="__codelineno-0-9" name="__codelineno-0-9"></a>    └── curate.py       # entry point `taxi-curate-mappings`: auto-accept drift + audit report
+</code></pre></div></td></tr></table></div>
+<p>A small <strong>refactor to <code>normalize</code></strong> supports curation: extract the drift-detection half of
+<code>taxi_normalize.bootstrap.bootstrap_type</code> into a pure <code>detect_drift(...) -&gt; DriftReport</code> returning
+structured lists (rename suggestions with confidence, lossy casts with from/to/reason, data-loss
+columns with file counts). <code>bootstrap_type</code> keeps its current behavior by calling <code>detect_drift</code>
+then emitting; <code>curate.py</code> consumes the same structured detection instead of parsing scaffold
+comments. This is an internal refactor — normalize's CLI behavior is unchanged and stays a strict
+human-in-the-loop gate.</p>
+<p><strong>Tests:</strong> <code>tests/taxi_orchestrate/</code> (mirrors the other components).</p>
+<p><strong><code>pyproject.toml</code> additions:</strong>
+- Add <code>orchestrator/src/taxi_orchestrate</code> to <code>[tool.hatch.build.targets.wheel] packages</code>.
+- Add <code>taxi-run = "taxi_orchestrate.cli:main"</code> and
+  <code>taxi-curate-mappings = "taxi_orchestrate.curate:main"</code> to <code>[project.scripts]</code>.
+- <strong>No new runtime dependency</strong> (stdlib <code>subprocess</code>, <code>argparse</code>, <code>pathlib</code>; <code>pyyaml</code> already a dep).</p>
+<h2 id="cli">CLI</h2>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-1-1"> 1</a></span>
+<span class="normal"><a href="#__codelineno-1-2"> 2</a></span>
+<span class="normal"><a href="#__codelineno-1-3"> 3</a></span>
+<span class="normal"><a href="#__codelineno-1-4"> 4</a></span>
+<span class="normal"><a href="#__codelineno-1-5"> 5</a></span>
+<span class="normal"><a href="#__codelineno-1-6"> 6</a></span>
+<span class="normal"><a href="#__codelineno-1-7"> 7</a></span>
+<span class="normal"><a href="#__codelineno-1-8"> 8</a></span>
+<span class="normal"><a href="#__codelineno-1-9"> 9</a></span>
+<span class="normal"><a href="#__codelineno-1-10">10</a></span>
+<span class="normal"><a href="#__codelineno-1-11">11</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1"></a>taxi-run [TYPE]                 # TYPE optional; omit = all four types, in order
+<a id="__codelineno-1-2" name="__codelineno-1-2"></a>  --recent [N]                  # downloader recent-mode passthrough (default N per downloader)
+<a id="__codelineno-1-3" name="__codelineno-1-3"></a>  --skip-download               # normalize (and load) using the existing raw/ mirror
+<a id="__codelineno-1-4" name="__codelineno-1-4"></a>  --download-only               # only mirror; skip normalize and load
+<a id="__codelineno-1-5" name="__codelineno-1-5"></a>  --load                        # opt-in: also load normalized parquet into SQL Server
+<a id="__codelineno-1-6" name="__codelineno-1-6"></a>  --sample N|N%                 # passed through to normalize
+<a id="__codelineno-1-7" name="__codelineno-1-7"></a>  --data-dir DIR                # working root holding raw/ + raw-normalized/ (default: repo root)
+<a id="__codelineno-1-8" name="__codelineno-1-8"></a>  --dry-run                     # print the per-type plan of stages and exit 0, running nothing
+<a id="__codelineno-1-9" name="__codelineno-1-9"></a>  # forwarded to taxi-load, only meaningful with --load:
+<a id="__codelineno-1-10" name="__codelineno-1-10"></a>  --host HOST  --port 1433  --database taxi  --schema dbo  --user sa
+<a id="__codelineno-1-11" name="__codelineno-1-11"></a>  --flush-rows 100000  --full-refresh
+</code></pre></div></td></tr></table></div>
+<ul>
+<li><code>TYPE</code> is one of <code>yellow</code>, <code>green</code>, <code>fhv</code>, <code>fhvhv</code>; omitting it processes all four in order.
+  Restricted via <code>choices</code> (a typo is a usage error, exit 2), matching <code>taxi-load</code>.</li>
+<li><strong>Default run = download → normalize.</strong> <code>--load</code> adds the load stage. <code>--download-only</code> and
+  <code>--skip-download</code> select a sub-range; <code>--download-only</code> with <code>--load</code> is a usage error.</li>
+<li><strong>Load requires <code>MSSQL_PASSWORD</code> (environment only)</strong>, forwarded to <code>taxi-load</code> and never
+  logged. With <code>--load</code> set and the variable missing, the run fails fast with exit 2 before any
+  stage runs.</li>
+<li><strong>Minimum connection for <code>--load</code> is server + user + password</strong> (<code>--host</code>, <code>--user</code>,
+  <code>MSSQL_PASSWORD</code>); <code>--database</code> defaults to <code>taxi</code> and <code>--schema</code> to <code>dbo</code>. <strong>Trusting the
+  server certificate is enabled by default</strong> — the loader's connection string already sets
+  <code>Encrypt=yes;TrustServerCertificate=yes</code>, so it is not exposed as a CLI option in this version.</li>
+<li><code>--recent [N]</code> and <code>--sample</code> are passthroughs to the downloader and normalize respectively.</li>
+<li><code>--dry-run</code> prints, per type, the stages that would run (and the resolved commands), then exits
+  0 without invoking anything.</li>
+</ul>
+<h2 id="stage-invocation">Stage invocation</h2>
+<p>All stages run with <code>cwd = &lt;data-dir&gt;</code> (default: the repo root, resolved as the directory
+containing <code>downloader/</code> and <code>pyproject.toml</code>), so normalize finds <code>raw/</code> and
+<code>normalize/mappings/</code> and the loader finds <code>raw-normalized/</code>.</p>
+<table>
+<thead>
+<tr>
+<th>Stage</th>
+<th>Command (argv)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>download</td>
+<td><code>bash &lt;root&gt;/downloader/download_taxi_data.sh [TYPE]</code> — or <code>… --recent [N] [TYPE]</code></td>
+</tr>
+<tr>
+<td>normalize</td>
+<td><code>&lt;python&gt; -m taxi_normalize.cli [TYPE] [--sample S]</code></td>
+</tr>
+<tr>
+<td>load</td>
+<td><code>&lt;python&gt; -m taxi_loader.cli [TYPE] --input-dir raw-normalized [conn flags]</code></td>
+</tr>
+</tbody>
+</table>
+<p><code>&lt;python&gt;</code> is <code>sys.executable</code>. The <code>-m</code> form is used because both Python CLIs have a
+<code>__main__</code> guard, so it works without relying on the console scripts being on <code>PATH</code>. The
+<code>build_download_cmd</code> / <code>build_normalize_cmd</code> / <code>build_load_cmd</code> functions are <strong>pure</strong> (argv-list
+builders) and unit-tested; a single injected <code>run(cmd, cwd, env) -&gt; int</code> wrapper does the actual
+<code>subprocess.run</code> and is stubbed in tests. <code>MSSQL_PASSWORD</code> is passed through the child
+environment for the load stage only.</p>
+<h2 id="exit-code-halt-semantics-the-core">Exit-code &amp; halt semantics (the core)</h2>
+<p>For each requested type, stages run in order. <strong>A "needs review" or failure outcome halts that
+type's remaining stages</strong> — never load data that did not fully normalize — while other types
+continue. This logic lives in <code>pipeline.py</code> as a pure function of <code>(stage, child_exit_code)</code>.</p>
+<table>
+<thead>
+<tr>
+<th>Stage</th>
+<th>Child exit</th>
+<th>Type outcome</th>
+<th>Effect</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>download</td>
+<td><code>0</code></td>
+<td>—</td>
+<td>proceed to normalize</td>
+</tr>
+<tr>
+<td>download</td>
+<td>non-<code>0</code></td>
+<td><code>DOWNLOAD_FAILED</code></td>
+<td>halt this type</td>
+</tr>
+<tr>
+<td>normalize</td>
+<td><code>0</code></td>
+<td>—</td>
+<td>proceed to load (if <code>--load</code>)</td>
+</tr>
+<tr>
+<td>normalize</td>
+<td><code>3</code> (scaffold written)</td>
+<td><code>NEEDS_REVIEW</code></td>
+<td>halt this type; name the mapping file</td>
+</tr>
+<tr>
+<td>normalize</td>
+<td><code>1</code> (unresolved / amended)</td>
+<td><code>NEEDS_REVIEW</code></td>
+<td>halt this type; name the mapping file</td>
+</tr>
+<tr>
+<td>normalize</td>
+<td><code>2</code></td>
+<td><code>NORMALIZE_ERROR</code></td>
+<td>halt this type</td>
+</tr>
+<tr>
+<td>load</td>
+<td><code>0</code></td>
+<td><code>LOADED</code> (or <code>SKIPPED</code> if download+normalize were no-ops)</td>
+<td>done</td>
+</tr>
+<tr>
+<td>load</td>
+<td><code>1</code> (partial)</td>
+<td><code>LOAD_PARTIAL</code></td>
+<td>record; continue other types</td>
+</tr>
+<tr>
+<td>load</td>
+<td><code>2</code> (conn/config)</td>
+<td><code>LOAD_ERROR</code></td>
+<td><strong>abort remaining loads</strong> (a shared-server conn error will recur)</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Overall exit code</strong> (mirrors the repo's <code>2 &gt; 1 &gt; 0</code> convention):</p>
+<ul>
+<li><code>0</code> — every requested type completed its requested stages cleanly (including all-skip no-ops and a successful <code>--dry-run</code>).</li>
+<li><code>1</code> — at least one type halted <strong>needing human mapping review</strong> (normalize exit 3/1), and nothing else failed. This is the cron signal "a mapping needs a human."</li>
+<li><code>2</code> — an <strong>operational failure</strong> occurred (download failed, normalize error, or load partial/error). Cron signal "something broke."</li>
+</ul>
+<p>Precedence when several occur: <code>2</code> (broke) &gt; <code>1</code> (needs review) &gt; <code>0</code>. The end-of-run summary
+always prints every type's per-stage result regardless of the headline code.</p>
+<p><strong>Known limitation (documented, accepted for v1):</strong> <code>download_taxi_data.sh</code> exits <code>0</code> even when it
+gives up after exhausting WAF backoff — it returns non-zero only on bad arguments. So the
+orchestrator cannot distinguish "downloaded nothing because all caught up" from "WAF-blocked and
+gave up." v1 treats download exit <code>0</code> as success. A future downloader change (exit non-zero on
+give-up) would let the orchestrator surface it; that change is out of scope here.</p>
+<h2 id="reporting">Reporting</h2>
+<p>No state store. At the end of a run the orchestrator prints a per-type, per-stage summary table
+to stdout (type | download | normalize | load | outcome), a one-line overall verdict, and sets
+the exit code above. <code>cron</code> captures stdout and the exit code; that is the entire notification
+surface. (A machine-readable <code>--json</code> summary is a possible future addition, omitted from v1.)</p>
+<h2 id="mapping-curation-second-deliverable">Mapping curation (second deliverable)</h2>
+<p>For a fresh clone to run the pipeline unattended, the four per-type mapping YAMLs must be
+committed to <code>normalize/mappings/</code> (today only <code>.gitkeep</code> is there, so the first <code>normalize</code> run
+of each type stops at exit 3 to scaffold a mapping for review).</p>
+<p>The maintainer's full local history has been copied into this repo's <code>raw/</code> (yellow 209 files back
+to 2009, green 149, fhv 136, fhvhv 88 — ~580 monthly parquet files; <code>raw/</code> is gitignored). <strong>No
+download and no symlink are required.</strong></p>
+<p><strong>The acknowledgments are automated, not made by hand.</strong> <code>taxi-curate-mappings</code> accepts every
+detected drift decision for a type and writes a complete mapping, then emits an audit report so the
+maintainer can <strong>verify after the fact</strong> (rather than gate before). The normalizer itself stays a
+strict human-in-the-loop tool; this bulk-accept path is a separate, deliberately-invoked utility.</p>
+<p><code>taxi-curate-mappings [TYPE]</code> (omit TYPE = all four), reading <code>raw/</code> and writing
+<code>normalize/mappings/&lt;type&gt;.yaml</code>:</p>
+<ol>
+<li>Uses <code>normalize</code>'s <code>detect_drift</code> to enumerate, for the type: suggested <strong>renames</strong>
+   (with confidence), <strong>lossy casts</strong> (column, from→to, reason), and <strong>data-loss</strong> columns
+   (column, files-present count).</li>
+<li><strong>Auto-accepts all of them</strong> into the mapping, with rename-beats-data-loss precedence (a column
+   with an accepted rename is not also data-loss-acked). Each lossy cast and each data-loss drop is
+   written with <code>ack_date</code> = today, <code>ack_by: auto-curated</code>, and a <code>reason</code> carrying the detected
+   detail; renames are written into <code>renames:</code>.</li>
+<li>Iterates (bounded) — write mapping, re-detect — until the normalizer's <strong>planner reports zero
+   unresolved items across every raw file</strong> for that type (the same check <code>normalize</code> gates on).
+   This is metadata-only (no parquet is written during curation).</li>
+<li>Writes a committed <strong>audit report</strong> <code>normalize/mappings/CURATION-REPORT.md</code>: a per-type section
+   listing <strong>every ack-required decision</strong> — the lossy casts and data-loss drops, with column,
+   types/reason, and how many files/years are affected — under a clear "verify these" heading, plus
+   a secondary list of auto-accepted renames with their confidence (heuristic, worth a glance).</li>
+</ol>
+<p>The tool is non-interactive and re-runnable: when new months introduce new drift, re-running it
+amends the mapping and the report. The committed YAMLs (with <code>ack_date</code>/<code>ack_by</code>/<code>reason</code> on every
+acknowledgment) plus the report are the audit trail — the same "decisions recorded in git" the
+project's philosophy wants, just accepted-then-verified instead of reviewed-then-accepted.</p>
+<p>Curation doubles as the orchestrator's real end-to-end validation: once the mappings are clean,
+<code>taxi-run --skip-download</code> normalizes cleanly, and <code>taxi-run --skip-download --load</code> loads into a
+SQL Server.</p>
+<h2 id="testing-strategy">Testing strategy</h2>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-2-1">1</a></span>
+<span class="normal"><a href="#__codelineno-2-2">2</a></span>
+<span class="normal"><a href="#__codelineno-2-3">3</a></span>
+<span class="normal"><a href="#__codelineno-2-4">4</a></span>
+<span class="normal"><a href="#__codelineno-2-5">5</a></span>
+<span class="normal"><a href="#__codelineno-2-6">6</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1"></a>tests/taxi_orchestrate/
+<a id="__codelineno-2-2" name="__codelineno-2-2"></a>  test_pipeline.py    # pure exit-code -&gt; outcome + halt/continue decision table — NO subprocess
+<a id="__codelineno-2-3" name="__codelineno-2-3"></a>  test_stages.py      # build_*_cmd() argv builders; run() with stubbed commands
+<a id="__codelineno-2-4" name="__codelineno-2-4"></a>  test_cli.py         # arg parsing, stage selection, --dry-run, missing-password exit 2
+<a id="__codelineno-2-5" name="__codelineno-2-5"></a>  test_run_stub.py    # end-to-end chaining against tiny STUB stage scripts (exit codes + markers)
+<a id="__codelineno-2-6" name="__codelineno-2-6"></a>  test_curate.py      # auto-accept over synthetic drift fixtures -&gt; clean mapping + report
+</code></pre></div></td></tr></table></div>
+<ul>
+<li><strong><code>test_pipeline.py</code> (the bulk):</strong> every row of the exit-code table — download fail halts the
+  type; normalize 0/1/2/3 → proceed / needs-review / error; load 0/1/2 → loaded / partial /
+  abort-remaining; overall <code>2&gt;1&gt;0</code> precedence; per-type independence. Pure and fast.</li>
+<li><strong><code>test_stages.py</code>:</strong> the argv builders produce the exact commands (<code>-m taxi_normalize.cli …</code>,
+  <code>--input-dir raw-normalized</code>, <code>--recent N</code>, forwarded loader flags); the injected <code>run</code> wrapper
+  is exercised with stub commands.</li>
+<li><strong><code>test_run_stub.py</code>:</strong> the CLI drives a full multi-type run against <strong>stub scripts</strong> that exit
+  with configured codes and drop marker files, verifying chaining, halting, stage selection, and
+  the summary/exit-code — with no real downloader / normalize / loader / SQL Server.</li>
+<li><strong><code>test_curate.py</code>:</strong> over synthetic drift parquet fixtures (reusing <code>tests/taxi_normalize</code>'s
+  patterns), <code>taxi-curate-mappings</code> produces a mapping the normalizer's planner accepts with zero
+  unresolved; renames/lossy/data-loss are handled with the right precedence; every ack carries
+  <code>ack_date</code>/<code>ack_by</code>/<code>reason</code>; and the audit report lists the ack-required decisions.</li>
+<li><strong>Real end-to-end</strong> (manual, during curation): <code>taxi-curate-mappings</code> over the real <code>raw/</code>
+  produces clean committed mappings; <code>taxi-run --skip-download</code> then produces clean
+  <code>raw-normalized/</code>; <code>taxi-run --skip-download --load</code> loads into the loader's Docker SQL Server.
+  Not part of the fast unit suite.</li>
+</ul>
+<p><strong>Target test count:</strong> ~25–30, weighted toward the pure <code>pipeline</code> and <code>curate</code> cases.</p>
+<h2 id="implementation-sequence-for-the-plan">Implementation sequence (for the plan)</h2>
+<ol>
+<li><code>pipeline.py</code> pure outcome/halt logic + exhaustive <code>test_pipeline.py</code>.</li>
+<li><code>stages.py</code> argv builders + injected runner + <code>test_stages.py</code>.</li>
+<li><code>report.py</code> summary rendering (+ unit test).</li>
+<li><code>cli.py</code> (arg parsing, per-type loop, <code>--dry-run</code>, exit codes) + <code>test_cli.py</code> + <code>test_run_stub.py</code>.</li>
+<li><code>pyproject.toml</code> wiring (<code>taxi-run</code> + <code>taxi-curate-mappings</code>) + <code>orchestrator/README.md</code> pointer.</li>
+<li><code>normalize</code> refactor: extract <code>detect_drift(...) -&gt; DriftReport</code> from <code>bootstrap_type</code>
+   (behavior-preserving) + a unit test that <code>bootstrap_type</code> output is unchanged.</li>
+<li><code>curate.py</code> (<code>taxi-curate-mappings</code>): auto-accept renames + lossy/data-loss acks to zero
+   unresolved, emit the audit report, + <code>test_curate.py</code>.</li>
+<li><strong>Run curation for real:</strong> <code>taxi-curate-mappings</code> over <code>raw/</code>, commit the four
+   <code>normalize/mappings/*.yaml</code> + <code>CURATION-REPORT.md</code>; validate <code>taxi-run --skip-download [--load]</code>
+   end-to-end.</li>
+</ol>
+<h2 id="success-criteria">Success criteria</h2>
+<ul>
+<li><code>taxi-run</code> (no arg) runs download → normalize for all four types and prints a per-type summary.</li>
+<li><code>taxi-run yellow --skip-download</code> normalizes yellow from the existing mirror; exit 0 when the
+  mapping is complete.</li>
+<li>When normalize scaffolds/amends a mapping for a type, that type halts at <code>NEEDS_REVIEW</code>, the
+  mapping file is named in the summary, other types still run, and the overall exit code is <code>1</code>.</li>
+<li><code>taxi-run --skip-download --load</code> loads normalized parquet into SQL Server via <code>taxi-load</code>,
+  forwarding connection flags and <code>MSSQL_PASSWORD</code>; a load partial/error yields overall exit <code>2</code>.</li>
+<li><code>--load</code> without <code>MSSQL_PASSWORD</code> fails fast with exit <code>2</code>, having run nothing.</li>
+<li><code>--dry-run</code> prints the plan and exits <code>0</code>, invoking no stage.</li>
+<li><code>taxi-curate-mappings</code> runs non-interactively over <code>raw/</code>, produces mappings the normalizer's
+  planner accepts with zero unresolved for all four types, fills every ack with
+  <code>ack_date</code>/<code>ack_by</code>/<code>reason</code>, and writes <code>CURATION-REPORT.md</code> enumerating the ack-required
+  decisions (lossy casts + data-loss drops) plus the auto-accepted renames.</li>
+<li>The four <code>normalize/mappings/*.yaml</code> + <code>CURATION-REPORT.md</code> are committed and a fresh clone's
+  <code>taxi-run --skip-download</code> reaches exit <code>0</code> for all four types.</li>
+<li><code>uv run --extra test pytest tests/taxi_orchestrate/</code> passes with no network, no SQL Server, and
+  no real TLC data (stubbed stages + synthetic drift fixtures).</li>
+</ul>
+<h2 id="out-of-scope">Out of scope</h2>
+<ul>
+<li>Scheduling / daemon / cadence (use system <code>cron</code>), state databases, and built-in notifications.</li>
+<li>The <code>analyze</code> (schema-drift) stage in the chain; a <code>--json</code> machine-readable summary.</li>
+<li>Any change to the downloader's coarse exit codes (WAF give-up still exits 0 in v1).</li>
+<li>The CI fake-data end-to-end pipeline and dev/test/prod promotion — the fourth sub-project.</li>
+<li>Adding path flags (<code>--input-dir</code> / <code>--mappings-dir</code>) to <code>normalize</code>; v1 runs stages at the
+  repo-root convention and curates against the real data already copied into <code>raw/</code>.</li>
+<li>Exposing certificate-trust as a CLI option (it is on by default in the loader's connection
+  string) or changing <code>normalize</code>'s strict interactive gate (the auto-accept path is a separate
+  <code>taxi-curate-mappings</code> utility; the <code>detect_drift</code> extraction is a behavior-preserving refactor).</li>
+</ul>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var labels=set.querySelector(".tabbed-labels");for(var tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["content.code.copy", "content.tabs.link", "navigation.tracking", "navigation.top", "search.highlight", "search.share"], "search": "../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+    
+  </body>
+</html>
