@@ -61,3 +61,25 @@ def test_cast_executable_rules():
     assert _cast_executable("TIMESTAMP", "TIMESTAMP") is True # same family
     assert _cast_executable("BIGINT", "VARCHAR") is True      # anything -> string
     assert _cast_executable("VARCHAR", "TIMESTAMP") is False  # string -> temporal
+
+
+def test_mapping_to_dict_roundtrips_value_map_policy(tmp_path):
+    """curate._mapping_to_dict must preserve value_maps AND their on_unmapped policy
+    across a dict -> YAML -> load_mapping round-trip (so re-curation keeps them)."""
+    import yaml
+    from taxi_normalize.mapping import Mapping, load_mapping
+    from taxi_orchestrate.curate import _mapping_to_dict
+
+    m = Mapping(
+        target="t.parquet",
+        value_maps={"VendorID": {"CMT": 1, "DDS": None}, "RatecodeID": {"1": 1, "6": 6}},
+        value_map_unmapped={"RatecodeID": "null"},  # VendorID defaults to strict/error
+    )
+    d = _mapping_to_dict(m, "t.parquet")
+    p = tmp_path / "m.yaml"
+    p.write_text("# hdr\n" + yaml.safe_dump(d, sort_keys=False))
+    back = load_mapping(p)
+    assert back.value_maps["VendorID"] == {"CMT": 1, "DDS": None}
+    assert back.value_maps["RatecodeID"] == {"1": 1, "6": 6}
+    assert back.value_map_unmapped.get("RatecodeID") == "null"
+    assert back.value_map_unmapped.get("VendorID", "error") == "error"
