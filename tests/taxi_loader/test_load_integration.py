@@ -18,7 +18,7 @@ import pytest
 from taxi_loader import load, manifest
 from taxi_loader.cli import main
 from taxi_loader.connection import (
-    ConnConfig, attach_target, connect_duckdb, ensure_database,
+    ConnConfig, attach_target, build_conn_string, connect_duckdb, ensure_database,
 )
 
 pytestmark = pytest.mark.skipif(
@@ -118,7 +118,41 @@ def test_partial_load_recovery_via_integrity_check(prepared, normalized_family):
     assert _count(conn, cfg, table) == 5               # rebuilt, no duplicate/injected row
 
 
-def test_dry_run_touches_nothing(prepared, normalized_family, capsys):
+def test_dry_run_touches_nothing(normalized_family, capsys):
+    """Dry-run against a database that does not exist yet must be fully
+    read-only: no CREATE DATABASE, no CREATE SCHEMA, no CREATE TABLE — yet it
+    still prints an accurate reconciliation plan (everything looks "fresh")."""
+    dbname = "drytest_" + uuid.uuid4().hex[:8]
+    cfg = ConnConfig(
+        host=os.environ.get("MSSQL_HOST", "localhost"),
+        port=int(os.environ.get("MSSQL_PORT", "1433")),
+        database=dbname, schema="t" + uuid.uuid4().hex[:8],
+        user=os.environ.get("MSSQL_USER", "sa"),
+        password=os.environ["MSSQL_PASSWORD"],
+    )
+    # Deliberately do NOT provision: no ensure_database, no attach_target.
+    rc = _run(cfg, normalized_family, extra=["--dry-run"])
+    out = capsys.readouterr().out
+
+    assert rc == 0
+    assert "append" in out or "reload" in out   # plan was printed
+    assert cfg.password not in out              # never logged
+
+    # The database must NOT have been created by the dry-run.
+    check_conn = connect_duckdb()
+    check_conn.execute(
+        "ATTACH ? AS mssql_check (TYPE mssql)",
+        [build_conn_string(cfg, "master")],
+    )
+    row = check_conn.execute(
+        "SELECT id FROM mssql_scan('mssql_check', ?)",
+        [f"SELECT DB_ID('{dbname}') AS id"],
+    ).fetchone()
+    assert row is not None and row[0] is None
+    check_conn.close()
+
+
+def test_dry_run_on_prepared_schema_creates_no_tables(prepared, normalized_family, capsys):
     conn, cfg = prepared
     assert _run(cfg, normalized_family, extra=["--dry-run"]) == 0
     out = capsys.readouterr().out

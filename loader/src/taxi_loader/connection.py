@@ -108,14 +108,20 @@ def ensure_database(conn: duckdb.DuckDBPyConnection, cfg: ConnConfig) -> None:
             pass
 
 
-def attach_target(conn: duckdb.DuckDBPyConnection, cfg: ConnConfig) -> None:
-    """ATTACH the target database as `mssql` and create the schema if non-default."""
+def attach_target(conn: duckdb.DuckDBPyConnection, cfg: ConnConfig, *,
+                  create_schema: bool = True) -> None:
+    """ATTACH the target database as `mssql` and create the schema if non-default.
+
+    create_schema=False skips the CREATE SCHEMA branch entirely, leaving the
+    ATTACH as the only side effect (still raises LoaderConnectionError if the
+    target database itself does not exist).
+    """
     try:
         conn.execute(
             f"ATTACH ? AS {ATTACH_NAME} (TYPE mssql)",
             [build_conn_string(cfg, cfg.database)],
         )
-        if cfg.schema != "dbo":
+        if create_schema and cfg.schema != "dbo":
             stmt = (
                 f"IF SCHEMA_ID('{_sql_str(cfg.schema)}') IS NULL "
                 f"EXEC('CREATE SCHEMA [{cfg.schema}]')"

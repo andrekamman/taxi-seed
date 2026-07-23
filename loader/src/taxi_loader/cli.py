@@ -16,8 +16,8 @@ import duckdb
 
 from taxi_loader import load, manifest
 from taxi_loader.connection import (
-    ConnConfig, LoaderConfigError, LoaderError, attach_target, connect_duckdb,
-    ensure_database, validate_identifier,
+    ConnConfig, LoaderConfigError, LoaderConnectionError, LoaderError,
+    attach_target, connect_duckdb, ensure_database, validate_identifier,
 )
 from taxi_loader.reconcile import APPEND, RELOAD, SKIP, MonthFile, reconcile
 from taxi_shared.type_mapping import TypeMappingError
@@ -78,18 +78,33 @@ def _describe_plan(data_type: str, plans) -> None:
 
 
 def _process_type(conn, cfg, data_type: str, input_dir: str,
-                  flush_rows: int, full_refresh: bool, dry_run: bool) -> int:
+                  flush_rows: int, full_refresh: bool, dry_run: bool,
+                  attached: bool) -> int:
     disk = discover_month_files(conn, input_dir, data_type)
     if not disk:
         print(f"{data_type}: no parquet under {input_dir}/{data_type}, skipping")
         return 0
 
-    manifest_rows = manifest.read_manifest(conn, cfg, data_type)
-    years = sorted({m.year for m in disk} | {r.year for r in manifest_rows})
-    table_counts = {
-        y: load.count_year_table(conn, cfg, load.year_table(data_type, y))
-        for y in years
-    }
+    if dry_run and not attached:
+        # Target database doesn't exist yet -> nothing on the server, so
+        # every year is fresh; no manifest, no table counts.
+        manifest_rows = []
+    elif dry_run:
+        manifest_rows = (
+            manifest.read_manifest(conn, cfg, data_type)
+            if manifest.manifest_table_exists(conn, cfg) else []
+        )
+    else:
+        manifest_rows = manifest.read_manifest(conn, cfg, data_type)
+
+    if dry_run and not attached:
+        table_counts = {}
+    else:
+        years = sorted({m.year for m in disk} | {r.year for r in manifest_rows})
+        table_counts = {
+            y: load.count_year_table(conn, cfg, load.year_table(data_type, y))
+            for y in years
+        }
     plans = reconcile(disk, manifest_rows, table_counts, full_refresh)
 
     if dry_run:
@@ -132,9 +147,18 @@ def main(argv=None) -> int:
     # Connection / provisioning failures are exit 2 (nothing loaded).
     try:
         conn = connect_duckdb()
-        ensure_database(conn, cfg)
-        attach_target(conn, cfg)
-        manifest.ensure_manifest_table(conn, cfg)
+        if args.dry_run:
+            # Read-only: attach without provisioning; tolerate an absent database.
+            try:
+                attach_target(conn, cfg, create_schema=False)
+                attached = True
+            except LoaderConnectionError:
+                attached = False   # DB doesn't exist yet -> every year is fresh
+        else:
+            ensure_database(conn, cfg)
+            attach_target(conn, cfg)
+            manifest.ensure_manifest_table(conn, cfg)
+            attached = True
     except LoaderError as e:
         print(f"error: {e}", file=sys.stderr)
         return 2
@@ -143,7 +167,8 @@ def main(argv=None) -> int:
     for data_type in types:
         try:
             _process_type(conn, cfg, data_type, args.input_dir,
-                          args.flush_rows, args.full_refresh, args.dry_run)
+                          args.flush_rows, args.full_refresh, args.dry_run,
+                          attached)
         except TypeMappingError as e:
             print(f"error: {data_type}: {e}", file=sys.stderr)
             overall = max(overall, 2)

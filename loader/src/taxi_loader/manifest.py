@@ -52,13 +52,17 @@ def _exec(conn: duckdb.DuckDBPyConnection, sql: str) -> None:
     conn.execute(f"SELECT mssql_exec('{ATTACH_NAME}', ?)", [sql])
 
 
-def ensure_manifest_table(conn: duckdb.DuckDBPyConnection, cfg: ConnConfig) -> None:
+def manifest_table_exists(conn: duckdb.DuckDBPyConnection, cfg: ConnConfig) -> bool:
     fq = manifest_fq(cfg.schema)
-    exists = conn.execute(
+    row = conn.execute(
         f"SELECT o FROM mssql_scan('{ATTACH_NAME}', ?)",
         [f"SELECT OBJECT_ID('{_sql_str(fq)}','U') AS o"],
     ).fetchone()
-    if exists and exists[0] is not None:
+    return bool(row and row[0] is not None)
+
+
+def ensure_manifest_table(conn: duckdb.DuckDBPyConnection, cfg: ConnConfig) -> None:
+    if manifest_table_exists(conn, cfg):
         return
     for stmt in build_manifest_ddl(cfg.schema):
         _exec(conn, stmt)
