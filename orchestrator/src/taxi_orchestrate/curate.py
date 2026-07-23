@@ -106,7 +106,6 @@ def curate_type(data_type: str, raw_dir: Path, mapping_path: Path,
 
     mapping_dict = _mapping_to_dict(existing, target_name)
 
-    converged = False
     for _round in range(_MAX_ROUNDS):
         _write_mapping(mapping_path, mapping_dict, data_type, today)
         mapping = load_mapping(mapping_path)
@@ -131,7 +130,6 @@ def curate_type(data_type: str, raw_dir: Path, mapping_path: Path,
                     drop_needed[u.column] = drop_needed.get(u.column, 0) + 1
 
         if not lossy_needed and not drop_needed:
-            converged = True
             break
 
         lc = mapping_dict["lossy_casts"]
@@ -157,7 +155,7 @@ def curate_type(data_type: str, raw_dir: Path, mapping_path: Path,
 
     _write_mapping(mapping_path, mapping_dict, data_type, today)
     remaining = _unresolved_total(conn, files, target_md, load_mapping(mapping_path))
-    if not converged or remaining:
+    if remaining:
         raise RuntimeError(
             f"{data_type}: {remaining} unresolved item(s) remain after {_MAX_ROUNDS} round(s) "
             f"of auto-curation (ambiguous/cyclic drift needing manual review)"
