@@ -49,9 +49,15 @@ def _mapping_to_dict(existing: Optional[Mapping], target_name: str) -> dict:
     d = {"target": target_name, "renames": {}, "lossy_casts": {}, "acknowledged_data_loss": {}}
     if existing is not None:
         d["renames"] = dict(existing.renames)
-        # Preserve hand-authored value_maps (e.g. yellow payment_type string->code).
+        # Preserve hand-authored value_maps (+ their on_unmapped policy).
         if existing.value_maps:
-            d["value_maps"] = {c: dict(m) for c, m in existing.value_maps.items()}
+            vm_out = {}
+            for c, m in existing.value_maps.items():
+                if existing.value_map_unmapped.get(c, "error") == "null":
+                    vm_out[c] = {"map": dict(m), "on_unmapped": "null"}
+                else:
+                    vm_out[c] = dict(m)
+            d["value_maps"] = vm_out
         for c, e in existing.lossy_casts.items():
             d["lossy_casts"][c] = {"from": e.from_type, "to": e.to_type,
                                    "ack_date": e.ack_date, "ack_by": e.ack_by or ACK_BY,

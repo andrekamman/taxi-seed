@@ -39,6 +39,7 @@ class Mapping:
     # value_maps: {target_column: {source_value: target_value}} — remaps discrete
     # historical values (e.g. string payment codes) to the target's coded form.
     value_maps: dict[str, dict] = field(default_factory=dict)
+    value_map_unmapped: dict[str, str] = field(default_factory=dict)  # column -> "error" | "null"
 
 
 _ALLOWED_KEYS = {"target", "renames", "lossy_casts", "acknowledged_data_loss", "value_maps"}
@@ -108,12 +109,26 @@ def load_mapping(path: Path) -> Mapping:
         )
 
     value_maps: dict[str, dict] = {}
+    value_map_unmapped: dict[str, str] = {}
     for col, entry in (raw.get("value_maps") or {}).items():
         if not isinstance(entry, dict) or not entry:
             raise MappingError(
                 f"value_maps.{col} must be a non-empty dict of {{source_value: target_value}}"
             )
-        value_maps[col] = {str(k): v for k, v in entry.items()}
+        if set(entry.keys()) <= {"map", "on_unmapped"} and isinstance(entry.get("map"), dict):
+            vm = entry["map"]
+            if not vm:
+                raise MappingError(f"value_maps.{col}.map must be non-empty")
+            policy = entry.get("on_unmapped", "error")
+            if policy not in ("error", "null"):
+                raise MappingError(
+                    f"value_maps.{col}.on_unmapped must be 'error' or 'null', got {policy!r}"
+                )
+        else:
+            vm = entry
+            policy = "error"
+        value_maps[col] = {str(k): v for k, v in vm.items()}
+        value_map_unmapped[col] = policy
 
     return Mapping(
         target=target,
@@ -121,4 +136,5 @@ def load_mapping(path: Path) -> Mapping:
         lossy_casts=lossy_casts,
         acknowledged_data_loss=data_loss,
         value_maps=value_maps,
+        value_map_unmapped=value_map_unmapped,
     )

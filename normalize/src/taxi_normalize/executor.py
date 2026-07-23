@@ -15,7 +15,9 @@ def _quote(name: str) -> str:
 
 
 def _sql_lit(value) -> str:
-    """Render a Python scalar as a SQL literal (numbers bare, strings quoted)."""
+    """Render a Python scalar as a SQL literal (None->NULL, numbers bare, strings quoted)."""
+    if value is None:
+        return "NULL"
     if isinstance(value, bool):
         return "TRUE" if value else "FALSE"
     if isinstance(value, (int, float)):
@@ -50,15 +52,19 @@ def _action_sql(action: ColumnAction) -> str:
             for k, v in action.value_map.items()
         )
         # NULLs pass through; a mapped value converts to its code; an UNMAPPED
-        # non-null value raises (rather than silently becoming NULL) so the loss
-        # surfaces and the human extends the value_map — honoring the project's
-        # "data loss is an error" rule instead of quietly dropping data.
-        err = (
-            "error('value_map: unmapped value in " + action.source_column.replace("'", "''")
-            + ": ' || CAST(" + src + " AS VARCHAR))"
-        )
+        # non-null value raises by default (rather than silently becoming NULL) so
+        # the loss surfaces and the human extends the value_map — honoring the
+        # project's "data loss is an error" rule instead of quietly dropping data.
+        # A mapping may opt into on_unmapped: null to discard unmapped values instead.
+        if action.value_map_unmapped == "null":
+            els = "NULL"
+        else:
+            els = (
+                "error('value_map: unmapped value in " + action.source_column.replace("'", "''")
+                + ": ' || CAST(" + src + " AS VARCHAR))"
+            )
         return (
-            f"CAST(CASE WHEN {src} IS NULL THEN NULL {whens} ELSE {err} END "
+            f"CAST(CASE WHEN {src} IS NULL THEN NULL {whens} ELSE {els} END "
             f"AS {action.target_type}) AS {tgt}"
         )
     raise ValueError(f"Unknown action type: {action.action!r}")
