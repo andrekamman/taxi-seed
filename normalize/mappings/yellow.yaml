@@ -4,14 +4,22 @@
 target: yellow_tripdata_2026-05.parquet
 renames:
   airport_fee: Airport_fee
-  Total_Amt: total_amount
-  Payment_Type: payment_type
-  Passenger_Count: passenger_count
-  Tolls_Amt: tolls_amount
+  Trip_Pickup_DateTime: tpep_pickup_datetime
+  pickup_datetime: tpep_pickup_datetime
+  Trip_Dropoff_DateTime: tpep_dropoff_datetime
+  dropoff_datetime: tpep_dropoff_datetime
+  vendor_name: VendorID
+  vendor_id: VendorID
+  store_and_forward: store_and_fwd_flag
+  rate_code: RatecodeID
   Tip_Amt: tip_amount
-  surcharge: extra
   Fare_Amt: fare_amount
+  Tolls_Amt: tolls_amount
+  Total_Amt: total_amount
+  Passenger_Count: passenger_count
+  Payment_Type: payment_type
   Trip_Distance: trip_distance
+  surcharge: extra
 lossy_casts:
   passenger_count:
     from: DOUBLE
@@ -26,31 +34,7 @@ lossy_casts:
     ack_by: auto-curated
     reason: 'DOUBLE -> BIGINT: DOUBLE -> BIGINT would lose data (range/precision)'
 acknowledged_data_loss:
-  vendor_name:
-    ack_date: '2026-07-23'
-    ack_by: auto-curated
-    reason: column dropped; had data in 12 file(s)
-  Trip_Dropoff_DateTime:
-    ack_date: '2026-07-23'
-    ack_by: auto-curated
-    reason: column dropped; had data in 12 file(s)
   Start_Lon:
-    ack_date: '2026-07-23'
-    ack_by: auto-curated
-    reason: column dropped; had data in 12 file(s)
-  store_and_forward:
-    ack_date: '2026-07-23'
-    ack_by: auto-curated
-    reason: column dropped; had data in 12 file(s)
-  End_Lon:
-    ack_date: '2026-07-23'
-    ack_by: auto-curated
-    reason: column dropped; had data in 12 file(s)
-  Trip_Pickup_DateTime:
-    ack_date: '2026-07-23'
-    ack_by: auto-curated
-    reason: column dropped; had data in 12 file(s)
-  End_Lat:
     ack_date: '2026-07-23'
     ack_by: auto-curated
     reason: column dropped; had data in 12 file(s)
@@ -58,15 +42,11 @@ acknowledged_data_loss:
     ack_date: '2026-07-23'
     ack_by: auto-curated
     reason: column dropped; had data in 12 file(s)
-  rate_code:
+  End_Lat:
     ack_date: '2026-07-23'
     ack_by: auto-curated
     reason: column dropped; had data in 12 file(s)
-  pickup_latitude:
-    ack_date: '2026-07-23'
-    ack_by: auto-curated
-    reason: column dropped; had data in 12 file(s)
-  dropoff_datetime:
+  End_Lon:
     ack_date: '2026-07-23'
     ack_by: auto-curated
     reason: column dropped; had data in 12 file(s)
@@ -74,7 +54,7 @@ acknowledged_data_loss:
     ack_date: '2026-07-23'
     ack_by: auto-curated
     reason: column dropped; had data in 12 file(s)
-  pickup_longitude:
+  pickup_latitude:
     ack_date: '2026-07-23'
     ack_by: auto-curated
     reason: column dropped; had data in 12 file(s)
@@ -82,11 +62,7 @@ acknowledged_data_loss:
     ack_date: '2026-07-23'
     ack_by: auto-curated
     reason: column dropped; had data in 12 file(s)
-  pickup_datetime:
-    ack_date: '2026-07-23'
-    ack_by: auto-curated
-    reason: column dropped; had data in 12 file(s)
-  vendor_id:
+  pickup_longitude:
     ack_date: '2026-07-23'
     ack_by: auto-curated
     reason: column dropped; had data in 12 file(s)
@@ -113,3 +89,19 @@ value_maps:
     Dis: 4
     Dispute: 4
     'NA ': 5
+  VendorID:
+    CMT: 1
+    VTS: 2
+    DDS: null
+  store_and_fwd_flag:
+    '0.0': N
+    '1.0': Y
+  RatecodeID:
+    map:
+      '1': 1
+      '2': 2
+      '3': 3
+      '4': 4
+      '5': 5
+      '6': 6
+    on_unmapped: 'null'
