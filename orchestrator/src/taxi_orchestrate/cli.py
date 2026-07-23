@@ -102,7 +102,6 @@ def main(argv=None) -> int:
 
     for t in types:
         outcomes: list[pipeline.StageOutcome] = []
-        halted = False
         for stage in planned:
             if stage == pipeline.LOAD and abort_load:
                 break
@@ -117,12 +116,10 @@ def main(argv=None) -> int:
             outcomes.append(o)
             if o.abort_run:
                 abort_load = True
-            if o.halt_type:
-                halted = True
+            if o.halt_type:  # needs-review or failure: skip this type's remaining stages
                 break
         runs.append(report.TypeRun(t, outcomes))
         all_outcomes.extend(outcomes)
-        _ = halted  # (kept for readability; halting already broke the stage loop)
 
     print(report.render_summary(runs))
     return pipeline.overall_exit_code(all_outcomes)

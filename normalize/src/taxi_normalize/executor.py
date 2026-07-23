@@ -46,14 +46,20 @@ def _action_sql(action: ColumnAction) -> str:
         src = _quote(action.source_column)
         tgt = _quote(action.target_column)
         whens = " ".join(
-            f"WHEN {_sql_lit(str(k))} THEN {_sql_lit(v)}"
+            f"WHEN CAST({src} AS VARCHAR) = {_sql_lit(str(k))} THEN {_sql_lit(v)}"
             for k, v in action.value_map.items()
         )
-        # Match on the string form of the source value; anything unmapped falls
-        # back to a TRY_CAST (NULL if not coercible), then coerce to target type.
+        # NULLs pass through; a mapped value converts to its code; an UNMAPPED
+        # non-null value raises (rather than silently becoming NULL) so the loss
+        # surfaces and the human extends the value_map — honoring the project's
+        # "data loss is an error" rule instead of quietly dropping data.
+        err = (
+            "error('value_map: unmapped value in " + action.source_column.replace("'", "''")
+            + ": ' || CAST(" + src + " AS VARCHAR))"
+        )
         return (
-            f"CAST(CASE CAST({src} AS VARCHAR) {whens} "
-            f"ELSE TRY_CAST({src} AS {action.target_type}) END AS {action.target_type}) AS {tgt}"
+            f"CAST(CASE WHEN {src} IS NULL THEN NULL {whens} ELSE {err} END "
+            f"AS {action.target_type}) AS {tgt}"
         )
     raise ValueError(f"Unknown action type: {action.action!r}")
 

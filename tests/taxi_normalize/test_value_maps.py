@@ -76,3 +76,34 @@ def test_end_to_end_value_map_and_passthrough(tmp_path):
     # column is the target integer type
     typ = conn.execute(f"SELECT typeof(payment_type) FROM '{out}' LIMIT 1").fetchone()[0]
     assert typ.upper() == "BIGINT"
+
+
+def test_null_source_passes_through_value_map(tmp_path):
+    conn = duckdb.connect(":memory:")
+    _write(conn, tmp_path / "raw/yellow/2009/yellow_tripdata_2009-01.parquet",
+           "SELECT * FROM (VALUES (1,'CASH'),(2, CAST(NULL AS VARCHAR))) AS t(vendorid, payment_type)")
+    tgt = tmp_path / "raw/yellow/2024/yellow_tripdata_2024-01.parquet"
+    _write(conn, tgt, "SELECT 1 AS vendorid, CAST(2 AS BIGINT) AS payment_type")
+    mapping = Mapping(target="yellow_tripdata_2024-01.parquet",
+                      value_maps={"payment_type": {"CASH": 2}})
+    target_md = get_file_metadata(conn, tgt)
+    src = tmp_path / "raw/yellow/2009/yellow_tripdata_2009-01.parquet"
+    out = tmp_path / "out/p.parquet"
+    execute_transform(conn, plan_file(get_file_metadata(conn, src), target_md, mapping), src, out)
+    assert conn.execute(f"SELECT vendorid, payment_type FROM '{out}' ORDER BY vendorid").fetchall() == [(1, 2), (2, None)]
+
+
+def test_unmapped_value_raises_not_silent_null(tmp_path):
+    import pytest
+    conn = duckdb.connect(":memory:")
+    _write(conn, tmp_path / "raw/yellow/2009/yellow_tripdata_2009-01.parquet",
+           "SELECT * FROM (VALUES (1,'CASH'),(2,'MYSTERY')) AS t(vendorid, payment_type)")
+    tgt = tmp_path / "raw/yellow/2024/yellow_tripdata_2024-01.parquet"
+    _write(conn, tgt, "SELECT 1 AS vendorid, CAST(2 AS BIGINT) AS payment_type")
+    mapping = Mapping(target="yellow_tripdata_2024-01.parquet",
+                      value_maps={"payment_type": {"CASH": 2}})  # 'MYSTERY' unmapped
+    target_md = get_file_metadata(conn, tgt)
+    src = tmp_path / "raw/yellow/2009/yellow_tripdata_2009-01.parquet"
+    out = tmp_path / "out/p.parquet"
+    with pytest.raises(duckdb.Error, match="unmapped value"):
+        execute_transform(conn, plan_file(get_file_metadata(conn, src), target_md, mapping), src, out)

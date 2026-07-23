@@ -43,6 +43,9 @@ def classify(stage: str, exit_code: int) -> StageOutcome:
             return StageOutcome(stage, exit_code, OK, False, False)
         if exit_code == 1:
             return StageOutcome(stage, exit_code, PARTIAL, False, False)
+        # Loader exit 2 is conn/config OR a per-type TypeMappingError; both abort
+        # the remaining types' load. Conflating them is the deliberate conservative
+        # choice (over-aborting is safe: exit 2 still surfaces the failure).
         return StageOutcome(stage, exit_code, CONN_ERROR, True, True)
     raise ValueError(f"unknown stage: {stage!r}")
 
