@@ -14,6 +14,15 @@ def _quote(name: str) -> str:
     return '"' + name.replace('"', '""') + '"'
 
 
+def _sql_lit(value) -> str:
+    """Render a Python scalar as a SQL literal (numbers bare, strings quoted)."""
+    if isinstance(value, bool):
+        return "TRUE" if value else "FALSE"
+    if isinstance(value, (int, float)):
+        return str(value)
+    return "'" + str(value).replace("'", "''") + "'"
+
+
 def _action_sql(action: ColumnAction) -> str:
     """Produce a single SELECT-list expression for one column action."""
     if action.action == "passthrough":
@@ -33,6 +42,19 @@ def _action_sql(action: ColumnAction) -> str:
     if action.action == "null_fill":
         tgt = _quote(action.target_column)
         return f"NULL::{action.target_type} AS {tgt}"
+    if action.action == "value_map":
+        src = _quote(action.source_column)
+        tgt = _quote(action.target_column)
+        whens = " ".join(
+            f"WHEN {_sql_lit(str(k))} THEN {_sql_lit(v)}"
+            for k, v in action.value_map.items()
+        )
+        # Match on the string form of the source value; anything unmapped falls
+        # back to a TRY_CAST (NULL if not coercible), then coerce to target type.
+        return (
+            f"CAST(CASE CAST({src} AS VARCHAR) {whens} "
+            f"ELSE TRY_CAST({src} AS {action.target_type}) END AS {action.target_type}) AS {tgt}"
+        )
     raise ValueError(f"Unknown action type: {action.action!r}")
 
 

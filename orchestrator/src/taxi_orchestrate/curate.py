@@ -49,6 +49,9 @@ def _mapping_to_dict(existing: Optional[Mapping], target_name: str) -> dict:
     d = {"target": target_name, "renames": {}, "lossy_casts": {}, "acknowledged_data_loss": {}}
     if existing is not None:
         d["renames"] = dict(existing.renames)
+        # Preserve hand-authored value_maps (e.g. yellow payment_type string->code).
+        if existing.value_maps:
+            d["value_maps"] = {c: dict(m) for c, m in existing.value_maps.items()}
         for c, e in existing.lossy_casts.items():
             d["lossy_casts"][c] = {"from": e.from_type, "to": e.to_type,
                                    "ack_date": e.ack_date, "ack_by": e.ack_by or ACK_BY,
@@ -196,9 +199,11 @@ def curate_type(data_type: str, raw_dir: Path, mapping_path: Path,
             if col in renames or col in dl:
                 continue
             new = rename_new.get(col)
-            # Only accept a rename whose cast to the target column will actually run;
+            value_mapped = new is not None and new in mapping_dict.get("value_maps", {})
+            # Accept a rename when the cast will run (numeric/same-family/->string)
+            # OR when the target column has a hand-authored value_map to convert it;
             # otherwise drop the column (data-loss) rather than emit a crashing cast.
-            if new is not None and _cast_executable(d["src"], target_md.get(new, {}).get("type", "")):
+            if new is not None and (value_mapped or _cast_executable(d["src"], target_md.get(new, {}).get("type", ""))):
                 renames[col] = new
                 result.renames.append((col, new, rename_conf.get(col, 0.0)))
             else:

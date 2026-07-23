@@ -19,11 +19,12 @@ from taxi_normalize.mapping import Mapping
 
 @dataclass
 class ColumnAction:
-    action: str  # "passthrough" | "rename" | "cast" | "null_fill"
+    action: str  # "passthrough" | "rename" | "cast" | "null_fill" | "value_map"
     source_column: Optional[str] = None
     target_column: Optional[str] = None
     cast_to: Optional[str] = None
     target_type: Optional[str] = None
+    value_map: Optional[dict] = None  # for action == "value_map": {source_value: target_value}
 
 
 @dataclass
@@ -94,6 +95,9 @@ def plan_file(
             raw_type = raw_stats["type"]
             if raw_type == tgt_type:
                 actions.append(ColumnAction(action="passthrough", source_column=tgt_col, target_column=tgt_col))
+            elif tgt_col in mapping.value_maps:
+                actions.append(ColumnAction(action="value_map", source_column=tgt_col, target_column=tgt_col,
+                                            target_type=tgt_type, value_map=mapping.value_maps[tgt_col]))
             elif _cast_is_safe(raw_stats, tgt_type):
                 actions.append(ColumnAction(action="cast", source_column=tgt_col, target_column=tgt_col, cast_to=tgt_type))
             else:
@@ -114,6 +118,9 @@ def plan_file(
                 raw_type = raw_stats["type"]
                 if raw_type == tgt_type:
                     actions.append(ColumnAction(action="rename", source_column=src, target_column=tgt_col))
+                elif tgt_col in mapping.value_maps:
+                    actions.append(ColumnAction(action="value_map", source_column=src, target_column=tgt_col,
+                                                target_type=tgt_type, value_map=mapping.value_maps[tgt_col]))
                 elif _cast_is_safe(raw_stats, tgt_type):
                     actions.append(ColumnAction(action="rename", source_column=src, target_column=tgt_col, cast_to=tgt_type))
                 else:
