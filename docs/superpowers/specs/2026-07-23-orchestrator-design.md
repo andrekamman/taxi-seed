@@ -21,9 +21,11 @@ built-in email/Slack.
 This sub-project has **two deliverables**:
 
 1. **The `taxi-run` orchestrator** (code + tests).
-2. **Curated, committed mapping YAMLs** for all four types (`normalize/mappings/{yellow,green,fhv,fhvhv}.yaml`),
-   without which a fresh clone cannot run the pipeline unattended (normalize would stop on the
-   first run to scaffold a mapping for review). See *Mapping curation* below.
+2. **A `taxi-curate-mappings` tool** that auto-accepts all detected drift and emits an audit
+   report, plus the **curated, committed mapping YAMLs** it produces for all four types
+   (`normalize/mappings/{yellow,green,fhv,fhvhv}.yaml`) — without which a fresh clone cannot run
+   the pipeline unattended (normalize would stop on the first run to scaffold a mapping for
+   review). See *Mapping curation* below.
 
 ## Non-goals
 
@@ -66,15 +68,25 @@ orchestrator/
     ├── cli.py          # entry point `taxi-run`: arg parsing, the per-type loop
     ├── stages.py       # pure build_*_cmd() argv builders + a thin injected subprocess runner
     ├── pipeline.py     # PURE exit-code -> outcome + halt/continue logic (the heart)
-    └── report.py       # per-type / per-stage summary rendering
+    ├── report.py       # per-type / per-stage summary rendering
+    └── curate.py       # entry point `taxi-curate-mappings`: auto-accept drift + audit report
 ```
+
+A small **refactor to `normalize`** supports curation: extract the drift-detection half of
+`taxi_normalize.bootstrap.bootstrap_type` into a pure `detect_drift(...) -> DriftReport` returning
+structured lists (rename suggestions with confidence, lossy casts with from/to/reason, data-loss
+columns with file counts). `bootstrap_type` keeps its current behavior by calling `detect_drift`
+then emitting; `curate.py` consumes the same structured detection instead of parsing scaffold
+comments. This is an internal refactor — normalize's CLI behavior is unchanged and stays a strict
+human-in-the-loop gate.
 
 **Tests:** `tests/taxi_orchestrate/` (mirrors the other components).
 
 **`pyproject.toml` additions:**
 - Add `orchestrator/src/taxi_orchestrate` to `[tool.hatch.build.targets.wheel] packages`.
-- Add `taxi-run = "taxi_orchestrate.cli:main"` to `[project.scripts]`.
-- **No new runtime dependency** (stdlib `subprocess`, `argparse`, `pathlib`).
+- Add `taxi-run = "taxi_orchestrate.cli:main"` and
+  `taxi-curate-mappings = "taxi_orchestrate.curate:main"` to `[project.scripts]`.
+- **No new runtime dependency** (stdlib `subprocess`, `argparse`, `pathlib`; `pyyaml` already a dep).
 
 ## CLI
 
@@ -99,6 +111,10 @@ taxi-run [TYPE]                 # TYPE optional; omit = all four types, in order
 - **Load requires `MSSQL_PASSWORD` (environment only)**, forwarded to `taxi-load` and never
   logged. With `--load` set and the variable missing, the run fails fast with exit 2 before any
   stage runs.
+- **Minimum connection for `--load` is server + user + password** (`--host`, `--user`,
+  `MSSQL_PASSWORD`); `--database` defaults to `taxi` and `--schema` to `dbo`. **Trusting the
+  server certificate is enabled by default** — the loader's connection string already sets
+  `Encrypt=yes;TrustServerCertificate=yes`, so it is not exposed as a CLI option in this version.
 - `--recent [N]` and `--sample` are passthroughs to the downloader and normalize respectively.
 - `--dry-run` prints, per type, the stages that would run (and the resolved commands), then exits
   0 without invoking anything.
@@ -168,24 +184,41 @@ For a fresh clone to run the pipeline unattended, the four per-type mapping YAML
 committed to `normalize/mappings/` (today only `.gitkeep` is there, so the first `normalize` run
 of each type stops at exit 3 to scaffold a mapping for review).
 
-The maintainer's full local history already exists at `/Users/andre/git/taxi/raw` (yellow back to
-2009, green to 2013, fhv to 2015, fhvhv to 2019 — ~580 monthly parquet files total); **no download
-is required.** Curation procedure:
+The maintainer's full local history has been copied into this repo's `raw/` (yellow 209 files back
+to 2009, green 149, fhv 136, fhvhv 88 — ~580 monthly parquet files; `raw/` is gitignored). **No
+download and no symlink are required.**
 
-1. Symlink `taxi-public/raw → /Users/andre/git/taxi/raw` (both `raw/` and `raw-normalized/` are
-   gitignored, so a local symlink is fine).
-2. For each type, run `normalize <type>`. First run scaffolds `normalize/mappings/<type>.yaml`
-   (exit 3) with SUGGESTED/TODO entries for detected drift; subsequent runs amend it (exit 1) for
-   anything still unresolved.
-3. **The maintainer makes the acknowledgment decisions** — uncomment accepted renames, and add an
-   `ack_date` for each lossy cast and each acknowledged data-loss drop (this is the human-in-the-loop
-   gate; it cannot be automated).
-4. Re-run until `normalize <type>` exits `0` for all four types.
-5. Commit the four reviewed `normalize/mappings/*.yaml`.
+**The acknowledgments are automated, not made by hand.** `taxi-curate-mappings` accepts every
+detected drift decision for a type and writes a complete mapping, then emits an audit report so the
+maintainer can **verify after the fact** (rather than gate before). The normalizer itself stays a
+strict human-in-the-loop tool; this bulk-accept path is a separate, deliberately-invoked utility.
 
-This is data-and-review work done during implementation, and it doubles as the orchestrator's real
-end-to-end validation: once the mappings are clean, `taxi-run --skip-download` normalizes cleanly,
-and `taxi-run --skip-download --load` loads into a SQL Server.
+`taxi-curate-mappings [TYPE]` (omit TYPE = all four), reading `raw/` and writing
+`normalize/mappings/<type>.yaml`:
+
+1. Uses `normalize`'s `detect_drift` to enumerate, for the type: suggested **renames**
+   (with confidence), **lossy casts** (column, from→to, reason), and **data-loss** columns
+   (column, files-present count).
+2. **Auto-accepts all of them** into the mapping, with rename-beats-data-loss precedence (a column
+   with an accepted rename is not also data-loss-acked). Each lossy cast and each data-loss drop is
+   written with `ack_date` = today, `ack_by: auto-curated`, and a `reason` carrying the detected
+   detail; renames are written into `renames:`.
+3. Iterates (bounded) — write mapping, re-detect — until the normalizer's **planner reports zero
+   unresolved items across every raw file** for that type (the same check `normalize` gates on).
+   This is metadata-only (no parquet is written during curation).
+4. Writes a committed **audit report** `normalize/mappings/CURATION-REPORT.md`: a per-type section
+   listing **every ack-required decision** — the lossy casts and data-loss drops, with column,
+   types/reason, and how many files/years are affected — under a clear "verify these" heading, plus
+   a secondary list of auto-accepted renames with their confidence (heuristic, worth a glance).
+
+The tool is non-interactive and re-runnable: when new months introduce new drift, re-running it
+amends the mapping and the report. The committed YAMLs (with `ack_date`/`ack_by`/`reason` on every
+acknowledgment) plus the report are the audit trail — the same "decisions recorded in git" the
+project's philosophy wants, just accepted-then-verified instead of reviewed-then-accepted.
+
+Curation doubles as the orchestrator's real end-to-end validation: once the mappings are clean,
+`taxi-run --skip-download` normalizes cleanly, and `taxi-run --skip-download --load` loads into a
+SQL Server.
 
 ## Testing strategy
 
@@ -195,6 +228,7 @@ tests/taxi_orchestrate/
   test_stages.py      # build_*_cmd() argv builders; run() with stubbed commands
   test_cli.py         # arg parsing, stage selection, --dry-run, missing-password exit 2
   test_run_stub.py    # end-to-end chaining against tiny STUB stage scripts (exit codes + markers)
+  test_curate.py      # auto-accept over synthetic drift fixtures -> clean mapping + report
 ```
 
 - **`test_pipeline.py` (the bulk):** every row of the exit-code table — download fail halts the
@@ -206,11 +240,16 @@ tests/taxi_orchestrate/
 - **`test_run_stub.py`:** the CLI drives a full multi-type run against **stub scripts** that exit
   with configured codes and drop marker files, verifying chaining, halting, stage selection, and
   the summary/exit-code — with no real downloader / normalize / loader / SQL Server.
-- **Real end-to-end** (manual, during curation): `taxi-run --skip-download` over the real
-  `raw/` symlink produces clean `raw-normalized/`; `taxi-run --skip-download --load` loads into the
-  loader's Docker SQL Server. Not part of the fast unit suite.
+- **`test_curate.py`:** over synthetic drift parquet fixtures (reusing `tests/taxi_normalize`'s
+  patterns), `taxi-curate-mappings` produces a mapping the normalizer's planner accepts with zero
+  unresolved; renames/lossy/data-loss are handled with the right precedence; every ack carries
+  `ack_date`/`ack_by`/`reason`; and the audit report lists the ack-required decisions.
+- **Real end-to-end** (manual, during curation): `taxi-curate-mappings` over the real `raw/`
+  produces clean committed mappings; `taxi-run --skip-download` then produces clean
+  `raw-normalized/`; `taxi-run --skip-download --load` loads into the loader's Docker SQL Server.
+  Not part of the fast unit suite.
 
-**Target test count:** ~20–25, weighted toward the pure `pipeline` cases.
+**Target test count:** ~25–30, weighted toward the pure `pipeline` and `curate` cases.
 
 ## Implementation sequence (for the plan)
 
@@ -218,9 +257,14 @@ tests/taxi_orchestrate/
 2. `stages.py` argv builders + injected runner + `test_stages.py`.
 3. `report.py` summary rendering (+ unit test).
 4. `cli.py` (arg parsing, per-type loop, `--dry-run`, exit codes) + `test_cli.py` + `test_run_stub.py`.
-5. `pyproject.toml` wiring + `orchestrator/README.md` pointer.
-6. **Mapping curation:** symlink real data, run/normalize/ack per type, commit the four YAMLs;
-   validate `taxi-run --skip-download [--load]` end-to-end.
+5. `pyproject.toml` wiring (`taxi-run` + `taxi-curate-mappings`) + `orchestrator/README.md` pointer.
+6. `normalize` refactor: extract `detect_drift(...) -> DriftReport` from `bootstrap_type`
+   (behavior-preserving) + a unit test that `bootstrap_type` output is unchanged.
+7. `curate.py` (`taxi-curate-mappings`): auto-accept renames + lossy/data-loss acks to zero
+   unresolved, emit the audit report, + `test_curate.py`.
+8. **Run curation for real:** `taxi-curate-mappings` over `raw/`, commit the four
+   `normalize/mappings/*.yaml` + `CURATION-REPORT.md`; validate `taxi-run --skip-download [--load]`
+   end-to-end.
 
 ## Success criteria
 
@@ -233,10 +277,14 @@ tests/taxi_orchestrate/
   forwarding connection flags and `MSSQL_PASSWORD`; a load partial/error yields overall exit `2`.
 - `--load` without `MSSQL_PASSWORD` fails fast with exit `2`, having run nothing.
 - `--dry-run` prints the plan and exits `0`, invoking no stage.
-- The four `normalize/mappings/*.yaml` are committed and a fresh clone's `taxi-run --skip-download`
-  reaches exit `0` for all four types.
+- `taxi-curate-mappings` runs non-interactively over `raw/`, produces mappings the normalizer's
+  planner accepts with zero unresolved for all four types, fills every ack with
+  `ack_date`/`ack_by`/`reason`, and writes `CURATION-REPORT.md` enumerating the ack-required
+  decisions (lossy casts + data-loss drops) plus the auto-accepted renames.
+- The four `normalize/mappings/*.yaml` + `CURATION-REPORT.md` are committed and a fresh clone's
+  `taxi-run --skip-download` reaches exit `0` for all four types.
 - `uv run --extra test pytest tests/taxi_orchestrate/` passes with no network, no SQL Server, and
-  no real TLC data (stubbed stages).
+  no real TLC data (stubbed stages + synthetic drift fixtures).
 
 ## Out of scope
 
@@ -245,4 +293,7 @@ tests/taxi_orchestrate/
 - Any change to the downloader's coarse exit codes (WAF give-up still exits 0 in v1).
 - The CI fake-data end-to-end pipeline and dev/test/prod promotion — the fourth sub-project.
 - Adding path flags (`--input-dir` / `--mappings-dir`) to `normalize`; v1 runs stages at the
-  repo-root convention and curates against real data via a local symlink.
+  repo-root convention and curates against the real data already copied into `raw/`.
+- Exposing certificate-trust as a CLI option (it is on by default in the loader's connection
+  string) or changing `normalize`'s strict interactive gate (the auto-accept path is a separate
+  `taxi-curate-mappings` utility; the `detect_drift` extraction is a behavior-preserving refactor).
