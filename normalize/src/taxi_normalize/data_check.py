@@ -79,6 +79,23 @@ def get_file_metadata(conn: duckdb.DuckDBPyConnection, file_path: Path) -> dict[
     return result
 
 
+def _combine_bound(current: Any, value: Any, fn) -> Any:
+    """Fold one file's min/max into the running range bound.
+
+    A column whose type drifts between string and numeric across files (real TLC
+    history has these) yields incomparable min/max values; `min(int, str)` would
+    raise. When the two are incomparable, keep the first-seen bound rather than
+    crash — the metadata range is only a hint (the planner's per-file cast-safety
+    check is authoritative), so an imperfect bound is acceptable, a crash is not.
+    """
+    if current is None:
+        return value
+    try:
+        return fn(current, value)
+    except TypeError:
+        return current
+
+
 def aggregate_across_files(files_metadata: list[dict[str, dict[str, Any]]]) -> dict[str, dict[str, Any]]:
     """Aggregate per-file metadata into per-column presence + null/range summary.
 
@@ -107,9 +124,9 @@ def aggregate_across_files(files_metadata: list[dict[str, dict[str, Any]]]) -> d
             if non_null_count > 0:
                 a["files_with_data"] += 1
             if stats["min"] is not None:
-                a["min_range"] = stats["min"] if a["min_range"] is None else min(a["min_range"], stats["min"])
+                a["min_range"] = _combine_bound(a["min_range"], stats["min"], min)
             if stats["max"] is not None:
-                a["max_range"] = stats["max"] if a["max_range"] is None else max(a["max_range"], stats["max"])
+                a["max_range"] = _combine_bound(a["max_range"], stats["max"], max)
     # Convert sets to sorted lists so callers can rely on stable output.
     for a in agg.values():
         a["types_seen"] = sorted(a["types_seen"])
@@ -137,10 +154,16 @@ def fits_in_target_type(col_stats: dict[str, Any], target_type: str) -> tuple[bo
     target_upper = target_type.upper()
     if target_upper in _INT_RANGES:
         lo, hi = _INT_RANGES[target_upper]
-        if min_v is not None and min_v < lo:
-            return False, f"min value {min_v} is below {target_upper} range (min {lo})"
-        if max_v is not None and max_v > hi:
-            return False, f"max value {max_v} exceeds {target_upper} range (max {hi})"
+        try:
+            if min_v is not None and min_v < lo:
+                return False, f"min value {min_v} is below {target_upper} range (min {lo})"
+            if max_v is not None and max_v > hi:
+                return False, f"max value {max_v} exceeds {target_upper} range (max {hi})"
+        except TypeError:
+            # min/max aren't comparable to an integer range (e.g. a string-typed
+            # column whose values drifted vs a numeric target). Metadata can't
+            # judge the range; defer to the per-file cast-safety check.
+            return True, ""
         return True, ""
     # VARCHAR(N)
     if target_upper.startswith("VARCHAR(") and target_upper.endswith(")"):
