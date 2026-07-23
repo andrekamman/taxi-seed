@@ -50,7 +50,17 @@ Semantics in the executor's `value_map` action:
 `load_mapping` parses both forms into `Mapping.value_maps` (the `{value: target}` dict) plus
 `Mapping.value_map_unmapped` (`{column: "error" | "null"}`, default `"error"`). The planner threads
 the policy onto the `value_map` `ColumnAction`; the executor renders the `ELSE` branch accordingly
-(`error(...)` or `NULL`). SQL literals (including `NULL`) are rendered by `_sql_lit`.
+(`error(...)` or `NULL`). SQL literals (including `NULL`) are rendered by `_sql_lit`. **Hand-authored
+YAML must quote the policy value (`on_unmapped: 'null'`)** — a bare `null` parses to YAML `None` and
+is rejected.
+
+**When a value_map fires:** only on a raw↔target **type mismatch**. An exact-type-match column
+passthroughs (same name) or plain-renames (Case B) *before* the value_map is considered, so a
+same-type value cleanup is a no-op. Additionally, on a **same-name** column (Case A) the value_map
+applies only when the raw column is **string-typed** — a numeric same-name variant (e.g. DOUBLE
+`RatecodeID` 2018-2023 with values `1.0..6.0/99.0`) casts normally rather than being NULLed by a
+string-keyed map. A **renamed** source (Case B) always value-maps regardless of type, so a numeric
+historical source like `store_and_forward` (DOUBLE 0/1 → `store_and_fwd_flag`) still converts.
 
 ## Yellow mapping completion (hand-authored)
 
