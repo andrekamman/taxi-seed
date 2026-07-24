@@ -43,3 +43,33 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
       - name: Deploy site
         run: uv run --extra docs mkdocs gh-deploy --force
+
+  integration:
+    runs-on: ubuntu-latest
+    services:
+      mssql:
+        image: mcr.microsoft.com/mssql/server:2022-latest
+        env:
+          ACCEPT_EULA: "Y"
+          MSSQL_SA_PASSWORD: "Str0ng_Passw0rd!"
+        ports:
+          - 1433:1433
+    env:
+      MSSQL_PASSWORD: "Str0ng_Passw0rd!"
+      MSSQL_HOST: "127.0.0.1"
+      MSSQL_PORT: "1433"
+      MSSQL_USER: "sa"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v3
+        with:
+          enable-cache: true
+      - run: uv python install 3.13
+      - run: uv sync --extra test
+      - name: Wait for SQL Server
+        run: uv run python scripts/wait_for_mssql.py
+      - name: Run loader integration + pipeline e2e tests
+        run: |
+          uv run --extra test pytest \
+            tests/taxi_loader/test_load_integration.py \
+            tests/e2e/test_pipeline_e2e.py -v
