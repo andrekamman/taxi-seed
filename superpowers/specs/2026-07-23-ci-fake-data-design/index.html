@@ -1,0 +1,1274 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Downloader, schema-drift analyzer, and K6 SQL Server load tester for NYC TLC taxi trip data">
+      
+      
+      
+        <link rel="canonical" href="https://andrekamman.github.io/taxi/superpowers/specs/2026-07-23-ci-fake-data-design/">
+      
+      
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>CI / fake-data — design spec (2026-07-23) - taxi</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.ec1eaa64.min.css">
+      
+        
+        <link rel="stylesheet" href="../../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#ci-fake-data-design-spec-2026-07-23" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../../.." title="taxi" class="md-header__button md-logo" aria-label="taxi" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            taxi
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              CI / fake-data — design spec (2026-07-23)
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+          <a href="javascript:void(0)" class="md-search__icon md-icon" title="Share" aria-label="Share" data-clipboard data-clipboard-text="" data-md-component="search-share" tabindex="-1">
+            
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9a3 3 0 0 0-3 3 3 3 0 0 0 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.15c-.05.21-.08.43-.08.66 0 1.61 1.31 2.91 2.92 2.91s2.92-1.3 2.92-2.91A2.92 2.92 0 0 0 18 16.08"/></svg>
+          </a>
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/andrekamman/taxi" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    andrekamman/taxi
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../../.." title="taxi" class="md-nav__button md-logo" aria-label="taxi" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    taxi
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/andrekamman/taxi" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    andrekamman/taxi
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../getting-started/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Guides
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Guides
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../guides/downloader/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Downloader
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../guides/schema-drift/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Schema Drift
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../guides/normalize/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Normalize
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../guides/k6-loadtest/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    K6 Load Test
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../cookbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Cookbook
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reference
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Reference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/configuration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Configuration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/exit-codes/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Exit codes
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Design Specs
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Design Specs
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../2026-07-19-monorepo-restructure-design/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Monorepo restructure
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../2026-07-21-normalizer-design/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Normalizer
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../2026-03-25-k6-sql-load-testing-design/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    K6 SQL load testing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../2026-07-22-documentation-design/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Documentation site
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../contributing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Contributing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#background-current-state-facts" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Background / current state (facts)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#a-ci-sql-server-integration-job" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        A — CI SQL Server integration job
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#b-fake-data-generator-end-to-end-smoke" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        B — fake-data generator + end-to-end smoke
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="B — fake-data generator + end-to-end smoke">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#b1-schema-constants-module-code-driven-no-committed-parquet" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        B.1 Schema-constants module (code-driven — no committed parquet)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#b2-generator" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        B.2 Generator
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#b3-end-to-end-test-testse2etest_pipeline_e2epy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        B.3 End-to-end test — tests/e2e/test_pipeline_e2e.py
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#b4-local-parity" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        B.4 Local parity
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#testing-strategy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Testing strategy
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#error-handling" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Error handling
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#out-of-scope-deferred" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Out of scope (deferred)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#open-items-to-resolve-during-implementation-not-blocking" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Open items to resolve during implementation (not blocking)
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="ci-fake-data-design-spec-2026-07-23">CI / fake-data — design spec (2026-07-23)</h1>
+<p><strong>Sub-project:</strong> the four-part taxi expansion's last piece (normalizer ✅, docs ✅, loader ✅,
+orchestrator ✅, <strong>CI/fake-data ← this</strong>).</p>
+<p><strong>Goal:</strong> make every push validate the loader + orchestrator + normalize integration against a
+<strong>real SQL Server</strong>, without the ~100 GB TLC download — by (A) adding a CI job with a SQL Server
+service container that runs the existing integration tests, and (B) generating tiny <strong>fake data</strong>
+shaped like the real TLC schema and driving the whole pipeline (generate → normalize → load →
+assert) as a CI smoke that exercises the <strong>actual committed mappings</strong>.</p>
+<p><strong>Scope (v1): A + B.</strong> k6-in-CI (C) and dev/test/prod promotion (D) are deferred to later
+follow-ups and are out of scope here.</p>
+<hr />
+<h2 id="background-current-state-facts">Background / current state (facts)</h2>
+<ul>
+<li><strong>CI</strong> (<code>.github/workflows/ci.yml</code>): two jobs — <code>test</code> (pytest on py3.12/3.13 via <code>uv</code>;
+  <code>uv sync --extra test</code> then <code>uv run --extra test pytest -q</code>) and <code>docs</code> (mkdocs <code>gh-deploy</code> on
+  push to <code>main</code>, <code>needs: test</code>). <strong>No SQL Server, no integration coverage today.</strong></li>
+<li><strong>Loader integration tests</strong> already exist: <code>tests/taxi_loader/test_load_integration.py</code> (7 tests),
+  gated by <code>pytestmark = pytest.mark.skipif(not os.environ.get("MSSQL_PASSWORD"), …)</code>. They
+  provision/attach/load/verify against <code>mcr.microsoft.com/mssql/server:2022-latest</code>. <strong>These run
+  today only when <code>MSSQL_PASSWORD</code> is set — i.e. never in CI.</strong></li>
+<li><strong>Reusable helpers</strong> in that test file (to be shared with the new e2e test): <code>cfg()</code> fixture
+  (builds <code>ConnConfig</code> with a unique schema <code>"t"+uuid4().hex[:8]</code>, reads <code>MSSQL_HOST</code>/<code>MSSQL_PORT</code>/
+  <code>MSSQL_USER</code> with defaults <code>localhost</code>/<code>1433</code>/<code>sa</code>, <code>database="taxi"</code>, <code>password=os.environ["MSSQL_PASSWORD"]</code>);
+  <code>prepared(cfg)</code>; <code>attached(cfg)</code> (<code>@contextmanager</code>, short-lived read connection); <code>_count(cfg, table)</code>
+  → <code>load.count_year_table</code>; <code>_read_manifest(cfg)</code> → <code>manifest.read_manifest</code>; <code>_detach_close(conn)</code>.</li>
+<li><strong>DuckDB <code>mssql</code> attach is process-global</strong> — only one connection may hold the ATTACH at a time.
+  Tests provision then detach; each verification opens a short-lived attached connection. The e2e
+  test MUST respect this (drive the pipeline, then open short-lived reads to assert).</li>
+<li><strong>Loader</strong> (<code>loader/src/taxi_loader/cli.py</code>, entry point <code>taxi-load</code>): argparse flags — positional
+  <code>data_type</code> (four types; omit = all), <code>--host</code> (localhost), <code>--port</code> (1433), <code>--database</code> (taxi),
+  <code>--schema</code> (dbo), <code>--user</code> (sa), <code>--input-dir</code> (default <code>raw-normalized</code>; reads
+  <code>&lt;input-dir&gt;/&lt;type&gt;/&lt;year&gt;/*.parquet</code>, parsing <code>(\d{4})-(\d{2})</code> from the filename), <code>--flush-rows</code>,
+  <code>--full-refresh</code>, <code>--dry-run</code>. Password only from env <code>MSSQL_PASSWORD</code>. Year-table name =
+  <code>f"{data_type}_{year}"</code>. Connection provisioning (<code>connection.py</code>): <code>INSTALL mssql FROM community;
+  LOAD mssql;</code> and <strong>hard-asserts <code>EXPECTED_MSSQL_EXT_VERSION = "7e57d24"</code></strong>; <code>build_conn_string</code>
+  uses <code>Encrypt=yes;TrustServerCertificate=yes</code>; <code>ensure_database</code> creates <code>taxi</code> if absent;
+  <code>attach_target</code> attaches as <code>mssql</code> and creates the schema if <code>!= "dbo"</code>.</li>
+<li><strong>Orchestrator</strong> (<code>orchestrator/src/taxi_orchestrate/cli.py</code>, entry point <code>taxi-run</code>): argparse
+  flags — positional <code>data_type</code>, <code>--recent</code>, <strong><code>--skip-download</code></strong>, <code>--download-only</code>, <strong><code>--load</code></strong>,
+  <code>--sample</code>, <strong><code>--data-dir</code></strong> ("working root holding raw/ + raw-normalized/; default: repo root"),
+  <code>--dry-run</code>, plus load-forwarded <code>--host/--port/--database/--schema/--user/--flush-rows/--full-refresh</code>.
+  <code>root = Path(args.data_dir).resolve() if args.data_dir else find_repo_root(cwd)</code>; <strong>every stage runs
+  with <code>cwd=root</code></strong>. Stage order (<code>_planned_stages</code>): download (unless <code>--skip-download</code>) → normalize →
+  load (if <code>--load</code>). <code>--load</code> requires <code>MSSQL_PASSWORD</code> in env (forwarded to the load subprocess).
+  Load stage reads <code>INPUT_DIR = "raw-normalized"</code>.</li>
+<li><strong>Normalize</strong> (<code>normalize/src/taxi_normalize/cli.py</code>, entry point <strong><code>normalize</code></strong> — not
+  <code>taxi-normalize</code>): argparse — positional <code>data_type</code> (omit = all four), <code>--sample</code> (default
+  <code>"100%"</code>). <strong>No <code>--input-dir</code>/<code>--mappings-dir</code>/<code>--data-dir</code> flags.</strong> Paths are resolved relative to
+  CWD: raw input <code>raw/&lt;type&gt;/</code>, mapping <code>normalize/mappings/&lt;type&gt;.yaml</code>, output <code>raw-normalized/&lt;type&gt;/</code>.
+  Target resolved via <code>raw_dir.rglob(mapping.target)</code>; all inputs via <code>sorted(raw_dir.rglob("*.parquet"))</code>.
+  Exit codes: 0 done, 1 needs-review (unresolved items), 2 error, 3 first-run scaffold generated.</li>
+<li><strong>Mapping format</strong> (<code>normalize/src/taxi_normalize/mapping.py</code>), allowed top-level keys:
+  <code>target</code> (required — a target parquet <strong>filename</strong> whose schema every raw file is rewritten to
+  conform to), <code>renames</code> (<code>{old: new}</code>), <code>lossy_casts</code> (<code>{col: {ack_date, from, to, ack_by?, reason?}}</code>),
+  <code>acknowledged_data_loss</code> (<code>{col: {ack_date, ack_by?, reason?}}</code> — dropped columns), <code>value_maps</code>
+  (<code>{col: {src: tgt}}</code> <strong>or</strong> <code>{col: {map: {…}, on_unmapped: 'error'|'null'}}</code>). Committed targets:
+  <code>yellow→yellow_tripdata_2026-05.parquet</code>, <code>green→green_tripdata_2026-05.parquet</code>,
+  <code>fhv→fhv_tripdata_2026-04.parquet</code>, <code>fhvhv→fhvhv_tripdata_2026-05.parquet</code>.</li>
+<li><strong>A raw input file processes cleanly</strong> iff every non-conforming column is covered by <code>renames</code>,
+  <code>lossy_casts</code>, <code>acknowledged_data_loss</code>, or <code>value_maps</code>; otherwise normalize exits 1. The pinned
+  <code>target:</code> file itself must exist under <code>raw/&lt;type&gt;/</code> to supply the reference schema.</li>
+<li><strong>DuckDB→SQL Server type map</strong> (<code>shared/src/taxi_shared/type_mapping.py</code>): <code>BIGINT→BIGINT</code>,
+  <code>DOUBLE→FLOAT</code>, <code>VARCHAR/TEXT/STRING→NVARCHAR(MAX)</code>, <code>TIMESTAMP*→DATETIME2</code>, <code>DECIMAL(p,s)</code>
+  passthrough; unmapped types raise <code>TypeMappingError</code>. Generated parquet must use only mapped types.</li>
+<li><strong><code>pyproject.toml</code></strong>: <code>requires-python = "&gt;=3.12"</code>; core deps <code>duckdb&gt;=1.4.4</code>, <code>pyyaml&gt;=6.0</code>;
+  <code>[project.optional-dependencies].test = ["pytest&gt;=8.0"]</code>; wheel packages include
+  <code>loader/src/taxi_loader</code>, <code>normalize/src/taxi_normalize</code>, <code>orchestrator/src/taxi_orchestrate</code>,
+  <code>shared/src/taxi_shared</code>.</li>
+</ul>
+<hr />
+<h2 id="a-ci-sql-server-integration-job">A — CI SQL Server integration job</h2>
+<p>Add <strong>one</strong> job to <code>.github/workflows/ci.yml</code>; leave <code>test</code> and <code>docs</code> unchanged.</p>
+<ul>
+<li><strong><code>integration</code></strong>, <code>runs-on: ubuntu-latest</code> (x86_64 — supported by the DuckDB <code>mssql</code> extension),
+  <strong>single Python</strong> (3.13). The py3.12/3.13 matrix stays on the unit <code>test</code> job; the integration job
+  runs one version to save time.</li>
+<li><strong>Service container:</strong>
+  <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-1">1</a></span>
+<span class="normal"><a href="#__codelineno-0-2">2</a></span>
+<span class="normal"><a href="#__codelineno-0-3">3</a></span>
+<span class="normal"><a href="#__codelineno-0-4">4</a></span>
+<span class="normal"><a href="#__codelineno-0-5">5</a></span>
+<span class="normal"><a href="#__codelineno-0-6">6</a></span>
+<span class="normal"><a href="#__codelineno-0-7">7</a></span>
+<span class="normal"><a href="#__codelineno-0-8">8</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1"></a><span class="nt">services</span><span class="p">:</span>
+<a id="__codelineno-0-2" name="__codelineno-0-2"></a><span class="w">  </span><span class="nt">mssql</span><span class="p">:</span>
+<a id="__codelineno-0-3" name="__codelineno-0-3"></a><span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">mcr.microsoft.com/mssql/server:2022-latest</span>
+<a id="__codelineno-0-4" name="__codelineno-0-4"></a><span class="w">    </span><span class="nt">env</span><span class="p">:</span>
+<a id="__codelineno-0-5" name="__codelineno-0-5"></a><span class="w">      </span><span class="nt">ACCEPT_EULA</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Y&quot;</span>
+<a id="__codelineno-0-6" name="__codelineno-0-6"></a><span class="w">      </span><span class="nt">MSSQL_SA_PASSWORD</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Str0ng_Passw0rd!&quot;</span>
+<a id="__codelineno-0-7" name="__codelineno-0-7"></a><span class="w">    </span><span class="nt">ports</span><span class="p">:</span>
+<a id="__codelineno-0-8" name="__codelineno-0-8"></a><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;1433:1433&quot;</span>
+</code></pre></div></td></tr></table></div></li>
+<li><strong>Readiness = explicit wait step, not a container healthcheck.</strong> A bounded poll loop (e.g. up to
+  ~60s, ~2s interval) that succeeds when a <code>SELECT 1</code> connects — using the <code>sqlcmd</code> shipped in the
+  <code>mssql-tools</code> image, or a Python/DuckDB <code>mssql</code> attempt, or a raw TCP check on 1433. Fail the job
+  with a clear message on timeout. (SQL Server's own container healthcheck is the historically flaky
+  part; an explicit step is more reliable and debuggable.)</li>
+<li><strong>Run step:</strong>
+  <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-1-1">1</a></span>
+<span class="normal"><a href="#__codelineno-1-2">2</a></span>
+<span class="normal"><a href="#__codelineno-1-3">3</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1"></a>MSSQL_PASSWORD=Str0ng_Passw0rd! uv run --extra test pytest \
+<a id="__codelineno-1-2" name="__codelineno-1-2"></a>  tests/taxi_loader/test_load_integration.py \
+<a id="__codelineno-1-3" name="__codelineno-1-3"></a>  tests/e2e/test_pipeline_e2e.py
+</code></pre></div></td></tr></table></div>
+  With <code>MSSQL_HOST=localhost</code> / <code>MSSQL_PORT=1433</code> / <code>MSSQL_USER=sa</code> (defaults already match the mapped
+  service port). This runs the 7 existing loader integration tests <strong>and</strong> the new e2e smoke.</li>
+<li>Steps otherwise mirror the <code>test</code> job: <code>actions/checkout@v4</code>, <code>astral-sh/setup-uv@v3</code>
+  (<code>enable-cache: true</code>), <code>uv python install 3.13</code>, <code>uv sync --extra test</code>.</li>
+</ul>
+<p><strong>Risk noted:</strong> the loader pins <code>EXPECTED_MSSQL_EXT_VERSION = "7e57d24"</code>. CI installs the <code>mssql</code>
+community extension against the same pinned <code>duckdb&gt;=1.4.4</code>, so it should resolve identically to local;
+if it drifts, the existing integration tests fail loudly (this is the same code path as a local run).</p>
+<hr />
+<h2 id="b-fake-data-generator-end-to-end-smoke">B — fake-data generator + end-to-end smoke</h2>
+<h3 id="b1-schema-constants-module-code-driven-no-committed-parquet">B.1 Schema-constants module (code-driven — no committed parquet)</h3>
+<p>A small committed module (e.g. <code>tests/e2e/schemas.py</code> or a <code>tests/e2e/fakedata/</code> package) declares,
+<strong>per type</strong>, two things derived by reading each committed <code>normalize/mappings/&lt;type&gt;.yaml</code>:</p>
+<ol>
+<li><strong>Target schema</strong> — the canonical (post-rename, final-type) columns + DuckDB types, matching the
+   mapping's pinned <code>target:</code> file. Used to write the pinned target parquet (a few rows) so normalize
+   has its reference schema.</li>
+<li><strong>Raw-historical schema(s)</strong> — at least one <strong>drift-era</strong> raw file per type whose columns are the
+   <em>pre-rename</em> historical names and types, deliberately shaped to make <strong>every</strong> mapping mechanism
+   fire:</li>
+<li>a <strong>rename</strong> (a column under its historical name, e.g. <code>vendor_id</code>, <code>pickup_datetime</code>),</li>
+<li>a <strong>lossy_cast</strong> (a column with the <code>from</code> type, e.g. <code>passenger_count</code>/<code>RatecodeID</code> as DOUBLE),</li>
+<li>a <strong>value_map</strong> (a column holding a source code string, e.g. <code>payment_type</code>, <code>store_and_fwd_flag</code>,
+     covering both the flat and the <code>map:</code>/<code>on_unmapped:</code> forms),</li>
+<li>an <strong>acknowledged_data_loss</strong> drop (an extra column the mapping drops, e.g. lat/long,
+     <code>__index_level_0__</code>).</li>
+</ol>
+<p>Only DuckDB types in the <code>type_mapping</code> table (BIGINT/DOUBLE/VARCHAR/TIMESTAMP/DECIMAL) are used, so
+the loaded parquet maps cleanly to SQL Server. Row counts are tiny (single digits per file) and can
+span ≥2 months/years so <code>&lt;type&gt;_&lt;year&gt;</code> table assertions and the manifest are meaningful.</p>
+<h3 id="b2-generator">B.2 Generator</h3>
+<p>A helper (mirroring <code>tests/taxi_loader/conftest.py::write_month</code>, which uses DuckDB
+<code>COPY (SELECT … FROM range(n)) TO '&lt;path&gt;' (FORMAT PARQUET)</code>) writes, per type, into an isolated
+temp <code>workroot</code>:
+- the pinned <strong>target</strong> file <code>workroot/raw/&lt;type&gt;/…/&lt;mapping.target&gt;</code> (canonical schema), and
+- the <strong>raw-historical</strong> file(s) <code>workroot/raw/&lt;type&gt;/&lt;year&gt;/&lt;type&gt;_tripdata_&lt;year&gt;-&lt;mm&gt;.parquet</code>
+  (filename <strong>must</strong> contain <code>YYYY-MM</code>).</p>
+<h3 id="b3-end-to-end-test-testse2etest_pipeline_e2epy">B.3 End-to-end test — <code>tests/e2e/test_pipeline_e2e.py</code></h3>
+<p>Gated by the <strong>same</strong> <code>skipif(not os.environ.get("MSSQL_PASSWORD"))</code> as the loader integration tests,
+so local <code>pytest</code> stays green without SQL Server. For <strong>all four</strong> types (parametrized):</p>
+<ol>
+<li>Create isolated temp <code>workroot</code>.</li>
+<li><strong>Copy</strong> the repo's <code>normalize/mappings/</code> → <code>workroot/normalize/mappings/</code> (so normalize, which
+   resolves mappings relative to CWD, uses the <strong>real committed</strong> mappings without polluting the repo's
+   gitignored <code>raw/</code>). <strong>No production-code change is required</strong> — this is the reconciliation mechanism.</li>
+<li>Generate raw + target files into <code>workroot/raw/&lt;type&gt;/</code> (B.2).</li>
+<li>Drive the whole pipeline: <code>taxi-run &lt;type&gt; --skip-download --load --data-dir workroot
+   --schema &lt;unique-schema&gt; --host … --port … --user …</code> (invoke <code>taxi_orchestrate.cli.main([...])</code>
+   in-process, or subprocess the console script). This chains normalize → load with <code>cwd=workroot</code>.</li>
+<li>Assert via the shared helpers: <code>load.count_year_table</code> (table <code>&lt;type&gt;_&lt;year&gt;</code>) equals the generated
+   row counts, and <code>manifest.read_manifest</code> reflects the loaded (year, month, rows) tuples — using
+   <strong>short-lived attached reads</strong>, respecting the single-process <code>mssql</code>-attach constraint. Use a
+   <strong>unique schema per test</strong> (as the existing <code>cfg()</code> fixture does) so parametrized types don't
+   collide.</li>
+</ol>
+<p><strong>Shared helpers:</strong> factor the reusable SQL-Server-side helpers so both
+<code>tests/taxi_loader/test_load_integration.py</code> and <code>tests/e2e/test_pipeline_e2e.py</code> use them. Prefer a
+shared <code>conftest.py</code>/module over duplication; keep test-file basenames unique across components
+(pytest default import mode) — the e2e file is <code>test_pipeline_e2e.py</code>.</p>
+<h3 id="b4-local-parity">B.4 Local parity</h3>
+<p>A small runnable entry (a <code>uv</code> script target or a <code>make</code>/shell wrapper, e.g. <code>scripts/e2e-smoke.sh</code>)
+that sets <code>MSSQL_PASSWORD</code> and runs the same <code>pytest tests/e2e/test_pipeline_e2e.py</code> against a local
+Docker SQL Server — documented alongside the existing manual bring-up in the integration test's
+docstring, so CI and local runs are identical.</p>
+<hr />
+<h2 id="testing-strategy">Testing strategy</h2>
+<ul>
+<li>The e2e smoke <strong>is</strong> the new integration coverage; it doubles as regression coverage for the whole
+  <code>taxi_shared</code> → loader DDL path on a real server and for the committed mappings staying loadable.</li>
+<li>Local <code>pytest -q</code> (no <code>MSSQL_PASSWORD</code>) stays green: today's 189 passed / 7 skipped becomes 189
+  passed / (7 + N) skipped, where N is the new e2e cases.</li>
+<li>With <code>MSSQL_PASSWORD</code> set (local Docker or CI), the 7 loader integration tests + the new e2e cases
+  execute and assert real row counts.</li>
+</ul>
+<h2 id="error-handling">Error handling</h2>
+<ul>
+<li>CI readiness wait fails fast with a clear message on timeout (A).</li>
+<li>Normalize non-zero exits (1 needs-review, 2 error, 3 scaffold) must fail the e2e test loudly — a
+  drift file that doesn't fire the intended mapping mechanism should surface as a test failure, not a
+  silent pass.</li>
+<li>The e2e test cleans up its schema/attach on exit (mirroring the existing <code>prepared</code>/<code>_detach_close</code>
+  teardown) so parametrized runs and reruns are isolated.</li>
+</ul>
+<h2 id="out-of-scope-deferred">Out of scope (deferred)</h2>
+<ul>
+<li><strong>C</strong> — building/running xk6 load tests in CI.</li>
+<li><strong>D</strong> — dev/test/prod promotion + schema-diff gates.</li>
+<li>Any new production CLI flags (e.g. a <code>normalize --mappings-dir</code>): the mapping-copy mechanism avoids
+  needing them; revisit only if a future piece requires it.</li>
+</ul>
+<h2 id="open-items-to-resolve-during-implementation-not-blocking">Open items to resolve during implementation (not blocking)</h2>
+<ul>
+<li>Exact readiness mechanism (sqlcmd vs Python/DuckDB attempt vs TCP) — pick the simplest reliable one.</li>
+<li>Whether to invoke <code>taxi-run</code> in-process (<code>cli.main</code>) or via subprocess — in-process is faster and
+  gives direct exceptions; subprocess is closer to real usage. Prefer in-process unless the <code>cwd=root</code>
+  handling forces subprocess.</li>
+<li>Precise per-type drift-file column sets — authored from each committed mapping during implementation.</li>
+</ul>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var labels=set.querySelector(".tabbed-labels");for(var tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["content.code.copy", "content.tabs.link", "navigation.tracking", "navigation.top", "search.highlight", "search.share"], "search": "../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+    
+  </body>
+</html>
