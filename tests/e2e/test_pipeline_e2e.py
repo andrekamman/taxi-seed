@@ -1,12 +1,14 @@
 import os
 import shutil
 import subprocess
+from contextlib import contextmanager
 from pathlib import Path
+from uuid import uuid4
 
 import pytest
-from conftest import attached
 from fakedata import DATA_TYPES, generate
 from taxi_loader import load, manifest
+from taxi_loader.connection import ATTACH_NAME, ConnConfig, attach_target, connect_duckdb
 
 pytestmark = pytest.mark.skipif(
     not os.environ.get("MSSQL_PASSWORD"),
@@ -15,6 +17,33 @@ pytestmark = pytest.mark.skipif(
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 REPO_MAPPINGS = REPO_ROOT / "normalize" / "mappings"
+
+
+@pytest.fixture
+def cfg():
+    return ConnConfig(
+        host=os.environ.get("MSSQL_HOST", "localhost"),
+        port=int(os.environ.get("MSSQL_PORT", "1433")),
+        database="taxi",
+        schema="t" + uuid4().hex[:8],
+        user=os.environ.get("MSSQL_USER", "sa"),
+        password=os.environ["MSSQL_PASSWORD"],
+    )
+
+
+@contextmanager
+def attached(conn_cfg):
+    """Short-lived read connection; respects the process-global mssql attach."""
+    conn = connect_duckdb()
+    try:
+        attach_target(conn, conn_cfg, create_schema=False)
+        yield conn
+    finally:
+        try:
+            conn.execute(f"DETACH {ATTACH_NAME}")
+        except Exception:
+            pass
+        conn.close()
 
 
 def _run_pipeline(workroot: Path, data_type: str, cfg) -> None:
