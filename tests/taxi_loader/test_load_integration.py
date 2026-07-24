@@ -7,6 +7,9 @@ Bring a server up first, e.g.:
     mcr.microsoft.com/mssql/server:2022-latest
 Then: MSSQL_PASSWORD='Str0ng_Passw0rd!' uv run --extra test pytest tests/taxi_loader/test_load_integration.py
 
+Or run everything (container bring-up + these tests + the pipeline e2e) with:
+    ./scripts/e2e-smoke.sh
+
 Note: the `mssql` extension keeps its ATTACH "context" alive process-wide across
 DuckDB connections, so only ONE connection may hold the `mssql` attach at a time.
 These tests therefore provision, then release the attach, and each verification
