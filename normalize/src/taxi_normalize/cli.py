@@ -26,7 +26,7 @@ from taxi_normalize.planner import plan_file
 DATA_TYPES = ("yellow", "green", "fhv", "fhvhv")
 
 
-def main() -> int:
+def main(argv=None) -> int:
     parser = argparse.ArgumentParser(
         prog="normalize",
         description="Rewrite historical TLC parquet files to conform to the latest schema.",
@@ -41,7 +41,7 @@ def main() -> int:
              "and amendment: N (absolute) or N%% (percent). Default: 100%% (full scan). "
              "Ignored when the mapping is already complete.",
     )
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
 
     types = [args.data_type] if args.data_type else list(DATA_TYPES)
     overall_rc = 0
