@@ -514,8 +514,7 @@ wheels = [
 ]
 
 [[package]]
-name = "taxi"
-version = "0.1.0"
+name = "taxi-seed"
 source = { editable = "." }
 dependencies = [
     { name = "duckdb" },
@@ -541,7 +540,7 @@ requires-dist = [
     { name = "pytest", marker = "extra == 'test'", specifier = ">=8.0" },
     { name = "pyyaml", specifier = ">=6.0" },
 ]
-provides-extras = ["test", "docs"]
+provides-extras = ["docs", "test"]
 
 [[package]]
 name = "urllib3"
