@@ -95,10 +95,21 @@ These are manual, out-of-band steps — they only need to happen once per repo, 
     - `testpypi` — no protection rules. The prerelease flow should be fast and unattended.
     - `pypi` — add yourself (or the release approver) as a **required reviewer**. This is the actual production approval gate: the `pypi` job in `release.yml` will not run until someone approves the deployment.
 
-4. **Turn on branch protection for `dev`**, requiring the `integration` check:
+4. **Turn on branch protection for both `dev` and `main`**, requiring the `integration` check on each. Both branches get the identical rule — `dev` because feature-branch PRs land there, and `main` because `dev`→`main` promotion PRs need the same gate to keep `main` releasable:
 
     ```bash
     gh api -X PUT repos/andrekamman/taxi/branches/dev/protection --input - <<'JSON'
+    {
+      "required_status_checks": { "strict": true, "contexts": ["integration"] },
+      "enforce_admins": true,
+      "required_pull_request_reviews": null,
+      "restrictions": null
+    }
+    JSON
+    ```
+
+    ```bash
+    gh api -X PUT repos/andrekamman/taxi/branches/main/protection --input - <<'JSON'
     {
       "required_status_checks": { "strict": true, "contexts": ["integration"] },
       "enforce_admins": true,
