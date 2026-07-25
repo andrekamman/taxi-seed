@@ -1,8 +1,12 @@
 # Contributing
 
-Contributions are welcome — the standard flow is fork the repo, cut a branch off `main`, and open a pull request back into `main`. Before you dive into the code, the [design specs](superpowers/specs/2026-07-19-monorepo-restructure-design.md) under `docs/superpowers/specs/` are the best starting point for the "why is this shaped this way?" reader; they capture the design decisions each sub-project was built against, and reading them first is usually faster than reverse-engineering intent from the diffs.
+Contributions are welcome — the standard flow is fork the repo, cut a branch off `dev`, and open a pull request back into `dev`. Before you dive into the code, the [design specs](superpowers/specs/2026-07-19-monorepo-restructure-design.md) under `docs/superpowers/specs/` are the best starting point for the "why is this shaped this way?" reader; they capture the design decisions each sub-project was built against, and reading them first is usually faster than reverse-engineering intent from the diffs.
 
 This page covers the four things you need to be productive in a PR: how to get a working dev environment, how to run and add tests, how to build the docs, and the informal conventions the tree already follows. If something on this page is out of date or contradicts what CI actually does, that itself is a bug — please file it or fix it in your PR.
+
+## Branching & releases
+
+`dev` is the default and integration branch — branch from it, and open your PR **into `dev`**, not `main`. The `integration` check (SQL Server e2e tests) has to pass before a PR can merge; it's a required status check, so the merge button stays disabled until it's green. `main` only moves forward via a promotion merge from `dev`, and releases happen by tagging `main` — see [Operations → Releasing](operations/releasing.md) for the full tag-to-PyPI flow.
 
 ## Dev setup
 

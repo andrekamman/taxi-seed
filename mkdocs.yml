@@ -58,6 +58,8 @@ nav:
   - Reference:
       - Configuration: reference/configuration.md
       - Exit codes: reference/exit-codes.md
+  - Operations:
+      - Releasing: operations/releasing.md
   - Design Specs:
       - Monorepo restructure: superpowers/specs/2026-07-19-monorepo-restructure-design.md
       - Normalizer: superpowers/specs/2026-07-21-normalizer-design.md
