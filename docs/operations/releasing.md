@@ -68,6 +68,11 @@ git push origin v0.2.0
 
 This runs `build`, then the `pypi` job — which waits for approval in the `pypi` GitHub Environment (the required reviewer configured during one-time setup) before it publishes — then creates the GitHub Release. Approve the deployment from the Actions run page (or `gh run watch`, which surfaces the pending-approval state) when you're ready for it to go live.
 
+### Safety / gotchas
+
+- **The required reviewer on the `pypi` Environment is the only gate protecting production PyPI.** If that environment is created without a required reviewer (or not created at all), a final `vX.Y.Z` tag publishes to real PyPI unattended — there is no other approval step in the path. Don't skip step 3 of the one-time setup below.
+- **`release.yml` triggers on any `v*` tag pushed to any branch**, not just `main`. Only create release tags on `main`, per the branch model above — an accidental `v1.0.0` tag pushed on a feature branch or on `dev` would build from that commit and publish it just the same.
+
 ## One-time setup checklist
 
 These are manual, out-of-band steps — they only need to happen once per repo, not per release.
