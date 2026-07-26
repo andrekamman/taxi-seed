@@ -41,21 +41,26 @@ def main(argv=None) -> int:
              "and amendment: N (absolute) or N%% (percent). Default: 100%% (full scan). "
              "Ignored when the mapping is already complete.",
     )
+    parser.add_argument(
+        "--data-dir", default=".",
+        help="Base dir for data: reads <data-dir>/raw/<type>, writes "
+             "<data-dir>/raw-normalized/<type>. Default: current directory.",
+    )
     args = parser.parse_args(argv)
 
     types = [args.data_type] if args.data_type else list(DATA_TYPES)
     overall_rc = 0
     for data_type in types:
-        rc = _normalize_one(data_type, args.sample)
+        rc = _normalize_one(data_type, args.sample, args.data_dir)
         if rc != 0 and rc > overall_rc:
             overall_rc = rc
     return overall_rc
 
 
-def _normalize_one(data_type: str, sample: str) -> int:
-    raw_dir = Path("raw") / data_type
+def _normalize_one(data_type: str, sample: str, data_dir: str) -> int:
+    raw_dir = Path(data_dir) / "raw" / data_type
     mapping_path = Path("normalize") / "mappings" / f"{data_type}.yaml"
-    out_dir = Path("raw-normalized") / data_type
+    out_dir = Path(data_dir) / "raw-normalized" / data_type
 
     if not raw_dir.exists():
         print(f"{data_type}: no raw files at {raw_dir}, skipping")
