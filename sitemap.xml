@@ -2,86 +2,94 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <url>
          <loc>https://andrekamman.github.io/taxi/</loc>
-         <lastmod>2026-07-24</lastmod>
+         <lastmod>2026-07-26</lastmod>
     </url>
     <url>
          <loc>https://andrekamman.github.io/taxi/architecture/</loc>
-         <lastmod>2026-07-24</lastmod>
+         <lastmod>2026-07-26</lastmod>
     </url>
     <url>
          <loc>https://andrekamman.github.io/taxi/contributing/</loc>
-         <lastmod>2026-07-24</lastmod>
+         <lastmod>2026-07-26</lastmod>
     </url>
     <url>
          <loc>https://andrekamman.github.io/taxi/cookbook/</loc>
-         <lastmod>2026-07-24</lastmod>
+         <lastmod>2026-07-26</lastmod>
     </url>
     <url>
          <loc>https://andrekamman.github.io/taxi/getting-started/</loc>
-         <lastmod>2026-07-24</lastmod>
+         <lastmod>2026-07-26</lastmod>
     </url>
     <url>
          <loc>https://andrekamman.github.io/taxi/guides/downloader/</loc>
-         <lastmod>2026-07-24</lastmod>
+         <lastmod>2026-07-26</lastmod>
     </url>
     <url>
          <loc>https://andrekamman.github.io/taxi/guides/k6-loadtest/</loc>
-         <lastmod>2026-07-24</lastmod>
+         <lastmod>2026-07-26</lastmod>
     </url>
     <url>
          <loc>https://andrekamman.github.io/taxi/guides/normalize/</loc>
-         <lastmod>2026-07-24</lastmod>
+         <lastmod>2026-07-26</lastmod>
     </url>
     <url>
          <loc>https://andrekamman.github.io/taxi/guides/schema-drift/</loc>
-         <lastmod>2026-07-24</lastmod>
+         <lastmod>2026-07-26</lastmod>
+    </url>
+    <url>
+         <loc>https://andrekamman.github.io/taxi/operations/releasing/</loc>
+         <lastmod>2026-07-26</lastmod>
     </url>
     <url>
          <loc>https://andrekamman.github.io/taxi/reference/configuration/</loc>
-         <lastmod>2026-07-24</lastmod>
+         <lastmod>2026-07-26</lastmod>
     </url>
     <url>
          <loc>https://andrekamman.github.io/taxi/reference/exit-codes/</loc>
-         <lastmod>2026-07-24</lastmod>
+         <lastmod>2026-07-26</lastmod>
     </url>
     <url>
          <loc>https://andrekamman.github.io/taxi/superpowers/notes/2026-07-22-mssql-extension-spike/</loc>
-         <lastmod>2026-07-24</lastmod>
+         <lastmod>2026-07-26</lastmod>
     </url>
     <url>
          <loc>https://andrekamman.github.io/taxi/superpowers/notes/2026-07-23-ci-fake-data-kickoff/</loc>
-         <lastmod>2026-07-24</lastmod>
+         <lastmod>2026-07-26</lastmod>
     </url>
     <url>
          <loc>https://andrekamman.github.io/taxi/superpowers/specs/2026-03-25-k6-sql-load-testing-design/</loc>
-         <lastmod>2026-07-24</lastmod>
+         <lastmod>2026-07-26</lastmod>
     </url>
     <url>
          <loc>https://andrekamman.github.io/taxi/superpowers/specs/2026-07-19-monorepo-restructure-design/</loc>
-         <lastmod>2026-07-24</lastmod>
+         <lastmod>2026-07-26</lastmod>
     </url>
     <url>
          <loc>https://andrekamman.github.io/taxi/superpowers/specs/2026-07-21-normalizer-design/</loc>
-         <lastmod>2026-07-24</lastmod>
+         <lastmod>2026-07-26</lastmod>
     </url>
     <url>
          <loc>https://andrekamman.github.io/taxi/superpowers/specs/2026-07-22-documentation-design/</loc>
-         <lastmod>2026-07-24</lastmod>
+         <lastmod>2026-07-26</lastmod>
     </url>
     <url>
          <loc>https://andrekamman.github.io/taxi/superpowers/specs/2026-07-22-sql-loader-design/</loc>
-         <lastmod>2026-07-24</lastmod>
+         <lastmod>2026-07-26</lastmod>
     </url>
     <url>
          <loc>https://andrekamman.github.io/taxi/superpowers/specs/2026-07-23-ci-fake-data-design/</loc>
-         <lastmod>2026-07-24</lastmod>
+         <lastmod>2026-07-26</lastmod>
     </url>
     <url>
          <loc>https://andrekamman.github.io/taxi/superpowers/specs/2026-07-23-normalize-multisource-valuemap-design/</loc>
-         <lastmod>2026-07-24</lastmod>
+         <lastmod>2026-07-26</lastmod>
     </url>
     <url>
          <loc>https://andrekamman.github.io/taxi/superpowers/specs/2026-07-23-orchestrator-design/</loc>
-         <lastmod>2026-07-24</lastmod>
+         <lastmod>2026-07-26</lastmod>
+    </url>
+    <url>
+         <loc>https://andrekamman.github.io/taxi/superpowers/specs/2026-07-25-devtestprod-promotion-design/</loc>
+         <lastmod>2026-07-26</lastmod>
     </url>
 </urlset>

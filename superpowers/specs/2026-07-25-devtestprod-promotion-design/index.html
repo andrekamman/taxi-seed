@@ -10,7 +10,7 @@
       
       
       
-        <link rel="canonical" href="https://andrekamman.github.io/taxi/superpowers/specs/2026-07-23-normalize-multisource-valuemap-design/">
+        <link rel="canonical" href="https://andrekamman.github.io/taxi/superpowers/specs/2026-07-25-devtestprod-promotion-design/">
       
       
       
@@ -23,7 +23,7 @@
     
     
       
-        <title>Multi-source Renames + value_map Policies Design - taxi</title>
+        <title>dev/test/prod promotion + release pipeline — design spec (2026-07-25) - taxi</title>
       
     
     
@@ -74,7 +74,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#multi-source-renames-value_map-policies-design" class="md-skip">
+        <a href="#devtestprod-promotion-release-pipeline-design-spec-2026-07-25" class="md-skip">
           Skip to content
         </a>
       
@@ -110,7 +110,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Multi-source Renames + value_map Policies Design
+              dev/test/prod promotion + release pipeline — design spec (2026-07-25)
             
           </span>
         </div>
@@ -940,10 +940,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#motivation" class="md-nav__link">
+  <a href="#decisions-locked-from-brainstorming" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Motivation
+        Decisions locked (from brainstorming)
       
     </span>
   </a>
@@ -951,10 +951,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#feature-1-multi-source-rename" class="md-nav__link">
+  <a href="#background-current-state-facts" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Feature 1 — Multi-source rename
+        Background / current state (facts)
       
     </span>
   </a>
@@ -962,10 +962,93 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#feature-2-value_map-null-values-unmapped-policy" class="md-nav__link">
+  <a href="#design" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Feature 2 — value_map NULL values + unmapped policy
+        Design
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Design">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#a-branch-topology-dev-main" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        A. Branch topology (dev + main)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#b-ci-as-the-pr-gate-githubworkflowsciyml" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        B. CI as the PR gate (.github/workflows/ci.yml)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#c-release-promotion-workflow-githubworkflowsreleaseyml" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        C. Release &amp; promotion workflow (.github/workflows/release.yml)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#d-versioning-distribution-name-pyprojecttoml" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        D. Versioning &amp; distribution name (pyproject.toml)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#e-manual-out-of-band-setup-the-users-steps-documented-not-automated-in-repo" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        E. Manual, out-of-band setup (the user's steps — documented, not automated in-repo)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#f-documentation-this-sub-project-only" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        F. Documentation (this sub-project only)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#testing-validation-strategy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Testing / validation strategy
       
     </span>
   </a>
@@ -973,10 +1056,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#yellow-mapping-completion-hand-authored" class="md-nav__link">
+  <a href="#out-of-scope-explicit" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Yellow mapping completion (hand-authored)
+        Out of scope (explicit)
       
     </span>
   </a>
@@ -984,43 +1067,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#non-goals" class="md-nav__link">
+  <a href="#notes-for-the-eventual-plan" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Non-goals
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#testing-strategy" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Testing strategy
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#implementation-sequence-for-the-plan" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Implementation sequence (for the plan)
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#success-criteria" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Success criteria
+        Notes for the eventual plan
       
     </span>
   </a>
@@ -1047,112 +1097,173 @@
   
 
 
-<h1 id="multi-source-renames-value_map-policies-design">Multi-source Renames + value_map Policies Design</h1>
-<p><strong>Date:</strong> 2026-07-23
-<strong>Status:</strong> Approved, ready for implementation planning
-<strong>Follow-up to:</strong> the orchestrator sub-project (see <code>2026-07-23-orchestrator-design.md</code>), which introduced
-<code>value_maps</code> and left several yellow 2009-2010 columns dropped that are actually recoverable.</p>
-<h2 id="motivation">Motivation</h2>
-<p>Auto-curation drops yellow columns that a human can see are renames/value-maps, because two
-normalizer limitations block them:</p>
+<h1 id="devtestprod-promotion-release-pipeline-design-spec-2026-07-25">dev/test/prod promotion + release pipeline — design spec (2026-07-25)</h1>
+<p><strong>Sub-project:</strong> the first of the "last two parts" the user requested. Part 1 (<strong>this spec</strong>) = branch
+separation + a CI-gated PR flow + tag-driven release promotion to TestPyPI (test) and PyPI (prod).
+Part 2 (separate, later) = a full documentation sweep reflecting the whole expansion.</p>
+<p><strong>Goal:</strong> Establish dev/test/prod as a <em>code-artifact promotion</em> pipeline for the <code>taxi-seed</code>
+package: changes land on <code>dev</code> via CI-gated pull requests, and the same merged code is promoted to
+TEST (TestPyPI) and PROD (PyPI) by pushing git tags, using GitHub-native mechanisms standard for
+small open-source Python repos.</p>
+<p><strong>Repo identity (context):</strong> this repo is a <strong>practice/seed data installer</strong> — it loads realistic NYC
+TLC taxi data into a database (SQL Server today; more loaders/transformers later) so people can learn
+data engineering and database migrations. The migration <em>recipes</em> live in a separate <code>taxi-lab</code> hub
+repo that depends on this package. That is why the PyPI distribution is named for its job (<code>taxi-seed</code>),
+not the dataset.</p>
+<hr />
+<h2 id="decisions-locked-from-brainstorming">Decisions locked (from brainstorming)</h2>
+<ul>
+<li><strong>Promotion model:</strong> trunk <code>dev</code> + tag-driven releases. <strong>TestPyPI = TEST, PyPI = PROD.</strong></li>
+<li><strong>Branch topology:</strong> <code>dev</code> (new default branch / integration trunk) + <code>main</code> (stable, released;
+  mkdocs <code>gh-deploy</code> runs from <code>main</code>). Not three long-lived env branches.</li>
+<li><strong>PR gate:</strong> the <code>integration</code> job (SQL Server e2e) is a <strong>required status check</strong> on <code>dev</code>.</li>
+<li><strong>Publishing:</strong> real <strong>Trusted Publishing (OIDC)</strong> to TestPyPI and PyPI — no stored API tokens.</li>
+<li><strong>Versioning:</strong> tag-driven via <strong><code>hatch-vcs</code></strong> (the git tag is the single source of truth; drop the
+  static <code>version = "0.1.0"</code>).</li>
+<li><strong>Distribution name:</strong> <code>taxi-seed</code> (verified available on PyPI 2026-07-25). Import packages
+  (<code>taxi_loader</code>, <code>taxi_normalize</code>, <code>taxi_orchestrate</code>, <code>taxi_shared</code>, <code>schema_drift</code>, <code>k6_loadtest</code>)
+  and console scripts (<code>taxi-load</code>, <code>taxi-run</code>, <code>normalize</code>, …) are <strong>unchanged</strong> — only
+  <code>[project].name</code> moves.</li>
+</ul>
+<hr />
+<h2 id="background-current-state-facts">Background / current state (facts)</h2>
+<ul>
+<li><strong>Package:</strong> <code>pyproject.toml</code> <code>[project] name = "taxi"</code>, static <code>version = "0.1.0"</code> (the only version
+  string in the repo), build backend <code>hatchling</code>. Not published; <strong>no git tags</strong>, no release
+  automation, no <code>Makefile</code>. Deps <code>duckdb&gt;=1.4.4</code>, <code>pyyaml&gt;=6.0</code>; extras <code>test</code>, <code>docs</code>.</li>
+<li><strong>Connection config:</strong> argparse flags with hard-coded defaults (<code>localhost</code>/<code>1433</code>/<code>taxi</code>/<code>dbo</code>/<code>sa</code>)</li>
+<li><code>MSSQL_PASSWORD</code> env for the password. <strong>No environment concept, no config file, no settings
+  module.</strong> (This spec does <strong>not</strong> add one — promotion is about code artifacts, not runtime DB
+  targets. See Out of scope.)</li>
+<li><strong>CI</strong> (<code>.github/workflows/ci.yml</code>): <code>on: push: branches:[main]</code> + <code>on: pull_request</code> (no branch
+  filter → any PR base). Jobs: <code>test</code> (py3.12/3.13 unit), <code>integration</code> (SQL Server service container</li>
+<li>loader/e2e tests) — both run on every PR and on push-to-main; <code>docs</code>
+  (<code>if: push &amp;&amp; ref==refs/heads/main</code>, <code>needs: test</code>) deploys mkdocs to <code>gh-pages</code>.</li>
+<li><strong>Branches:</strong> default <code>main</code>; <code>gh-pages</code> (docs artifact). <strong>No <code>dev</code> branch.</strong> Remote
+  <code>github.com/andrekamman/taxi</code>, a <strong>personal public repo</strong> → branch protection + GitHub Environments
+  (with required reviewers) are available on the Free plan.</li>
+<li><strong>Docs:</strong> mkdocs-material; no Operations/Deployment section today. <code>docs/architecture.md</code>
+  "What's not built yet" (line ~194) names this exact work and is stale.</li>
+</ul>
+<hr />
+<h2 id="design">Design</h2>
+<h3 id="a-branch-topology-dev-main">A. Branch topology (<code>dev</code> + <code>main</code>)</h3>
+<ul>
+<li>Create a <strong><code>dev</code></strong> branch from current <code>main</code>; make <code>dev</code> the <strong>default branch</strong> on GitHub (so PRs
+  target it by default).</li>
+<li><strong><code>main</code></strong> remains the stable/released branch. mkdocs continues to deploy from <code>main</code>.</li>
+<li>Flow: <code>feature/*</code> → PR → <strong><code>dev</code></strong> (CI-gated) → when a release is desired, PR/merge <strong><code>dev</code> → <code>main</code></strong>
+  → tag the release on <code>main</code>.</li>
+<li>The <code>dev</code>→<code>main</code> promotion is an ordinary PR (also CI-gated), keeping <code>main</code> always releasable.</li>
+</ul>
+<h3 id="b-ci-as-the-pr-gate-githubworkflowsciyml">B. CI as the PR gate (<code>.github/workflows/ci.yml</code>)</h3>
+<ul>
+<li>Keep <code>test</code> and <code>integration</code> running on <code>pull_request</code> (already unfiltered → covers PRs into <code>dev</code>
+  and <code>main</code>). Add <code>dev</code> to the push trigger so direct pushes to <code>dev</code> also run them:
+  <code>on: push: branches: [main, dev]</code>. <code>docs</code> stays <code>main</code>-push-only.</li>
+<li><strong>Required status check:</strong> make the <code>integration</code> job a required check for merging into <code>dev</code> (and
+  <code>main</code>) via a <strong>branch-protection rule / ruleset</strong>. This is a GitHub <em>repo setting</em>, not in-repo
+  YAML. The spec provides the exact <code>gh api</code> command; the user applies it once (§E). This is the
+  GitHub equivalent of Azure DevOps build-validation branch policy.</li>
+<li><strong>Job-name stability:</strong> the required check is referenced by the job's name (<code>integration</code>); renaming
+  the job later silently disarms the gate — call this out in the ops docs.</li>
+</ul>
+<h3 id="c-release-promotion-workflow-githubworkflowsreleaseyml">C. Release &amp; promotion workflow (<code>.github/workflows/release.yml</code>)</h3>
+<p>Triggered <code>on: push: tags: ['v*']</code>. One workflow, tag-pattern-driven:</p>
 <ol>
-<li><strong>Single-source renames only.</strong> The planner inverts <code>renames</code> to one <code>{target: source}</code> dict, so
-   two historical names for the same concept (e.g. <code>Trip_Pickup_DateTime</code> in 2009 and
-   <code>pickup_datetime</code> in 2010, both → <code>tpep_pickup_datetime</code>) collide — one silently wins, the other
-   is dropped as data-loss.</li>
-<li><strong>value_map can't express NULL or "discard the rest."</strong> Its values can't be <code>null</code>, and every
-   unmapped value raises — so a vendor code we deliberately want to null (<code>DDS</code>), or a messy column
-   where only some codes are valid (<code>rate_code</code>), can't be modeled.</li>
+<li><strong>Build</strong> (always): checkout with full history/tags (<code>fetch-depth: 0</code>, needed by <code>hatch-vcs</code>),
+   build sdist+wheel (<code>uv build</code>), run the fast unit suite (<code>uv run --extra test pytest -q</code>, no DB) as
+   a publish guard, upload <code>dist/</code> as a workflow artifact.</li>
+<li><strong>Classify the tag</strong> (PEP 440): a <strong>prerelease/dev</strong> tag (<code>v1.2.3rc1</code>, <code>v1.2.3a1</code>, <code>v1.2.3b1</code>,
+   <code>v1.2.3.dev1</code>) → TEST path; a <strong>final</strong> tag (<code>v1.2.3</code>) → PROD path.</li>
+<li><strong>TEST — publish to TestPyPI:</strong> job <code>environment: testpypi</code>, <code>permissions: id-token: write</code>, publish
+   <code>dist/</code> with <code>pypa/gh-action-pypi-publish</code> pointed at <code>https://test.pypi.org/legacy/</code>. Runs for
+   prerelease tags (and may also run for final tags as a pre-PROD smoke — decided at plan time; default:
+   prerelease tags only).</li>
+<li><strong>PROD — publish to PyPI:</strong> job <code>environment: pypi</code> (which carries a <strong>required reviewer</strong> →
+   the human approval gate), <code>permissions: id-token: write</code>, publish <code>dist/</code> with
+   <code>pypa/gh-action-pypi-publish</code> (default PyPI). Runs for <strong>final</strong> tags only. On success, create a
+   <strong>GitHub Release</strong> for the tag with the built artifacts attached (prerelease tags → GitHub
+   <em>prerelease</em>; final tags → full release).</li>
+<li><strong>No secrets:</strong> publishing uses <strong>Trusted Publishing (OIDC)</strong>; the only permission needed is
+   <code>id-token: write</code>. No <code>PYPI_API_TOKEN</code>/<code>TWINE_*</code> anywhere.</li>
 </ol>
-<p>This adds the two small features and completes yellow's mapping so only genuinely-removed columns
-(the old lat/long TLC dropped) remain data-loss.</p>
-<h2 id="feature-1-multi-source-rename">Feature 1 — Multi-source rename</h2>
+<blockquote>
+<p>The exact <code>hatch-vcs</code> config, <code>uv build</code> invocation, and <code>pypa/gh-action-pypi-publish</code> inputs
+(including how to select TestPyPI vs PyPI and how prerelease detection is wired) will be pinned in
+the implementation plan against current upstream docs — these are easy to get subtly wrong.</p>
+</blockquote>
+<h3 id="d-versioning-distribution-name-pyprojecttoml">D. Versioning &amp; distribution name (<code>pyproject.toml</code>)</h3>
 <ul>
-<li><code>renames:</code> may contain <strong>multiple <code>old: new</code> entries that share the same <code>new</code></strong> (target).</li>
-<li><strong>Planner:</strong> for each target column reached by a rename, pick the source that is <strong>present in the
-  current raw file</strong>. Build target → <em>list</em> of sources (not a single inverse). Per era only one
-  source exists, so this is unambiguous in practice.</li>
-<li><strong>Ambiguity rule:</strong> if, for one file, <strong>more than one</strong> source for a target is present <strong>and</strong> the
-  target column itself is absent, raise a clear error (fail-loud; do not silently pick one). If the
-  target column is present directly, it wins (Case A passthrough/cast) and the rename sources for it
-  are ignored for that file.</li>
-<li>Behavior is unchanged for the existing single-source case.</li>
+<li>Add <code>hatch-vcs</code> to <code>[build-system].requires</code>; set <code>[tool.hatch.version] source = "vcs"</code>; <strong>remove</strong>
+  the static <code>version</code> and add <code>dynamic = ["version"]</code>. The git tag <code>vX.Y.Z</code> → version <code>X.Y.Z</code>
+  (hatch-vcs strips the leading <code>v</code>).</li>
+<li>Configure <code>hatch-vcs</code> so untagged/dev builds produce <strong>PEP 440-valid</strong> versions acceptable to
+  TestPyPI/PyPI (no local <code>+g&lt;sha&gt;</code> segment on published artifacts) — pinned at plan time.</li>
+<li>Rename <code>[project].name</code> <code>taxi</code> → <strong><code>taxi-seed</code></strong>. Add minimal PyPI-facing metadata that costs
+  nothing and improves the listing: <code>description</code> (already present), <code>readme = "README.md"</code> (README.md
+  exists at repo root — reference it), <code>license</code>, <code>[project.urls]</code> (Homepage → repo, Docs → the
+  mkdocs site), and a few <code>classifiers</code>. <strong>No</strong> change to <code>[tool.hatch.build.targets.wheel] packages</code>
+  or <code>[project.scripts]</code>.</li>
 </ul>
-<h2 id="feature-2-value_map-null-values-unmapped-policy">Feature 2 — value_map NULL values + unmapped policy</h2>
-<p>The <code>value_maps</code> YAML entry for a column may take either form:</p>
+<h3 id="e-manual-out-of-band-setup-the-users-steps-documented-not-automated-in-repo">E. Manual, out-of-band setup (the user's steps — documented, not automated in-repo)</h3>
+<p>The workflows assume these one-time actions; the ops docs page (§F) lists them with exact values:
+1. <strong>Create the <code>dev</code> branch</strong>, push it, set it as the <strong>default branch</strong> on GitHub.
+2. <strong>PyPI + TestPyPI:</strong> create accounts; register a <strong>Trusted Publisher</strong> on each for repo
+   <code>andrekamman/taxi</code>, workflow filename <code>release.yml</code>, and environment name <code>pypi</code> (PyPI) /
+   <code>testpypi</code> (TestPyPI).
+3. <strong>GitHub Environments:</strong> create <code>testpypi</code> and <code>pypi</code>; add a <strong>required reviewer</strong> to <code>pypi</code> (the
+   PROD approval gate).
+4. <strong>Branch protection on <code>dev</code></strong> (and <code>main</code>): require the <code>integration</code> status check (and, if
+   desired, a PR review). Provide the <code>gh api</code> / ruleset command in the docs.</p>
+<h3 id="f-documentation-this-sub-project-only">F. Documentation (this sub-project only)</h3>
 <ul>
-<li><strong>Strict (unchanged default):</strong> a flat <code>{source_value: target_value}</code> dict. Unmapped non-null
-  values <strong>raise</strong> (current behavior). <code>target_value</code> may now be <code>null</code> (explicit → SQL NULL).</li>
-<li><strong>Policy form:</strong> <code>{map: {source_value: target_value}, on_unmapped: null | error}</code>.
-  <code>on_unmapped: null</code> converts any unmapped non-null value to NULL; <code>error</code> (the default) raises.</li>
+<li>Add one page: <strong><code>docs/operations/releasing.md</code></strong> (new "Operations" nav group in <code>mkdocs.yml</code>) — the
+  branch model, the CI PR gate, the tag → TestPyPI → PyPI promotion flow, and the §E manual setup
+  checklist (accounts, trusted publishers, environments, branch protection).</li>
+<li>Update <code>CONTRIBUTING</code>/<code>docs/contributing.md</code> to state the new flow (branch from <code>dev</code>, PR into
+  <code>dev</code>, integration check must pass).</li>
+<li>The <strong>broader docs sweep</strong> (fixing stale <code>architecture.md</code>, reflecting loader/orchestrator/CI/e2e)
+  is <strong>sub-project 2</strong> — not in this spec.</li>
 </ul>
-<p>Semantics in the executor's <code>value_map</code> action:
-- source <code>NULL</code> → <code>NULL</code> (always).
-- mapped value → its target value (including explicit <code>null</code>).
-- unmapped non-null → <strong>raise</strong> (strict / <code>on_unmapped: error</code>) or <strong><code>NULL</code></strong> (<code>on_unmapped: null</code>).</p>
-<p><code>load_mapping</code> parses both forms into <code>Mapping.value_maps</code> (the <code>{value: target}</code> dict) plus
-<code>Mapping.value_map_unmapped</code> (<code>{column: "error" | "null"}</code>, default <code>"error"</code>). The planner threads
-the policy onto the <code>value_map</code> <code>ColumnAction</code>; the executor renders the <code>ELSE</code> branch accordingly
-(<code>error(...)</code> or <code>NULL</code>). SQL literals (including <code>NULL</code>) are rendered by <code>_sql_lit</code>. <strong>Hand-authored
-YAML must quote the policy value (<code>on_unmapped: 'null'</code>)</strong> — a bare <code>null</code> parses to YAML <code>None</code> and
-is rejected.</p>
-<p><strong>When a value_map fires:</strong> only on a raw↔target <strong>type mismatch</strong>. An exact-type-match column
-passthroughs (same name) or plain-renames (Case B) <em>before</em> the value_map is considered, so a
-same-type value cleanup is a no-op. Additionally, on a <strong>same-name</strong> column (Case A) the value_map
-applies only when the raw column is <strong>string-typed</strong> — a numeric same-name variant (e.g. DOUBLE
-<code>RatecodeID</code> 2018-2023 with values <code>1.0..6.0/99.0</code>) casts normally rather than being NULLed by a
-string-keyed map. A <strong>renamed</strong> source (Case B) always value-maps regardless of type, so a numeric
-historical source like <code>store_and_forward</code> (DOUBLE 0/1 → <code>store_and_fwd_flag</code>) still converts.</p>
-<h2 id="yellow-mapping-completion-hand-authored">Yellow mapping completion (hand-authored)</h2>
-<p>Added to <code>normalize/mappings/yellow.yaml</code> (curate preserves hand-authored renames/value_maps):</p>
+<hr />
+<h2 id="testing-validation-strategy">Testing / validation strategy</h2>
 <ul>
-<li><strong>Multi-source renames:</strong></li>
-<li><code>Trip_Pickup_DateTime → tpep_pickup_datetime</code>, <code>pickup_datetime → tpep_pickup_datetime</code></li>
-<li><code>Trip_Dropoff_DateTime → tpep_dropoff_datetime</code>, <code>dropoff_datetime → tpep_dropoff_datetime</code></li>
-<li><code>vendor_name → VendorID</code>, <code>vendor_id → VendorID</code></li>
-<li>(datetimes are VARCHAR→TIMESTAMP; the planner already treats that cast as safe.)</li>
-<li><strong>value_maps:</strong></li>
-<li><code>VendorID: {CMT: 1, VTS: 2, DDS: null}</code> (strict — a genuinely-new vendor still errors)</li>
-<li><code>store_and_fwd_flag: {"0.0": N, "1.0": Y}</code> (from DOUBLE <code>store_and_forward</code>; exact source-string
-    form of the DOUBLE confirmed at implementation time)</li>
-<li><code>RatecodeID: {map: {"1":1, …, "6":6}, on_unmapped: null}</code> (valid codes kept, corrupt 2010 values
-    → NULL) — applied to <code>rate_code → RatecodeID</code>.</li>
+<li><strong>Workflow validity:</strong> <code>release.yml</code> and the edited <code>ci.yml</code> parse (<code>yaml.safe_load</code>); job/trigger
+  structure asserted (e.g. release job classification for a sample prerelease vs final tag).</li>
+<li><strong>Build correctness (local, no publish):</strong> <code>uv build</code> produces an sdist+wheel whose <strong>version derives
+  from a git tag</strong> — validated by creating a throwaway local tag (e.g. <code>v0.0.0test</code>) and asserting the
+  built artifact's version, then deleting the tag. Confirms <code>hatch-vcs</code> + dynamic version + the
+  <code>taxi-seed</code> dist name (built filename is <code>taxi_seed-&lt;v&gt;-*.whl</code>) without touching PyPI.</li>
+<li><strong>Metadata:</strong> assert <code>[project].name == "taxi-seed"</code>, <code>dynamic</code> includes <code>version</code>, no static
+  <code>version</code>, and the wheel still contains all six import packages + console scripts (<code>uv build</code> +
+  inspect, or <code>pip show</code>/entry-points after a local install into a temp venv).</li>
+<li><strong>Publishing itself is validated out-of-band</strong> on the first real prerelease tag (TestPyPI) — CI can't
+  publish to real indexes from a test run, and Trusted Publishing needs the registered publisher. The
+  ops docs give the exact first-run procedure.</li>
+<li><strong>Non-regression:</strong> the existing <code>test</code>/<code>integration</code>/<code>docs</code> jobs and the full pytest suite remain
+  green; the <code>ci.yml</code> edits don't alter existing job bodies.</li>
 </ul>
-<p><code>store_and_forward → store_and_fwd_flag</code> and <code>rate_code → RatecodeID</code> are single-source renames.</p>
-<h2 id="non-goals">Non-goals</h2>
+<h2 id="out-of-scope-explicit">Out of scope (explicit)</h2>
 <ul>
-<li>No general "fuzzy" or auto-discovered multi-source renames — multi-source entries are authored by
-  a human in the mapping YAML; <code>taxi-curate-mappings</code> does not invent them.</li>
-<li>No change to <code>taxi-curate-mappings</code>' auto-acceptance beyond preserving these hand-authored entries
-  (which it already does via <code>_mapping_to_dict</code>).</li>
-<li>Other data types (green/fhv/fhvhv) are unaffected — their mappings already normalize cleanly.</li>
+<li><strong>Runtime DB-target environments / a config-file or <code>--env</code> selector for the loader.</strong> Promotion here
+  is code-artifact (PyPI) promotion; it does <strong>not</strong> add dev/test/prod <em>database</em> connection profiles.
+  (A future piece could add a <code>taxi-seed --env</code> config surface; not now.)</li>
+<li><strong>Publishing <code>taxi-lab</code> (the recipes hub) or splitting this repo.</strong> <code>taxi-lab</code> is a separate repo the
+  user owns; this spec only makes <em>this</em> package cleanly installable/depend-able.</li>
+<li><strong>The full documentation sweep</strong> (sub-project 2).</li>
+<li><strong>k6-in-CI (piece C)</strong> and <strong>schema-diff promotion gates</strong> — still deferred.</li>
+<li><strong>Automating the PyPI/GitHub account &amp; environment setup</strong> — inherently manual/out-of-band;
+  documented, not scripted (beyond the branch-protection <code>gh</code> command).</li>
 </ul>
-<h2 id="testing-strategy">Testing strategy</h2>
+<h2 id="notes-for-the-eventual-plan">Notes for the eventual plan</h2>
 <ul>
-<li><strong>Planner (<code>tests/taxi_normalize</code>):</strong> multi-source rename picks the present source per file; a file
-  with two present sources (target absent) raises; direct target presence wins over rename sources.</li>
-<li><strong>Executor/mapping:</strong> value_map value <code>null</code> → NULL; <code>on_unmapped: null</code> nulls an unmapped value
-  while <code>error</code> (default) raises; both YAML forms parse.</li>
-<li><strong>End-to-end:</strong> re-normalize yellow over the real <code>raw/yellow/</code> → exit 0, and <strong>spot-check
-  <code>raw-normalized/yellow/</code> for 2009 and 2010</strong>: <code>tpep_pickup_datetime</code>/<code>tpep_dropoff_datetime</code> and
-  <code>VendorID</code> are populated (not all-NULL), <code>store_and_fwd_flag</code> is <code>Y</code>/<code>N</code>, <code>RatecodeID</code> has valid
-  codes with corrupt-source rows NULL.</li>
-<li>Full repo suite stays green (behavior unchanged for existing single-source / strict cases).</li>
-</ul>
-<h2 id="implementation-sequence-for-the-plan">Implementation sequence (for the plan)</h2>
-<ol>
-<li>Planner multi-source rename (target → list-of-sources; present-source selection; ambiguity error) + tests.</li>
-<li>Mapping parse of both value_map forms (<code>value_maps</code> + <code>value_map_unmapped</code>; <code>null</code> values) + <code>_sql_lit(None)</code> → <code>NULL</code> + executor <code>ELSE</code> policy + tests.</li>
-<li>Author yellow mapping additions; re-run <code>taxi-curate-mappings yellow</code> (preserves them) and re-normalize; spot-check the 2009-2010 columns; commit the mapping + refreshed <code>CURATION-REPORT.md</code>.</li>
-</ol>
-<h2 id="success-criteria">Success criteria</h2>
-<ul>
-<li>Two source names for one target both normalize (per era) instead of one being dropped.</li>
-<li><code>value_maps</code> support <code>null</code> targets and an <code>on_unmapped: null</code> policy; strict mode still raises on surprises.</li>
-<li>Yellow re-normalizes to exit 0 with 2009-2010 pickup/dropoff datetimes, <code>VendorID</code> (CMT→1, VTS→2,
-  DDS→NULL), <code>store_and_fwd_flag</code> (Y/N), and valid <code>RatecodeID</code> populated; only true removals (old
-  lat/long, <code>__index_level_0__</code>) remain in <code>acknowledged_data_loss</code>.</li>
-<li><code>uv run --extra test pytest</code> stays green.</li>
+<li>Pin exact <code>hatch-vcs</code>/<code>uv build</code>/<code>gh-action-pypi-publish</code>/OIDC config against current docs.</li>
+<li>Decide final-tag behavior: TestPyPI-then-PyPI vs PyPI-only (default: prerelease→TestPyPI only,
+  final→PyPI only + GitHub Release).</li>
+<li>Ensure <code>fetch-depth: 0</code> wherever <code>hatch-vcs</code> reads tags (build job).</li>
+<li><code>README.md</code> exists at repo root — reference it via <code>readme = "README.md"</code>.</li>
+<li>The branch-protection required-check name must match the job name <code>integration</code> exactly.</li>
 </ul>
 
 

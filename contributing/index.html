@@ -665,7 +665,7 @@
   <span class="md-ellipsis">
     
   
-    Design Specs
+    Operations
   
 
     
@@ -678,6 +678,88 @@
         
         <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Operations
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../operations/releasing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Releasing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" >
+        
+          
+          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Design Specs
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -873,6 +955,17 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#branching-releases" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Branching &amp; releases
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#dev-setup" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -984,6 +1077,17 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#branching-releases" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Branching &amp; releases
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#dev-setup" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1081,8 +1185,10 @@
 
 
 <h1 id="contributing">Contributing</h1>
-<p>Contributions are welcome — the standard flow is fork the repo, cut a branch off <code>main</code>, and open a pull request back into <code>main</code>. Before you dive into the code, the <a href="../superpowers/specs/2026-07-19-monorepo-restructure-design/">design specs</a> under <code>docs/superpowers/specs/</code> are the best starting point for the "why is this shaped this way?" reader; they capture the design decisions each sub-project was built against, and reading them first is usually faster than reverse-engineering intent from the diffs.</p>
+<p>Contributions are welcome — the standard flow is fork the repo, cut a branch off <code>dev</code>, and open a pull request back into <code>dev</code>. Before you dive into the code, the <a href="../superpowers/specs/2026-07-19-monorepo-restructure-design/">design specs</a> under <code>docs/superpowers/specs/</code> are the best starting point for the "why is this shaped this way?" reader; they capture the design decisions each sub-project was built against, and reading them first is usually faster than reverse-engineering intent from the diffs.</p>
 <p>This page covers the four things you need to be productive in a PR: how to get a working dev environment, how to run and add tests, how to build the docs, and the informal conventions the tree already follows. If something on this page is out of date or contradicts what CI actually does, that itself is a bug — please file it or fix it in your PR.</p>
+<h2 id="branching-releases">Branching &amp; releases</h2>
+<p><code>dev</code> is the default and integration branch — branch from it, and open your PR <strong>into <code>dev</code></strong>, not <code>main</code>. The <code>integration</code> check (SQL Server e2e tests) has to pass before a PR can merge; it's a required status check, so the merge button stays disabled until it's green. <code>main</code> only moves forward via a promotion merge from <code>dev</code>, and releases happen by tagging <code>main</code> — see <a href="../operations/releasing/">Operations → Releasing</a> for the full tag-to-PyPI flow.</p>
 <h2 id="dev-setup">Dev setup</h2>
 <p>Clone the repo and sync the environment with both optional extras:</p>
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-1">1</a></span>

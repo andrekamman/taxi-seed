@@ -10,13 +10,13 @@
       
       
       
-        <link rel="canonical" href="https://andrekamman.github.io/taxi/reference/exit-codes/">
+        <link rel="canonical" href="https://andrekamman.github.io/taxi/operations/releasing/">
       
       
-        <link rel="prev" href="../configuration/">
+        <link rel="prev" href="../../reference/exit-codes/">
       
       
-        <link rel="next" href="../../operations/releasing/">
+        <link rel="next" href="../../superpowers/specs/2026-07-19-monorepo-restructure-design/">
       
       
         
@@ -27,7 +27,7 @@
     
     
       
-        <title>Exit codes - taxi</title>
+        <title>Releasing - taxi</title>
       
     
     
@@ -78,7 +78,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#exit-codes" class="md-skip">
+        <a href="#releasing" class="md-skip">
           Skip to content
         </a>
       
@@ -114,7 +114,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Exit codes
+              Releasing
             
           </span>
         </div>
@@ -536,20 +536,18 @@
       
   
   
-    
   
   
-  
     
     
     
     
     
-    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" checked>
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
         
           
           <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
@@ -570,7 +568,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="true">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_6">
             <span class="md-nav__icon md-icon"></span>
             
@@ -588,7 +586,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../configuration/" class="md-nav__link">
+      <a href="../../reference/configuration/" class="md-nav__link">
         
   
   
@@ -613,6 +611,90 @@
                 
   
   
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/exit-codes/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Exit codes
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Operations
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Operations
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
     
   
   
@@ -632,7 +714,7 @@
   <span class="md-ellipsis">
     
   
-    Exit codes
+    Releasing
   
 
     
@@ -650,7 +732,7 @@
   <span class="md-ellipsis">
     
   
-    Exit codes
+    Releasing
   
 
     
@@ -676,22 +758,44 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#downloader-download_taxi_datash" class="md-nav__link">
+  <a href="#branch-model" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Downloader (download_taxi_data.sh)
+        Branch model
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Downloader (download_taxi_data.sh)">
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#the-ci-gate" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The CI gate
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#releasing-test-prod" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Releasing (test → prod)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Releasing (test → prod)">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#rate-limit-waf-handling" class="md-nav__link">
+  <a href="#cut-a-prerelease-testpypi" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Rate-limit / WAF handling
+        Cut a prerelease (TestPyPI)
       
     </span>
   </a>
@@ -699,10 +803,21 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#interactive-vs-non-interactive" class="md-nav__link">
+  <a href="#cut-a-final-release-pypi" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Interactive vs non-interactive
+        Cut a final release (PyPI)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#safety-gotchas" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Safety / gotchas
       
     </span>
   </a>
@@ -715,49 +830,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#normalize-uv-run-normalize" class="md-nav__link">
+  <a href="#one-time-setup-checklist" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Normalize (uv run normalize)
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Normalize (uv run normalize)">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#multi-type-aggregation" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Multi-type aggregation
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#ci-recipes" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        CI recipes
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#schema-drift-uv-run-schema-drift" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Schema-drift (uv run schema-drift)
+        One-time setup checklist
       
     </span>
   </a>
@@ -765,49 +841,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#k6-preprocess-uv-run-k6-preprocess" class="md-nav__link">
+  <a href="#optional-custom-docs-domain" class="md-nav__link">
     <span class="md-ellipsis">
       
-        K6-preprocess (uv run k6-preprocess)
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="K6-preprocess (uv run k6-preprocess)">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#common-exit-1-messages" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Common exit-1 messages
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#standard-shell-conventions" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Standard shell conventions
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#getting-the-exit-code-in-your-shell" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Getting the exit code in your shell
+        Optional — custom docs domain
       
     </span>
   </a>
@@ -818,88 +855,6 @@
   
 </nav>
       
-    </li>
-  
-
-              
-            
-          </ul>
-        </nav>
-      
-    </li>
-  
-
-    
-      
-      
-  
-  
-  
-  
-    
-    
-    
-    
-    
-    <li class="md-nav__item md-nav__item--nested">
-      
-        
-        
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" >
-        
-          
-          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
-            
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Operations
-  
-
-    
-  </span>
-  
-  
-
-            <span class="md-nav__icon md-icon"></span>
-          </label>
-        
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_7">
-            <span class="md-nav__icon md-icon"></span>
-            
-  
-    Operations
-  
-
-          </label>
-          <ul class="md-nav__list" data-md-scrollfix>
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../operations/releasing/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Releasing
-  
-
-    
-  </span>
-  
-  
-
-      </a>
     </li>
   
 
@@ -1132,22 +1087,44 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#downloader-download_taxi_datash" class="md-nav__link">
+  <a href="#branch-model" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Downloader (download_taxi_data.sh)
+        Branch model
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Downloader (download_taxi_data.sh)">
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#the-ci-gate" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The CI gate
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#releasing-test-prod" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Releasing (test → prod)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Releasing (test → prod)">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#rate-limit-waf-handling" class="md-nav__link">
+  <a href="#cut-a-prerelease-testpypi" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Rate-limit / WAF handling
+        Cut a prerelease (TestPyPI)
       
     </span>
   </a>
@@ -1155,10 +1132,21 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#interactive-vs-non-interactive" class="md-nav__link">
+  <a href="#cut-a-final-release-pypi" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Interactive vs non-interactive
+        Cut a final release (PyPI)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#safety-gotchas" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Safety / gotchas
       
     </span>
   </a>
@@ -1171,49 +1159,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#normalize-uv-run-normalize" class="md-nav__link">
+  <a href="#one-time-setup-checklist" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Normalize (uv run normalize)
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Normalize (uv run normalize)">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#multi-type-aggregation" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Multi-type aggregation
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#ci-recipes" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        CI recipes
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#schema-drift-uv-run-schema-drift" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Schema-drift (uv run schema-drift)
+        One-time setup checklist
       
     </span>
   </a>
@@ -1221,49 +1170,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#k6-preprocess-uv-run-k6-preprocess" class="md-nav__link">
+  <a href="#optional-custom-docs-domain" class="md-nav__link">
     <span class="md-ellipsis">
       
-        K6-preprocess (uv run k6-preprocess)
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="K6-preprocess (uv run k6-preprocess)">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#common-exit-1-messages" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Common exit-1 messages
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#standard-shell-conventions" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Standard shell conventions
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#getting-the-exit-code-in-your-shell" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Getting the exit code in your shell
+        Optional — custom docs domain
       
     </span>
   </a>
@@ -1290,200 +1200,179 @@
   
 
 
-<h1 id="exit-codes">Exit codes</h1>
-<p>Every CLI in this repo follows the same convention: <code>0</code> on success, non-zero on specific failure classes documented per-tool. Scripts consuming these tools — a CI job, a cron wrapper, a Makefile, a shell one-liner — can branch on the exit code without parsing stderr.</p>
-<p>The tables below list the <em>emitted</em> codes. Codes are stable and part of the tools' contract: changing one is a breaking change and requires a version bump.</p>
-<h2 id="downloader-download_taxi_datash">Downloader (<code>download_taxi_data.sh</code>)</h2>
-<p>The downloader is a bash script; codes are set with <code>exit N</code>. It never uses <code>set -e</code>, so intermediate curl failures are handled inline and do not surface as a raw curl exit code.</p>
-<table>
-<thead>
-<tr>
-<th>Code</th>
-<th>Meaning</th>
-<th>Suggested action</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>0</td>
-<td>All requested downloads succeeded or were already present locally. <code>--help</code> also exits 0.</td>
-<td>None. Idempotent success — safe to re-run.</td>
-</tr>
-<tr>
-<td>1</td>
-<td>Unknown option, unrecognized data type, WSL confirmation prompt declined, or persistent rate-limit / WAF block after 3 backoff attempts (the 5 min → 15 min → 60 min ladder was exhausted).</td>
-<td>If unknown-option: run with <code>--help</code>. If WSL prompt: re-run with <code>OUTPUT_DIR</code> set to a <code>/mnt/c/...</code> path (or accept the prompt). If backoff-exhaustion: wait several hours — WAF cooldowns often exceed the 60 min ladder cap — and retry from a different network or via a VPN.</td>
-</tr>
-<tr>
-<td>130</td>
-<td>User interrupted with Ctrl-C (standard shell convention: 128 + SIGINT).</td>
-<td>None.</td>
-</tr>
-</tbody>
-</table>
-<h3 id="rate-limit-waf-handling">Rate-limit / WAF handling</h3>
-<p>CloudFront responds to requests in several distinguishable ways:</p>
+<h1 id="releasing">Releasing</h1>
+<p>This page is the operator's runbook for the branch model, the CI gate that protects it, and the tag-driven release flow that publishes <code>taxi-seed</code> to PyPI. If you are looking for how to build and test locally as a contributor, see <a href="../../contributing/">Contributing</a> instead — this page is about promoting code from a merged PR to a published package.</p>
+<h2 id="branch-model">Branch model</h2>
 <ul>
-<li><strong>Existing file</strong> — HTTP 200/206 with a body that begins with the parquet magic bytes <code>PAR1</code>.</li>
-<li><strong>Not yet published</strong> — HTTP 403 with an S3-style <code>AccessDenied</code> XML body (or a 404).</li>
-<li><strong>WAF / rate-limit block</strong> — HTTP 403 with an HTML "The request could not be satisfied" page, or a direct HTTP 429 / 503.</li>
+<li><strong><code>dev</code></strong> is the default branch and the integration branch. Feature branches are cut from <code>dev</code>, and pull requests target <code>dev</code> — not <code>main</code>.</li>
+<li><strong><code>main</code></strong> is the stable, released branch. Nothing lands on <code>main</code> directly; it only moves forward by merging <code>dev</code> into it once <code>dev</code> is in a state worth shipping.</li>
+<li>The docs site deploys from <code>main</code> (see the <code>docs</code> job in <code>.github/workflows/ci.yml</code>, gated on <code>push</code> to <code>refs/heads/main</code>), so <code>main</code> is also "what's live on the docs site" at any given moment.</li>
+<li>Releases are tagged <strong>on <code>main</code></strong>, after the promotion merge — never on <code>dev</code> and never on a feature branch. The version published to PyPI is whatever <code>main</code> looked like when the tag was pushed.</li>
 </ul>
-<p>The downloader classifies every response before choosing to retry, skip, or back off. On a rate-limit classification, an exponential ladder kicks in: sleep 5 min, 15 min, 60 min, then abort with exit <code>1</code>. A single successful download resets the ladder to 0.</p>
-<h3 id="interactive-vs-non-interactive">Interactive vs non-interactive</h3>
-<p>The WSL confirmation prompt is only issued when stdin is a TTY (<code>[ -t 0 ]</code>). In non-interactive contexts (cron, CI, <code>nohup</code>, subshell redirections, <code>docker run</code> without <code>-it</code>) the script proceeds without prompting and writes to the resolved <code>output_dir</code> unchanged. This lets you script the downloader without worrying about the prompt blocking your job.</p>
-<h2 id="normalize-uv-run-normalize">Normalize (<code>uv run normalize</code>)</h2>
+<p>The promotion path in order: feature branch → PR into <code>dev</code> → <code>dev</code> passes CI → PR/merge <code>dev</code> into <code>main</code> → tag <code>main</code> → release workflow runs.</p>
+<h2 id="the-ci-gate">The CI gate</h2>
+<p>Every pull request runs two jobs defined in <code>.github/workflows/ci.yml</code>:</p>
+<ul>
+<li><strong><code>test</code></strong> — unit tests across the Python version matrix (3.12, 3.13).</li>
+<li><strong><code>integration</code></strong> — end-to-end tests against a real SQL Server container (loader integration + pipeline e2e), on Python 3.13.</li>
+</ul>
+<p>Merging into <code>dev</code> or <code>main</code> is blocked until <code>integration</code> passes — it is configured as a <strong>required status check</strong> (see the one-time setup below for the exact command that wires this up).</p>
+<div class="admonition warning">
+<p class="admonition-title">The required check is named <code>integration</code></p>
+<p>Branch protection matches on the job name, not on what the job does. If the <code>integration</code> job in <code>.github/workflows/ci.yml</code> is ever renamed, the branch-protection rule silently stops matching anything — GitHub will show the merge button as available even though no equivalent check ran. Renaming that job and updating branch protection have to happen in the same PR.</p>
+</div>
+<h2 id="releasing-test-prod">Releasing (test → prod)</h2>
+<p>The published version is derived entirely from the git tag via <code>hatch-vcs</code> — there is no version string to bump in <code>pyproject.toml</code>. Pushing a tag is the release action.</p>
+<p><code>.github/workflows/release.yml</code> triggers on any tag matching <code>v*</code> and classifies it as prerelease or final by shape:</p>
 <table>
 <thead>
 <tr>
-<th>Code</th>
-<th>Meaning</th>
-<th>Suggested action</th>
+<th>Tag shape</th>
+<th>Example</th>
+<th>Classified as</th>
+<th>Destination</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>0</td>
-<td>Success — all specified data types normalized (or all outputs were already present and skipped).</td>
-<td>None.</td>
+<td><code>vX.Y.Z</code></td>
+<td><code>v0.2.0</code></td>
+<td>final</td>
+<td>PyPI + GitHub Release</td>
 </tr>
 <tr>
-<td>1</td>
-<td>Mapping incomplete — one or more unresolved items reported. The mapping YAML has been amended in place with new SUGGESTED/TODO entries for every unresolved column.</td>
-<td>Review the amended <code>normalize/mappings/&lt;type&gt;.yaml</code>, uncomment the SUGGESTED lines you accept, fill in <code>ack_date:</code> on TODO blocks, re-run.</td>
-</tr>
-<tr>
-<td>2</td>
-<td>Configuration error — missing raw data directory, malformed mapping YAML, or <code>target:</code> file not found under <code>raw/&lt;type&gt;/</code>.</td>
-<td>Fix the reported issue: check the raw-data path, validate the YAML, or bump <code>target:</code> to a file that actually exists.</td>
-</tr>
-<tr>
-<td>3</td>
-<td>First run — no mapping YAML existed for this type. A scaffold has been generated at <code>normalize/mappings/&lt;type&gt;.yaml</code> from the raw data.</td>
-<td>Review the scaffold, uncomment SUGGESTED renames you accept, fill in <code>ack_date:</code> for TODOs, re-run.</td>
+<td>anything else matching <code>v*</code></td>
+<td><code>v0.2.0rc1</code>, <code>v0.2.0a1</code>, <code>v0.2.0b1</code>, <code>v0.2.0.dev1</code></td>
+<td>prerelease</td>
+<td>TestPyPI + GitHub prerelease</td>
 </tr>
 </tbody>
 </table>
-<h3 id="multi-type-aggregation">Multi-type aggregation</h3>
-<p>When invoked with no argument (<code>uv run normalize</code>), the tool runs all four data types in turn and returns the <strong>highest</strong> exit code observed. A mixed run — e.g. <code>yellow</code> succeeds (0), <code>fhvhv</code> needs edits (1) — exits <code>1</code>. This keeps CI logic simple: any non-zero means "at least one type needs attention", and the code tells you what kind of attention.</p>
-<p>The ordering used by exit-code precedence, from lowest to highest: <code>0 → 1 → 2 → 3</code>. A first-run-plus-mapping-error scenario therefore exits <code>3</code> (the more actionable state), not <code>2</code>.</p>
-<h3 id="ci-recipes">CI recipes</h3>
+<p>Both paths run the same <code>build</code> job first (checkout with full history/tags for <code>hatch-vcs</code>, <code>uv sync --extra test</code>, <code>pytest -q</code> as a guard, <code>uv build</code>), then fan out to <code>testpypi</code> or <code>pypi</code> based on the classification, then create the GitHub release/prerelease from the built artifacts. Publishing uses OIDC Trusted Publishing (<code>id-token: write</code>) — there are no PyPI tokens stored anywhere in the repo or its secrets.</p>
+<h3 id="cut-a-prerelease-testpypi">Cut a prerelease (TestPyPI)</h3>
+<p>From an up-to-date <code>main</code>:</p>
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-1">1</a></span>
-<span class="normal"><a href="#__codelineno-0-2">2</a></span>
-<span class="normal"><a href="#__codelineno-0-3">3</a></span>
-<span class="normal"><a href="#__codelineno-0-4">4</a></span>
-<span class="normal"><a href="#__codelineno-0-5">5</a></span>
-<span class="normal"><a href="#__codelineno-0-6">6</a></span>
-<span class="normal"><a href="#__codelineno-0-7">7</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1"></a><span class="c1"># Fail the CI job on any non-zero — the strictest posture.</span>
-<a id="__codelineno-0-2" name="__codelineno-0-2"></a>uv<span class="w"> </span>run<span class="w"> </span>normalize<span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="nb">exit</span><span class="w"> </span><span class="nv">$?</span>
-<a id="__codelineno-0-3" name="__codelineno-0-3"></a>
-<a id="__codelineno-0-4" name="__codelineno-0-4"></a><span class="c1"># Treat exit 3 (first run) as expected on a fresh clone; anything else fails.</span>
-<a id="__codelineno-0-5" name="__codelineno-0-5"></a>uv<span class="w"> </span>run<span class="w"> </span>normalize
-<a id="__codelineno-0-6" name="__codelineno-0-6"></a><span class="nv">code</span><span class="o">=</span><span class="nv">$?</span>
-<a id="__codelineno-0-7" name="__codelineno-0-7"></a><span class="k">if</span><span class="w"> </span><span class="o">[</span><span class="w"> </span><span class="s2">&quot;</span><span class="nv">$code</span><span class="s2">&quot;</span><span class="w"> </span>!<span class="o">=</span><span class="w"> </span><span class="s2">&quot;0&quot;</span><span class="w"> </span><span class="o">]</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="o">[</span><span class="w"> </span><span class="s2">&quot;</span><span class="nv">$code</span><span class="s2">&quot;</span><span class="w"> </span>!<span class="o">=</span><span class="w"> </span><span class="s2">&quot;3&quot;</span><span class="w"> </span><span class="o">]</span><span class="p">;</span><span class="w"> </span><span class="k">then</span><span class="w"> </span><span class="nb">exit</span><span class="w"> </span><span class="s2">&quot;</span><span class="nv">$code</span><span class="s2">&quot;</span><span class="p">;</span><span class="w"> </span><span class="k">fi</span>
+<span class="normal"><a href="#__codelineno-0-2">2</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1"></a>git<span class="w"> </span>tag<span class="w"> </span>v0.2.0rc1
+<a id="__codelineno-0-2" name="__codelineno-0-2"></a>git<span class="w"> </span>push<span class="w"> </span>origin<span class="w"> </span>v0.2.0rc1
 </code></pre></div></td></tr></table></div>
-<h2 id="schema-drift-uv-run-schema-drift">Schema-drift (<code>uv run schema-drift</code>)</h2>
+<p>This runs the <code>build</code> job, then the <code>testpypi</code> job (environment <code>testpypi</code>, no approval required), then creates a GitHub prerelease. Watch it in the Actions tab or with:</p>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-1-1">1</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1"></a>gh<span class="w"> </span>run<span class="w"> </span>watch
+</code></pre></div></td></tr></table></div>
+<p>Verify the published artifact installs before promoting further:</p>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-2-1">1</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1"></a>pip<span class="w"> </span>install<span class="w"> </span>-i<span class="w"> </span>https://test.pypi.org/simple/<span class="w"> </span>taxi-seed<span class="o">==</span><span class="m">0</span>.2.0rc1
+</code></pre></div></td></tr></table></div>
+<h3 id="cut-a-final-release-pypi">Cut a final release (PyPI)</h3>
+<p>Once the prerelease has been verified, tag the same commit (or a later one on <code>main</code>) with the final version:</p>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-3-1">1</a></span>
+<span class="normal"><a href="#__codelineno-3-2">2</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1"></a>git<span class="w"> </span>tag<span class="w"> </span>v0.2.0
+<a id="__codelineno-3-2" name="__codelineno-3-2"></a>git<span class="w"> </span>push<span class="w"> </span>origin<span class="w"> </span>v0.2.0
+</code></pre></div></td></tr></table></div>
+<p>This runs <code>build</code>, then the <code>pypi</code> job — which waits for approval in the <code>pypi</code> GitHub Environment (the required reviewer configured during one-time setup) before it publishes — then creates the GitHub Release. Approve the deployment from the Actions run page (or <code>gh run watch</code>, which surfaces the pending-approval state) when you're ready for it to go live.</p>
+<h3 id="safety-gotchas">Safety / gotchas</h3>
+<ul>
+<li><strong>The required reviewer on the <code>pypi</code> Environment is the only gate protecting production PyPI.</strong> If that environment is created without a required reviewer (or not created at all), a final <code>vX.Y.Z</code> tag publishes to real PyPI unattended — there is no other approval step in the path. Don't skip step 3 of the one-time setup below.</li>
+<li><strong><code>release.yml</code> triggers on any <code>v*</code> tag pushed to any branch</strong>, not just <code>main</code>. Only create release tags on <code>main</code>, per the branch model above — an accidental <code>v1.0.0</code> tag pushed on a feature branch or on <code>dev</code> would build from that commit and publish it just the same.</li>
+</ul>
+<h2 id="one-time-setup-checklist">One-time setup checklist</h2>
+<p>These are manual, out-of-band steps — they only need to happen once per repo, not per release.</p>
+<ol>
+<li>
+<p><strong>Create and default <code>dev</code>.</strong></p>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-4-1">1</a></span>
+<span class="normal"><a href="#__codelineno-4-2">2</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1"></a>git<span class="w"> </span>checkout<span class="w"> </span>-b<span class="w"> </span>dev<span class="w"> </span>main
+<a id="__codelineno-4-2" name="__codelineno-4-2"></a>git<span class="w"> </span>push<span class="w"> </span>-u<span class="w"> </span>origin<span class="w"> </span>dev
+</code></pre></div></td></tr></table></div>
+<p>Then in GitHub: <strong>Settings → General → Default branch</strong> → switch it to <code>dev</code>. New PRs and <code>git clone</code> will target <code>dev</code> from then on.</p>
+</li>
+<li>
+<p><strong>Register PyPI + TestPyPI Trusted Publishers.</strong> Both PyPI and TestPyPI support registering a <em>pending</em> publisher before the project has ever been uploaded — this is what lets the very first <code>pypi</code>/<code>testpypi</code> job authenticate via OIDC with nothing to configure on the GitHub side beyond the environment name. On each of <a href="https://pypi.org/manage/account/publishing/">pypi.org</a> and <a href="https://test.pypi.org/manage/account/publishing/">test.pypi.org</a>, add a pending publisher with:</p>
 <table>
 <thead>
 <tr>
-<th>Code</th>
-<th>Meaning</th>
-<th>Suggested action</th>
+<th>Field</th>
+<th>Value</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>0</td>
-<td>Report generated to stdout (or to <code>--output &lt;file&gt;</code>).</td>
-<td>None.</td>
+<td>PyPI project name</td>
+<td><code>taxi-seed</code></td>
 </tr>
 <tr>
-<td>1</td>
-<td><code>--data-dir &lt;path&gt;</code> does not exist. Message: <code>Error: Data directory '&lt;path&gt;' does not exist.</code></td>
-<td>Check the path. Default is <code>raw/</code> relative to CWD; pass <code>--data-dir</code> explicitly if your mirror lives elsewhere.</td>
+<td>Owner</td>
+<td><code>andrekamman</code></td>
 </tr>
 <tr>
-<td>2</td>
-<td>Argument error (argparse default). Unknown flag, missing required value, invalid <code>--types</code> entry, etc.</td>
-<td>Run with <code>--help</code> to see the flag list.</td>
+<td>Repository name</td>
+<td><code>taxi</code></td>
+</tr>
+<tr>
+<td>Workflow name</td>
+<td><code>release.yml</code></td>
+</tr>
+<tr>
+<td>Environment name</td>
+<td><code>pypi</code> (on pypi.org) / <code>testpypi</code> (on test.pypi.org)</td>
 </tr>
 </tbody>
 </table>
-<p>Schema-drift itself does not raise on missing columns, mismatched types, or ambiguous renames — those are reported <em>in</em> the output, not in the exit code. If you want a CI job that fails when new drift appears, diff the report against a checked-in baseline; the exit code alone will not signal it.</p>
-<h2 id="k6-preprocess-uv-run-k6-preprocess">K6-preprocess (<code>uv run k6-preprocess</code>)</h2>
-<table>
-<thead>
-<tr>
-<th>Code</th>
-<th>Meaning</th>
-<th>Suggested action</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>0</td>
-<td>Success — DDL, chunks, <code>test.js</code>, and <code>manifest.json</code> written to <code>--output</code> (default <code>k6-loadtest/output/</code>).</td>
-<td>Apply the DDL and run K6.</td>
-</tr>
-<tr>
-<td>1</td>
-<td>Any exception raised during preprocessing. Common causes: missing <code>--config</code> file, malformed YAML, config validation failure (missing required section/field, unknown <code>mode:</code>, <code>workload</code> percentages that don't sum to 100, <code>path:</code> glob that matches no files, invalid <code>think_time</code> duration string). The failing message is printed to stderr as <code>Error: {message}</code>.</td>
-<td>Read the stderr message; it names the failing field or the missing file. Fix and re-run.</td>
-</tr>
-<tr>
-<td>2</td>
-<td>Argument error (argparse default). Missing the required <code>--config</code> flag, unknown option.</td>
-<td>Run with <code>--help</code>.</td>
-</tr>
-</tbody>
-</table>
-<h3 id="common-exit-1-messages">Common exit-1 messages</h3>
-<p>The messages below all correspond to exit <code>1</code> and come from <code>ConfigError</code> in <code>k6_loadtest/config.py</code>:</p>
+</li>
+<li>
+<p><strong>Create the GitHub Environments.</strong> <strong>Settings → Environments</strong>:</p>
 <ul>
-<li><code>Missing required section: {data_sources|targets|scenarios}</code> — the top-level YAML is missing one of the three required blocks.</li>
-<li><code>Data source {name!r}: mode must be 'parquet' or 'synthetic', got {mode!r}</code> — unknown <code>mode:</code> value.</li>
-<li><code>Data source {name!r}: missing required field {field!r}</code> — a required per-mode field (<code>columns</code>, <code>key_columns</code>, <code>path</code>) is absent.</li>
-<li><code>Data source {name!r}: synthetic column {col!r} must have a 'type' field</code> — a synthetic column entry has no <code>type:</code>.</li>
-<li><code>Data source {name!r}: key_column {kc!r} not found in columns</code> — <code>key_columns:</code> references a name that is not declared under <code>columns:</code>.</li>
-<li><code>Data source {name!r}: path {…} matches no files</code> — the parquet glob resolved to zero files at preprocess time.</li>
-<li><code>Target {name!r}: missing required field {field!r}</code> — a target is missing one of <code>host</code>, <code>port</code>, <code>database</code>, <code>username</code>, <code>password</code>, <code>table</code>.</li>
-<li><code>Scenario {name!r}: target {target!r} not found in targets</code> / <code>data_source {…} not found in data_sources</code> — a scenario references a name that does not exist at the top level.</li>
-<li><code>Scenario {name!r}: ordering must be 'parallel' or 'sequential', got {ordering!r}</code> — unknown <code>ordering:</code> value.</li>
-<li><code>Scenario {name!r}: workload percentages must sum to 100, got {total}</code> — the <code>insert</code>/<code>update</code>/<code>delete</code> mix doesn't add up.</li>
-<li><code>Scenario {name!r}: missing required field 'k6'</code> — no <code>k6:</code> block, so there's no executor to generate.</li>
-<li><code>Invalid duration format: {value!r} (expected e.g. '200ms' or '1s')</code> — a <code>think_time.min</code> or <code>think_time.max</code> value doesn't match the duration grammar.</li>
+<li><code>testpypi</code> — no protection rules. The prerelease flow should be fast and unattended.</li>
+<li><code>pypi</code> — add yourself (or the release approver) as a <strong>required reviewer</strong>. This is the actual production approval gate: the <code>pypi</code> job in <code>release.yml</code> will not run until someone approves the deployment.</li>
 </ul>
-<p>Every message is prefixed with <code>Error:</code> when printed to stderr. Grepping for <code>Error:</code> in your CI log surfaces preprocess failures quickly.</p>
-<h2 id="standard-shell-conventions">Standard shell conventions</h2>
-<p>The tools in this repo do not invent exit codes beyond what's documented above; standard shell conventions still apply on top:</p>
-<ul>
-<li><code>130</code> — SIGINT (Ctrl-C). Bash reports this for any tool killed by SIGINT — not just the downloader.</li>
-<li><code>137</code> — SIGKILL (128 + 9). Often means an OOM kill; the Linux OOM killer sends SIGKILL. Rerun with a smaller dataset (<code>--sample</code> for normalize, <code>max_rows</code> for k6-preprocess parquet mode) or on a machine with more RAM.</li>
-<li><code>143</code> — SIGTERM (128 + 15). A container orchestrator or <code>systemd</code> sent a graceful-shutdown signal. Increase the shutdown timeout or split the work into smaller batches.</li>
-</ul>
-<p>None of these are emitted by the tools themselves — they come from the surrounding process manager. If you see one, the tool never got to run its own exit logic.</p>
-<h2 id="getting-the-exit-code-in-your-shell">Getting the exit code in your shell</h2>
-<p>For a quick one-liner check:</p>
-<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-1-1">1</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1"></a>uv<span class="w"> </span>run<span class="w"> </span>normalize<span class="w"> </span>yellow<span class="p">;</span><span class="w"> </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;exit=</span><span class="nv">$?</span><span class="s2">&quot;</span>
+</li>
+<li>
+<p><strong>Turn on branch protection for both <code>dev</code> and <code>main</code></strong>, requiring the <code>integration</code> check on each. Both branches get the identical rule — <code>dev</code> because feature-branch PRs land there, and <code>main</code> because <code>dev</code>→<code>main</code> promotion PRs need the same gate to keep <code>main</code> releasable:</p>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-5-1">1</a></span>
+<span class="normal"><a href="#__codelineno-5-2">2</a></span>
+<span class="normal"><a href="#__codelineno-5-3">3</a></span>
+<span class="normal"><a href="#__codelineno-5-4">4</a></span>
+<span class="normal"><a href="#__codelineno-5-5">5</a></span>
+<span class="normal"><a href="#__codelineno-5-6">6</a></span>
+<span class="normal"><a href="#__codelineno-5-7">7</a></span>
+<span class="normal"><a href="#__codelineno-5-8">8</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1"></a>gh<span class="w"> </span>api<span class="w"> </span>-X<span class="w"> </span>PUT<span class="w"> </span>repos/andrekamman/taxi/branches/dev/protection<span class="w"> </span>--input<span class="w"> </span>-<span class="w"> </span><span class="s">&lt;&lt;&#39;JSON&#39;</span>
+<a id="__codelineno-5-2" name="__codelineno-5-2"></a><span class="s">{</span>
+<a id="__codelineno-5-3" name="__codelineno-5-3"></a><span class="s">  &quot;required_status_checks&quot;: { &quot;strict&quot;: true, &quot;contexts&quot;: [&quot;integration&quot;] },</span>
+<a id="__codelineno-5-4" name="__codelineno-5-4"></a><span class="s">  &quot;enforce_admins&quot;: true,</span>
+<a id="__codelineno-5-5" name="__codelineno-5-5"></a><span class="s">  &quot;required_pull_request_reviews&quot;: null,</span>
+<a id="__codelineno-5-6" name="__codelineno-5-6"></a><span class="s">  &quot;restrictions&quot;: null</span>
+<a id="__codelineno-5-7" name="__codelineno-5-7"></a><span class="s">}</span>
+<a id="__codelineno-5-8" name="__codelineno-5-8"></a><span class="s">JSON</span>
 </code></pre></div></td></tr></table></div>
-<p>For a scripted decision, capture immediately (a subsequent command overwrites <code>$?</code>):</p>
-<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-2-1">1</a></span>
-<span class="normal"><a href="#__codelineno-2-2">2</a></span>
-<span class="normal"><a href="#__codelineno-2-3">3</a></span>
-<span class="normal"><a href="#__codelineno-2-4">4</a></span>
-<span class="normal"><a href="#__codelineno-2-5">5</a></span>
-<span class="normal"><a href="#__codelineno-2-6">6</a></span>
-<span class="normal"><a href="#__codelineno-2-7">7</a></span>
-<span class="normal"><a href="#__codelineno-2-8">8</a></span>
-<span class="normal"><a href="#__codelineno-2-9">9</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1"></a>uv<span class="w"> </span>run<span class="w"> </span>normalize<span class="w"> </span>yellow
-<a id="__codelineno-2-2" name="__codelineno-2-2"></a><span class="nv">code</span><span class="o">=</span><span class="nv">$?</span>
-<a id="__codelineno-2-3" name="__codelineno-2-3"></a><span class="k">case</span><span class="w"> </span><span class="s2">&quot;</span><span class="nv">$code</span><span class="s2">&quot;</span><span class="w"> </span><span class="k">in</span>
-<a id="__codelineno-2-4" name="__codelineno-2-4"></a><span class="w">    </span><span class="m">0</span><span class="o">)</span><span class="w"> </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;normalized&quot;</span><span class="w"> </span><span class="p">;;</span>
-<a id="__codelineno-2-5" name="__codelineno-2-5"></a><span class="w">    </span><span class="m">1</span><span class="o">)</span><span class="w"> </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;needs edits — see mapping YAML&quot;</span><span class="w"> </span><span class="p">;;</span>
-<a id="__codelineno-2-6" name="__codelineno-2-6"></a><span class="w">    </span><span class="m">2</span><span class="o">)</span><span class="w"> </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;config error — check paths/YAML&quot;</span><span class="w"> </span><span class="p">;;</span>
-<a id="__codelineno-2-7" name="__codelineno-2-7"></a><span class="w">    </span><span class="m">3</span><span class="o">)</span><span class="w"> </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;first run — review scaffold&quot;</span><span class="w"> </span><span class="p">;;</span>
-<a id="__codelineno-2-8" name="__codelineno-2-8"></a><span class="w">    </span>*<span class="o">)</span><span class="w"> </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;unexpected exit </span><span class="nv">$code</span><span class="s2">&quot;</span><span class="w"> </span><span class="p">;;</span>
-<a id="__codelineno-2-9" name="__codelineno-2-9"></a><span class="k">esac</span>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-6-1">1</a></span>
+<span class="normal"><a href="#__codelineno-6-2">2</a></span>
+<span class="normal"><a href="#__codelineno-6-3">3</a></span>
+<span class="normal"><a href="#__codelineno-6-4">4</a></span>
+<span class="normal"><a href="#__codelineno-6-5">5</a></span>
+<span class="normal"><a href="#__codelineno-6-6">6</a></span>
+<span class="normal"><a href="#__codelineno-6-7">7</a></span>
+<span class="normal"><a href="#__codelineno-6-8">8</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1"></a>gh<span class="w"> </span>api<span class="w"> </span>-X<span class="w"> </span>PUT<span class="w"> </span>repos/andrekamman/taxi/branches/main/protection<span class="w"> </span>--input<span class="w"> </span>-<span class="w"> </span><span class="s">&lt;&lt;&#39;JSON&#39;</span>
+<a id="__codelineno-6-2" name="__codelineno-6-2"></a><span class="s">{</span>
+<a id="__codelineno-6-3" name="__codelineno-6-3"></a><span class="s">  &quot;required_status_checks&quot;: { &quot;strict&quot;: true, &quot;contexts&quot;: [&quot;integration&quot;] },</span>
+<a id="__codelineno-6-4" name="__codelineno-6-4"></a><span class="s">  &quot;enforce_admins&quot;: true,</span>
+<a id="__codelineno-6-5" name="__codelineno-6-5"></a><span class="s">  &quot;required_pull_request_reviews&quot;: null,</span>
+<a id="__codelineno-6-6" name="__codelineno-6-6"></a><span class="s">  &quot;restrictions&quot;: null</span>
+<a id="__codelineno-6-7" name="__codelineno-6-7"></a><span class="s">}</span>
+<a id="__codelineno-6-8" name="__codelineno-6-8"></a><span class="s">JSON</span>
 </code></pre></div></td></tr></table></div>
+<p>Note: GitHub only lists a check name as selectable in the Settings UI after it has run at least once on the repo (e.g. via one open PR) — but the API above accepts the <code>integration</code> name regardless of whether the UI has seen it yet, so this can be run before or after that first PR.</p>
+</li>
+</ol>
+<h2 id="optional-custom-docs-domain">Optional — custom docs domain</h2>
+<p>The docs site can be pointed at <code>taxi-seed.com</code> instead of the default <code>andrekamman.github.io/taxi/</code> URL. This is not required for anything above and can be done at any time:</p>
+<ol>
+<li>
+<p>Add a <code>docs/CNAME</code> file to the repo containing exactly:</p>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-7-1">1</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1"></a>taxi-seed.com
+</code></pre></div></td></tr></table></div>
+<p><code>mkdocs gh-deploy</code> copies everything under <code>docs/</code> into the published site, so this file will land at the root of <code>gh-pages</code> automatically on the next docs deploy.
+2. In GitHub: <strong>Settings → Pages</strong>, set the custom domain to <code>taxi-seed.com</code> and enable "Enforce HTTPS" once the certificate has provisioned.
+3. Add the DNS records at your registrar: either an <code>ALIAS</code>/<code>ANAME</code> (or the four GitHub Pages <code>A</code> records) for the apex domain, or a <code>CNAME</code> record if serving from a subdomain — pointing at <code>andrekamman.github.io</code>.</p>
+</li>
+</ol>
 
 
 
