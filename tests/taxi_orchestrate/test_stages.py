@@ -14,27 +14,28 @@ def _conn(**kw):
 
 
 def test_download_full_all_types():
-    cmd = build_download_cmd(Path("/repo"), None, None, Path("/data"))
-    assert cmd[:2] == ["bash", "/repo/downloader/download_taxi_data.sh"]
-    assert cmd[cmd.index("--data-dir") + 1] == "/data"
+    cmd = build_download_cmd(None, None, Path("/data"))
+    assert cmd[:3] == [sys.executable, "-m", "taxi_download.cli"]
+    assert "--recent" not in cmd
+    assert cmd[-2:] == ["--data-dir", "/data"]
 
 
 def test_download_full_one_type():
-    cmd = build_download_cmd(Path("/repo"), "yellow", None, Path("/data"))
+    cmd = build_download_cmd("yellow", None, Path("/data"))
+    assert cmd[:3] == [sys.executable, "-m", "taxi_download.cli"]
     assert "yellow" in cmd and "--recent" not in cmd
-    # data_type stays adjacent to the recent group; --data-dir is appended last
     assert cmd[-2:] == ["--data-dir", "/data"]
 
 
 def test_download_recent_default_n():
-    cmd = build_download_cmd(Path("/repo"), "green", 0, Path("/data"))
+    cmd = build_download_cmd("green", 0, Path("/data"))
     assert "--recent" in cmd
     assert cmd[cmd.index("--recent") + 1] == "green"  # no numeric N inserted
     assert cmd[-2:] == ["--data-dir", "/data"]
 
 
 def test_download_recent_explicit_n():
-    cmd = build_download_cmd(Path("/repo"), "green", 3, Path("/data"))
+    cmd = build_download_cmd("green", 3, Path("/data"))
     i = cmd.index("--recent")
     assert cmd[i + 1] == "3" and cmd[i + 2] == "green"
     assert cmd[-2:] == ["--data-dir", "/data"]
