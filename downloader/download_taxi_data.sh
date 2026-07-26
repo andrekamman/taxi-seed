@@ -9,6 +9,7 @@ recent_months=3
 max_lookback_months=18  # in --recent mode, how far back to look per type before giving up
 recent_type=""          # empty = all four types
 full_type=""            # empty = all four types (full-history mode)
+data_dir_opt=""         # base dir; when set, output_dir = $data_dir_opt/raw
 
 DATA_TYPES=("yellow" "green" "fhv" "fhvhv")
 
@@ -36,6 +37,16 @@ while [[ $# -gt 0 ]]; do
                 shift
             fi
             ;;
+        --data-dir)
+            shift
+            if [[ $# -gt 0 ]]; then
+                data_dir_opt="$1"
+                shift
+            else
+                echo "--data-dir requires a directory argument" >&2
+                exit 1
+            fi
+            ;;
         -h|--help)
             cat <<'HELP'
 Usage:
@@ -44,6 +55,7 @@ Usage:
   ./download_taxi_data.sh --recent [N]             Recent N months (default 3), all types
   ./download_taxi_data.sh --recent [N] TYPE        Recent N months (default 3), one type only
   ./download_taxi_data.sh --recent TYPE            Recent 3 months, one type only
+  ./download_taxi_data.sh --data-dir DIR            Write to DIR/raw (instead of ./raw)
 
 TYPE is one of: yellow, green, fhv, fhvhv.
 
@@ -67,10 +79,12 @@ HELP
     esac
 done
 
-# Output directory: honor OUTPUT_DIR override; otherwise resolve raw/ relative
-# to this script's location, so the script works from any CWD.
+# Output directory precedence: OUTPUT_DIR (explicit full path) > --data-dir/raw
+# > raw/ resolved relative to this script (so it works from any CWD).
 if [ -n "$OUTPUT_DIR" ]; then
     output_dir="$OUTPUT_DIR"
+elif [ -n "$data_dir_opt" ]; then
+    output_dir="$data_dir_opt/raw"
 else
     script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
     output_dir="$script_dir/../raw"
