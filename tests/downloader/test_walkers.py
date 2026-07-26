@@ -7,6 +7,7 @@ import pytest
 
 from taxi_download import download as dl
 from taxi_download.download import (
+    MAX_CONSECUTIVE_GIVEUPS,
     WalkSummary,
     download_full,
     download_recent,
@@ -89,3 +90,21 @@ def test_recent_persistent_ratelimit_reports_giveup(client, stub, tmp_path, monk
     summ = download_recent(client, "yellow", tmp_path, n=1, today=date(2025, 7, 10), sleeper=NOOP)
     assert summ.downloaded == 0
     assert summ.gaveup >= 1
+
+
+def test_full_aborts_after_consecutive_giveup_cap(client, stub, tmp_path, monkeypatch):
+    _point_at_stub(monkeypatch, stub)
+    # fhvhv starts 2019-02. Serve 2019-02 and 2019-03 normally (seen_data becomes
+    # True, 2 real downloads), then make every month from 2019-04 onward a
+    # persistent 429 -- under a sustained WAF block a full-history walk would
+    # otherwise hammer every remaining month up to `today` (here: through
+    # 2019-12, i.e. 9 months). The consecutive-giveup cap must stop the walk
+    # after exactly MAX_CONSECUTIVE_GIVEUPS give-ups instead.
+    _present(stub, "fhvhv", (2019, 2), (2019, 3))
+    for month in range(4, 13):  # 2019-04 .. 2019-12: 9 months of persistent 429
+        stub.ratelimit[dl.filename("fhvhv", 2019, month)] = 99
+    summ = download_full(client, "fhvhv", tmp_path, today=date(2020, 1, 1), sleeper=NOOP)
+    assert summ.downloaded == 2
+    assert summ.gaveup == MAX_CONSECUTIVE_GIVEUPS
+    # confirm it really stopped early rather than walking every remaining month
+    assert not target_path(tmp_path, "fhvhv", 2019, 4 + MAX_CONSECUTIVE_GIVEUPS).exists()

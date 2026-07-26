@@ -22,6 +22,10 @@ MAX_LOOKBACK = 18
 PARQUET_MAGIC = b"PAR1"
 # capped exponential backoff: 30s, 90s, 270s, … capped at 3600s, up to MAX_RETRIES tries
 BACKOFF_BASE_S, BACKOFF_FACTOR, BACKOFF_CAP_S, MAX_RETRIES = 30, 3, 3600, 4
+# sustained rate-limit (or network failure) across this many consecutive months
+# in a full-history walk means "abort the type" rather than hammering every
+# remaining month for hours.
+MAX_CONSECUTIVE_GIVEUPS = 3
 
 
 class FetchResult(Enum):
@@ -136,21 +140,28 @@ class WalkSummary:
 def download_full(client, data_type: str, raw_dir, today, sleeper) -> WalkSummary:
     end = previous_month(today)
     downloaded = gaveup = 0
+    consecutive_giveups = 0
     seen_data = False
     for (year, month) in months_forward(START_DATES[data_type], end):
         if target_path(raw_dir, data_type, year, month).exists():
             seen_data = True
+            consecutive_giveups = 0
             continue
         result = download_month(client, data_type, year, month, raw_dir, sleeper)
         if result is FetchResult.OK:
             downloaded += 1
             seen_data = True
+            consecutive_giveups = 0
         elif result is FetchResult.NOTFOUND:
             if seen_data:
                 break  # end of series
+            consecutive_giveups = 0
             continue  # pre-series gap — keep walking forward
         else:
             gaveup += 1
+            consecutive_giveups += 1
+            if consecutive_giveups >= MAX_CONSECUTIVE_GIVEUPS:
+                break  # sustained rate-limit/network failure — stop hammering
     return WalkSummary(downloaded, gaveup)
 
 
