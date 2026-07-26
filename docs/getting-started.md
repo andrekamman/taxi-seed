@@ -245,6 +245,5 @@ The [Normalize guide](guides/normalize.md) walks through the real-world case whe
 - **[Downloader guide](guides/downloader.md)** — WAF classifier, disk sizing table, WSL warning explained in detail.
 - **[Schema Drift guide](guides/schema-drift.md)** — three modes, how rename detection works, programmatic API.
 - **[Normalize guide](guides/normalize.md)** — three-state model, bootstrap+amend semantics, two worked examples.
-- **[K6 Load Test guide](guides/k6-loadtest.md)** — building the custom K6 binary, config, running against a local Docker SQL Server.
 - **[Cookbook](cookbook.md)** — nightly cron, DuckDB `httpfs`, corporate proxy, populating a fresh dev SQL Server.
 - **[Architecture](architecture.md)** — the four-tool DAG and the core design principles.

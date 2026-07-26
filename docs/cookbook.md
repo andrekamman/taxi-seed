@@ -247,7 +247,7 @@ Scenario-oriented recipes that combine the four tools — downloader, schema-dri
 
 **Recipe:**
 
-1. Start SQL Server (from the [K6 Load Test guide](guides/k6-loadtest.md)):
+1. Start SQL Server:
 
     ```bash
     cat > docker-compose.yml <<'EOF'
