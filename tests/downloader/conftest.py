@@ -24,6 +24,7 @@ class _State:
         self.body = body
         self.present: set[str] = set()
         self.ratelimit: dict[str, int] = {}
+        self.force: dict[str, tuple[int, bytes]] = {}  # filename -> (status, body)
         self.base_url = ""
 
 
@@ -42,6 +43,13 @@ def stub(tmp_path):
                 self.send_response(429)
                 self.end_headers()
                 self.wfile.write(b"slow down")
+                return
+            if name in state.force:
+                status, body = state.force[name]
+                self.send_response(status)
+                self.send_header("Content-Length", str(len(body)))
+                self.end_headers()
+                self.wfile.write(body)
                 return
             if name in state.present:
                 self.send_response(200)

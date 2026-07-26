@@ -1,5 +1,7 @@
 # tests/downloader/test_fetch.py
 """fetch_one + download_month against the stub server. No real network."""
+import socket
+
 import httpx
 import pytest
 
@@ -39,6 +41,56 @@ def test_fetch_one_429_is_ratelimit(client, stub, tmp_path, monkeypatch):
     stub.ratelimit["yellow_tripdata_2025-06.parquet"] = 99
     dest = tmp_path / "yellow_tripdata_2025-06.parquet"
     assert fetch_one(client, dl.url_for("yellow", 2025, 6), dest) is FetchResult.RATELIMIT
+
+
+def test_fetch_one_403_accessdenied_is_notfound(client, stub, tmp_path, monkeypatch):
+    _point_at_stub(monkeypatch, stub)
+    stub.force["yellow_tripdata_2025-06.parquet"] = (
+        403,
+        b"<Error><Code>AccessDenied</Code></Error>",
+    )
+    dest = tmp_path / "yellow_tripdata_2025-06.parquet"
+    assert fetch_one(client, dl.url_for("yellow", 2025, 6), dest) is FetchResult.NOTFOUND
+    assert not (dest.parent / (dest.name + ".part")).exists()
+
+
+def test_fetch_one_403_nosuchkey_is_notfound(client, stub, tmp_path, monkeypatch):
+    _point_at_stub(monkeypatch, stub)
+    stub.force["yellow_tripdata_2025-06.parquet"] = (
+        403,
+        b"<Error><Code>NoSuchKey</Code></Error>",
+    )
+    dest = tmp_path / "yellow_tripdata_2025-06.parquet"
+    assert fetch_one(client, dl.url_for("yellow", 2025, 6), dest) is FetchResult.NOTFOUND
+    assert not (dest.parent / (dest.name + ".part")).exists()
+
+
+def test_fetch_one_403_cloudfront_block_is_ratelimit(client, stub, tmp_path, monkeypatch):
+    _point_at_stub(monkeypatch, stub)
+    stub.force["yellow_tripdata_2025-06.parquet"] = (403, b"Request blocked")
+    dest = tmp_path / "yellow_tripdata_2025-06.parquet"
+    assert fetch_one(client, dl.url_for("yellow", 2025, 6), dest) is FetchResult.RATELIMIT
+    assert not (dest.parent / (dest.name + ".part")).exists()
+
+
+def test_fetch_one_5xx_is_ratelimit(client, stub, tmp_path, monkeypatch):
+    _point_at_stub(monkeypatch, stub)
+    stub.force["yellow_tripdata_2025-06.parquet"] = (500, b"boom")
+    dest = tmp_path / "yellow_tripdata_2025-06.parquet"
+    assert fetch_one(client, dl.url_for("yellow", 2025, 6), dest) is FetchResult.RATELIMIT
+    assert not (dest.parent / (dest.name + ".part")).exists()
+
+
+def test_fetch_one_transport_error_is_neterror(client, tmp_path):
+    # Grab a free port, then close it so nothing is listening -> ConnectError.
+    s = socket.socket()
+    s.bind(("127.0.0.1", 0))
+    dead_port = s.getsockname()[1]
+    s.close()
+    url = f"http://127.0.0.1:{dead_port}/yellow_tripdata_2025-06.parquet"
+    dest = tmp_path / "yellow_tripdata_2025-06.parquet"
+    assert fetch_one(client, url, dest) is FetchResult.NETERROR
+    assert not (dest.parent / (dest.name + ".part")).exists()
 
 
 def test_download_month_skips_existing(client, stub, tmp_path, monkeypatch):
