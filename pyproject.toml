@@ -38,7 +38,6 @@ local_scheme = "no-local-version"
 
 [tool.hatch.build.targets.wheel]
 packages = [
-  "k6-loadtest/src/k6_loadtest",
   "loader/src/taxi_loader",
   "normalize/src/taxi_normalize",
   "orchestrator/src/taxi_orchestrate",
@@ -55,7 +54,6 @@ docs = [
 ]
 
 [project.scripts]
-k6-preprocess = "k6_loadtest.preprocess:main"
 normalize = "taxi_normalize.cli:main"
 schema-drift = "schema_drift.cli:main"
 taxi-curate-mappings = "taxi_orchestrate.curate:main"
