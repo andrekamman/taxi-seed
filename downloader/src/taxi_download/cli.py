@@ -12,7 +12,6 @@ import httpx
 
 from taxi_download.download import (
     DATA_TYPES,
-    WalkSummary,
     clean_corrupt,
     download_full,
     download_recent,
