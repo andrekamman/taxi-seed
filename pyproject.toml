@@ -8,6 +8,7 @@ license-files = ["LICENSE"]
 requires-python = ">=3.12"
 dependencies = [
     "duckdb>=1.4.4",
+    "httpx>=0.27",
     "pyyaml>=6.0",
 ]
 classifiers = [
@@ -38,6 +39,7 @@ local_scheme = "no-local-version"
 
 [tool.hatch.build.targets.wheel]
 packages = [
+  "downloader/src/taxi_download",
   "loader/src/taxi_loader",
   "normalize/src/taxi_normalize",
   "orchestrator/src/taxi_orchestrate",
@@ -57,5 +59,6 @@ docs = [
 normalize = "taxi_normalize.cli:main"
 schema-drift = "schema_drift.cli:main"
 taxi-curate-mappings = "taxi_orchestrate.curate:main"
+taxi-download = "taxi_download.cli:main"
 taxi-load = "taxi_loader.cli:main"
 taxi-run = "taxi_orchestrate.cli:main"

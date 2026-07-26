@@ -52,7 +52,7 @@ def parse_args(argv=None) -> argparse.Namespace:
 def find_repo_root(start: Path) -> Path:
     cur = start.resolve()
     for d in [cur, *cur.parents]:
-        if (d / "downloader" / "download_taxi_data.sh").exists() and (d / "pyproject.toml").exists():
+        if (d / "pyproject.toml").exists() and (d / "normalize" / "mappings").is_dir():
             return d
     return cur
 
@@ -108,7 +108,7 @@ def main(argv=None) -> int:
             if stage == pipeline.LOAD and abort_load:
                 break
             if stage == pipeline.DOWNLOAD:
-                rc = stages.run(stages.build_download_cmd(repo_root, t, args.recent, data_dir), repo_root)
+                rc = stages.run(stages.build_download_cmd(t, args.recent, data_dir), repo_root)
             elif stage == pipeline.NORMALIZE:
                 rc = stages.run(stages.build_normalize_cmd(t, args.sample, data_dir), repo_root)
             else:  # LOAD

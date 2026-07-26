@@ -20,15 +20,15 @@ class LoadConn:
     full_refresh: bool
 
 
-def build_download_cmd(repo_root: Path, data_type: Optional[str],
-                       recent: Optional[int], data_dir: Path) -> list[str]:
-    cmd = ["bash", str(repo_root / "downloader" / "download_taxi_data.sh")]
+def build_download_cmd(data_type: Optional[str], recent: Optional[int],
+                       data_dir: Path) -> list[str]:
+    cmd = [sys.executable, "-m", "taxi_download.cli"]
+    if data_type:
+        cmd.append(data_type)          # positional first so bare --recent doesn't swallow it
     if recent is not None:
         cmd.append("--recent")
         if recent > 0:
             cmd.append(str(recent))
-    if data_type:
-        cmd.append(data_type)          # keep TYPE adjacent to the recent group
     cmd += ["--data-dir", str(data_dir)]
     return cmd
 

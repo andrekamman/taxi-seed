@@ -5,7 +5,7 @@ def _fake_run(codes):
     """Return a run() stub that yields exit codes keyed by the stage token in cmd."""
     def _run(cmd, cwd, extra_env=None):
         joined = " ".join(cmd)
-        if "download_taxi_data.sh" in joined:
+        if "taxi_download.cli" in joined:
             stage = "download"
         elif "taxi_normalize.cli" in joined:
             stage = "normalize"
@@ -20,7 +20,7 @@ def _fake_run(codes):
 def test_default_runs_download_then_normalize(monkeypatch, capsys):
     seen = []
     def _run(cmd, cwd, extra_env=None):
-        seen.append("download" if "download_taxi_data.sh" in " ".join(cmd)
+        seen.append("download" if "taxi_download.cli" in " ".join(cmd)
                     else "normalize" if "taxi_normalize.cli" in " ".join(cmd) else "load")
         return 0
     monkeypatch.setattr(cli.stages, "run", _run)
@@ -61,7 +61,7 @@ def test_load_conn_error_aborts_remaining_loads(monkeypatch):
 def test_skip_download_runs_normalize_only(monkeypatch):
     seen = []
     def _run(cmd, cwd, extra_env=None):
-        seen.append("download" if "download_taxi_data.sh" in " ".join(cmd)
+        seen.append("download" if "taxi_download.cli" in " ".join(cmd)
                     else "normalize" if "taxi_normalize.cli" in " ".join(cmd) else "load")
         return 0
     monkeypatch.setattr(cli.stages, "run", _run)
