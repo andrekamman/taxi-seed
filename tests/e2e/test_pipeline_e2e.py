@@ -1,5 +1,4 @@
 import os
-import shutil
 import subprocess
 from contextlib import contextmanager
 from pathlib import Path
@@ -14,9 +13,6 @@ pytestmark = pytest.mark.skipif(
     not os.environ.get("MSSQL_PASSWORD"),
     reason="requires SQL Server (set MSSQL_PASSWORD)",
 )
-
-REPO_ROOT = Path(__file__).resolve().parents[2]
-REPO_MAPPINGS = REPO_ROOT / "normalize" / "mappings"
 
 
 @pytest.fixture
@@ -67,7 +63,8 @@ def _count(cfg, table: str) -> int:
 
 @pytest.mark.parametrize("data_type", DATA_TYPES)
 def test_pipeline_loads_expected_row_counts(tmp_path, cfg, data_type):
-    shutil.copytree(REPO_MAPPINGS, tmp_path / "normalize" / "mappings")
+    # normalize reads its mappings from the repo (the orchestrator runs each stage
+    # with cwd=repo_root), so we only generate raw data under the --data-dir workroot.
     info = generate(tmp_path, data_type, rows_target=2, rows_drift=3)
 
     _run_pipeline(tmp_path, data_type, cfg)

@@ -55,7 +55,7 @@ Usage:
   ./download_taxi_data.sh --recent [N]             Recent N months (default 3), all types
   ./download_taxi_data.sh --recent [N] TYPE        Recent N months (default 3), one type only
   ./download_taxi_data.sh --recent TYPE            Recent 3 months, one type only
-  ./download_taxi_data.sh --data-dir DIR            Write to DIR/raw (instead of ./raw)
+  ./download_taxi_data.sh --data-dir DIR           Write to DIR/raw (instead of ./raw)
 
 TYPE is one of: yellow, green, fhv, fhvhv.
 
