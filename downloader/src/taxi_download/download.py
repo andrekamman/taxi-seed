@@ -3,6 +3,7 @@
 (`client`, `today`, `sleeper`) so all branches test offline and instantly."""
 from __future__ import annotations
 
+from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
 
@@ -124,3 +125,48 @@ def download_month(client, data_type: str, year: int, month: int, raw_dir, sleep
             delay = min(BACKOFF_BASE_S * (BACKOFF_FACTOR ** attempt), BACKOFF_CAP_S)
             sleeper(delay)
     return result
+
+
+@dataclass
+class WalkSummary:
+    downloaded: int
+    gaveup: int
+
+
+def download_full(client, data_type: str, raw_dir, today, sleeper) -> WalkSummary:
+    end = previous_month(today)
+    downloaded = gaveup = 0
+    seen_data = False
+    for (year, month) in months_forward(START_DATES[data_type], end):
+        if target_path(raw_dir, data_type, year, month).exists():
+            seen_data = True
+            continue
+        result = download_month(client, data_type, year, month, raw_dir, sleeper)
+        if result is FetchResult.OK:
+            downloaded += 1
+            seen_data = True
+        elif result is FetchResult.NOTFOUND:
+            if seen_data:
+                break  # end of series
+            continue  # pre-series gap — keep walking forward
+        else:
+            gaveup += 1
+    return WalkSummary(downloaded, gaveup)
+
+
+def download_recent(client, data_type: str, raw_dir, n: int, today, sleeper) -> WalkSummary:
+    downloaded = gaveup = examined = 0
+    for (year, month) in months_backward(previous_month(today)):
+        if downloaded >= n or examined >= MAX_LOOKBACK:
+            break
+        examined += 1
+        if target_path(raw_dir, data_type, year, month).exists():
+            break  # stop early on an already-present local file
+        result = download_month(client, data_type, year, month, raw_dir, sleeper)
+        if result is FetchResult.OK:
+            downloaded += 1
+        elif result is FetchResult.NOTFOUND:
+            continue  # month not published — keep looking back
+        else:
+            gaveup += 1
+    return WalkSummary(downloaded, gaveup)
