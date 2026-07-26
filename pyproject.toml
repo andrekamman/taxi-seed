@@ -38,6 +38,7 @@ local_scheme = "no-local-version"
 
 [tool.hatch.build.targets.wheel]
 packages = [
+  "downloader/src/taxi_download",
   "loader/src/taxi_loader",
   "normalize/src/taxi_normalize",
   "orchestrator/src/taxi_orchestrate",
