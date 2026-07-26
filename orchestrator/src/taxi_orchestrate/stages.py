@@ -20,29 +20,31 @@ class LoadConn:
     full_refresh: bool
 
 
-def build_download_cmd(root: Path, data_type: Optional[str],
-                       recent: Optional[int]) -> list[str]:
-    cmd = ["bash", str(root / "downloader" / "download_taxi_data.sh")]
+def build_download_cmd(repo_root: Path, data_type: Optional[str],
+                       recent: Optional[int], data_dir: Path) -> list[str]:
+    cmd = ["bash", str(repo_root / "downloader" / "download_taxi_data.sh")]
     if recent is not None:
         cmd.append("--recent")
         if recent > 0:
             cmd.append(str(recent))
     if data_type:
-        cmd.append(data_type)
+        cmd.append(data_type)          # keep TYPE adjacent to the recent group
+    cmd += ["--data-dir", str(data_dir)]
     return cmd
 
 
-def build_normalize_cmd(data_type: str, sample: Optional[str]) -> list[str]:
+def build_normalize_cmd(data_type: str, sample: Optional[str], data_dir: Path) -> list[str]:
     cmd = [sys.executable, "-m", "taxi_normalize.cli", data_type]
     if sample:
         cmd += ["--sample", sample]
+    cmd += ["--data-dir", str(data_dir)]
     return cmd
 
 
-def build_load_cmd(data_type: str, input_dir: str, conn: LoadConn) -> list[str]:
+def build_load_cmd(data_type: str, conn: LoadConn, data_dir: Path) -> list[str]:
     cmd = [
         sys.executable, "-m", "taxi_loader.cli", data_type,
-        "--input-dir", input_dir,
+        "--data-dir", str(data_dir),
         "--host", conn.host,
         "--port", str(conn.port),
         "--database", conn.database,

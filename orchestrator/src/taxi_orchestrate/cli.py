@@ -15,7 +15,6 @@ from pathlib import Path
 from taxi_orchestrate import pipeline, report, stages
 
 DATA_TYPES = ("yellow", "green", "fhv", "fhvhv")
-INPUT_DIR = "raw-normalized"
 
 
 def parse_args(argv=None) -> argparse.Namespace:
@@ -35,7 +34,8 @@ def parse_args(argv=None) -> argparse.Namespace:
                    help="also load normalized parquet into SQL Server")
     p.add_argument("--sample", default=None, help="passed through to normalize")
     p.add_argument("--data-dir", default=None,
-                   help="working root holding raw/ + raw-normalized/ (default: repo root)")
+                   help="base data dir: download->DIR/raw, normalize->DIR/raw-normalized, "
+                        "load from DIR/raw-normalized (default: repo root)")
     p.add_argument("--dry-run", action="store_true",
                    help="print the per-type plan and exit without running anything")
     # forwarded to taxi-load (only meaningful with --load)
@@ -82,7 +82,8 @@ def main(argv=None) -> int:
                   file=sys.stderr)
             return 2
 
-    root = Path(args.data_dir).resolve() if args.data_dir else find_repo_root(Path.cwd())
+    repo_root = find_repo_root(Path.cwd())
+    data_dir = Path(args.data_dir).resolve() if args.data_dir else repo_root
     types = [args.data_type] if args.data_type else list(DATA_TYPES)
     planned = _planned_stages(args)
     conn = stages.LoadConn(
@@ -91,7 +92,8 @@ def main(argv=None) -> int:
     )
 
     if args.dry_run:
-        print(f"taxi-run plan (root={root}); stages: {' -> '.join(planned)}")
+        print(f"taxi-run plan (repo_root={repo_root}, data_dir={data_dir}); "
+              f"stages: {' -> '.join(planned)}")
         for t in types:
             print(f"  {t}: {', '.join(planned)}")
         return 0
@@ -106,11 +108,11 @@ def main(argv=None) -> int:
             if stage == pipeline.LOAD and abort_load:
                 break
             if stage == pipeline.DOWNLOAD:
-                rc = stages.run(stages.build_download_cmd(root, t, args.recent), root)
+                rc = stages.run(stages.build_download_cmd(repo_root, t, args.recent, data_dir), repo_root)
             elif stage == pipeline.NORMALIZE:
-                rc = stages.run(stages.build_normalize_cmd(t, args.sample), root)
+                rc = stages.run(stages.build_normalize_cmd(t, args.sample, data_dir), repo_root)
             else:  # LOAD
-                rc = stages.run(stages.build_load_cmd(t, INPUT_DIR, conn), root,
+                rc = stages.run(stages.build_load_cmd(t, conn, data_dir), repo_root,
                                 extra_env={"MSSQL_PASSWORD": password})
             o = pipeline.classify(stage, rc)
             outcomes.append(o)
