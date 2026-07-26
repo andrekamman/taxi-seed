@@ -1,8 +1,8 @@
 site_name: taxi
 site_description: Downloader, schema-drift analyzer, and K6 SQL Server load tester for NYC TLC taxi trip data
-site_url: https://andrekamman.github.io/taxi/
-repo_url: https://github.com/andrekamman/taxi
-repo_name: andrekamman/taxi
+site_url: https://andrekamman.github.io/taxi-seed/
+repo_url: https://github.com/andrekamman/taxi-seed
+repo_name: andrekamman/taxi-seed
 edit_uri: edit/main/docs/
 
 theme:

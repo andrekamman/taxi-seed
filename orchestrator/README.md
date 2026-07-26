@@ -5,4 +5,4 @@ Runs the pipeline as one command: `taxi-run [TYPE]` chains download → normaliz
 when normalize needs human review. `taxi-curate-mappings` auto-accepts detected
 schema drift into complete mapping YAMLs and writes an audit report.
 
-→ **[Full guide](https://andrekamman.github.io/taxi/guides/orchestrator/)**
+→ **[Full guide](https://andrekamman.github.io/taxi-seed/guides/orchestrator/)**

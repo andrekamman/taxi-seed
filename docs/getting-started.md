@@ -18,7 +18,7 @@ The commands below assume a POSIX shell (bash or zsh) and a working internet con
 ## 1. Clone and install
 
 ```bash
-git clone https://github.com/andrekamman/taxi.git
+git clone https://github.com/andrekamman/taxi-seed.git
 cd taxi
 uv sync --extra test
 ```

@@ -92,7 +92,7 @@ These are manual, out-of-band steps — they only need to happen once per repo, 
     |---|---|
     | PyPI project name | `taxi-seed` |
     | Owner | `andrekamman` |
-    | Repository name | `taxi` |
+    | Repository name | `taxi-seed` |
     | Workflow name | `release.yml` |
     | Environment name | `pypi` (on pypi.org) / `testpypi` (on test.pypi.org) |
 
@@ -103,7 +103,7 @@ These are manual, out-of-band steps — they only need to happen once per repo, 
 4. **Turn on branch protection for both `dev` and `main`**, requiring the `integration` check on each. Both branches get the identical rule — `dev` because feature-branch PRs land there, and `main` because `dev`→`main` promotion PRs need the same gate to keep `main` releasable:
 
     ```bash
-    gh api -X PUT repos/andrekamman/taxi/branches/dev/protection --input - <<'JSON'
+    gh api -X PUT repos/andrekamman/taxi-seed/branches/dev/protection --input - <<'JSON'
     {
       "required_status_checks": { "strict": true, "contexts": ["integration"] },
       "enforce_admins": true,
@@ -114,7 +114,7 @@ These are manual, out-of-band steps — they only need to happen once per repo, 
     ```
 
     ```bash
-    gh api -X PUT repos/andrekamman/taxi/branches/main/protection --input - <<'JSON'
+    gh api -X PUT repos/andrekamman/taxi-seed/branches/main/protection --input - <<'JSON'
     {
       "required_status_checks": { "strict": true, "contexts": ["integration"] },
       "enforce_admins": true,
@@ -128,7 +128,7 @@ These are manual, out-of-band steps — they only need to happen once per repo, 
 
 ## Optional — custom docs domain
 
-The docs site can be pointed at `taxi-seed.com` instead of the default `andrekamman.github.io/taxi/` URL. This is not required for anything above and can be done at any time:
+The docs site can be pointed at `taxi-seed.com` instead of the default `andrekamman.github.io/taxi-seed/` URL. This is not required for anything above and can be done at any time:
 
 1. Add a `docs/CNAME` file to the repo containing exactly:
 

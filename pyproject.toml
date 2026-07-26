@@ -20,9 +20,9 @@ classifiers = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/andrekamman/taxi"
-Documentation = "https://andrekamman.github.io/taxi/"
-Repository = "https://github.com/andrekamman/taxi"
+Homepage = "https://github.com/andrekamman/taxi-seed"
+Documentation = "https://andrekamman.github.io/taxi-seed/"
+Repository = "https://github.com/andrekamman/taxi-seed"
 
 [build-system]
 requires = ["hatchling", "hatch-vcs"]

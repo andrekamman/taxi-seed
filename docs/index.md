@@ -64,7 +64,7 @@ the other three tools are original to this repo. See
 ## Quick start
 
 ```bash
-git clone https://github.com/andrekamman/taxi.git
+git clone https://github.com/andrekamman/taxi-seed.git
 cd taxi
 ./downloader/download_taxi_data.sh --recent 3 yellow
 ```
@@ -101,5 +101,5 @@ The **downloader** shell script was loosely based on
 (MIT) — specifically its convention for organizing TLC parquet by type and
 year. The rest of the repo (schema-drift analyzer, normalizer, k6-loadtest rig)
 is original work and shares no code with Todd's project. See
-[THIRD_PARTY_NOTICES](https://github.com/andrekamman/taxi/blob/main/THIRD_PARTY_NOTICES)
+[THIRD_PARTY_NOTICES](https://github.com/andrekamman/taxi-seed/blob/main/THIRD_PARTY_NOTICES)
 for the full attribution.

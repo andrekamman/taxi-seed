@@ -13,7 +13,7 @@ This page covers the four things you need to be productive in a PR: how to get a
 Clone the repo and sync the environment with both optional extras:
 
 ```bash
-git clone https://github.com/andrekamman/taxi.git
+git clone https://github.com/andrekamman/taxi-seed.git
 cd taxi
 uv sync --extra test --extra docs
 ```
@@ -54,7 +54,7 @@ Add `-x` to stop at the first failure, or `--lf` to re-run only the tests that f
 
 ## Adding a new test
 
-The fixture pattern is documented by example in [`tests/taxi_normalize/conftest.py`](https://github.com/andrekamman/taxi/blob/main/tests/taxi_normalize/conftest.py). Fixtures build synthetic parquet families with DuckDB using `COPY (SELECT * FROM VALUES ...) TO '<path>' (FORMAT PARQUET)` — no network, no fixture files checked into the tree, and each test receives its own `tmp_path` so there is no shared state between tests. The upside is that the whole suite is hermetic and finishes in under a second even as the corpus grows; the downside is that new tests have to describe the schema they need, rather than pointing at a fixture file on disk.
+The fixture pattern is documented by example in [`tests/taxi_normalize/conftest.py`](https://github.com/andrekamman/taxi-seed/blob/main/tests/taxi_normalize/conftest.py). Fixtures build synthetic parquet families with DuckDB using `COPY (SELECT * FROM VALUES ...) TO '<path>' (FORMAT PARQUET)` — no network, no fixture files checked into the tree, and each test receives its own `tmp_path` so there is no shared state between tests. The upside is that the whole suite is hermetic and finishes in under a second even as the corpus grows; the downside is that new tests have to describe the schema they need, rather than pointing at a fixture file on disk.
 
 Reuse the existing families wherever possible:
 
