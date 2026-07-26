@@ -38,8 +38,11 @@ def parse_args(argv=None) -> argparse.Namespace:
     p.add_argument("--database", default="taxi")
     p.add_argument("--schema", default="dbo")
     p.add_argument("--user", default="sa")
-    p.add_argument("--input-dir", default="raw-normalized",
-                   help="reads <input-dir>/<type>/<year>/*.parquet")
+    p.add_argument("--input-dir", default=None,
+                   help="reads <input-dir>/<type>/<year>/*.parquet "
+                        "(overrides --data-dir; default: raw-normalized)")
+    p.add_argument("--data-dir", default=None,
+                   help="base dir; reads <data-dir>/raw-normalized (unless --input-dir given)")
     p.add_argument("--flush-rows", type=int, default=100000,
                    help="BCP commit batch size")
     p.add_argument("--full-refresh", action="store_true",
@@ -47,6 +50,14 @@ def parse_args(argv=None) -> argparse.Namespace:
     p.add_argument("--dry-run", action="store_true",
                    help="print the reconciliation plan and exit without writing")
     return p.parse_args(argv)
+
+
+def resolve_input_dir(input_dir, data_dir) -> str:
+    if input_dir is not None:
+        return input_dir
+    if data_dir is not None:
+        return str(Path(data_dir) / "raw-normalized")
+    return "raw-normalized"
 
 
 def discover_month_files(conn: duckdb.DuckDBPyConnection, input_dir,
@@ -125,6 +136,7 @@ def _process_type(conn, cfg, data_type: str, input_dir: str,
 
 def main(argv=None) -> int:
     args = parse_args(argv)
+    input_dir = resolve_input_dir(args.input_dir, args.data_dir)
 
     try:
         schema = validate_identifier(args.schema, "schema")
@@ -167,7 +179,7 @@ def main(argv=None) -> int:
     try:
         for data_type in types:
             try:
-                _process_type(conn, cfg, data_type, args.input_dir,
+                _process_type(conn, cfg, data_type, input_dir,
                               args.flush_rows, args.full_refresh, args.dry_run,
                               attached)
             except TypeMappingError as e:

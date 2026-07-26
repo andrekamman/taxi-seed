@@ -1,7 +1,7 @@
 import duckdb
 import pytest
 
-from taxi_loader.cli import discover_month_files, main, parse_args
+from taxi_loader.cli import discover_month_files, main, parse_args, resolve_input_dir
 
 
 def test_parse_args_defaults():
@@ -12,7 +12,8 @@ def test_parse_args_defaults():
     assert ns.database == "taxi"
     assert ns.schema == "dbo"
     assert ns.user == "sa"
-    assert ns.input_dir == "raw-normalized"
+    assert ns.input_dir is None
+    assert ns.data_dir is None
     assert ns.flush_rows == 100000
     assert ns.full_refresh is False
     assert ns.dry_run is False
@@ -41,3 +42,12 @@ def test_invalid_data_type_is_rejected():
     with pytest.raises(SystemExit) as exc:
         parse_args(["yello"])
     assert exc.value.code == 2
+
+
+def test_resolve_input_dir_precedence():
+    # explicit --input-dir wins
+    assert resolve_input_dir("/x/norm", "/base") == "/x/norm"
+    # else derive from --data-dir
+    assert resolve_input_dir(None, "/base") == "/base/raw-normalized"
+    # else default
+    assert resolve_input_dir(None, None) == "raw-normalized"
