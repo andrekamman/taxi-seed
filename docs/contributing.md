@@ -132,5 +132,6 @@ There is no enforced formatter today — the conventions below are informal but 
     - [Monorepo restructure](superpowers/specs/2026-07-19-monorepo-restructure-design.md) — why the four tools live in one repo with shared tooling instead of four separate repos.
     - [Normalizer](superpowers/specs/2026-07-21-normalizer-design.md) — the "data loss is a first-class error" contract, the mapping YAML shape, and the `ack_date` acknowledgment protocol.
     - [Documentation site](superpowers/specs/2026-07-22-documentation-design.md) — how the site is structured, what belongs in guides vs cookbook vs reference, and the strict-build convention.
+    - SQL load testing (legacy) — the design for this has moved with the tool to the separate `taxi-lab` repo.
 - `docs/superpowers/plans/` — implementation plans for each spec. Answers "how did we get from design to code?". Kept in the repo but excluded from the published site because they read as working notes rather than reference material.
 - Commit history — the "why did this line change?" reader. Commit messages are expected to explain intent, not just restate the diff; if the "why" needs more than a paragraph, it belongs in a spec instead.
