@@ -85,10 +85,10 @@ uv run taxi-run yellow --load   # error: MSSQL_PASSWORD environment variable is 
 | Code | Meaning |
 |---|---|
 | 0 | Every planned stage for every type completed cleanly (`ok`) — a genuinely clean run. |
-| 1 | No stage failed outright, but at least one type stopped at `needs_review` (normalize found unresolved mapping items) or the loader reported a partial load. Nothing operationally broke; a human has follow-up work. |
-| 2 | At least one stage classified as `failed` or `conn_error` — download failed outright, normalize hit a real configuration error, or the loader hit a connection/config error or `TypeMappingError`. Also returned immediately for the `--download-only` + `--load` conflict or a missing `MSSQL_PASSWORD` when `--load` is set, before any stage runs. |
+| 1 | No stage failed outright, but at least one type stopped at `needs_review` (normalize found unresolved mapping items). Nothing operationally broke; a human has follow-up work. |
+| 2 | At least one stage classified as `failed`, `partial`, or `conn_error` — download failed outright, normalize hit a real configuration error, the loader reported a partial load, or the loader hit a connection/config error or `TypeMappingError`. Also returned immediately for the `--download-only` + `--load` conflict or a missing `MSSQL_PASSWORD` when `--load` is set, before any stage runs. |
 
-Precedence is **2 > 1 > 0**: `pipeline.overall_exit_code` scans every stage outcome across every type and returns 2 if any outcome is in the failure set (`failed`, `partial`... — wait, see note below), else 1 if any is `needs_review`, else 0.
+Precedence is **2 > 1 > 0**: `pipeline.overall_exit_code` scans every stage outcome across every type and returns 2 if any outcome is in the failure set (`failed`, `partial`, `conn_error`), else 1 if any is `needs_review`, else 0.
 
 Note the one subtlety: a loader exit of `1` (partial load) classifies as `partial`, which **is** counted among the exit-2 statuses in `overall_exit_code` — so a partial load on any type escalates the whole run's exit code to 2, even though that type's own stage exit was 1. This is intentional: a partial load is a real operational anomaly (some rows may be missing from SQL Server), not merely "needs human review of a mapping file," so it's treated with the same urgency as a hard failure at the orchestrator level.
 
