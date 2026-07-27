@@ -52,6 +52,8 @@ nav:
       - Downloader: guides/downloader.md
       - Schema Drift: guides/schema-drift.md
       - Normalize: guides/normalize.md
+      - Loader: guides/loader.md
+      - Orchestrator: guides/orchestrator.md
   - Cookbook: cookbook.md
   - Architecture: architecture.md
   - Reference:
