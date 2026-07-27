@@ -13,9 +13,10 @@ The promotion path in order: feature branch → PR into `dev` → `dev` passes C
 
 ## The CI gate
 
-Every pull request runs two jobs defined in `.github/workflows/ci.yml`:
+`.github/workflows/ci.yml` defines three jobs — `test`, `docs`, and `integration`. A pull request runs `test` and `integration`; `docs` only runs (and deploys) on a `push` to `main`, so it does not gate PRs.
 
 - **`test`** — unit tests across the Python version matrix (3.12, 3.13).
+- **`docs`** — builds and deploys the documentation site; gated on `push` to `refs/heads/main`, not on pull requests.
 - **`integration`** — end-to-end tests against a real SQL Server container (loader integration + pipeline e2e), on Python 3.13.
 
 Merging into `dev` or `main` is blocked until `integration` passes — it is configured as a **required status check** (see the one-time setup below for the exact command that wires this up).
