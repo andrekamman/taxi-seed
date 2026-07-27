@@ -141,7 +141,7 @@ Why the convention: the `ack_date` is the enforced pause-and-think. Its presence
 |---|---|---|
 | 0 | Success — files normalized or already present; or no `raw/<type>` directory found for this type (skipped, nothing to do) | Nothing, or mirror the raw data first if that was unexpected |
 | 1 | Mapping incomplete; unresolved items reported and mapping amended | Edit the mapping YAML, re-run |
-| 2 | Configuration error (mapping failed to load, target file not found, or bootstrap/amend analysis error) | Fix the reported issue |
+| 2 | Configuration error (mapping failed to load, target file not found, or first-run bootstrap analysis error) | Fix the reported issue |
 | 3 | First run; scaffold generated | Review the scaffold, edit, re-run |
 
 A missing `raw/<type>` directory is **not** a configuration error — it's treated as "nothing to normalize yet" and prints `<type>: no raw files at <raw_dir>, skipping`, exiting 0 for that type.
