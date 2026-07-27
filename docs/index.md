@@ -9,7 +9,8 @@ heuristics with data-verified rename detection, a normalizer that halts on any
 data loss unless the operator explicitly acknowledges the drift, a loader that
 lands normalized parquet into a target database, and an orchestrator that
 drives the download → analyze → normalize → load pipeline end-to-end. A
-full-history mirror is roughly 40 GB of parquet and takes 6–10 hours to
+full-history mirror is roughly 40–100 GB of parquet (depending on how many of
+the four series and how much history you mirror) and takes 6–10 hours to
 download end-to-end on residential broadband, so the pipeline is designed to
 be resumable, incremental, and cheap to re-run on a schedule rather than
 something you kick off once and hope survives. The project is MIT-licensed.

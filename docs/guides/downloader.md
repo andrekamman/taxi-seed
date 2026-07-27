@@ -26,7 +26,7 @@ Disk sized to your intent — see [Disk sizing](#disk-sizing) below.
 | Full history green only     | ≈1.2 GB     | 5–10 min                      |
 | Full history fhv only       | ≈6 GB       | 30–60 min                     |
 | Full history fhvhv only     | ≈37 GB      | 2–4 hours                     |
-| **Full history (all four)** | **≈75 GB**  | **6–10 hours**                |
+| **Full history (all four)** | **≈40–100 GB** | **6–10 hours**              |
 
 TLC adds roughly 2 GB/month across all types (mostly FHVHV). Plan capacity accordingly if you're building a long-lived mirror.
 
@@ -41,7 +41,7 @@ Run at the repo root. This exposes the `taxi-download` console script (defined i
 ## Basic usage
 
 ```bash
-# Full history, all four types (~75 GB, 6–10 hours)
+# Full history, all four types (~40–100 GB, 6–10 hours)
 uv run taxi-download
 
 # Full history, one type only
@@ -84,7 +84,7 @@ The tool is idempotent: files already present under `<data-dir>/raw/` are skippe
 
 **Native Windows / Git Bash / PowerShell.** Install Python and [uv](https://docs.astral.sh/uv/), then run the commands above exactly as documented. No extra config needed for small pulls.
 
-**WSL2 — the VHDX growth problem.** WSL2 stores your Linux filesystem in a VHDX file on your Windows `C:` drive. Every byte written under the WSL2 root (including `~`, `/home`, `/tmp`, `/opt`) goes into this VHDX file. Full-history TLC data is 100+ GB. The catch: **the VHDX does not shrink when you delete files.** If you download 75 GB into WSL, then `rm -rf` it, your `C:` drive is still 75 GB smaller until you manually compact the VHDX with `wsl --shutdown` + `diskpart`, or `Optimize-VHD` in an elevated PowerShell.
+**WSL2 — the VHDX growth problem.** WSL2 stores your Linux filesystem in a VHDX file on your Windows `C:` drive. Every byte written under the WSL2 root (including `~`, `/home`, `/tmp`, `/opt`) goes into this VHDX file. A full-history TLC mirror is roughly 40–100 GB, depending on how many of the four series and how much history you mirror. The catch: **the VHDX does not shrink when you delete files.** If you download that much data into WSL, then `rm -rf` it, your `C:` drive stays exactly as full until you manually compact the VHDX with `wsl --shutdown` + `diskpart`, or `Optimize-VHD` in an elevated PowerShell.
 
 **The fix: point downloads at a Windows path from inside WSL.** Use `--data-dir` to redirect the output root — files land under `<data-dir>/raw`, so anything under `/mnt/c/...` writes directly to the Windows filesystem, bypassing the VHDX entirely:
 

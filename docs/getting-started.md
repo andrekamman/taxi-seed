@@ -40,7 +40,7 @@ Expected output:
 ```text
 ........................................................................ [ 86%]
 ...........                                                              [100%]
-83 passed in 0.94s
+N passed in <n>.<nn>s
 ```
 
 The exact test count grows as the suite grows; what matters is that there are no failures. The first invocation of `uv run` also builds the virtualenv (`.venv/`), so expect a one-time delay of 5–20 seconds while wheels are resolved and installed. Subsequent invocations reuse the cached environment.

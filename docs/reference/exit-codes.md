@@ -19,7 +19,7 @@ There is no exit `1` and no `130`-on-Ctrl-C special case documented for this too
 
 CloudFront responds to requests in several distinguishable ways:
 
-- **Existing file** — HTTP 200/206 with a body that begins with the parquet magic bytes `PAR1`.
+- **Existing file** — HTTP 200 with a body that begins with the parquet magic bytes `PAR1`.
 - **Not yet published** — HTTP 403 with an S3-style `AccessDenied` XML body (or a 404).
 - **WAF / rate-limit block** — HTTP 403 with an HTML "The request could not be satisfied" page, or a direct HTTP 429 / 503.
 
@@ -31,8 +31,10 @@ On a rate-limit classification, `taxi-download` backs off and retries; if every 
 |---|---|---|
 | 0 | Success — all specified data types normalized (or all outputs were already present and skipped). | None. |
 | 1 | Mapping incomplete — one or more unresolved items reported. The mapping YAML has been amended in place with new SUGGESTED/TODO entries for every unresolved column. | Review the amended `normalize/mappings/<type>.yaml`, uncomment the SUGGESTED lines you accept, fill in `ack_date:` on TODO blocks, re-run. |
-| 2 | Configuration error — missing raw data directory, malformed mapping YAML, or `target:` file not found under `raw/<type>/`. | Fix the reported issue: check the raw-data path, validate the YAML, or bump `target:` to a file that actually exists. |
+| 2 | Configuration error — mapping failed to load (malformed YAML), `target:` file not found under `raw/<type>/`, or a first-run bootstrap analysis error. | Fix the reported issue: validate the YAML, bump `target:` to a file that actually exists, or check the raw-data path. |
 | 3 | First run — no mapping YAML existed for this type. A scaffold has been generated at `normalize/mappings/<type>.yaml` from the raw data. | Review the scaffold, uncomment SUGGESTED renames you accept, fill in `ack_date:` for TODOs, re-run. |
+
+A missing `raw/<type>/` directory is **not** a configuration error — it's treated as "nothing to normalize yet," prints `<type>: no raw files at <raw_dir>, skipping`, and exits **0** for that type.
 
 ### Multi-type aggregation
 

@@ -38,7 +38,7 @@ uv run taxi-download yellow --recent 3
 
 Downloads ~200 MB in 1–2 minutes on residential broadband. This Quick Start only exercises the downloader. All tools live in one `uv sync`-managed environment; the [Getting Started tutorial](https://andrekamman.github.io/taxi-seed/getting-started/) walks the full end-to-end path from clone to normalized parquet.
 
-A full-history mirror is roughly 40 GB and takes 6–10 hours end-to-end; the downloader is designed to be resumable, incremental, and cheap to re-run on a schedule rather than something you kick off once and hope survives.
+A full-history mirror is roughly 40–100 GB (depending on how many of the four series and how much history you mirror) and takes 6–10 hours end-to-end; the downloader is designed to be resumable, incremental, and cheap to re-run on a schedule rather than something you kick off once and hope survives.
 
 ## Requirements
 

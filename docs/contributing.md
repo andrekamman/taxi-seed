@@ -27,7 +27,7 @@ Both extras are optional at runtime; the tools themselves (`taxi-download`, `sch
 
 ## Running the test suite
 
-The unit-test portion of the suite (everything outside `tests/integration/` and `tests/e2e/`) runs in about a second on a modern laptop — there is no reason to skip it:
+The unit-test portion of the suite (everything except `tests/taxi_loader/test_load_integration.py` and `tests/e2e/`, both of which need a real SQL Server container) runs in about a second on a modern laptop — there is no reason to skip it:
 
 ```bash
 # Unit suite (hermetic, no external services)
@@ -120,7 +120,7 @@ There is no enforced formatter today — the conventions below are informal but 
 
 - **Python** — `from __future__ import annotations` at the top of every module; explicit exit-code semantics on every CLI; error-first paths (validate all inputs → err out on any problem → then do work); `ack_date` and other ISO-8601 dates are always strings, never numeric.
 - **Bash** (`scripts/`, e.g. `scripts/e2e-smoke.sh`) — `set -euo pipefail` where feasible; no `#!/bin/sh` shebangs (scripts use bash 4+ features like arrays and `[[ ]]`).
-- **SQL** — single-quoted string literals; DuckDB dialect is the default, with occasional SQL Server dialect in `taxi_shared/` (the load-tester side of the tree).
+- **SQL** — single-quoted string literals; DuckDB dialect is the default, with occasional SQL Server dialect in `taxi_shared/` (the SQL Server / loader side of the tree).
 - **Formatting** — no `ruff`, no `black`, no `isort` in CI today. PRs that add one (with a matching CI check) are welcome; please raise an issue first so we can agree on config.
 - **Typing** — Python code uses standard `typing` / `collections.abc` annotations on public function signatures, with `from __future__ import annotations` making everything a string at runtime. There is no `mypy` gate in CI; annotations are treated as documentation, not enforcement.
 - **Logging / output** — CLIs write structured, human-readable status lines to stdout and errors to stderr. Exit codes carry the machine-readable signal; do not encode failure state in stdout formatting.
@@ -129,7 +129,7 @@ There is no enforced formatter today — the conventions below are informal but 
 ## Where design decisions live
 
 - [`docs/superpowers/specs/`](superpowers/specs/2026-07-19-monorepo-restructure-design.md) — one design spec per major sub-project. Answers "why is this shaped this way?". Current specs:
-    - [Monorepo restructure](superpowers/specs/2026-07-19-monorepo-restructure-design.md) — why the four tools live in one repo with shared tooling instead of four separate repos.
+    - [Monorepo restructure](superpowers/specs/2026-07-19-monorepo-restructure-design.md) — why the five tools live in one repo with shared tooling instead of five separate repos.
     - [Normalizer](superpowers/specs/2026-07-21-normalizer-design.md) — the "data loss is a first-class error" contract, the mapping YAML shape, and the `ack_date` acknowledgment protocol.
     - [Documentation site](superpowers/specs/2026-07-22-documentation-design.md) — how the site is structured, what belongs in guides vs cookbook vs reference, and the strict-build convention.
     - SQL load testing (legacy) — the design for this has moved with the tool to the separate `taxi-lab` repo.
