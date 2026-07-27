@@ -8,7 +8,7 @@
 
 **Tech Stack:** Python 3.12+, DuckDB, PyYAML, K6, xk6-sql, xk6-sql-driver-mssql
 
-**Spec:** `docs/superpowers/specs/2026-03-25-k6-sql-load-testing-design.md`
+**Spec:** `2026-03-25-k6-sql-load-testing-design.md` (sibling file in this handoff dir)
 
 ---
 

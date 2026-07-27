@@ -1,5 +1,5 @@
-site_name: taxi
-site_description: Downloader, schema-drift analyzer, and K6 SQL Server load tester for NYC TLC taxi trip data
+site_name: taxi-seed
+site_description: Downloader, schema-drift analyzer, normalizer, SQL Server loader, and orchestrator for NYC TLC taxi trip data
 site_url: https://andrekamman.github.io/taxi-seed/
 repo_url: https://github.com/andrekamman/taxi-seed
 repo_name: andrekamman/taxi-seed
@@ -64,6 +64,10 @@ nav:
   - Design Specs:
       - Monorepo restructure: superpowers/specs/2026-07-19-monorepo-restructure-design.md
       - Normalizer: superpowers/specs/2026-07-21-normalizer-design.md
-      - K6 SQL load testing: superpowers/specs/2026-03-25-k6-sql-load-testing-design.md
       - Documentation site: superpowers/specs/2026-07-22-documentation-design.md
+      - SQL loader: superpowers/specs/2026-07-22-sql-loader-design.md
+      - Orchestrator: superpowers/specs/2026-07-23-orchestrator-design.md
+      - Python downloader: superpowers/specs/2026-07-26-python-downloader-design.md
+      - Configurable data dir: superpowers/specs/2026-07-26-configurable-data-dir-design.md
+      - Documentation sync: superpowers/specs/2026-07-26-documentation-sync-design.md
   - Contributing: contributing.md
