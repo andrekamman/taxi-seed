@@ -1,5 +1,7 @@
 # Normalizer Design
 
+> *Historical design record (as of 2026-07-21); the K6 load tester was later moved to the separate `taxi-lab` repo, and the repo was renamed `taxi` → `taxi-seed`. This document is preserved as-is and does not reflect the current codebase.*
+
 **Date:** 2026-07-21
 **Status:** Implemented; amended 2026-07-22 to collapse the CLI to a single command with implicit bootstrap + amend semantics.
 **Sub-project of:** the four-part expansion (normalizer, SQL Server loader, orchestrator, CI/CD)

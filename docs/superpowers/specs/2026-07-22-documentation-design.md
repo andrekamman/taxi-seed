@@ -1,5 +1,7 @@
 # Documentation Design
 
+> *Historical design record (as of 2026-07-22); the K6 load tester was later moved to the separate `taxi-lab` repo, and the repo was renamed `taxi` → `taxi-seed`. This document is preserved as-is and does not reflect the current codebase.*
+
 **Date:** 2026-07-22
 **Status:** Approved, ready for implementation planning
 **Sub-project of:** the four-part expansion (this doubles as sub-project #4 "CI testing pipeline" — the docs-build CI workflow uses the same GitHub Actions setup that tests will).
