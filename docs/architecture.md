@@ -1,6 +1,6 @@
 # Architecture
 
-The taxi-seed repo is a monorepo of five small tools plus a shared library. Together they form a pipeline — **download → analyze → normalize → load** — that turns the NYC TLC's public trip parquet files into rows in a SQL Server database. Individually, each tool is usable on its own: the downloader is a resumable HTTP mirror, schema-drift is a generic parquet-family analyzer, normalize rewrites parquet against a target schema, the loader bulk-loads normalized parquet into SQL Server via DuckDB, and the orchestrator chains the other stages together as one command.
+The taxi-seed repo is a monorepo of five small tools plus a shared library. Together they form a pipeline — **download → normalize → load** — that turns the NYC TLC's public trip parquet files into rows in a SQL Server database. Individually, each tool is usable on its own: the downloader is a resumable HTTP mirror, schema-drift is a generic parquet-family analyzer, normalize rewrites parquet against a target schema, the loader bulk-loads normalized parquet into SQL Server via DuckDB, and the orchestrator chains the other stages together as one command.
 
 The tools share conventions rather than code paths: parquet everywhere, DuckDB for introspection, explicit per-file atomicity for writes, and a human-in-the-loop policy for any decision that could silently lose data. The rest of this page walks through the repo layout, the pipeline DAG, and the design principles that recur across the tools. If you're new to the project, the pipeline DAG below is the fastest way to orient — everything else is elaboration on how each stage behaves and why it was built the way it was.
 
@@ -96,7 +96,7 @@ Each stage writes its output to disk; the next stage reads from disk. There is n
 **Independence.** No tool requires any of the others upstream:
 
 - Use only the **downloader** if all you need is a resumable local mirror of TLC data.
-- Use only **schema-drift** against any parquet family that follows a `_YYYY-MM.parquet` naming convention — the tool doesn't know or care that the files came from TLC.
+- Use only **schema-drift** against any parquet family that follows a `_tripdata_YYYY-MM.parquet` naming convention — the tool doesn't know or care that the files came from TLC.
 - Use only **normalize** if you have parquet from somewhere else and want to consolidate it to a target schema. The mapping YAML format is generic.
 - Use only the **loader** if you already have normalized parquet from somewhere else and just want it in SQL Server — it doesn't know or care how `raw-normalized/` was produced.
 
@@ -106,7 +106,7 @@ The pipeline shape is a strong suggestion, not a contract. `taxi-run` exists for
 
 - Parquet is the interchange format. CSV, JSON, and native SQL Server tables show up only at the ends of the pipeline.
 - DuckDB is the introspection engine. Every stage that needs to understand the shape of a parquet file reads its footer through DuckDB rather than hand-rolling parquet parsing.
-- File naming follows `<type>_YYYY-MM.parquet`. schema-drift and normalize both assume this convention when grouping files into a "family" and ordering them chronologically.
+- File naming follows `<type>_tripdata_YYYY-MM.parquet`. schema-drift and normalize both assume this convention when grouping files into a "family" and ordering them chronologically.
 - Configuration is YAML for anything a human edits (mapping files) and command-line flags for anything an operator sets per-run. There are no `.env` files or hidden state directories; the loader's password is the one deliberate exception, and it comes only from the `MSSQL_PASSWORD` environment variable, never a flag.
 
 ## Core design principles
@@ -133,7 +133,7 @@ The bootstrap+amend workflow referenced above is worth a brief note because seve
 
 ### Per-file atomicity
 
-Both the normalizer and the downloader write to a temp path and atomically rename to the final path via `os.replace` only after the write succeeds. Interrupted runs leave no half-written files. When either tool checks whether an existing file is "already done", it validates the PAR1 head-and-tail bytes rather than just checking that the path exists — a zero-byte or truncated file will not pass the check and will be re-downloaded or re-normalized on the next run.
+Both the normalizer and the downloader write to a temp path and atomically rename to the final path via `os.replace` only after the write succeeds. Interrupted runs leave no half-written files. When either tool checks whether an existing file is "already done" and can be skipped, that check is a plain presence check (`dest.exists()` for the downloader, `out_path.exists()` for the normalizer) — but every freshly downloaded file *is* validated against the PAR1 parquet magic bytes before being accepted, so a zero-byte or truncated download is caught and re-fetched rather than silently left on disk to be skipped later.
 
 The combination survives Ctrl-C, network drops, and disk-full events without state corruption. There are no lock files, no journal, no separate manifest to keep in sync for these two stages — the filesystem itself is the state store. This matters most for long-running downloader jobs, where a mid-file crash is inevitable at some point over 15 years of data, and for normalize runs against thousands of parquet files, where any per-file bookkeeping would become its own reliability problem. (The loader is the one stage that *does* keep a manifest — see the [loader guide](guides/loader.md#idempotent-reconcile-skip-append-truncate-reload) — because "already loaded into SQL Server" isn't something a filesystem check alone can answer.)
 

@@ -8,7 +8,7 @@ that looks like a scraper), a schema-drift analyzer that combines column-name
 heuristics with data-verified rename detection, a normalizer that halts on any
 data loss unless the operator explicitly acknowledges the drift, a loader that
 lands normalized parquet into a target database, and an orchestrator that
-drives the download → analyze → normalize → load pipeline end-to-end. A
+drives the download → normalize → load pipeline end-to-end. A
 full-history mirror is roughly 40–100 GB of parquet (depending on how many of
 the four series and how much history you mirror) and takes 6–10 hours to
 download end-to-end on residential broadband, so the pipeline is designed to
@@ -25,8 +25,8 @@ the other tools are original to this repo. See
   `403 AccessDenied` responses (a missing object, retry is pointless) from HTML
   block pages served by AWS WAF (a transient rate limit, retry is mandatory),
   which is the single most common failure mode when scraping the TLC bucket at
-  any real volume. When a block is detected the downloader walks a 5 → 15 → 60
-  minute exponential backoff ladder to ride out the WAF window without
+  any real volume. When a block is detected the downloader walks a 30s → 90s → 270s
+  exponential backoff ladder (capped at 3600s) to ride out the WAF window without
   hammering the origin, and the incremental catch-up mode stops the moment a
   locally-existing file is encountered so scheduled runs stay cheap even once
   the mirror is warm. The net effect is that a nightly cron survives WAF
@@ -36,15 +36,16 @@ the other tools are original to this repo. See
   something to paper over. That means silent data loss on lossy `DOUBLE →
   BIGINT` casts, dropped payment-type columns, or a vendor quietly renaming
   `pickup_datetime` to `tpep_pickup_datetime` all halt the run instead of
-  producing plausible-looking-but-wrong output. `ack_date` is the only
-  required field in the mapping YAML, and bootstrap + amend semantics mean
+  producing plausible-looking-but-wrong output. `target` is the only other
+  required top-level key in the mapping YAML besides `ack_date` (required
+  within each lossy-cast/data-loss entry), and bootstrap + amend semantics mean
   scheduled runs auto-detect newly-introduced drift and append review items
   to the mapping instead of dropping the affected columns; the drift analyzer
   uses DuckDB for parquet introspection so you can trust its verdict on
   columns that changed shape mid-file.
 - **Loader + orchestrator for the full pipeline** — the loader lands
   normalized parquet into a target database, and the orchestrator drives
-  download → analyze → normalize → load as a single scheduled run, so a
+  download → normalize → load as a single scheduled run, so a
   nightly cron can go from "check for new months" to "target database is
   up to date" without hand-wiring the individual tools together.
 
@@ -54,9 +55,9 @@ the other tools are original to this repo. See
 | ------------------ | -------------------------------------------------- | -------------------------------- | ---------------------------------------- |
 | Primary use case   | resumable mirror + normalize + load                | one-shot Postgres load           | ad-hoc SQL over remote parquet           |
 | Resumable download | yes; stop-on-local incremental catch-up            | one-shot `wget` loop             | no local mirror needed                   |
-| WAF-aware retry    | classifier + 5/15/60 min exponential backoff       | none — fails on WAF block page   | N/A (single HTTP range request per scan) |
+| WAF-aware retry    | classifier + 30s/90s/270s exponential backoff (capped 3600s) | none — fails on WAF block page   | N/A (single HTTP range request per scan) |
 | Schema handling    | drift analyzer + rename-verified mapping YAML      | fixed columns; breaks on drift   | trusts remote schema per query           |
-| Target database    | any (parquet-first) via loader                     | Postgres                         | DuckDB (in-process)                      |
+| Target database    | SQL Server (via DuckDB `mssql` extension)          | Postgres                         | DuckDB (in-process)                      |
 | Install effort     | `uv sync`                                          | Postgres + shell + Ruby + client | single `duckdb` binary                   |
 
 ## Quick start

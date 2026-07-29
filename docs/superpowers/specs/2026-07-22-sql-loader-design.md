@@ -1,5 +1,7 @@
 # SQL Server Loader Design
 
+> *Historical design record (as of 2026-07-22); the K6 load tester was later moved to the separate `taxi-lab` repo, and the repo was renamed `taxi` → `taxi-seed`. This document is preserved as-is and does not reflect the current codebase.*
+
 **Date:** 2026-07-22
 **Status:** Implemented and merged to `main` (2026-07-23). Reconciled with the shipped
 implementation — passages that changed during the build are marked **[as-built]**.

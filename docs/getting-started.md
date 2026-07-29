@@ -164,7 +164,7 @@ Read the report top-to-bottom: each transition block corresponds to one month-to
 
 Rename detection uses a combination of positional overlap (adjacent-in-file-order), type compatibility, and name similarity — so `pickup_longitude -> PULocationID` is flagged high-confidence only when the surrounding columns line up in a way that makes accidental co-occurrence unlikely. On real historical data the yellow trips schema went through three major transitions (2015-07, 2016-07, and the 2016 payment-column split); running `schema-drift --types yellow` against a full mirror surfaces all three.
 
-The [Schema Drift guide](guides/schema-drift.md) covers the report format in detail and describes all three modes (report / mapping / diff).
+The [Schema Drift guide](guides/schema-drift.md) covers the report format in detail and describes all three modes (default taxi-aware, `--generic`, and `--verify-data`).
 
 ## 6. (Optional) Normalize
 

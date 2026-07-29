@@ -84,8 +84,8 @@ uv run taxi-run yellow --load   # error: MSSQL_PASSWORD environment variable is 
 
 | Code | Meaning |
 |---|---|
-| 0 | Every planned stage for every type completed cleanly (`ok`) — a genuinely clean run. |
-| 1 | No stage failed outright, but at least one type stopped at `needs_review` (normalize found unresolved mapping items). Nothing operationally broke; a human has follow-up work. |
+| 0 | Every planned stage for every type completed cleanly (`ok`) — a genuinely clean run — or `--dry-run` printed the per-type plan and exited without running anything. |
+| 1 | No stage failed outright, but at least one type stopped at `needs_review` — normalize returned 1 (unresolved mapping items) or 3 (first-run scaffold awaiting review) for that type. Nothing operationally broke; a human has follow-up work. |
 | 2 | At least one stage classified as `failed`, `partial`, or `conn_error` — download failed outright, normalize hit a real configuration error, the loader reported a partial load, or the loader hit a connection/config error or `TypeMappingError`. Also returned immediately for the `--download-only` + `--load` conflict or a missing `MSSQL_PASSWORD` when `--load` is set, before any stage runs. |
 
 Precedence is **2 > 1 > 0**: `pipeline.overall_exit_code` scans every stage outcome across every type and returns 2 if any outcome is in the failure set (`failed`, `partial`, `conn_error`), else 1 if any is `needs_review`, else 0.
