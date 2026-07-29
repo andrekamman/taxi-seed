@@ -4,9 +4,9 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Docs](https://img.shields.io/badge/docs-online-brightgreen)](https://andrekamman.github.io/taxi-seed/)
 
-`taxi-seed` is one repo, one Python package with five tools (plus a shared library) for working with the NYC Taxi & Limousine Commission (TLC) trip record data set: a WAF-aware CloudFront **downloader** (WAF = Web Application Firewall — the layer AWS uses to block traffic that looks like a scraper), a **schema-drift** analyzer, a **normalize** step that halts on any data loss unless the operator explicitly acknowledges the drift, a **loader** that lands normalized parquet into a target database, and an **orchestrator** that drives the whole download → analyze → normalize → load pipeline end-to-end. The project is MIT-licensed. The downloader was loosely based on [`toddwschneider/nyc-taxi-data`](https://github.com/toddwschneider/nyc-taxi-data); the other tools are original to this repo. See [Acknowledgments](#acknowledgments) for details.
+`taxi-seed` is one repo, one Python package with five tools (plus a shared library) for working with the NYC Taxi & Limousine Commission (TLC) trip record data set: a WAF-aware CloudFront **downloader** (WAF = Web Application Firewall — the layer AWS uses to block traffic that looks like a scraper), a **schema-drift** analyzer, a **normalize** step that halts on any data loss unless the operator explicitly acknowledges the drift, a **loader** that lands normalized parquet into a target database, and an **orchestrator** that drives the whole download → normalize → load pipeline end-to-end. The project is MIT-licensed. The downloader was loosely based on [`toddwschneider/nyc-taxi-data`](https://github.com/toddwschneider/nyc-taxi-data); the other tools are original to this repo. See [Acknowledgments](#acknowledgments) for details.
 
-- **WAF-aware CloudFront downloader** with a 5 / 15 / 60 minute exponential backoff ladder and stop-on-local incremental catch-up so nightly crons stay cheap once the mirror is warm.
+- **WAF-aware CloudFront downloader** with a 30s / 90s / 270s exponential backoff ladder (capped at 3600s) and stop-on-local incremental catch-up so nightly crons stay cheap once the mirror is warm.
 - **Normalizer that treats data loss as a first-class error** — missing columns, lossy casts, and silent renames halt the run; explicit `ack_date` acknowledgment is required before drift is written through.
 - **Loader + orchestrator** that land normalized parquet into a target database and drive the full pipeline end-to-end on a schedule.
 
@@ -22,8 +22,8 @@ One repo, five tools plus a shared library:
 - [`schema-drift/`](schema-drift/) — Python CLI that reports column-name and column-shape drift across a mirror.
 - [`normalize/`](normalize/) — Python CLI that rewrites a mirror to a single target schema, refusing to lose data.
 - [`loader/`](loader/) — Python CLI that loads normalized parquet into a target database.
-- [`orchestrator/`](orchestrator/) — Python CLI that drives download → analyze → normalize → load as one pipeline.
-- [`shared/`](shared/) — common library code (parquet conventions, DuckDB helpers) used across the tools.
+- [`orchestrator/`](orchestrator/) — Python CLI that drives download → normalize → load as one pipeline.
+- [`shared/`](shared/) — common library code (`sql_generator.py` for `CREATE TABLE` DDL generation, `type_mapping.py` for DuckDB→SQL Server type mapping) used across the tools.
 
 Each component has a short `README.md` that points at the guide on the site; the guide is authoritative.
 

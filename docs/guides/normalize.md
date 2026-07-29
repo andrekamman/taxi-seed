@@ -4,7 +4,7 @@
 
 The operational model is a two-phase loop: you run the tool, and it either (a) writes normalized parquet successfully or (b) rewrites a per-type mapping file with new items for you to review. You edit the mapping, re-run, and repeat until everything is resolved. On the first run against a raw type that has no mapping yet, the tool auto-generates the scaffold from the actual raw data and exits without writing any parquet. On every subsequent run it validates the mapping against the current raw data and, if new schema drift has appeared since the last run, amends the mapping in place with new SUGGESTED/TODO entries.
 
-This bootstrap-and-amend semantics is what makes `normalize` safe to run on a schedule. A future orchestrator sub-project will invoke `normalize` on a cron — when TLC ships new drift (they do, roughly once a year), you'll wake up to a mapping-file diff to review in a pull request, not a silent failure and not a wholesale scaffold regeneration that clobbers your prior decisions.
+This bootstrap-and-amend semantics is what makes `normalize` safe to run on a schedule. The orchestrator (`taxi-run`) already invokes `normalize` as part of its pipeline and classifies its exit codes (0/1/3) accordingly — only scheduling `taxi-run` itself on a cron is still future work — so when TLC ships new drift (they do, roughly once a year), you'll wake up to a mapping-file diff to review in a pull request, not a silent failure and not a wholesale scaffold regeneration that clobbers your prior decisions.
 
 ## Prerequisites
 
@@ -105,7 +105,7 @@ Fires when the mapping exists but the planner finds unresolved items. Sequence:
 
 The critical property: **your semantic decisions survive**. A rename you accepted stays accepted. An `ack_date` you filled in stays filled in. What you lose are the free-form comments you wrote in the file body — because there's no way for the tool to associate a comment with the entry it describes across an edit. Put reasoning in the `reason:` field of an ack entry instead, or in the git commit message.
 
-Operational rationale: the (future) orchestrator sub-project will run `normalize` on a cron. When TLC ships new drift, amend semantics mean the human wakes up to a mapping-file diff to review — not a silent failure, not a scaffold regenerated from scratch.
+Operational rationale: the orchestrator (`taxi-run`) already runs `normalize` as part of its pipeline; only invoking it on a cron schedule is still future work. When TLC ships new drift, amend semantics mean the human wakes up to a mapping-file diff to review — not a silent failure, not a scaffold regenerated from scratch.
 
 ## The `ack_date` convention
 

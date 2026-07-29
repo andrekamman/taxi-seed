@@ -80,7 +80,7 @@ uv run taxi-load yellow --full-refresh
 
 ## The `--data-dir` and `--input-dir` flags
 
-**`--data-dir DIR`** — base directory; the loader reads `DIR/raw-normalized/<type>/<year>/*.parquet` (default: `.`, i.e. `./raw-normalized`).
+**`--data-dir DIR`** — base directory; the loader reads `DIR/raw-normalized/<type>/<year>/*.parquet` (default: unset — when `--input-dir` is also not given, falls back to bare `raw-normalized` in the current directory).
 
 **`--input-dir DIR`** — overrides `--data-dir` entirely: the loader reads `DIR/<type>/<year>/*.parquet` directly. Use this when your normalized output doesn't live under a `raw-normalized/` subdirectory.
 
@@ -101,7 +101,7 @@ If a type has no parquet at all under the resolved input directory, that type is
 | `--database` | `taxi` | Target database name. Created automatically if it doesn't exist (non-dry-run only). Must match `[A-Za-z_][A-Za-z0-9_]*`. |
 | `--schema` | `dbo` | Target schema. Created automatically if non-`dbo` and absent (non-dry-run only). Must match `[A-Za-z_][A-Za-z0-9_]*`. |
 | `--user` | `sa` | SQL Server login. |
-| `--data-dir` | `.` | Base dir; reads `<data-dir>/raw-normalized` unless `--input-dir` is given. |
+| `--data-dir` | *(unset)* | Base dir; reads `<data-dir>/raw-normalized` unless `--input-dir` is given; falls back to bare `raw-normalized` when neither flag is given. |
 | `--input-dir` | *(unset)* | Reads `<input-dir>/<type>/<year>/*.parquet` directly; overrides `--data-dir`. |
 | `--flush-rows` | `100000` | BCP commit batch size passed to the `mssql` extension's `COPY`. |
 | `--full-refresh` | off | Force truncate + reload of every year processed, ignoring the manifest. |

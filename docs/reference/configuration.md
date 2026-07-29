@@ -16,6 +16,7 @@ Emitted by `normalize <type>` on bootstrap (first run against a type with no map
 | `renames` | dict[str, str] | no | Map of `<old_name>: <new_name>`. Both must be strings. Applies when the historical column name is `<old_name>` and the target has `<new_name>`. |
 | `lossy_casts` | dict[str, LossyCastEntry] | no | Explicit acknowledgments for type casts that could lose data (range or precision). Keyed by the target column name. |
 | `acknowledged_data_loss` | dict[str, DataLossEntry] | no | Explicit acknowledgments for historical columns that have data but no place to land in the target schema (and no rename mapping). Keyed by the historical column name. |
+| `value_maps` | dict[str, dict] | no | Column value remapping, keyed by column name. Each entry is either a bare `{source_value: target_value}` map, or `{map: {...}, on_unmapped: "error"\|"null"}` (default policy `"error"`) to control behavior for values not present in the map. |
 
 Unknown top-level keys are rejected by the loader.
 
@@ -99,7 +100,7 @@ The loader is strict — anything outside the listed structure raises `MappingEr
 - Missing file → `Mapping file not found: {path}`.
 - Empty file → `Empty mapping file: {path}`.
 - YAML that parses to something other than a dict → `Mapping file must be a YAML mapping`.
-- Unknown top-level key → `Unknown top-level key: {key}` (only `target`, `renames`, `lossy_casts`, `acknowledged_data_loss` are allowed).
+- Unknown top-level key → `Unknown top-level key: {key}` (only `target`, `renames`, `lossy_casts`, `acknowledged_data_loss`, `value_maps` are allowed).
 - Missing `target:` → `Missing required field: target`.
 - `renames:` where a key or value is not a string → `Rename entry must be string->string, got {…}: {…}`.
 - `lossy_casts.<col>` that is not a dict → `lossy_casts.{col} must be a dict`.

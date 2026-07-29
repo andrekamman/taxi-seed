@@ -60,7 +60,6 @@ if [ "$code" != "0" ] && [ "$code" != "3" ]; then exit "$code"; fi
 |---|---|---|
 | 0 | Report generated to stdout (or to `--output <file>`). | None. |
 | 1 | `--data-dir <path>` does not exist. Message: `Error: Data directory '<path>' does not exist.` | Check the path. Default is `raw/` relative to CWD; pass `--data-dir` explicitly if your mirror lives elsewhere. |
-| 2 | Argument error (argparse default). Unknown flag, missing required value, invalid `--types` entry, etc. | Run with `--help` to see the flag list. |
 
 Schema-drift itself does not raise on missing columns, mismatched types, or ambiguous renames — those are reported *in* the output, not in the exit code. If you want a CI job that fails when new drift appears, diff the report against a checked-in baseline; the exit code alone will not signal it.
 
@@ -78,8 +77,8 @@ When multiple types are processed in one invocation (no positional `data_type`),
 
 | Code | Meaning | Suggested action |
 |---|---|---|
-| 0 | Every planned stage for every type completed cleanly — a genuinely clean run. | None. |
-| 1 | No stage failed outright, but at least one type stopped at `needs_review` (normalize found unresolved mapping items). | Resolve the mapping YAML for the flagged type(s) and re-run. |
+| 0 | Every planned stage for every type completed cleanly — a genuinely clean run — or `--dry-run` printed the per-type plan and exited without running anything. | None. |
+| 1 | No stage failed outright, but at least one type stopped at `needs_review` — normalize returned 1 (unresolved mapping items) or 3 (first-run scaffold awaiting review) for that type. | Resolve the mapping YAML for the flagged type(s) and re-run. |
 | 2 | At least one stage classified as `failed`, `partial`, or `conn_error` (download failed, normalize hit a real config error, or the loader reported a partial load / connection-config error / `TypeMappingError`). Also returned immediately for `--download-only` combined with `--load`, or for a missing `MSSQL_PASSWORD` when `--load` is set — before any stage runs. | Check the per-type summary printed at the end of the run; fix the failing stage and re-run. |
 
 Precedence is **2 > 1 > 0**: `pipeline.overall_exit_code` returns 2 if any stage outcome is in the failure set (`failed`, `partial`, `conn_error`), else 1 if any is `needs_review`, else 0. Note that a loader exit of `1` (partial load) classifies as `partial`, which **is** counted among the exit-2 statuses at the orchestrator level — so a partial load on any type escalates the whole run's exit code to 2, even though that type's own stage exit was 1. See [Orchestrator → Exit codes](../guides/orchestrator.md#exit-codes) for the full writeup.
@@ -89,7 +88,7 @@ Precedence is **2 > 1 > 0**: `pipeline.overall_exit_code` returns 2 if any stage
 | Code | Meaning | Suggested action |
 |---|---|---|
 | 0 | Every requested type curated cleanly, or was skipped because `<raw-dir>/<type>` doesn't exist (not an error). | None. |
-| 2 | At least one type raised (no file matching the target name, a non-executable cast needing manual mapping, or unresolved items remaining after 8 rounds); argument errors also exit 2. | Read the stderr message for the blocking column/type and resolve it by hand in the mapping YAML. |
+| 2 | At least one type raised: a `FileNotFoundError` (no parquet files for that type, or the mapping's `target` file is missing) or a `RuntimeError` (a non-executable cast needing manual mapping, or unresolved items remaining after 8 curation rounds); argument errors also exit 2. | Read the stderr message for the blocking column/type and resolve it by hand in the mapping YAML. |
 
 Multiple types aggregate via `max()`, same as the other multi-type tools in this repo. See [Orchestrator → `taxi-curate-mappings`](../guides/orchestrator.md#taxi-curate-mappings) for the full writeup.
 
