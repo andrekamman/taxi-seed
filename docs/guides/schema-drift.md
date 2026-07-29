@@ -13,7 +13,7 @@ Two scenarios drive most usage:
 
 ## Prerequisites
 
-Install dependencies with `uv sync` in the `schema-drift/` directory.
+Install dependencies with `uv sync` in the repo root.
 
 You need a parquet family: either the [downloader](downloader.md)'s `raw/` mirror or any directory of parquet files whose names follow the convention `<type>_tripdata_YYYY-MM.parquet`. That pattern is required — the analyzer extracts the period from the filename to order the files and label the transitions.
 
@@ -132,7 +132,9 @@ For candidate pairs whose name similarity clears the threshold, the tool can com
 
 ### Confidence threshold
 
-The default cutoff is 0.6. Anything below that shows in the report as an unresolved add/remove pair — the tool didn't have enough evidence to call it a rename, and a human needs to decide. Anything at or above 0.6 is emitted as a SUGGESTED rename with its confidence percentage and, when applicable, a `✓ data verified` / `✗ data mismatch` marker.
+The cutoff depends on the mode. **Default (taxi) mode** scores renames by name similarity and applies a **0.7** cutoff; if the candidate pair's types don't match, the name-similarity score is first penalized ×0.7, so a type-mismatched pair needs a near-perfect name match to clear the bar. **`--generic` mode** has no name signal to fall back on — it scores renames purely by data similarity and cuts off at **0.6** instead.
+
+Anything below the relevant threshold shows in the report as an unresolved add/remove pair — the tool didn't have enough evidence to call it a rename, and a human needs to decide. Anything at or above the threshold is emitted as a SUGGESTED rename with its confidence percentage and, when applicable, a `✓ data verified` / `✗ data mismatch` marker.
 
 In practice, TLC renames tend to score in the 75–95% band. Anything lower is worth a manual look at the two candidate columns before you accept it as a rename in a `normalize` mapping.
 

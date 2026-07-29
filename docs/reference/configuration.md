@@ -107,143 +107,16 @@ The loader is strict — anything outside the listed structure raises `MappingEr
 
 The strictness is deliberate: silent tolerance of a mistyped field name would defeat the whole "explicit acknowledgment" model.
 
-## K6 load-test config YAML
+## Loader and orchestrator configuration
 
-**File path:** `k6-loadtest/config.yaml`. Typically copied from `k6-loadtest/config.sample.yaml` and edited.
-
-Consumed by `uv run k6-preprocess`, which validates the file, exports data, and writes a K6 test bundle to `k6-loadtest/output/`. Validation failures raise `ConfigError` and the tool exits `1`.
-
-### Top-level structure
-
-Three required top-level keys:
-
-- `data_sources:` — dict of `<name>: <SourceConfig>`. One entry per logical dataset (e.g. `yellow_trips`, `green_trips`).
-- `targets:` — dict of `<name>: <TargetConfig>`. One entry per SQL Server connection.
-- `scenarios:` — dict of `<name>: <ScenarioConfig>`. Each scenario ties one data source to one target and defines the K6 workload.
-
-Missing any of the three raises `Missing required section: <name>`.
-
-### Data source config (per source)
-
-Fields common to both modes:
-
-| Field | Type | Required | Description |
-|---|---|---|---|
-| `mode` | string | no | `parquet` (default) or `synthetic`. Anything else raises a `ConfigError`. |
-| `key_columns` | list[str] | **yes** | Columns used as primary key for UPDATE and DELETE statements. Every name listed here must exist as a key in `columns:`. |
-| `columns` | dict | **yes** | Column definitions. Shape differs per mode — see below. |
-
-Parquet-mode-only fields:
-
-| Field | Type | Required | Description |
-|---|---|---|---|
-| `path` | string (glob) | **yes** | Glob pattern like `raw/yellow/**/*.parquet`. Validated at preprocess time; if the glob matches zero files, preprocess raises `path {…} matches no files`. |
-| `chunk_size` | int | no | Rows per output JSON chunk. Larger chunks mean fewer bulk-insert round-trips at runtime but more RAM held by each VU's `SharedArray` slice. |
-| `max_rows` | int | no | Optional cap on rows loaded from parquet. Useful for reducing preprocess time on very large datasets. |
-
-Synthetic-mode-only fields:
-
-| Field | Type | Required | Description |
-|---|---|---|---|
-| `columns` | dict[str, ColumnSpec] | **yes** | Every column entry must be a dict with at least a `type:` key; missing `type` raises `synthetic column {…} must have a 'type' field`. |
-
-`ColumnSpec` fields (synthetic mode):
-
-| Field | Type | Required | Description |
-|---|---|---|---|
-| `type` | string | **yes** | One of `int`, `bigint`, `float`, `datetime`, `date`, `string`, `bool`. Maps to SQL Server types: `INT`, `BIGINT`, `FLOAT`, `DATETIME2`, `DATE`, `NVARCHAR(MAX)`, `BIT`. |
-| `min` | number or ISO-8601 string | no | Lower bound for random generation. For `datetime`/`date`, use quoted ISO-8601 strings. |
-| `max` | number or ISO-8601 string | no | Upper bound. Same shape as `min`. |
-
-In parquet mode, `columns` is a dict of `<canonical_name>: <parquet_column_name>` — a rename map from the source parquet's column name to the name used in the generated SQL.
-
-**Synthetic-mode example:**
-
-```yaml
-yellow_trips:
-  mode: synthetic
-  key_columns: [pickup_time, dropoff_time]
-  columns:
-    pickup_time:
-      type: datetime
-      min: "2026-01-01"
-      max: "2026-03-01"
-    passenger_count:
-      type: int
-      min: 1
-      max: 6
-```
-
-**Parquet-mode example:**
-
-```yaml
-green_trips:
-  mode: parquet
-  path: raw/green/2026/*.parquet
-  chunk_size: 5000
-  max_rows: 1000000
-  key_columns: [pickup_time, dropoff_time]
-  columns:
-    pickup_time: lpep_pickup_datetime
-    dropoff_time: lpep_dropoff_datetime
-    passenger_count: passenger_count
-```
-
-### Target config
-
-| Field | Type | Required | Description |
-|---|---|---|---|
-| `host` | string | **yes** | Hostname or IP address of the SQL Server. |
-| `port` | int | **yes** | Typically `1433`. |
-| `database` | string | **yes** | Target database name. Must already exist. |
-| `username` | string | **yes** | SQL Server login. |
-| `password` | string | **yes** | Password value or a `${VAR}` placeholder. The preprocessor preserves `${VAR}` verbatim in the generated manifest so K6 does the substitution at runtime — passwords never enter `test.js` or the generated manifest. |
-| `table` | string | **yes** | Target table name for INSERT/UPDATE/DELETE statements. |
-
-Missing any of these fields raises `Target {…}: missing required field {…}`.
-
-### Scenario config
-
-| Field | Type | Required | Description |
-|---|---|---|---|
-| `target` | string | **yes** | Name of an entry in the top-level `targets:` dict. Reference is validated. |
-| `data_source` | string | **yes** | Name of an entry in the top-level `data_sources:` dict. Reference is validated. |
-| `ordering` | string | no | `parallel` (default) or `sequential`. Controls whether insert/update/delete phases run interleaved or in order. |
-| `workload` | dict[str, int] | **yes** | Percentages for `insert`, `update`, `delete`. **Must sum to exactly 100** or preprocess raises `workload percentages must sum to 100, got {N}`. |
-| `think_time` | dict | no | Bounds for random per-iteration sleep. Keys: `min:`, `max:`. Values are duration strings like `200ms` or `1.5s` — the parser rejects anything else. |
-| `k6` | dict | **yes** | K6 executor configuration passed through verbatim to the generated `test.js`. Fields depend on executor; commonly `executor:` (`ramping-vus`, `constant-vus`, `shared-iterations`, etc.), `startVUs:`, `stages:` (list of `{duration, target}`), or `duration:`. |
-
-**Scenario example:**
-
-```yaml
-cdc_stress_test:
-  target: local_server
-  data_source: yellow_trips
-  ordering: parallel
-  workload:
-    insert: 80
-    update: 15
-    delete: 5
-  think_time:
-    min: 200ms
-    max: 1s
-  k6:
-    executor: ramping-vus
-    startVUs: 2
-    stages:
-      - duration: 1m
-        target: 20
-      - duration: 5m
-        target: 20
-      - duration: 1m
-        target: 0
-```
+There is no YAML config file for the loader or the orchestrator — `taxi-load` and `taxi-run` are configured entirely through CLI flags (`--host`, `--port`, `--database`, `--schema`, `--user`, `--data-dir`/`--input-dir`, `--flush-rows`, `--full-refresh`, `--dry-run`, and, for `taxi-run`, `--recent`, `--skip-download`, `--download-only`, `--load`, `--sample`) plus one required environment variable, `MSSQL_PASSWORD`, whenever a load is involved. See [Loader](../guides/loader.md) and [Orchestrator](../guides/orchestrator.md) for the full flag reference.
 
 ## Environment variables
 
 | Variable | Used by | Description |
 |---|---|---|
-| `OUTPUT_DIR` | downloader | Overrides the default `raw/` output directory. Absolute or relative to CWD. Common WSL usage: `OUTPUT_DIR=/mnt/c/Users/$USER/taxi-data` to write to the Windows filesystem instead of the WSL2 VHDX. |
-| `MSSQL_PASSWORD` | K6 `test.js` (via `${MSSQL_PASSWORD}` in the sample `password:` value) | SQL Server password. The variable name is a convention — any `${VAR}` placeholder in the target's `password:` field is preserved through preprocess and expanded by K6 at runtime, so you can name it anything. |
-| `HTTPS_PROXY` / `HTTP_PROXY` | curl (downloader), uv, gh | Standard HTTP proxy env vars. The downloader honors them implicitly via curl. |
-| `NO_PROXY` | curl (downloader), uv, gh | Standard bypass list. Include `localhost` if you run SQL Server locally and need it to bypass a corporate proxy. |
+| `MSSQL_PASSWORD` | `taxi-load` / `taxi-run` | SQL Server password. Required whenever a load happens: always for `taxi-load`, and for `taxi-run` only when `--load` is passed. There is no `--password` flag — this is deliberate so the password never appears in `ps` output or shell history via an argument. |
+| `HTTPS_PROXY` / `HTTP_PROXY` | httpx (downloader), uv, gh | Standard HTTP proxy env vars. The downloader honors them implicitly via httpx. |
+| `NO_PROXY` | httpx (downloader), uv, gh | Standard bypass list. Include `localhost` if you run SQL Server locally and need it to bypass a corporate proxy. |
+
+`--data-dir` is the shared "base directory" flag across the downloader, normalize, loader, and orchestrator — each tool resolves its own subdirectory beneath it (`<data-dir>/raw`, `<data-dir>/raw-normalized`, etc.). The loader also accepts `--input-dir` to point directly at a normalized-parquet directory, overriding the `--data-dir`-derived path.

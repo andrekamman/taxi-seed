@@ -1,6 +1,6 @@
 # Cookbook
 
-Scenario-oriented recipes that combine the four tools — downloader, schema-drift, normalize, and K6 load test — into end-to-end workflows. Each recipe is self-contained and copy-pasteable, aimed at data engineers running the stack in a real environment. Where a recipe overlaps with a per-tool guide, this page focuses on the glue between tools and the operational details (cron, proxies, dev bootstraps).
+Scenario-oriented recipes that combine the tools — downloader, schema-drift, normalize, and loader, orchestrated end-to-end by `taxi-run` — into real workflows. Each recipe is self-contained and copy-pasteable, aimed at data engineers running the stack in a real environment. Where a recipe overlaps with a per-tool guide, this page focuses on the glue between tools and the operational details (cron, proxies, dev bootstraps).
 
 ## Nightly refresh via cron
 
@@ -8,24 +8,29 @@ Scenario-oriented recipes that combine the four tools — downloader, schema-dri
 
 **Recipe** — a shell script plus a scheduler entry.
 
-1. Create `/srv/taxi/bin/nightly-refresh.sh`:
+1. Create `/srv/taxi/bin/nightly-refresh.sh`. The orchestrator (`taxi-run`) already chains download → normalize per type and honors each stage's exit code, so the whole refresh is one command:
 
     ```bash
     #!/bin/bash
     set -euo pipefail
     cd /srv/taxi
 
-    # 1. Fetch any newly-published months (walker stops at first local file)
-    ./downloader/download_taxi_data.sh --recent 3 yellow
-    ./downloader/download_taxi_data.sh --recent 3 green
-    ./downloader/download_taxi_data.sh --recent 3 fhv
-    ./downloader/download_taxi_data.sh --recent 3 fhvhv
-
-    # 2. Normalize; auto-amends the mapping if new drift showed up
-    uv run normalize
+    # 1+2. Fetch any newly-published months (recent-mode stops at first local
+    # file) then normalize; auto-amends the mapping if new drift showed up.
+    # Exit 1 means at least one type needs a human to review a mapping amend.
+    uv run taxi-run --recent 3
 
     # 3. Snapshot schema-drift report for later diffing
     uv run schema-drift --output /var/log/taxi/drift-$(date +%Y%m%d).txt
+    ```
+
+    If you'd rather run each stage yourself instead of going through `taxi-run` (for finer-grained logging, say), the equivalent per-type chain is:
+
+    ```bash
+    for t in yellow green fhv fhvhv; do
+        uv run taxi-download --recent 3 "$t"
+        uv run normalize "$t"
+    done
     ```
 
 2. Wire it into cron (`crontab -e`):
@@ -71,7 +76,7 @@ Scenario-oriented recipes that combine the four tools — downloader, schema-dri
 **Notes:**
 
 - `--recent`'s stop-on-local semantic makes this fully idempotent — running it twice in the same day just skips everything.
-- If normalize amends the mapping (new drift detected), the script exits non-zero on that day. Consider paging on exit=1 vs. logging-only on exit=0.
+- `taxi-run` exits 0 for a clean run, 1 if any type's normalize amended its mapping and needs a human to review the new drift, or 2 for an operational failure (download failure, a real normalize config error). Consider paging on exit=2 vs. logging-only on exit=1 — see the [orchestrator guide's exit codes](guides/orchestrator.md#exit-codes). Note `set -euo pipefail` means the script stops at the `taxi-run` line on any non-zero exit, so the schema-drift snapshot won't run that day either; drop `-e` (or run schema-drift unconditionally with `|| true` before it) if you want the snapshot regardless.
 - `raw/` grows monotonically — plan capacity via the [Downloader guide's sizing table](guides/downloader.md#disk-sizing).
 - Prefer systemd timers over cron on modern hosts: `Persistent=true` catches up missed runs after downtime, and logs land in the journal automatically.
 
@@ -160,42 +165,44 @@ Scenario-oriented recipes that combine the four tools — downloader, schema-dri
 - ~30 GB of parquet queried in one DuckDB command takes seconds — parquet + DuckDB scale surprisingly well on a laptop with plenty of RAM.
 - If you're memory-bound, add `SET memory_limit='8GB'; SET threads=4;` before running — DuckDB will spill to disk rather than OOM.
 
-## Load-testing the normalizer's output
+## Loading the normalizer's output into SQL Server
 
-**Goal:** stress-test SQL Server with normalized parquet instead of raw — closer to your production data path.
+**Goal:** take `raw-normalized/` and get it into SQL Server as one table per type per year, re-runnable without re-loading data that's already there.
 
 **Recipe:**
 
-1. Edit `k6-loadtest/config.yaml` to point at `raw-normalized/`:
-
-    ```yaml
-    data_sources:
-      yellow_trips:
-        mode: parquet
-        path: raw-normalized/yellow/**/*.parquet
-        key_columns: [tpep_pickup_datetime]
-        max_rows: 500000
-    ```
-
-2. Preprocess parquet into K6 fixtures:
+1. Point the loader at a reachable SQL Server and set the password (there is no `--password` flag — it only ever comes from the environment):
 
     ```bash
-    uv run k6-preprocess --config k6-loadtest/config.yaml --output k6-loadtest/output/
+    export MSSQL_PASSWORD='YourStrong@Passw0rd'
     ```
 
-3. Apply DDL and run K6:
+2. See the plan before writing anything:
 
     ```bash
-    sqlcmd -S localhost -U sa -P "$MSSQL_PASSWORD" -i k6-loadtest/output/schema/yellow_trips.sql
-    MSSQL_PASSWORD='YourStrong@Passw0rd' ./k6-loadtest/k6 run k6-loadtest/output/test.js
+    uv run taxi-load yellow --dry-run
+    ```
+
+    This prints, per year, one of `skip`, `append month(s) NN, NN`, or `truncate + reload (N month file(s))` — see the [loader guide](guides/loader.md#idempotent-reconcile-skip-append-truncate-reload) for how that decision is made.
+
+3. Run it for real:
+
+    ```bash
+    uv run taxi-load yellow
+    ```
+
+    Omit the type to load all four (`yellow`, `green`, `fhv`, `fhvhv`) in turn:
+
+    ```bash
+    uv run taxi-load
     ```
 
 **Notes:**
 
-- Load-testing normalized data is more representative if your production pipeline normalizes before loading. If you load raw parquet directly and never normalize, load-test with `raw/` paths instead.
-- `max_rows: 500000` caps the fixture size; K6 will iterate through it. Set based on how long you want the test to run and your available VU-hours.
-- SQL Server bulk-insert throughput is often bounded by the client-side JSON parsing + network before the server itself. Watch `sql_query_duration` vs total `iteration_duration` to see where time goes.
-- If throughput plateaus, try lowering `vus` — SQL Server's lock contention on a single table can make more concurrency slower, not faster.
+- The loader reads `raw-normalized/<type>/<year>/*.parquet` by default; point it elsewhere with `--data-dir DIR` (reads `DIR/raw-normalized`) or `--input-dir DIR` (reads `DIR/<type>/<year>/*.parquet` directly, bypassing the `raw-normalized` assumption).
+- Re-running `taxi-load` after a fresh `normalize` pass is the common case, not a special one: new months on disk get **appended**; years where nothing changed are **skipped**; anything that looks inconsistent (a prior interrupted run, a row-count mismatch against the manifest) gets **truncated and reloaded** rather than silently left half-updated. Pass `--full-refresh` to force every year onto the reload path regardless of the manifest.
+- Table DDL is generated straight from the parquet schema via `taxi_shared`'s type mapper — there's no separate DDL file to hand-maintain or apply.
+- One command does download → normalize → load end to end: `uv run taxi-run yellow --load` (see the [orchestrator guide](guides/orchestrator.md)).
 
 ## Running behind a corporate proxy
 
@@ -214,8 +221,8 @@ Scenario-oriented recipes that combine the four tools — downloader, schema-dri
 2. Then everything just works:
 
     ```bash
-    # Downloader uses curl, honors HTTPS_PROXY
-    ./downloader/download_taxi_data.sh --recent 3 yellow
+    # Downloader uses httpx.Client, which honors HTTPS_PROXY/HTTP_PROXY via trust_env
+    uv run taxi-download --recent 3 yellow
 
     # uv also honors it
     uv sync --extra test
@@ -237,13 +244,13 @@ Scenario-oriented recipes that combine the four tools — downloader, schema-dri
 **Notes:**
 
 - If your proxy requires authentication: `http://user:pass@proxy.corp.internal:3128`. Prefer a keychain-backed helper over hardcoding.
-- Some corporate proxies MITM HTTPS with a self-signed CA. Point curl at the CA bundle via `CURL_CA_BUNDLE=/path/to/corp-ca.pem`; python via `SSL_CERT_FILE`; uv reads `UV_NATIVE_TLS=true` for OS trust store on Windows/macOS.
-- `NO_PROXY=localhost` matters if you're running SQL Server locally — you don't want K6 hitting the proxy for `localhost:1433`.
+- Some corporate proxies MITM HTTPS with a self-signed CA. Point Python (and therefore `taxi-download`'s `httpx` client) at the CA bundle via `SSL_CERT_FILE=/path/to/corp-ca.pem`; uv reads `UV_NATIVE_TLS=true` for OS trust store on Windows/macOS.
+- `NO_PROXY=localhost,127.0.0.1` is still worth setting even though `taxi-load`'s connection to SQL Server goes through DuckDB's `mssql` extension over the native TDS protocol, not HTTP, so it isn't itself proxy-aware — the exclusion matters for every *other* localhost-bound tool in the same shell (e.g. `sqlcmd`, a local dev server) that would otherwise try to route through the proxy and fail.
 - Docker's daemon has its own proxy configuration (`/etc/systemd/system/docker.service.d/http-proxy.conf`) — env vars in your shell don't affect image pulls.
 
 ## Populating a fresh dev SQL Server
 
-**Goal:** go from an empty Docker-hosted SQL Server to a populated `yellow_trips` table in ~30 minutes.
+**Goal:** go from an empty Docker-hosted SQL Server to a populated `taxi` database in well under 30 minutes.
 
 **Recipe:**
 
@@ -268,7 +275,7 @@ Scenario-oriented recipes that combine the four tools — downloader, schema-dri
 2. Fetch three months of yellow (small enough to complete in a couple of minutes):
 
     ```bash
-    ./downloader/download_taxi_data.sh --recent 3 yellow
+    uv run taxi-download --recent 3 yellow
     ```
 
 3. Normalize (first-run bootstrap + human ack pass omitted for brevity — on a stable-schema `--recent 3` window it's typically a no-op):
@@ -278,49 +285,34 @@ Scenario-oriented recipes that combine the four tools — downloader, schema-dri
     uv run normalize yellow    # 2nd run once mapping is fine
     ```
 
-4. Configure `k6-preprocess` to load normalized parquet as a one-shot bulk load. Edit `k6-loadtest/config.yaml`:
-
-    ```yaml
-    data_sources:
-      yellow_trips:
-        mode: parquet
-        path: raw-normalized/yellow/**/*.parquet
-        key_columns: [tpep_pickup_datetime]
-
-    targets:
-      - name: local
-        host: localhost
-        port: 1433
-        database: master
-        user: sa
-        password_env: MSSQL_PASSWORD
-
-    scenarios:
-      - name: bulk_load
-        data_source: yellow_trips
-        target: local
-        vus: 4
-        iterations: -1
-    ```
-
-5. Preprocess, apply DDL, run:
+4. Load into SQL Server. The loader creates the `taxi` database and `dbo` schema automatically, derives table DDL from the parquet, and writes one table per year (e.g. `yellow_2026`):
 
     ```bash
-    uv run k6-preprocess --config k6-loadtest/config.yaml --output k6-loadtest/output/
-    sqlcmd -S localhost -U sa -P 'YourStrong@Passw0rd' -i k6-loadtest/output/schema/yellow_trips.sql
-    MSSQL_PASSWORD='YourStrong@Passw0rd' ./k6-loadtest/k6 run k6-loadtest/output/test.js
+    export MSSQL_PASSWORD='YourStrong@Passw0rd'
+    uv run taxi-load yellow
     ```
 
-6. Verify the load:
+    Steps 2–4 collapse into a single command if you'd rather not run each stage by hand:
 
     ```bash
+    export MSSQL_PASSWORD='YourStrong@Passw0rd'
+    uv run taxi-run --recent 3 --load yellow
+    ```
+
+5. Verify the load:
+
+    ```bash
+    # Confirm the loader considers this year fully loaded (reports "skip")
+    uv run taxi-load yellow --dry-run
+
+    # Row count for a given year's table, e.g. 2026
     sqlcmd -S localhost -U sa -P 'YourStrong@Passw0rd' \
-      -Q "SELECT count(*) FROM master.dbo.yellow_trips;"
+      -Q "SELECT count(*) FROM taxi.dbo.yellow_2026;"
     ```
 
 **Notes:**
 
-- `iterations: -1` means "keep iterating until the fixture is exhausted"; with `vus: 4`, four connections load in parallel.
-- SQL Server's default `master` database is fine for a dev target. For anything real, `CREATE DATABASE taxi` and put the table there.
-- Total time is dominated by network to CloudFront (parquet download) then network to SQL Server (bulk insert). On a residential gigabit link, ~30 minutes for `--recent 3 yellow`.
-- If you're iterating on schema and want to reset without losing the container: `sqlcmd ... -Q "DROP TABLE yellow_trips;"` then re-apply the DDL — much faster than tearing down the volume.
+- The loader's defaults (`--host localhost`, `--port 1433`, `--database taxi`, `--schema dbo`, `--user sa`) match this docker-compose setup, so no flags are needed beyond `MSSQL_PASSWORD` for a local dev target.
+- Total time is dominated by network to CloudFront (parquet download); the SQL Server load itself is a bulk `COPY` via DuckDB's `mssql` extension and is fast even for a full year. On a residential gigabit link, `--recent 3 yellow` end to end is a few minutes, not 30.
+- Re-running `taxi-load yellow` after loading is a no-op (`skip`) unless new months landed on disk, in which case it appends just those months — see the [loader guide](guides/loader.md) for the full reconcile model.
+- If you're iterating on schema and want to reset a year without losing the container: `uv run taxi-load yellow --full-refresh` forces a drop-and-reload of every year processed, or drop the table by hand (`sqlcmd ... -Q "DROP TABLE yellow_2026;"`) and re-run `taxi-load`.

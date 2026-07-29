@@ -8,18 +8,17 @@ The commands below assume a POSIX shell (bash or zsh) and a working internet con
 
 - Python 3.12 or 3.13.
 - [uv](https://github.com/astral-sh/uv) installed.
-- curl (present on macOS and most Linux; on Windows install [Git for Windows](https://gitforwindows.org/) and run everything in Git Bash).
-- ~300 MB free disk (`--recent 3 yellow` is ~200 MB; venv + wheels are ~100 MB).
+- ~300 MB free disk (`yellow --recent 3` is ~200 MB; venv + wheels are ~100 MB).
 - Optional: [DuckDB CLI](https://duckdb.org/docs/installation/) for the "look at what you got" step (not required; you can do the same via `uv run python -c "..."`).
 
 !!! warning "WSL users"
-    If you're running on WSL2, your data will land on the Linux filesystem — which grows the WSL2 VHDX on your Windows C: drive and does NOT shrink when files are deleted. Point downloads at a Windows path with `OUTPUT_DIR=/mnt/c/Users/$USER/taxi-data` instead. See the [Downloader guide's WSL section](guides/downloader.md#windows-wsl) for full details.
+    If you're running on WSL2, your data will land on the Linux filesystem — which grows the WSL2 VHDX on your Windows C: drive and does NOT shrink when files are deleted. Point downloads at a Windows path with `uv run taxi-download --data-dir /mnt/c/Users/$USER/taxi-data yellow --recent 3` instead. See the [Downloader guide's WSL section](guides/downloader.md#windows-wsl) for full details.
 
 ## 1. Clone and install
 
 ```bash
 git clone https://github.com/andrekamman/taxi-seed.git
-cd taxi
+cd taxi-seed
 uv sync --extra test
 ```
 
@@ -41,7 +40,7 @@ Expected output:
 ```text
 ........................................................................ [ 86%]
 ...........                                                              [100%]
-83 passed in 0.94s
+N passed in <n>.<nn>s
 ```
 
 The exact test count grows as the suite grows; what matters is that there are no failures. The first invocation of `uv run` also builds the virtualenv (`.venv/`), so expect a one-time delay of 5–20 seconds while wheels are resolved and installed. Subsequent invocations reuse the cached environment.
@@ -49,45 +48,24 @@ The exact test count grows as the suite grows; what matters is that there are no
 ## 3. Download three recent months of yellow
 
 ```bash
-./downloader/download_taxi_data.sh --recent 3 yellow
+uv run taxi-download yellow --recent 3
 ```
 
 Expected output:
 
 ```text
-Checking for corrupt parquet files...
-  No corrupt files found
-
-NYC TLC Trip Data Downloader
-Generating URL list up to: 2026-06
-
-Downloading recent 3 months (yellow)...
-Will walk back through older not-yet-published months, and stop
-at the first locally-existing file (assumes prior runs are caught up).
-
---- yellow: looking for 3 recent months ---
-  Trying yellow_tripdata_2026-06.parquet...
-    Not published yet, trying older month
-  Trying yellow_tripdata_2026-05.parquet...
-    Saved to yellow/2026/yellow_tripdata_2026-05.parquet
-  Trying yellow_tripdata_2026-04.parquet...
-    Saved to yellow/2026/yellow_tripdata_2026-04.parquet
-  Trying yellow_tripdata_2026-03.parquet...
-    Saved to yellow/2026/yellow_tripdata_2026-03.parquet
-  Downloaded 3 new file(s) for yellow (walked back 4 month(s))
-
-Download complete!
-Files saved to: raw/<type>/<year>/
+yellow: downloaded 3, gave up on 0
+total downloaded: 3
 ```
 
-Here's what happened: the walker started at the previous month (2026-06 in this example), found it wasn't published yet, then walked backward and downloaded the three most recent published months. Total: ~200 MB in ~1–2 min on a typical connection.
+If a previous run left a corrupt partial file behind, you'll see an extra leading line: `cleaned 1 corrupt parquet file(s)` (the downloader deletes and re-fetches any local file that fails PAR1 validation). Here's what happened: the downloader walked backward from last month and downloaded the three most recent published months. Total: ~200 MB in ~1–2 min on a typical connection.
 
-The `--recent N` flag differs from `--from` / `--to`: it always anchors to "today minus one month" and walks backward until it either finds `N` new files or hits a locally-existing file (which signals it can stop, because prior runs already caught up to that point). That makes it the right flag for a nightly cron; use `--from YYYY-MM --to YYYY-MM` when you want an explicit window instead.
+`--recent N` (default 3) always anchors to "today minus one month" and walks backward until it either finds `N` new files or hits a locally-existing file (which signals it can stop, because prior runs already caught up to that point). That makes it the right flag for a nightly cron. Omit `--recent` for a full-history download instead. Use `--data-dir DIR` to change where files land (they're always written under `<DIR>/raw`; the default is `.`).
 
-The downloader also skips corrupt local files by silently overwriting them, and it validates each new download by opening it with a lightweight parquet reader before declaring it saved. The [Downloader guide](guides/downloader.md) covers the WAF classifier that distinguishes "not published yet" from "throttled" from "hard 4xx" — a distinction that matters when you're building automation on top.
+The downloader also skips corrupt local files by deleting and re-fetching them, and it validates each new download by checking the PAR1 parquet magic bytes before declaring it saved. The [Downloader guide](guides/downloader.md) covers the WAF classifier that distinguishes "not published yet" from "throttled" from "hard 4xx" — a distinction that matters when you're building automation on top.
 
 !!! warning "Windows / WSL disk usage"
-    On WSL2 the raw parquet lands on the Linux filesystem and permanently grows your WSL2 VHDX. See the [Downloader guide](guides/downloader.md#windows-wsl) for the `OUTPUT_DIR` workaround.
+    On WSL2 the raw parquet lands on the Linux filesystem and permanently grows your WSL2 VHDX. See the [Downloader guide](guides/downloader.md#windows-wsl) for the `--data-dir` workaround.
 
 ## 4. Look at what you got
 
@@ -236,7 +214,7 @@ find raw-normalized/yellow -name '*.parquet'
 
 Expected: three normalized files under `raw-normalized/yellow/2026/`.
 
-On this tiny recent sample the tool is essentially a passthrough — the target schema equals the raw schema, so files copy over unchanged. In production, `raw-normalized/` is the layer downstream tools should point at: the K6 load test reads from it, and the DuckDB `httpfs` recipes in the cookbook query it. Rerunning normalize is idempotent — files already present in `raw-normalized/` are skipped, so nightly cron jobs stay cheap.
+On this tiny recent sample the tool is essentially a passthrough — the target schema equals the raw schema, so files copy over unchanged. In production, `raw-normalized/` is the layer downstream tools should point at: the loader reads from it to populate a target database, and the DuckDB `httpfs` recipes in the cookbook query it. Rerunning normalize is idempotent — files already present in `raw-normalized/` are skipped, so nightly cron jobs stay cheap.
 
 The [Normalize guide](guides/normalize.md) walks through the real-world case where drift exists and the mapping is nontrivial (renames, type coercions, dropped columns, and the `ack_date:` gate).
 
@@ -246,4 +224,4 @@ The [Normalize guide](guides/normalize.md) walks through the real-world case whe
 - **[Schema Drift guide](guides/schema-drift.md)** — three modes, how rename detection works, programmatic API.
 - **[Normalize guide](guides/normalize.md)** — three-state model, bootstrap+amend semantics, two worked examples.
 - **[Cookbook](cookbook.md)** — nightly cron, DuckDB `httpfs`, corporate proxy, populating a fresh dev SQL Server.
-- **[Architecture](architecture.md)** — the four-tool DAG and the core design principles.
+- **[Architecture](architecture.md)** — the pipeline DAG and the core design principles.
