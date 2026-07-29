@@ -10,9 +10,13 @@
       
       
       
-        <link rel="canonical" href="https://andrekamman.github.io/taxi-seed/superpowers/notes/2026-07-22-mssql-extension-spike/">
+        <link rel="canonical" href="https://andrekamman.github.io/taxi-seed/superpowers/specs/2026-07-26-python-downloader-design/">
       
       
+        <link rel="prev" href="../2026-07-23-orchestrator-design/">
+      
+      
+        <link rel="next" href="../2026-07-26-configurable-data-dir-design/">
       
       
         
@@ -23,7 +27,7 @@
     
     
       
-        <title>mssql extension spike — findings - taxi-seed</title>
+        <title>Python downloader - taxi-seed</title>
       
     
     
@@ -74,7 +78,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#mssql-extension-spike-findings" class="md-skip">
+        <a href="#python-downloader-taxi_download-design-spec-2026-07-26" class="md-skip">
           Skip to content
         </a>
       
@@ -110,7 +114,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              mssql extension spike — findings
+              Python downloader
             
           </span>
         </div>
@@ -752,18 +756,20 @@
       
   
   
+    
   
   
+  
     
     
     
     
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" checked>
         
           
           <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="0">
@@ -784,7 +790,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="true">
           <label class="md-nav__title" for="__nav_8">
             <span class="md-nav__icon md-icon"></span>
             
@@ -802,7 +808,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../specs/2026-07-19-monorepo-restructure-design/" class="md-nav__link">
+      <a href="../2026-07-19-monorepo-restructure-design/" class="md-nav__link">
         
   
   
@@ -830,7 +836,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../specs/2026-07-21-normalizer-design/" class="md-nav__link">
+      <a href="../2026-07-21-normalizer-design/" class="md-nav__link">
         
   
   
@@ -858,7 +864,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../specs/2026-07-22-documentation-design/" class="md-nav__link">
+      <a href="../2026-07-22-documentation-design/" class="md-nav__link">
         
   
   
@@ -886,7 +892,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../specs/2026-07-22-sql-loader-design/" class="md-nav__link">
+      <a href="../2026-07-22-sql-loader-design/" class="md-nav__link">
         
   
   
@@ -914,7 +920,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../specs/2026-07-23-orchestrator-design/" class="md-nav__link">
+      <a href="../2026-07-23-orchestrator-design/" class="md-nav__link">
         
   
   
@@ -939,10 +945,37 @@
                 
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="../../specs/2026-07-26-python-downloader-design/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Python downloader
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   
@@ -958,6 +991,186 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#decisions-locked-from-brainstorming" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Decisions locked (from brainstorming)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#behavior-to-preserve-from-the-bash-script" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Behavior to preserve (from the bash script)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#design" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Design
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Design">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#package-structure-downloadersrctaxi_download" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Package structure (downloader/src/taxi_download/)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#constants-downloadpy-datespy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Constants (download.py / dates.py)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#core-functions-downloadpy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Core functions (download.py)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#cli-clipy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        CLI (cli.py)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#dropped-from-the-bash-version" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Dropped from the bash version
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#orchestrator-integration-orchestratorsrctaxi_orchestrate" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Orchestrator integration (orchestrator/src/taxi_orchestrate/)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#packaging-pyprojecttoml" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Packaging (pyproject.toml)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#removals" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Removals
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#testing-strategy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Testing strategy
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#out-of-scope-explicit" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Out of scope (explicit)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#notes-for-the-plan" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Notes for the plan
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -970,7 +1183,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../specs/2026-07-26-configurable-data-dir-design/" class="md-nav__link">
+      <a href="../2026-07-26-configurable-data-dir-design/" class="md-nav__link">
         
   
   
@@ -998,7 +1211,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../specs/2026-07-26-documentation-sync-design/" class="md-nav__link">
+      <a href="../2026-07-26-documentation-sync-design/" class="md-nav__link">
         
   
   
@@ -1080,22 +1293,88 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#confirmed-without-a-sql-server-community-repo-local-duckdb" class="md-nav__link">
+  <a href="#decisions-locked-from-brainstorming" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Confirmed WITHOUT a SQL Server (community repo + local DuckDB)
+        Decisions locked (from brainstorming)
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Confirmed WITHOUT a SQL Server (community repo + local DuckDB)">
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#behavior-to-preserve-from-the-bash-script" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Behavior to preserve (from the bash script)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#design" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Design
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Design">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#version-pin-caveat-surface-to-maintainer" class="md-nav__link">
+  <a href="#package-structure-downloadersrctaxi_download" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Version-pin caveat (surface to maintainer)
+        Package structure (downloader/src/taxi_download/)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#constants-downloadpy-datespy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Constants (download.py / dates.py)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#core-functions-downloadpy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Core functions (download.py)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#cli-clipy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        CLI (cli.py)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#dropped-from-the-bash-version" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Dropped from the bash version
       
     </span>
   </a>
@@ -1108,10 +1387,65 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#live-validation-complete-sql-server-2022-in-docker" class="md-nav__link">
+  <a href="#orchestrator-integration-orchestratorsrctaxi_orchestrate" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Live validation — COMPLETE (SQL Server 2022 in Docker)
+        Orchestrator integration (orchestrator/src/taxi_orchestrate/)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#packaging-pyprojecttoml" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Packaging (pyproject.toml)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#removals" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Removals
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#testing-strategy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Testing strategy
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#out-of-scope-explicit" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Out of scope (explicit)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#notes-for-the-plan" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Notes for the plan
       
     </span>
   </a>
@@ -1138,57 +1472,162 @@
   
 
 
-<h1 id="mssql-extension-spike-findings">mssql extension spike — findings</h1>
-<p><strong>Date:</strong> 2026-07-22
-<strong>Task:</strong> Task 1 of the SQL loader plan (<code>docs/superpowers/plans/2026-07-22-sql-loader.md</code>)
-<strong>Environment:</strong> macOS ARM64, DuckDB 1.4.4 (repo pin), <code>INSTALL mssql FROM community</code>.</p>
-<h2 id="confirmed-without-a-sql-server-community-repo-local-duckdb">Confirmed WITHOUT a SQL Server (community repo + local DuckDB)</h2>
+<h1 id="python-downloader-taxi_download-design-spec-2026-07-26">Python downloader (<code>taxi_download</code>) — design spec (2026-07-26)</h1>
+<p><strong>Goal:</strong> Replace the 488-line bash downloader (<code>downloader/download_taxi_data.sh</code>) with a Python
+package <code>taxi_download</code> that ships in the wheel and is driven by a <code>taxi-download</code> console script.
+This makes taxi-seed's download stage installable and runnable from a plain <code>pip install taxi-seed</code>
+(no repo checkout, no <code>bash</code>/<code>curl</code> shell-out), and easier to explain and maintain.</p>
+<p><strong>Piece 2 of 3</strong> (k6 removal ✅ → <strong>Python downloader</strong> → docs sweep). Ships as a PR into <code>dev</code>.</p>
+<hr />
+<h2 id="decisions-locked-from-brainstorming">Decisions locked (from brainstorming)</h2>
 <ul>
-<li><code>INSTALL mssql FROM community; LOAD mssql;</code> succeeds on DuckDB 1.4.4 — no external system dependency. ✅</li>
-<li><strong>Installed extension version reports as <code>7e57d24</code></strong> — a git short-SHA, <strong>not</strong> a semver.
-  The DuckDB community-extension registry versions this extension by commit hash. The spec's
-  nominated pin <code>v0.2.1</code> is therefore not a value <code>INSTALL … FROM community</code> can return.
-  → <code>EXPECTED_MSSQL_EXT_VERSION = "7e57d24"</code> (see <code>loader/src/taxi_loader/connection.py</code>).
-  Read via <code>SELECT extension_version FROM duckdb_extensions() WHERE extension_name='mssql'</code>.</li>
-<li>Functions present (<code>SELECT function_name FROM duckdb_functions() WHERE function_name LIKE 'mssql%'</code>):
-  <code>mssql_azure_auth_test, mssql_close, mssql_exec, mssql_open, mssql_ping, mssql_pool_stats,
-  mssql_preload_catalog, mssql_refresh_cache, mssql_scan, mssql_version</code>.
-  The plan uses <code>mssql_exec</code> (scalar; DDL/DML, returns affected rows) and <code>mssql_scan(catalog, query)</code>
-  (table; reads). Both present. ✅ No <code>mssql_query</code> — the plan correctly uses <code>mssql_scan</code>.</li>
+<li><strong>New runtime dependency: <code>httpx&gt;=0.27</code></strong> (deps become <code>duckdb</code>, <code>pyyaml</code>, <code>httpx</code>). Chosen for a
+  clean streaming/timeout/redirect API over hand-rolled <code>urllib</code>.</li>
+<li><strong>Clean reimplementation</strong>, not a 1:1 bash port: keep the essential domain behavior, drop the
+  bash-isms.</li>
+<li><strong>Package</strong> <code>downloader/src/taxi_download/</code> → console script <strong><code>taxi-download</code></strong>; added to the wheel
+  <code>packages</code> list. The orchestrator invokes it via <code>python -m taxi_download.cli</code> (like normalize/load).</li>
 </ul>
-<h3 id="version-pin-caveat-surface-to-maintainer">Version-pin caveat (surface to maintainer)</h3>
-<p>A commit-hash pin is brittle: whenever the community CI rebuilds the extension for DuckDB 1.4.x,
-the hash changes and the startup assertion (exit 2) will fire until <code>EXPECTED_MSSQL_EXT_VERSION</code>
-is bumped. This is exactly the spec's intent ("a version bump is a deliberate, tested change"),
-but the practical cadence of hash churn is higher than a semver would be. Options if it proves
-noisy: (a) relax the assertion to a warning, or (b) pin the DuckDB extension repo/version. Left as
-spec'd (hard assert) for v1.</p>
-<h2 id="live-validation-complete-sql-server-2022-in-docker">Live validation — COMPLETE (SQL Server 2022 in Docker)</h2>
-<p>The full env-gated integration suite (<code>tests/taxi_loader/test_load_integration.py</code>, 7 tests) now
-passes end-to-end against <code>mcr.microsoft.com/mssql/server:2022-latest</code> (amd64 under emulation on
-ARM64). Full repo suite: 125 passed with the server available. Two real bugs the README-grounded
-SQL missed were found and fixed here:</p>
-<ol>
-<li><strong>DuckDB rejects bind parameters in <code>ATTACH</code>.</strong> <code>ATTACH ? AS mssql (TYPE mssql)</code> → Parser Error.
-   Fix: interpolate the connection string as an escaped single-quoted literal (<code>_sql_str</code>); it is
-   still never logged. (<code>connection.py</code>)</li>
-<li><strong>The <code>mssql</code> extension's ATTACH "context" is process-global</strong>, surviving across DuckDB
-   connections. A leaked attach collides with the next attach of the same name ("Context 'mssql'
-   already exists"). Fix: <code>main()</code> now <code>DETACH</code>es + closes on exit; integration tests hold only one
-   <code>mssql</code> attach at a time. (<code>cli.py</code>, tests)</li>
-</ol>
-<p>The following spellings are now confirmed working against the live server:</p>
+<hr />
+<h2 id="behavior-to-preserve-from-the-bash-script">Behavior to preserve (from the bash script)</h2>
 <ul>
-<li><code>ATTACH 'Server=host,1433;Database=db;User Id=sa;Password=…;Encrypt=yes;TrustServerCertificate=yes' AS mssql (TYPE mssql)</code></li>
-<li>Provisioning via <code>SELECT mssql_exec('&lt;master-attach&gt;', 'IF DB_ID(''taxi'') IS NULL EXEC(''CREATE DATABASE [taxi]'')')</code></li>
-<li><code>SELECT mssql_exec('mssql', '&lt;CREATE TABLE …&gt;')</code> (confirm whether DDL must be <code>EXEC('…')</code>-wrapped)</li>
-<li>Append: <code>COPY (SELECT * FROM read_parquet([...])) TO 'mssql://mssql/dbo/&lt;table&gt;' (FORMAT 'bcp', CREATE_TABLE false, TABLOCK true, FLUSH_ROWS 100000)</code></li>
-<li>Reload: <code>DROP TABLE IF EXISTS &lt;fq&gt;</code> → explicit <code>CREATE TABLE</code> → append-style <code>COPY</code> (no <code>REPLACE</code>)</li>
-<li>Reads: <code>SELECT … FROM mssql_scan('mssql', '&lt;query&gt;')</code></li>
+<li><strong>CloudFront URL scheme:</strong> <code>https://d37ci6vzurychx.cloudfront.net/trip-data/&lt;type&gt;_tripdata_&lt;year&gt;-&lt;mm&gt;.parquet</code>.</li>
+<li><strong>Four types + per-type start dates:</strong> <code>yellow</code> 2009-01, <code>green</code> 2013-08, <code>fhv</code> 2015-01, <code>fhvhv</code> 2019-02.</li>
+<li><strong>Full-history mode:</strong> forward walk from the type's start date through the <strong>previous</strong> calendar month.
+  Skip months whose file already exists locally. If a month 404s <em>after</em> data has been seen, treat it
+  as end-of-series and stop that type; a 404 <em>before</em> any data is "pre-series", skip forward.</li>
+<li><strong><code>--recent [N]</code> mode:</strong> backward walk from the previous month; <strong>only successful downloads count
+  toward N</strong>; stop early when an already-present local file is hit; cap total months examined at
+  <code>MAX_LOOKBACK = 18</code>.</li>
+<li><strong>Output layout:</strong> <code>&lt;data-dir&gt;/raw/&lt;type&gt;/&lt;year&gt;/&lt;file&gt;</code>; skip files that already exist.</li>
+<li><strong>PAR1 corrupt-file validation:</strong> a valid parquet has magic bytes <code>PAR1</code> at both the first and last
+  4 bytes. Run an <strong>upfront cleanup pass</strong> (scan <code>&lt;data-dir&gt;/raw</code>, delete any parquet failing the
+  check) before downloading, and <strong>re-validate each freshly downloaded file</strong> (delete + treat as a
+  failed fetch if invalid).</li>
+<li><strong>Rate-limit resilience:</strong> TLC's CloudFront rate-limits and sometimes returns a <code>200</code> HTML intercept
+  page instead of the parquet. Handle both.</li>
 </ul>
-<p><strong>To finish the live spike / run integration:</strong> start Docker, then
-<code>docker run -d --name mssql-it -e ACCEPT_EULA=Y -e MSSQL_SA_PASSWORD='Str0ng_Passw0rd!' -p 1433:1433 mcr.microsoft.com/mssql/server:2022-latest</code>
-and <code>MSSQL_PASSWORD='Str0ng_Passw0rd!' uv run --extra test pytest tests/taxi_loader/test_load_integration.py -v</code>.</p>
+<h2 id="design">Design</h2>
+<h3 id="package-structure-downloadersrctaxi_download">Package structure (<code>downloader/src/taxi_download/</code>)</h3>
+<ul>
+<li><code>__init__.py</code></li>
+<li><code>dates.py</code> — pure month arithmetic: <code>previous_month(today) -&gt; (year, month)</code>; <code>START_DATES</code>;
+  iterators <code>months_forward(start, end)</code> and <code>months_backward(start)</code>. No I/O.</li>
+<li><code>download.py</code> — the fetch + validation + walker core (see below). Takes an injected <code>httpx.Client</code>
+  and a <code>now</code>/<code>today</code> value so it is unit-testable without network or wall-clock.</li>
+<li><code>cli.py</code> — argparse + <code>main(argv=None) -&gt; int</code>.</li>
+</ul>
+<h3 id="constants-downloadpy-datespy">Constants (<code>download.py</code> / <code>dates.py</code>)</h3>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-1">1</a></span>
+<span class="normal"><a href="#__codelineno-0-2">2</a></span>
+<span class="normal"><a href="#__codelineno-0-3">3</a></span>
+<span class="normal"><a href="#__codelineno-0-4">4</a></span>
+<span class="normal"><a href="#__codelineno-0-5">5</a></span>
+<span class="normal"><a href="#__codelineno-0-6">6</a></span>
+<span class="normal"><a href="#__codelineno-0-7">7</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1"></a><span class="n">BASE_URL</span> <span class="o">=</span> <span class="s2">&quot;https://d37ci6vzurychx.cloudfront.net/trip-data&quot;</span>
+<a id="__codelineno-0-2" name="__codelineno-0-2"></a><span class="n">DATA_TYPES</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;yellow&quot;</span><span class="p">,</span> <span class="s2">&quot;green&quot;</span><span class="p">,</span> <span class="s2">&quot;fhv&quot;</span><span class="p">,</span> <span class="s2">&quot;fhvhv&quot;</span><span class="p">)</span>
+<a id="__codelineno-0-3" name="__codelineno-0-3"></a><span class="n">START_DATES</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;yellow&quot;</span><span class="p">:</span> <span class="p">(</span><span class="mi">2009</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="s2">&quot;green&quot;</span><span class="p">:</span> <span class="p">(</span><span class="mi">2013</span><span class="p">,</span> <span class="mi">8</span><span class="p">),</span> <span class="s2">&quot;fhv&quot;</span><span class="p">:</span> <span class="p">(</span><span class="mi">2015</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="s2">&quot;fhvhv&quot;</span><span class="p">:</span> <span class="p">(</span><span class="mi">2019</span><span class="p">,</span> <span class="mi">2</span><span class="p">)}</span>
+<a id="__codelineno-0-4" name="__codelineno-0-4"></a><span class="n">MAX_LOOKBACK</span> <span class="o">=</span> <span class="mi">18</span>
+<a id="__codelineno-0-5" name="__codelineno-0-5"></a><span class="n">PARQUET_MAGIC</span> <span class="o">=</span> <span class="sa">b</span><span class="s2">&quot;PAR1&quot;</span>
+<a id="__codelineno-0-6" name="__codelineno-0-6"></a><span class="c1"># backoff: base 30s, factor 3, capped at 3600s, up to MAX_RETRIES attempts</span>
+<a id="__codelineno-0-7" name="__codelineno-0-7"></a><span class="n">BACKOFF_BASE_S</span><span class="p">,</span> <span class="n">BACKOFF_FACTOR</span><span class="p">,</span> <span class="n">BACKOFF_CAP_S</span><span class="p">,</span> <span class="n">MAX_RETRIES</span> <span class="o">=</span> <span class="mi">30</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">3600</span><span class="p">,</span> <span class="mi">4</span>
+</code></pre></div></td></tr></table></div>
+<h3 id="core-functions-downloadpy">Core functions (<code>download.py</code>)</h3>
+<ul>
+<li><code>filename(type, year, month) -&gt; str</code> → <code>f"{type}_tripdata_{year}-{month:02d}.parquet"</code>.</li>
+<li><code>url_for(type, year, month) -&gt; str</code> → <code>f"{BASE_URL}/{filename(...)}"</code>.</li>
+<li><code>target_path(raw_dir, type, year, month) -&gt; Path</code> → <code>raw_dir/type/str(year)/filename(...)</code>.</li>
+<li><code>is_valid_parquet(path) -&gt; bool</code> → file ≥ 8 bytes and first 4 == last 4 == <code>PAR1</code>.</li>
+<li><code>clean_corrupt(raw_dir) -&gt; int</code> → scan <code>raw_dir.rglob("*.parquet")</code>, delete invalid, return count.</li>
+<li><code>FetchResult = Enum("OK", "NOTFOUND", "RATELIMIT", "NETERROR")</code>.</li>
+<li><code>fetch_one(client, url, dest) -&gt; FetchResult</code> — stream the GET to a temp file; on <code>200</code> validate
+  PAR1 (invalid → <code>RATELIMIT</code>, the intercept-page case); rename into place on success. Map status:
+  <code>404</code>/<code>403(AccessDenied|NoSuchKey)</code> → <code>NOTFOUND</code>; <code>429</code>/<code>5xx</code>/<code>403(cloudfront/blocked)</code> → <code>RATELIMIT</code>;
+  transport errors → <code>NETERROR</code>. <strong>No retry here</strong> — the caller owns retry/backoff.</li>
+<li><code>download_month(client, type, year, month, raw_dir, sleeper) -&gt; FetchResult</code> — existence-skip;
+  else <code>fetch_one</code> with capped-exponential-backoff retry on <code>RATELIMIT</code>/<code>NETERROR</code> up to <code>MAX_RETRIES</code>,
+  then give up (returns the last result). <code>sleeper</code> is an injected sleep fn (no-op in tests).</li>
+<li><code>download_full(client, type, raw_dir, today, sleeper) -&gt; int</code> — the forward walker (returns count).</li>
+<li><code>download_recent(client, type, raw_dir, n, today, sleeper) -&gt; int</code> — the backward walker.</li>
+</ul>
+<h3 id="cli-clipy">CLI (<code>cli.py</code>)</h3>
+<ul>
+<li><code>argparse</code>: positional <code>data_type</code> (optional, choices = the four types; omit = all four),
+  <code>--recent [N]</code> (<code>nargs="?"</code>, <code>const=3</code>, i.e. default 3 months when N omitted — matching the bash
+  default), <code>--data-dir DIR</code> (default <code>"."</code>).</li>
+<li><code>main</code>: resolve <code>raw_dir = Path(data_dir) / "raw"</code>; <code>clean_corrupt(raw_dir)</code>; build an
+  <code>httpx.Client</code> (follow redirects, sane timeout); for each selected type run <code>download_recent</code> or
+  <code>download_full</code>; print per-type + total summary; return exit code.</li>
+<li><strong>Exit codes:</strong> <code>0</code> success (including skip-only / nothing-new); <code>2</code> on bad args or when a
+  rate-limit give-up prevented all progress for a requested type (so the orchestrator can halt). A
+  transient single-month failure that still lets the walk continue is not fatal.</li>
+</ul>
+<h3 id="dropped-from-the-bash-version">Dropped from the bash version</h3>
+<ul>
+<li>The separate two-phase HEAD/range <strong>probe</strong> (folded into a single GET + PAR1 validation).</li>
+<li>The exact <code>300/900/3600s</code> escalation → a clean capped exponential backoff.</li>
+<li>The <strong>WSL-VHDX interactive warning</strong>.</li>
+<li>The legacy <strong><code>OUTPUT_DIR</code></strong> env override (only <code>--data-dir</code> remains).</li>
+</ul>
+<h2 id="orchestrator-integration-orchestratorsrctaxi_orchestrate">Orchestrator integration (<code>orchestrator/src/taxi_orchestrate/</code>)</h2>
+<ul>
+<li><code>stages.py::build_download_cmd</code> — change from <code>["bash", str(repo_root/"downloader"/"download_taxi_data.sh"), …]</code>
+  to <code>[sys.executable, "-m", "taxi_download.cli", …]</code>, preserving the arg surface: append <code>--recent</code>
+  (+ <code>str(N)</code> when <code>N &gt; 0</code>), the <code>data_type</code> when set, and <code>--data-dir &lt;data_dir&gt;</code>. The <code>repo_root</code>
+  parameter is no longer needed for the download command (the module is importable) — keep the stage
+  running with <code>cwd=repo_root</code> for consistency, but the command itself no longer references the repo.</li>
+<li><code>cli.py::find_repo_root</code> — its marker <code>downloader/download_taxi_data.sh</code> is going away; change the
+  marker to <code>pyproject.toml</code> <strong>and</strong> <code>normalize/mappings/</code> (still present in the repo; still needed as
+  <code>cwd</code> so <code>normalize</code> finds its mappings).</li>
+<li>Update the existing <code>tests/taxi_orchestrate/test_stages.py</code> download-command assertions to the new
+  <code>python -m taxi_download.cli</code> form.</li>
+</ul>
+<h2 id="packaging-pyprojecttoml">Packaging (<code>pyproject.toml</code>)</h2>
+<ul>
+<li>Add <code>"httpx&gt;=0.27"</code> to <code>[project.dependencies]</code>.</li>
+<li>Add <code>"downloader/src/taxi_download"</code> to <code>[tool.hatch.build.targets.wheel].packages</code>.</li>
+<li>Add <code>taxi-download = "taxi_download.cli:main"</code> to <code>[project.scripts]</code>.</li>
+<li>Regenerate <code>uv.lock</code> (<code>uv sync</code>).</li>
+</ul>
+<h2 id="removals">Removals</h2>
+<ul>
+<li>Delete <code>downloader/download_taxi_data.sh</code>.</li>
+<li>Delete/replace <code>tests/downloader/test_output_dir.py</code> (it drives the bash script) with the new Python
+  tests.</li>
+<li><code>downloader/README.md</code> — update its pointer to the Python module (kept minimal; the full guide is
+  authored in the docs sweep, Piece 3).</li>
+</ul>
+<h2 id="testing-strategy">Testing strategy</h2>
+<ul>
+<li><strong>Pure units (no network):</strong> <code>dates.py</code> (previous_month wrap, forward/backward iterators),
+  <code>filename</code>/<code>url_for</code>/<code>target_path</code>, <code>is_valid_parquet</code> (good/short/bad-magic), <code>clean_corrupt</code>
+  (deletes only invalid), and the <code>--data-dir</code> → <code>raw/</code> resolution.</li>
+<li><strong>Fetch/walker with a local stub HTTP server</strong> (stdlib <code>http.server</code> on <code>127.0.0.1:0</code>, no real
+  network): serve a tiny valid parquet (built with DuckDB <code>COPY … TO</code>) for a set of months, <code>404</code> for
+  others, and one <code>429</code> to exercise a backoff-then-succeed path (with an injected no-op <code>sleeper</code>).
+  Assert: correct files land under <code>raw/&lt;type&gt;/&lt;year&gt;/</code>, existing files are skipped, <code>--recent N</code>
+  stops at the right count / on an existing file, and a persistent <code>429</code> yields the give-up exit code.</li>
+<li><strong>Determinism:</strong> inject <code>today</code> and <code>sleeper</code> so walkers and backoff are wall-clock-free and instant.</li>
+<li>Full suite stays green; <code>taxi-run --dry-run</code> shows the new <code>python -m taxi_download.cli</code> command.</li>
+</ul>
+<h2 id="out-of-scope-explicit">Out of scope (explicit)</h2>
+<ul>
+<li><strong>Packaging the normalize mappings</strong> so a pip-installed <code>taxi-run</code> can normalize end-to-end — this is
+  the separate <strong>Piece 2.5</strong> (mappings via <code>importlib.resources</code>). The downloader piece does not touch
+  normalize.</li>
+<li>Parallel/concurrent downloads (TLC rate-limits; sequential-with-backoff is intentional).</li>
+<li>Re-authoring the downloader <em>guide</em> / broader docs (that's Piece 3).</li>
+<li>Any change to the <code>raw/</code> layout or the <code>--data-dir</code> semantics established earlier.</li>
+</ul>
+<h2 id="notes-for-the-plan">Notes for the plan</h2>
+<ul>
+<li>Keep <code>download.py</code> functions injectable (<code>client</code>, <code>today</code>, <code>sleeper</code>) so every branch is testable
+  offline and instantly.</li>
+<li>The stub-server test builds its sample parquet with DuckDB (already a dep) to guarantee real PAR1
+  magic bytes.</li>
+<li>Confirm <code>httpx</code> resolves cleanly in <code>uv.lock</code> and doesn't conflict with <code>duckdb</code>/<code>pyyaml</code>.</li>
+<li>The <code>--recent [N]</code> <code>const</code> default must be <strong>3</strong> to match the bash default when <code>N</code> is omitted.</li>
+</ul>
 
 
 

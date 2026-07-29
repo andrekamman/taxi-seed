@@ -6,13 +6,17 @@
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
       
-        <meta name="description" content="Downloader, schema-drift analyzer, and K6 SQL Server load tester for NYC TLC taxi trip data">
+        <meta name="description" content="Downloader, schema-drift analyzer, normalizer, SQL Server loader, and orchestrator for NYC TLC taxi trip data">
       
       
       
         <link rel="canonical" href="https://andrekamman.github.io/taxi-seed/superpowers/specs/2026-07-26-configurable-data-dir-design/">
       
       
+        <link rel="prev" href="../2026-07-26-python-downloader-design/">
+      
+      
+        <link rel="next" href="../2026-07-26-documentation-sync-design/">
       
       
         
@@ -23,7 +27,7 @@
     
     
       
-        <title>Configurable data directory (--data-dir) — design spec (2026-07-26) - taxi</title>
+        <title>Configurable data dir - taxi-seed</title>
       
     
     
@@ -90,7 +94,7 @@
 
 <header class="md-header md-header--shadow" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="Header">
-    <a href="../../.." title="taxi" class="md-header__button md-logo" aria-label="taxi" data-md-component="logo">
+    <a href="../../.." title="taxi-seed" class="md-header__button md-logo" aria-label="taxi-seed" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
@@ -104,13 +108,13 @@
       <div class="md-header__ellipsis">
         <div class="md-header__topic">
           <span class="md-ellipsis">
-            taxi
+            taxi-seed
           </span>
         </div>
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Configurable data directory (--data-dir) — design spec (2026-07-26)
+              Configurable data dir
             
           </span>
         </div>
@@ -231,13 +235,13 @@
 
 <nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
-    <a href="../../.." title="taxi" class="md-nav__button md-logo" aria-label="taxi" data-md-component="logo">
+    <a href="../../.." title="taxi-seed" class="md-nav__button md-logo" aria-label="taxi-seed" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
 
     </a>
-    taxi
+    taxi-seed
   </label>
   
     <div class="md-nav__source">
@@ -446,14 +450,42 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../guides/k6-loadtest/" class="md-nav__link">
+      <a href="../../../guides/loader/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    K6 Load Test
+    Loader
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../guides/orchestrator/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Orchestrator
   
 
     
@@ -724,18 +756,20 @@
       
   
   
+    
   
   
+  
     
     
     
     
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" checked>
         
           
           <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="0">
@@ -756,7 +790,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="true">
           <label class="md-nav__title" for="__nav_8">
             <span class="md-nav__icon md-icon"></span>
             
@@ -830,14 +864,14 @@
   
   
     <li class="md-nav__item">
-      <a href="../2026-03-25-k6-sql-load-testing-design/" class="md-nav__link">
+      <a href="../2026-07-22-documentation-design/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    K6 SQL load testing
+    Documentation site
   
 
     
@@ -858,14 +892,311 @@
   
   
     <li class="md-nav__item">
-      <a href="../2026-07-22-documentation-design/" class="md-nav__link">
+      <a href="../2026-07-22-sql-loader-design/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    Documentation site
+    SQL loader
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../2026-07-23-orchestrator-design/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Orchestrator
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../2026-07-26-python-downloader-design/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Python downloader
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Configurable data dir
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Configurable data dir
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#decisions-locked-from-brainstorming" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Decisions locked (from brainstorming)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#current-state-facts-from-code" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Current state (facts, from code)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#design" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Design
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Design">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#common-rule" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Common rule
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#a-downloader-download_taxi_datash" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        A. Downloader (download_taxi_data.sh)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#b-normalizer-taxi_normalizeclipy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        B. Normalizer (taxi_normalize/cli.py)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#c-loader-taxi_loaderclipy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        C. Loader (taxi_loader/cli.py)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#d-orchestrator-clipy-stagespy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        D. Orchestrator (cli.py + stages.py)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#backward-compatibility-test-impact" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Backward compatibility &amp; test impact
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#testing-strategy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Testing strategy
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#out-of-scope" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Out of scope
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#notes-for-the-plan" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Notes for the plan
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../2026-07-26-documentation-sync-design/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Documentation sync
   
 
     

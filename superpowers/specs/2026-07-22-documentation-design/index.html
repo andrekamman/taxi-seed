@@ -6,17 +6,17 @@
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
       
-        <meta name="description" content="Downloader, schema-drift analyzer, and K6 SQL Server load tester for NYC TLC taxi trip data">
+        <meta name="description" content="Downloader, schema-drift analyzer, normalizer, SQL Server loader, and orchestrator for NYC TLC taxi trip data">
       
       
       
         <link rel="canonical" href="https://andrekamman.github.io/taxi-seed/superpowers/specs/2026-07-22-documentation-design/">
       
       
-        <link rel="prev" href="../2026-03-25-k6-sql-load-testing-design/">
+        <link rel="prev" href="../2026-07-21-normalizer-design/">
       
       
-        <link rel="next" href="../../../contributing/">
+        <link rel="next" href="../2026-07-22-sql-loader-design/">
       
       
         
@@ -27,7 +27,7 @@
     
     
       
-        <title>Documentation site - taxi</title>
+        <title>Documentation site - taxi-seed</title>
       
     
     
@@ -94,7 +94,7 @@
 
 <header class="md-header md-header--shadow" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="Header">
-    <a href="../../.." title="taxi" class="md-header__button md-logo" aria-label="taxi" data-md-component="logo">
+    <a href="../../.." title="taxi-seed" class="md-header__button md-logo" aria-label="taxi-seed" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
@@ -108,7 +108,7 @@
       <div class="md-header__ellipsis">
         <div class="md-header__topic">
           <span class="md-ellipsis">
-            taxi
+            taxi-seed
           </span>
         </div>
         <div class="md-header__topic" data-md-component="header-topic">
@@ -235,13 +235,13 @@
 
 <nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
-    <a href="../../.." title="taxi" class="md-nav__button md-logo" aria-label="taxi" data-md-component="logo">
+    <a href="../../.." title="taxi-seed" class="md-nav__button md-logo" aria-label="taxi-seed" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
 
     </a>
-    taxi
+    taxi-seed
   </label>
   
     <div class="md-nav__source">
@@ -450,14 +450,42 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../guides/k6-loadtest/" class="md-nav__link">
+      <a href="../../../guides/loader/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    K6 Load Test
+    Loader
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../guides/orchestrator/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Orchestrator
   
 
     
@@ -816,34 +844,6 @@
     
   
     Normalizer
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../2026-03-25-k6-sql-load-testing-design/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    K6 SQL load testing
   
 
     
@@ -1235,6 +1235,146 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../2026-07-22-sql-loader-design/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    SQL loader
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../2026-07-23-orchestrator-design/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Orchestrator
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../2026-07-26-python-downloader-design/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Python downloader
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../2026-07-26-configurable-data-dir-design/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Configurable data dir
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../2026-07-26-documentation-sync-design/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Documentation sync
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -1619,6 +1759,9 @@
 
 
 <h1 id="documentation-design">Documentation Design</h1>
+<blockquote>
+<p><em>Historical design record (as of 2026-07-22); the K6 load tester was later moved to the separate <code>taxi-lab</code> repo, and the repo was renamed <code>taxi</code> → <code>taxi-seed</code>. This document is preserved as-is and does not reflect the current codebase.</em></p>
+</blockquote>
 <p><strong>Date:</strong> 2026-07-22
 <strong>Status:</strong> Approved, ready for implementation planning
 <strong>Sub-project of:</strong> the four-part expansion (this doubles as sub-project #4 "CI testing pipeline" — the docs-build CI workflow uses the same GitHub Actions setup that tests will).</p>

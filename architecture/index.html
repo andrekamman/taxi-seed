@@ -6,7 +6,7 @@
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
       
-        <meta name="description" content="Downloader, schema-drift analyzer, and K6 SQL Server load tester for NYC TLC taxi trip data">
+        <meta name="description" content="Downloader, schema-drift analyzer, normalizer, SQL Server loader, and orchestrator for NYC TLC taxi trip data">
       
       
       
@@ -27,7 +27,7 @@
     
     
       
-        <title>Architecture - taxi</title>
+        <title>Architecture - taxi-seed</title>
       
     
     
@@ -94,7 +94,7 @@
 
 <header class="md-header md-header--shadow" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="Header">
-    <a href=".." title="taxi" class="md-header__button md-logo" aria-label="taxi" data-md-component="logo">
+    <a href=".." title="taxi-seed" class="md-header__button md-logo" aria-label="taxi-seed" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
@@ -108,7 +108,7 @@
       <div class="md-header__ellipsis">
         <div class="md-header__topic">
           <span class="md-ellipsis">
-            taxi
+            taxi-seed
           </span>
         </div>
         <div class="md-header__topic" data-md-component="header-topic">
@@ -235,13 +235,13 @@
 
 <nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
-    <a href=".." title="taxi" class="md-nav__button md-logo" aria-label="taxi" data-md-component="logo">
+    <a href=".." title="taxi-seed" class="md-nav__button md-logo" aria-label="taxi-seed" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
 
     </a>
-    taxi
+    taxi-seed
   </label>
   
     <div class="md-nav__source">
@@ -450,14 +450,42 @@
   
   
     <li class="md-nav__item">
-      <a href="../guides/k6-loadtest/" class="md-nav__link">
+      <a href="../guides/loader/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    K6 Load Test
+    Loader
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../guides/orchestrator/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Orchestrator
   
 
     
@@ -583,10 +611,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#the-four-tool-dag" class="md-nav__link">
+  <a href="#the-pipeline-dag" class="md-nav__link">
     <span class="md-ellipsis">
       
-        The four-tool DAG
+        The pipeline DAG
       
     </span>
   </a>
@@ -1019,14 +1047,14 @@
   
   
     <li class="md-nav__item">
-      <a href="../superpowers/specs/2026-03-25-k6-sql-load-testing-design/" class="md-nav__link">
+      <a href="../superpowers/specs/2026-07-22-documentation-design/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    K6 SQL load testing
+    Documentation site
   
 
     
@@ -1047,14 +1075,126 @@
   
   
     <li class="md-nav__item">
-      <a href="../superpowers/specs/2026-07-22-documentation-design/" class="md-nav__link">
+      <a href="../superpowers/specs/2026-07-22-sql-loader-design/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    Documentation site
+    SQL loader
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../superpowers/specs/2026-07-23-orchestrator-design/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Orchestrator
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../superpowers/specs/2026-07-26-python-downloader-design/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Python downloader
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../superpowers/specs/2026-07-26-configurable-data-dir-design/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Configurable data dir
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../superpowers/specs/2026-07-26-documentation-sync-design/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Documentation sync
   
 
     
@@ -1140,10 +1280,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#the-four-tool-dag" class="md-nav__link">
+  <a href="#the-pipeline-dag" class="md-nav__link">
     <span class="md-ellipsis">
       
-        The four-tool DAG
+        The pipeline DAG
       
     </span>
   </a>
@@ -1287,7 +1427,7 @@
 
 
 <h1 id="architecture">Architecture</h1>
-<p>The taxi repo is a monorepo of four small tools plus a shared library. Together they form a pipeline — <strong>download → analyze → normalize → load</strong> — that turns the NYC TLC's public trip parquet files into something you can load-test a SQL Server target with. Individually, each tool is usable on its own: the downloader is a resumable HTTP mirror, schema-drift is a generic parquet-family analyzer, normalize rewrites parquet against a target schema, and k6-loadtest drives a customized K6 binary at a SQL Server.</p>
+<p>The taxi-seed repo is a monorepo of five small tools plus a shared library. Together they form a pipeline — <strong>download → normalize → load</strong> — that turns the NYC TLC's public trip parquet files into rows in a SQL Server database. Individually, each tool is usable on its own: the downloader is a resumable HTTP mirror, schema-drift is a generic parquet-family analyzer, normalize rewrites parquet against a target schema, the loader bulk-loads normalized parquet into SQL Server via DuckDB, and the orchestrator chains the other stages together as one command.</p>
 <p>The tools share conventions rather than code paths: parquet everywhere, DuckDB for introspection, explicit per-file atomicity for writes, and a human-in-the-loop policy for any decision that could silently lose data. The rest of this page walks through the repo layout, the pipeline DAG, and the design principles that recur across the tools. If you're new to the project, the pipeline DAG below is the fastest way to orient — everything else is elaboration on how each stage behaves and why it was built the way it was.</p>
 <p>At a glance:</p>
 <table>
@@ -1302,7 +1442,7 @@
 <tbody>
 <tr>
 <td>downloader</td>
-<td>bash + curl</td>
+<td>Python + httpx</td>
 <td>TLC CloudFront URLs</td>
 <td><code>raw/&lt;type&gt;/*.parquet</code></td>
 </tr>
@@ -1319,10 +1459,16 @@
 <td><code>raw-normalized/&lt;type&gt;/*.parquet</code></td>
 </tr>
 <tr>
-<td>k6-loadtest</td>
-<td>Python + DuckDB + Go/xk6</td>
-<td><code>raw-normalized/&lt;type&gt;/*.parquet</code> (or synthetic)</td>
-<td>K6 test bundle, then SQL Server load</td>
+<td>loader</td>
+<td>Python + DuckDB (<code>mssql</code> extension)</td>
+<td><code>raw-normalized/&lt;type&gt;/*.parquet</code></td>
+<td>SQL Server tables (one per type per year)</td>
+</tr>
+<tr>
+<td>orchestrator</td>
+<td>Python</td>
+<td>none directly — drives the other stages as subprocesses</td>
+<td>chained download → normalize → load run + summary</td>
 </tr>
 </tbody>
 </table>
@@ -1351,90 +1497,100 @@
 <span class="normal"><a href="#__codelineno-0-22">22</a></span>
 <span class="normal"><a href="#__codelineno-0-23">23</a></span>
 <span class="normal"><a href="#__codelineno-0-24">24</a></span>
-<span class="normal"><a href="#__codelineno-0-25">25</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1"></a>taxi/
-<a id="__codelineno-0-2" name="__codelineno-0-2"></a>├── downloader/                       bash script + curl
-<a id="__codelineno-0-3" name="__codelineno-0-3"></a>├── schema-drift/
-<a id="__codelineno-0-4" name="__codelineno-0-4"></a>│   └── src/schema_drift/              analyzer (Python)
-<a id="__codelineno-0-5" name="__codelineno-0-5"></a>├── normalize/
-<a id="__codelineno-0-6" name="__codelineno-0-6"></a>│   ├── mappings/                      curated per-type YAML mappings
-<a id="__codelineno-0-7" name="__codelineno-0-7"></a>│   └── src/taxi_normalize/            normalizer (Python)
-<a id="__codelineno-0-8" name="__codelineno-0-8"></a>├── k6-loadtest/
-<a id="__codelineno-0-9" name="__codelineno-0-9"></a>│   ├── build_k6.sh                    Go/xk6 custom binary build
-<a id="__codelineno-0-10" name="__codelineno-0-10"></a>│   ├── config.sample.yaml
-<a id="__codelineno-0-11" name="__codelineno-0-11"></a>│   └── src/k6_loadtest/               Python preprocessor
-<a id="__codelineno-0-12" name="__codelineno-0-12"></a>├── shared/
-<a id="__codelineno-0-13" name="__codelineno-0-13"></a>│   └── src/taxi_shared/               shared library
-<a id="__codelineno-0-14" name="__codelineno-0-14"></a>├── tests/                             pytest per component
-<a id="__codelineno-0-15" name="__codelineno-0-15"></a>│   ├── k6_loadtest/
-<a id="__codelineno-0-16" name="__codelineno-0-16"></a>│   ├── schema_drift/
-<a id="__codelineno-0-17" name="__codelineno-0-17"></a>│   ├── taxi_normalize/
-<a id="__codelineno-0-18" name="__codelineno-0-18"></a>│   └── taxi_shared/
-<a id="__codelineno-0-19" name="__codelineno-0-19"></a>├── docs/                              this site
-<a id="__codelineno-0-20" name="__codelineno-0-20"></a>│   ├── guides/  cookbook.md  architecture.md  reference/  contributing.md
-<a id="__codelineno-0-21" name="__codelineno-0-21"></a>│   └── superpowers/                   design specs + implementation plans
-<a id="__codelineno-0-22" name="__codelineno-0-22"></a>├── mkdocs.yml
-<a id="__codelineno-0-23" name="__codelineno-0-23"></a>├── pyproject.toml                     single Python workspace, all packages
-<a id="__codelineno-0-24" name="__codelineno-0-24"></a>├── uv.lock
-<a id="__codelineno-0-25" name="__codelineno-0-25"></a>└── raw/                               gitignored — parquet mirror (per user)
+<span class="normal"><a href="#__codelineno-0-25">25</a></span>
+<span class="normal"><a href="#__codelineno-0-26">26</a></span>
+<span class="normal"><a href="#__codelineno-0-27">27</a></span>
+<span class="normal"><a href="#__codelineno-0-28">28</a></span>
+<span class="normal"><a href="#__codelineno-0-29">29</a></span>
+<span class="normal"><a href="#__codelineno-0-30">30</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1"></a>taxi-seed/
+<a id="__codelineno-0-2" name="__codelineno-0-2"></a>├── downloader/
+<a id="__codelineno-0-3" name="__codelineno-0-3"></a>│   └── src/taxi_download/             resumable mirror (Python + httpx)
+<a id="__codelineno-0-4" name="__codelineno-0-4"></a>├── schema-drift/
+<a id="__codelineno-0-5" name="__codelineno-0-5"></a>│   └── src/schema_drift/              analyzer (Python)
+<a id="__codelineno-0-6" name="__codelineno-0-6"></a>├── normalize/
+<a id="__codelineno-0-7" name="__codelineno-0-7"></a>│   ├── mappings/                      curated per-type YAML mappings
+<a id="__codelineno-0-8" name="__codelineno-0-8"></a>│   └── src/taxi_normalize/            normalizer (Python)
+<a id="__codelineno-0-9" name="__codelineno-0-9"></a>├── loader/
+<a id="__codelineno-0-10" name="__codelineno-0-10"></a>│   └── src/taxi_loader/               bulk loader (Python + DuckDB `mssql` extension)
+<a id="__codelineno-0-11" name="__codelineno-0-11"></a>├── orchestrator/
+<a id="__codelineno-0-12" name="__codelineno-0-12"></a>│   └── src/taxi_orchestrate/          taxi-run + taxi-curate-mappings (curate.py)
+<a id="__codelineno-0-13" name="__codelineno-0-13"></a>├── shared/
+<a id="__codelineno-0-14" name="__codelineno-0-14"></a>│   └── src/taxi_shared/               shared library
+<a id="__codelineno-0-15" name="__codelineno-0-15"></a>├── scripts/                           CI/dev helpers (wait_for_mssql.py, e2e-smoke.sh)
+<a id="__codelineno-0-16" name="__codelineno-0-16"></a>├── tests/                             pytest per component
+<a id="__codelineno-0-17" name="__codelineno-0-17"></a>│   ├── downloader/
+<a id="__codelineno-0-18" name="__codelineno-0-18"></a>│   ├── schema_drift/
+<a id="__codelineno-0-19" name="__codelineno-0-19"></a>│   ├── taxi_normalize/
+<a id="__codelineno-0-20" name="__codelineno-0-20"></a>│   ├── taxi_loader/
+<a id="__codelineno-0-21" name="__codelineno-0-21"></a>│   ├── taxi_orchestrate/
+<a id="__codelineno-0-22" name="__codelineno-0-22"></a>│   ├── taxi_shared/
+<a id="__codelineno-0-23" name="__codelineno-0-23"></a>│   └── e2e/
+<a id="__codelineno-0-24" name="__codelineno-0-24"></a>├── docs/                              this site
+<a id="__codelineno-0-25" name="__codelineno-0-25"></a>│   ├── guides/  cookbook.md  architecture.md  reference/  contributing.md
+<a id="__codelineno-0-26" name="__codelineno-0-26"></a>│   └── superpowers/                   design specs + implementation plans
+<a id="__codelineno-0-27" name="__codelineno-0-27"></a>├── mkdocs.yml
+<a id="__codelineno-0-28" name="__codelineno-0-28"></a>├── pyproject.toml                     single Python workspace, all six packages
+<a id="__codelineno-0-29" name="__codelineno-0-29"></a>├── uv.lock
+<a id="__codelineno-0-30" name="__codelineno-0-30"></a>└── raw/                               gitignored — parquet mirror (per user)
 </code></pre></div></td></tr></table></div>
 <p>A few things worth calling out:</p>
 <ul>
-<li><strong>Single <code>pyproject.toml</code></strong> at the root manages all four Python packages via <code>[tool.hatch.build.targets.wheel] packages = [...]</code>. There's one lockfile, one dependency graph, and one <code>uv sync</code> to get a working dev environment.</li>
+<li><strong>Single <code>pyproject.toml</code></strong> at the root manages all six Python packages (<code>taxi_download</code>, <code>schema_drift</code>, <code>taxi_normalize</code>, <code>taxi_loader</code>, <code>taxi_orchestrate</code>, <code>taxi_shared</code>) via <code>[tool.hatch.build.targets.wheel] packages = [...]</code>. There's one lockfile, one dependency graph, and one <code>uv sync</code> to get a working dev environment.</li>
 <li><strong><code>src/</code> layout</strong> used consistently — each Python package lives in <code>&lt;component&gt;/src/&lt;package_name&gt;/</code>. This enforces the "package under test is the installed package" rule: tests can't accidentally import the working-copy source and shadow the installed version.</li>
 <li><strong>Tests</strong> live in <code>tests/&lt;package_name&gt;/</code> rather than <code>&lt;component&gt;/tests/</code>. That way pytest discovers them with default settings and there's no ambiguity about which fixtures apply to which package.</li>
 <li><strong><code>docs/superpowers/</code></strong> contains design specs and implementation plans authored during development. They're kept publicly visible because they answer "why is X this way" better than after-the-fact prose can.</li>
 <li><strong><code>raw/</code></strong> and <code>raw-normalized/</code> are <code>.gitignore</code>d. Every user maintains their own local mirror — the repo carries the code, not the data. On a fresh clone, the pipeline builds those directories the first time it's run.</li>
 <li><strong><code>normalize/mappings/</code></strong> ships with curated YAML for each TLC data type. Those files <em>are</em> checked in — they're the human-reviewed record of every acknowledged drift decision, and they're what makes a fresh clone of the repo able to normalize the full historical dataset without re-doing the review work.</li>
 </ul>
-<h2 id="the-four-tool-dag">The four-tool DAG</h2>
+<h2 id="the-pipeline-dag">The pipeline DAG</h2>
 <pre class="mermaid"><code>flowchart LR
-  DL[downloader&lt;br/&gt;bash + curl]
+  DL[downloader&lt;br/&gt;Python + httpx]
   RAW[(raw/&lt;br/&gt;parquet mirror)]
   SD[schema-drift&lt;br/&gt;DuckDB analysis]
   NORM[normalize&lt;br/&gt;DuckDB transform]
   RN[(raw-normalized/&lt;br/&gt;uniform parquet)]
-  K6[k6-preprocess&lt;br/&gt;Python + DuckDB]
-  BUNDLE[(K6 test bundle&lt;br/&gt;DDL + chunks + test.js)]
-  LOAD[K6 binary&lt;br/&gt;load test]
+  LOAD[loader&lt;br/&gt;taxi-load]
   SQL[(SQL Server)]
 
   DL --&gt; RAW
   RAW --&gt; SD
   RAW --&gt; NORM
   NORM --&gt; RN
-  RN --&gt; K6
-  K6 --&gt; BUNDLE
-  BUNDLE --&gt; LOAD
-  LOAD --&gt; SQL</code></pre>
+  RN --&gt; LOAD
+  LOAD --&gt; SQL
+
+  RUN{{orchestrator&lt;br/&gt;taxi-run}}
+  RUN -.drives.-&gt; DL
+  RUN -.drives.-&gt; NORM
+  RUN -.drives.-&gt; LOAD</code></pre>
 <p><strong>Pipeline.</strong> The typical flow is left-to-right:</p>
 <ol>
-<li>The <strong>downloader</strong> mirrors CloudFront into <code>raw/</code> — a resumable, WAF-aware bash + curl script.</li>
+<li>The <strong>downloader</strong> (<code>taxi-download</code>) mirrors CloudFront into <code>raw/</code> — a resumable, WAF-aware Python client built on <code>httpx</code>.</li>
 <li><strong>schema-drift</strong> reads the mirror and reports what's changed schema-wise across the years of parquet files. It doesn't rewrite anything; it just produces a report.</li>
 <li><strong>normalize</strong> rewrites historical files to match the latest schema, producing <code>raw-normalized/</code> — a directory of parquet with uniform columns and types across every month.</li>
-<li><strong>k6-preprocess</strong> turns normalized parquet into a K6 test bundle: DDL, per-run chunks, and a generated <code>test.js</code>.</li>
-<li><strong>K6</strong> (the custom xk6-sql build) executes the bundle against a SQL Server target.</li>
+<li>The <strong>loader</strong> (<code>taxi-load</code>) bulk-loads normalized parquet into SQL Server, one table per type per year, through DuckDB's <code>mssql</code> community extension. It reconciles disk against what's already loaded and picks, per year, skip / append / truncate-reload — see the <a href="../guides/loader/">loader guide</a> for the full reconciliation model.</li>
+<li>The <strong>orchestrator</strong> (<code>taxi-run</code>) isn't a pipeline stage itself — it drives stages 1, 3, and 4 as subprocesses for one command, per data type, stopping a type early if a stage needs human review or fails outright. See the <a href="../guides/orchestrator/">orchestrator guide</a>.</li>
 </ol>
-<p>See spec: docs/superpowers/specs/2026-03-25-k6-sql-load-testing-design.md for the k6-loadtest stage's design decisions (custom xk6 build, chunked test bundle format, synthetic mode).</p>
-<p>Each stage writes its output to disk; the next stage reads from disk. There is no in-memory pipeline, no shared process, and no coordinator. That makes each stage individually restartable and individually inspectable — you can open the intermediate parquet in DuckDB, in Python, in DBeaver, or in any other tool that reads parquet, without any project-specific tooling.</p>
+<p>Each stage writes its output to disk; the next stage reads from disk. There is no in-memory pipeline, no shared process between the four data stages, and no coordinator baked into any one of them — <code>taxi-run</code> is an optional layer on top, not a requirement. That makes each stage individually restartable and individually inspectable — you can open the intermediate parquet in DuckDB, in Python, in DBeaver, or in any other tool that reads parquet, without any project-specific tooling.</p>
 <p><strong>Independence.</strong> No tool requires any of the others upstream:</p>
 <ul>
 <li>Use only the <strong>downloader</strong> if all you need is a resumable local mirror of TLC data.</li>
-<li>Use only <strong>schema-drift</strong> against any parquet family that follows a <code>_YYYY-MM.parquet</code> naming convention — the tool doesn't know or care that the files came from TLC.</li>
+<li>Use only <strong>schema-drift</strong> against any parquet family that follows a <code>_tripdata_YYYY-MM.parquet</code> naming convention — the tool doesn't know or care that the files came from TLC.</li>
 <li>Use only <strong>normalize</strong> if you have parquet from somewhere else and want to consolidate it to a target schema. The mapping YAML format is generic.</li>
-<li>Use only <strong>k6-preprocess</strong> (with synthetic mode) if you don't have parquet at all and just want to load-test SQL Server against a plausible taxi-shaped schema.</li>
+<li>Use only the <strong>loader</strong> if you already have normalized parquet from somewhere else and just want it in SQL Server — it doesn't know or care how <code>raw-normalized/</code> was produced.</li>
 </ul>
-<p>The pipeline shape is a strong suggestion, not a contract. Anywhere you want to plug in your own tool between two stages, the seam is a directory of parquet files.</p>
+<p>The pipeline shape is a strong suggestion, not a contract. <code>taxi-run</code> exists for the common case (run everything, in order, unattended), but nothing stops you from wiring your own tool into the seam between two stages — the seam is always a directory of parquet files.</p>
 <p><strong>Shared conventions across all stages.</strong> Beyond the language-and-tool split, every stage follows the same handful of rules:</p>
 <ul>
 <li>Parquet is the interchange format. CSV, JSON, and native SQL Server tables show up only at the ends of the pipeline.</li>
 <li>DuckDB is the introspection engine. Every stage that needs to understand the shape of a parquet file reads its footer through DuckDB rather than hand-rolling parquet parsing.</li>
-<li>File naming follows <code>&lt;type&gt;_YYYY-MM.parquet</code>. schema-drift and normalize both assume this convention when grouping files into a "family" and ordering them chronologically.</li>
-<li>Configuration is YAML for anything a human edits (mapping files, k6-loadtest config) and command-line flags for anything an operator sets per-run. There are no <code>.env</code> files or hidden state directories.</li>
+<li>File naming follows <code>&lt;type&gt;_tripdata_YYYY-MM.parquet</code>. schema-drift and normalize both assume this convention when grouping files into a "family" and ordering them chronologically.</li>
+<li>Configuration is YAML for anything a human edits (mapping files) and command-line flags for anything an operator sets per-run. There are no <code>.env</code> files or hidden state directories; the loader's password is the one deliberate exception, and it comes only from the <code>MSSQL_PASSWORD</code> environment variable, never a flag.</li>
 </ul>
 <h2 id="core-design-principles">Core design principles</h2>
 <h3 id="waf-aware-retry">WAF-aware retry</h3>
 <p>The downloader treats CloudFront's 403 responses as a first-class classification problem. Blocked traffic (WAF) and missing files (S3 <code>AccessDenied</code>) both come back as HTTP 403; only the response body distinguishes them. Naive clients can't tell them apart and either false-positive on rate limiting (unnecessary backoff on files that just don't exist) or hammer through a WAF block, extending the ban.</p>
-<p>The downloader's classifier looks at the body, then applies an exponential backoff ladder (5 → 15 → 60 minutes) when it sees a real WAF signal, and terminates cleanly at the year/month boundary when it has exhausted retries. A <code>404</code>-equivalent (S3 saying "this month wasn't published") is recorded and skipped without triggering backoff. That combination lets unattended catch-up runs stay well-behaved without a human sitting on them, and it lets the same script be invoked from cron without risking a runaway retry loop against a live WAF policy.</p>
+<p>The downloader's classifier looks at the body, then applies an exponential backoff ladder (30s → 90s → 270s, capped at 3600s) when it sees a real WAF signal, and terminates cleanly at the year/month boundary when it has exhausted retries. A <code>404</code>-equivalent (S3 saying "this month wasn't published") is recorded and skipped without triggering backoff. That combination lets unattended catch-up runs stay well-behaved without a human sitting on them, and it lets the same tool be invoked from cron without risking a runaway retry loop against a live WAF policy.</p>
 <h3 id="data-loss-is-an-error">Data loss is an error</h3>
 <p>The normalizer refuses to silently drop columns or perform lossy casts. Every discarded column, every type-narrowing cast, every null-fill of a previously-required column requires an explicit <code>ack_date</code> in the mapping YAML acknowledging the decision. The rationale: normalization is lossy by definition (target schema ≠ source schema), and treating that as "just log a warning and move on" is exactly how production surprises happen years later.</p>
 <p>Making it a hard error forces the human to think about the trade-off once, then documents the decision in git history where the next person can find it. When a new drift shows up in a subsequent month, the normalizer's bootstrap+amend workflow produces a <em>commented</em> YAML entry for the new item — the pipeline breaks until a human uncomments it, and the reviewer can see exactly which month first introduced the change. Silent success is never a state the tool can end up in.</p>
@@ -1443,19 +1599,19 @@
 <p><strong>Bootstrap</strong> is the initial mapping YAML generated from a full analysis of the historical parquet. It records the target schema, the acknowledged drops and casts, and the accepted renames.</p>
 <p><strong>Amend</strong> is the mode the normalizer runs in on subsequent passes: it compares current files against the existing mapping and adds commented entries for anything new (new columns, new type variations, new candidate renames). The reviewer then decides which of those entries to uncomment. This gives new drift the same review discipline as the original mapping without re-doing the whole review each month.</p>
 <h3 id="per-file-atomicity">Per-file atomicity</h3>
-<p>Both the normalizer and the downloader write to <code>&lt;name&gt;.tmp.&lt;ext&gt;</code> and atomically rename to the final path via <code>os.replace</code> / <code>mv</code> only after the write succeeds. Interrupted runs leave no half-written files. When either tool checks whether an existing file is "already done", it validates the PAR1 head-and-tail bytes rather than just checking that the path exists — a zero-byte or truncated file will not pass the check and will be re-downloaded or re-normalized on the next run.</p>
-<p>The combination survives Ctrl-C, network drops, and disk-full events without state corruption. There are no lock files, no journal, no separate manifest to keep in sync — the filesystem itself is the state store. This matters most for long-running downloader jobs, where a mid-file crash is inevitable at some point over 15 years of data, and for normalize runs against thousands of parquet files, where any per-file bookkeeping would become its own reliability problem.</p>
+<p>Both the normalizer and the downloader write to a temp path and atomically rename to the final path via <code>os.replace</code> only after the write succeeds. Interrupted runs leave no half-written files. When either tool checks whether an existing file is "already done" and can be skipped, that check is a plain presence check (<code>dest.exists()</code> for the downloader, <code>out_path.exists()</code> for the normalizer) — but every freshly downloaded file <em>is</em> validated against the PAR1 parquet magic bytes before being accepted, so a zero-byte or truncated download is caught and re-fetched rather than silently left on disk to be skipped later.</p>
+<p>The combination survives Ctrl-C, network drops, and disk-full events without state corruption. There are no lock files, no journal, no separate manifest to keep in sync for these two stages — the filesystem itself is the state store. This matters most for long-running downloader jobs, where a mid-file crash is inevitable at some point over 15 years of data, and for normalize runs against thousands of parquet files, where any per-file bookkeeping would become its own reliability problem. (The loader is the one stage that <em>does</em> keep a manifest — see the <a href="../guides/loader/#idempotent-reconcile-skip-append-truncate-reload">loader guide</a> — because "already loaded into SQL Server" isn't something a filesystem check alone can answer.)</p>
 <h3 id="metadata-first-scan-only-when-needed">Metadata-first, scan only when needed</h3>
 <p>Parquet footers store per-column min, max, null-count, and type. The normalizer's planner uses those to decide auto-drop safety (is the column all-null?), auto-cast safety (does the observed range fit the target type?), and null-fill decisions (is the column missing entirely from this file?) — no data scan required. A directory of a hundred parquet files can be planned in a few hundred milliseconds because it's just a hundred footer reads.</p>
 <p>Only precision-loss checks — for example, <code>DOUBLE</code> → <code>BIGINT</code> when the source has fractional values — require a full column scan. Those always run at 100% sample regardless of the <code>--sample</code> flag, because "we sampled and didn't see a problem" is not a safe answer to that particular question: a single fractional row would silently truncate. Metadata reads are constant-time per file; scans are linear in row count, and the difference matters when you're normalizing 15 years of monthly parquet.</p>
 <h3 id="human-in-the-loop-for-ambiguity">Human-in-the-loop for ambiguity</h3>
 <p>schema-drift's rename detection is heuristic. It compares column names and value distributions across months and decides whether a "dropped" column and an "added" column in the same file are actually the same column with a new name.</p>
-<p>High-confidence renames get marked as such; low-confidence ones get emitted as <code>SUGGESTED</code> with a confidence percentage rather than acted on. normalize's bootstrap+amend workflow takes those <code>SUGGESTED</code> items and turns them into <strong>commented</strong> YAML that a human uncomments to accept. No matter how good the heuristic gets, this pattern keeps the human in control of the decisions that matter — column renames across years of production data are not a place for silent auto-remediation, and confidence percentages give the reviewer a first-pass filter without pretending to make the decision for them.</p>
+<p>High-confidence renames get marked as such; low-confidence ones get emitted as <code>SUGGESTED</code> with a confidence percentage rather than acted on. normalize's bootstrap+amend workflow takes those <code>SUGGESTED</code> items and turns them into <strong>commented</strong> YAML that a human uncomments to accept. No matter how good the heuristic gets, this pattern keeps the human in control of the decisions that matter — column renames across years of production data are not a place for silent auto-remediation, and confidence percentages give the reviewer a first-pass filter without pretending to make the decision for them. (<code>taxi-curate-mappings</code> offers an explicitly-invoked, opt-in way to auto-accept this class of decision when unattended operation matters more than a per-drift human review — see the <a href="../guides/orchestrator/#taxi-curate-mappings">orchestrator guide</a>.)</p>
 <h3 id="monorepo-rationale">Monorepo rationale</h3>
-<p>Four separate repos would have been the default choice. This project runs as a monorepo because:</p>
+<p>Five separate repos would have been the default choice. This project runs as a monorepo because:</p>
 <ul>
-<li>The four tools share a common data domain (TLC parquet, DuckDB introspection, SQL Server type mapping). Splitting them would fragment domain knowledge across four <code>README.md</code> files.</li>
-<li><code>taxi_shared</code> (DuckDB → SQL Server type mapping + CREATE TABLE generation) is used by k6-loadtest today and will be used by the planned SQL Server loader tomorrow. Splitting would require versioning, publishing, and coordinating three separate repos to make a change that today is a single PR.</li>
+<li>The tools share a common data domain (TLC parquet, DuckDB introspection, SQL Server type mapping). Splitting them would fragment domain knowledge across five separate <code>README.md</code> files.</li>
+<li><code>taxi_shared</code> (DuckDB → SQL Server type mapping + CREATE TABLE generation) is used by the loader today. Splitting the loader and <code>taxi_shared</code> into separate repos would require versioning, publishing, and coordinating two repos to make a change that today is a single PR.</li>
 <li>One <code>pyproject.toml</code>, one <code>uv.lock</code>, one test suite, one <code>mkdocs build</code>. Ops is dramatically simpler.</li>
 <li>Each tool remains independently usable — the monorepo structure documents the coupling that exists (shared library, shared conventions) without forcing coupling that doesn't (each tool has its own CLI entry point and its own directory).</li>
 </ul>
@@ -1465,37 +1621,39 @@
 <p><code>shared/src/taxi_shared/</code> is deliberately small. Two modules:</p>
 <ul>
 <li><strong><code>type_mapping.py</code></strong> — DuckDB → SQL Server type mapping. Handles the common cases (<code>DOUBLE</code> → <code>FLOAT</code>, <code>VARCHAR</code> → <code>NVARCHAR(MAX)</code>, <code>TIMESTAMP</code> → <code>DATETIME2</code>, and so on) and the <code>DECIMAL(p,s)</code> parameterization where DuckDB's precision and scale are carried through to the SQL Server column definition.</li>
-<li><strong><code>sql_generator.py</code></strong> — <code>CREATE TABLE</code> DDL generation from a DuckDB schema. Used by k6-loadtest's preprocessor today, and reserved for use by the future SQL Server loader.</li>
+<li><strong><code>sql_generator.py</code></strong> — <code>CREATE TABLE</code> DDL generation from a DuckDB schema. Used by the loader (<code>taxi_loader</code>) to derive each year's table DDL directly from the normalized parquet's schema.</li>
 </ul>
 <p>The downloader, schema-drift, and normalize don't import <code>taxi_shared</code> — none of them touch SQL Server. Keeping the shared library scoped to the SQL Server concern keeps its API surface small and its change cadence slow: type mappings change when SQL Server introduces a new type, which is roughly once a decade.</p>
-<p>The alternative — a fat "utilities" package that everything imports — would tie the four tools' release cadences together and turn every shared-library refactor into a coordinated change across the whole repo. The current shape means <code>taxi_shared</code> can be evolved for SQL Server needs without any risk of breaking the downloader.</p>
+<p>The alternative — a fat "utilities" package that everything imports — would tie every tool's release cadence together and turn every shared-library refactor into a coordinated change across the whole repo. The current shape means <code>taxi_shared</code> can be evolved for SQL Server needs without any risk of breaking the downloader.</p>
 <p>If shared logic is discovered later (for example, a parquet-family iteration helper used by both schema-drift and normalize), the plan is to add a second small package under <code>shared/src/</code> rather than growing <code>taxi_shared</code> into a catch-all.</p>
 <h2 id="testing-philosophy">Testing philosophy</h2>
 <p>Every test builds its own synthetic parquet fixtures with DuckDB inside <code>conftest.py</code> (per component) and writes them under <code>tmp_path</code>. There are no network dependencies, no shared filesystem state, and no fixtures that persist across runs. This means:</p>
 <ul>
-<li><strong>Fast</strong>: 83 tests run in under a second.</li>
+<li><strong>Fast</strong>: the fast unit suite — every test except <code>tests/taxi_loader/test_load_integration.py</code> and <code>tests/e2e/</code> — runs in seconds on a laptop, no external services required. This is what <code>uv run --extra test pytest -q</code> gives you locally and what CI's <code>test</code> job runs on every push.</li>
 <li><strong>Deterministic</strong>: no flakiness from external services, no rate-limited APIs, no "the CI runner had a different DNS resolver" mysteries.</li>
 <li><strong>Isolated</strong>: tests can't corrupt each other's state because each one writes to its own <code>tmp_path</code>.</li>
 <li><strong>Grounded</strong>: fixtures produce real parquet files that exercise the real DuckDB code paths. There are no mocks of DuckDB or of the parquet reader — the code that runs in tests is the code that runs in production.</li>
 <li><strong>Debuggable</strong>: when a test fails, <code>tmp_path</code> contains the actual parquet files that broke it. You can open them in DuckDB and inspect them directly, without regenerating anything.</li>
 </ul>
-<p>The downside is real: there is no true end-to-end test against live TLC CloudFront, a real SQL Server, or a real xk6-sql runner. Those integration points are validated manually before releases. That trade-off is acceptable for a project of this size; a larger codebase would need a separate integration suite that runs less often but exercises the real dependencies.</p>
-<p>The upshot is that the test suite doubles as a fast feedback loop during development. <code>pytest</code> on a laptop is under a second, so a change-run-observe cycle costs less than a git commit. That's a deliberate design goal, not an accident of scale.</p>
+<p>A second, smaller suite needs a real SQL Server: <code>tests/taxi_loader/test_load_integration.py</code> and <code>tests/e2e/test_pipeline_e2e.py</code> are skipped automatically unless <code>MSSQL_PASSWORD</code> is set. CI's <code>integration</code> job runs them against a disposable <code>mssql/server</code> container on every push; locally, <code>scripts/e2e-smoke.sh</code> does the same (bring up a container, <code>scripts/wait_for_mssql.py</code> to wait for readiness, run the two suites, tear the container down). There is still no test against live TLC CloudFront — that integration point is validated manually before releases — but the SQL Server side is exercised automatically now that the loader exists.</p>
+<p>The upshot is that the fast unit suite doubles as a tight feedback loop during development — a change-run-observe cycle that costs less than a git commit — while the container-backed integration/e2e suite catches the class of bug (a <code>COPY</code> that doesn't actually round-trip through the <code>mssql</code> extension, a pipeline wiring mistake) that synthetic-fixture unit tests structurally can't.</p>
 <p>Component-level test layouts:</p>
 <ul>
+<li><code>tests/downloader/</code> — synthetic PAR1 fixtures and stubbed HTTP responses exercising the WAF classifier, backoff ladder, and recent-mode/full-history walkers.</li>
 <li><code>tests/schema_drift/</code> — synthetic parquet families with injected column adds, drops, renames, and type changes.</li>
 <li><code>tests/taxi_normalize/</code> — synthetic parquet with schema drift plus mapping YAML fixtures covering acknowledged and unacknowledged drift.</li>
-<li><code>tests/k6_loadtest/</code> — synthetic parquet used to drive the preprocessor; the K6 binary itself is not exercised in unit tests.</li>
+<li><code>tests/taxi_loader/</code> — the reconcile planner (skip/append/reload) tested purely against synthetic disk/manifest/table-count inputs, plus <code>test_load_integration.py</code> for the real <code>COPY</code>-into-SQL-Server path (needs <code>MSSQL_PASSWORD</code>, skipped otherwise).</li>
+<li><code>tests/taxi_orchestrate/</code> — stage classification (<code>pipeline.classify</code>, <code>overall_exit_code</code>) and CLI wiring, with the subprocess calls to the other tools stubbed out.</li>
 <li><code>tests/taxi_shared/</code> — DuckDB schemas fed through the type mapper and DDL generator; string-compare against expected <code>CREATE TABLE</code> output.</li>
+<li><code>tests/e2e/</code> — the full download → normalize → load pipeline run against generated fake data and a real SQL Server; skipped without <code>MSSQL_PASSWORD</code>.</li>
 </ul>
 <h2 id="whats-not-built-yet">What's not built yet</h2>
-<p>A few sub-projects are planned but not implemented. They're mentioned here because the current architecture leaves seams for them — each is a stage or wrapper that fits into the existing pipeline without changing the shape of what's already built.</p>
+<p>A few sub-projects are planned but not implemented. They're mentioned here because the current architecture leaves seams for them.</p>
 <ul>
-<li><strong>SQL Server loader</strong> — a DuckDB-based bulk loader that consumes <code>raw-normalized/&lt;type&gt;/**/*.parquet</code> and populates a SQL Server database. Today the load step happens indirectly, as a side effect of running k6-loadtest, which is fine for load testing but awkward for actually populating a warehouse. A dedicated loader would decouple "load the data" from "load-test SQL Server" and reuse <code>taxi_shared</code> for DDL generation.</li>
-<li><strong>Orchestrator</strong> — a scheduler + state tracker that runs the full pipeline (download → analyze → normalize → load) on a cadence, tracks last-successful-run per data type, and notifies a human when normalize amends a mapping (i.e., new drift needs review). This is the operational counterpart of the bootstrap+amend design: today the human runs each step; the orchestrator would run the steps and pull the human in only when normalize flags something as needing acknowledgement.</li>
-<li><strong>CI testing pipeline + dev/test/prod promotion</strong> — a CI workflow already runs on push (<code>.github/workflows/ci.yml</code>) and executes the pytest suite. Staged promotion of loaded data across dev, test, and prod SQL Server instances — with schema-diff gates between environments — is future work and depends on the SQL Server loader landing first.</li>
+<li><strong>dev/test/prod promotion + release pipeline</strong> — CI already runs <code>test</code>, <code>docs</code>, and <code>integration</code> jobs (<code>.github/workflows/ci.yml</code>) on every push. A tag-driven promotion flow — publishing to TestPyPI (test) and PyPI (prod) via Trusted Publishing, with the <code>integration</code> job as a required PR gate on <code>dev</code> — is designed (see spec below) but not yet wired up.</li>
 </ul>
-<p>None of these are blocking for the current use cases (mirror TLC data, analyze drift, normalize to a target schema, load-test SQL Server). They're listed so the architecture's future shape is legible from today's code.</p>
+<p>See spec: docs/superpowers/specs/2026-07-25-devtestprod-promotion-design.md.</p>
+<p>The mirror-download, drift-analysis, normalize, and SQL-Server-load stages are all built and covered by the guides linked from this page; this section is deliberately short because most of what used to be "not built yet" — the SQL Server loader and the orchestrator — has since landed.</p>
 
 
 

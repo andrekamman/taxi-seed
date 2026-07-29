@@ -6,7 +6,7 @@
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
       
-        <meta name="description" content="Downloader, schema-drift analyzer, and K6 SQL Server load tester for NYC TLC taxi trip data">
+        <meta name="description" content="Downloader, schema-drift analyzer, normalizer, SQL Server loader, and orchestrator for NYC TLC taxi trip data">
       
       
       
@@ -25,7 +25,7 @@
     
     
       
-        <title>taxi</title>
+        <title>taxi-seed</title>
       
     
     
@@ -76,7 +76,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#taxi" class="md-skip">
+        <a href="#taxi-seed" class="md-skip">
           Skip to content
         </a>
       
@@ -92,7 +92,7 @@
 
 <header class="md-header md-header--shadow" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="Header">
-    <a href="." title="taxi" class="md-header__button md-logo" aria-label="taxi" data-md-component="logo">
+    <a href="." title="taxi-seed" class="md-header__button md-logo" aria-label="taxi-seed" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
@@ -106,7 +106,7 @@
       <div class="md-header__ellipsis">
         <div class="md-header__topic">
           <span class="md-ellipsis">
-            taxi
+            taxi-seed
           </span>
         </div>
         <div class="md-header__topic" data-md-component="header-topic">
@@ -233,13 +233,13 @@
 
 <nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
-    <a href="." title="taxi" class="md-nav__button md-logo" aria-label="taxi" data-md-component="logo">
+    <a href="." title="taxi-seed" class="md-nav__button md-logo" aria-label="taxi-seed" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
 
     </a>
-    taxi
+    taxi-seed
   </label>
   
     <div class="md-nav__source">
@@ -561,14 +561,42 @@
   
   
     <li class="md-nav__item">
-      <a href="guides/k6-loadtest/" class="md-nav__link">
+      <a href="guides/loader/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    K6 Load Test
+    Loader
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="guides/orchestrator/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Orchestrator
   
 
     
@@ -945,14 +973,14 @@
   
   
     <li class="md-nav__item">
-      <a href="superpowers/specs/2026-03-25-k6-sql-load-testing-design/" class="md-nav__link">
+      <a href="superpowers/specs/2026-07-22-documentation-design/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    K6 SQL load testing
+    Documentation site
   
 
     
@@ -973,14 +1001,126 @@
   
   
     <li class="md-nav__item">
-      <a href="superpowers/specs/2026-07-22-documentation-design/" class="md-nav__link">
+      <a href="superpowers/specs/2026-07-22-sql-loader-design/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    Documentation site
+    SQL loader
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="superpowers/specs/2026-07-23-orchestrator-design/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Orchestrator
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="superpowers/specs/2026-07-26-python-downloader-design/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Python downloader
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="superpowers/specs/2026-07-26-configurable-data-dir-design/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Configurable data dir
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="superpowers/specs/2026-07-26-documentation-sync-design/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Documentation sync
   
 
     
@@ -1140,21 +1280,24 @@
   
 
 
-<h1 id="taxi">taxi</h1>
-<p><code>taxi</code> is one repo, four tools for working with the NYC Taxi &amp; Limousine
-Commission (TLC) trip record data set: a WAF-aware CloudFront downloader that
-recovers from block pages (WAF = Web Application Firewall — the layer AWS uses
-to block traffic that looks like a scraper), a schema-drift analyzer that combines column-name
-heuristics with data-verified rename detection, a K6-based SQL Server load
-tester with real and synthetic modes, and a normalizer that halts on any data
-loss unless the operator explicitly acknowledges the drift. A full-history
-mirror is roughly 40 GB of parquet and takes 6–10 hours to download end-to-end
-on residential broadband, so the pipeline is designed to be resumable,
-incremental, and cheap to re-run on a schedule rather than something you kick
-off once and hope survives. The project is MIT-licensed. The downloader
-shell script was loosely based on
+<h1 id="taxi-seed">taxi-seed</h1>
+<p><code>taxi-seed</code> is one repo, one Python package with five tools (plus a shared
+library) for working with the NYC Taxi &amp; Limousine Commission (TLC) trip
+record data set: a WAF-aware CloudFront downloader that recovers from block
+pages (WAF = Web Application Firewall — the layer AWS uses to block traffic
+that looks like a scraper), a schema-drift analyzer that combines column-name
+heuristics with data-verified rename detection, a normalizer that halts on any
+data loss unless the operator explicitly acknowledges the drift, a loader that
+lands normalized parquet into a target database, and an orchestrator that
+drives the download → normalize → load pipeline end-to-end. A
+full-history mirror is roughly 40–100 GB of parquet (depending on how many of
+the four series and how much history you mirror) and takes 6–10 hours to
+download end-to-end on residential broadband, so the pipeline is designed to
+be resumable, incremental, and cheap to re-run on a schedule rather than
+something you kick off once and hope survives. The project is MIT-licensed.
+The downloader was loosely based on
 <a href="https://github.com/toddwschneider/nyc-taxi-data"><code>toddwschneider/nyc-taxi-data</code></a>;
-the other three tools are original to this repo. See
+the other tools are original to this repo. See
 <a href="#acknowledgments">Acknowledgments</a> for details.</p>
 <h2 id="why-this-repo">Why this repo</h2>
 <ul>
@@ -1162,8 +1305,8 @@ the other three tools are original to this repo. See
   <code>403 AccessDenied</code> responses (a missing object, retry is pointless) from HTML
   block pages served by AWS WAF (a transient rate limit, retry is mandatory),
   which is the single most common failure mode when scraping the TLC bucket at
-  any real volume. When a block is detected the downloader walks a 5 → 15 → 60
-  minute exponential backoff ladder to ride out the WAF window without
+  any real volume. When a block is detected the downloader walks a 30s → 90s → 270s
+  exponential backoff ladder (capped at 3600s) to ride out the WAF window without
   hammering the origin, and the incremental catch-up mode stops the moment a
   locally-existing file is encountered so scheduled runs stay cheap even once
   the mirror is warm. The net effect is that a nightly cron survives WAF
@@ -1173,21 +1316,18 @@ the other three tools are original to this repo. See
   something to paper over. That means silent data loss on lossy <code>DOUBLE →
   BIGINT</code> casts, dropped payment-type columns, or a vendor quietly renaming
   <code>pickup_datetime</code> to <code>tpep_pickup_datetime</code> all halt the run instead of
-  producing plausible-looking-but-wrong output. <code>ack_date</code> is the only
-  required field in the mapping YAML, and bootstrap + amend semantics mean
+  producing plausible-looking-but-wrong output. <code>target</code> is the only other
+  required top-level key in the mapping YAML besides <code>ack_date</code> (required
+  within each lossy-cast/data-loss entry), and bootstrap + amend semantics mean
   scheduled runs auto-detect newly-introduced drift and append review items
   to the mapping instead of dropping the affected columns; the drift analyzer
   uses DuckDB for parquet introspection so you can trust its verdict on
   columns that changed shape mid-file.</li>
-<li><strong>Realistic K6 load testing</strong> — the SQL Server load tester runs against
-  either real parquet trip data or a synthetic generator that starts
-  instantly, so you can iterate on a <code>test.js</code> in seconds without waiting for
-  a multi-gigabyte load. A Python preprocessor turns parquet files into a
-  self-contained K6 test bundle — a DDL script, chunked JSON payloads, and a
-  <code>test.js</code> entry point — so a benchmark is one <code>k6 run</code> away with no
-  external state. The rig uses <a href="https://k6.io/">K6</a> with the <code>xk6-sql</code>
-  extension so you drive real SQL Server connections and get K6's built-in
-  percentile reporting on top.</li>
+<li><strong>Loader + orchestrator for the full pipeline</strong> — the loader lands
+  normalized parquet into a target database, and the orchestrator drives
+  download → normalize → load as a single scheduled run, so a
+  nightly cron can go from "check for new months" to "target database is
+  up to date" without hand-wiring the individual tools together.</li>
 </ul>
 <h2 id="how-it-compares">How it compares</h2>
 <table>
@@ -1202,7 +1342,7 @@ the other three tools are original to this repo. See
 <tbody>
 <tr>
 <td>Primary use case</td>
-<td>resumable mirror + normalize + benchmark</td>
+<td>resumable mirror + normalize + load</td>
 <td>one-shot Postgres load</td>
 <td>ad-hoc SQL over remote parquet</td>
 </tr>
@@ -1214,7 +1354,7 @@ the other three tools are original to this repo. See
 </tr>
 <tr>
 <td>WAF-aware retry</td>
-<td>classifier + 5/15/60 min exponential backoff</td>
+<td>classifier + 30s/90s/270s exponential backoff (capped 3600s)</td>
 <td>none — fails on WAF block page</td>
 <td>N/A (single HTTP range request per scan)</td>
 </tr>
@@ -1226,19 +1366,13 @@ the other three tools are original to this repo. See
 </tr>
 <tr>
 <td>Target database</td>
-<td>any (parquet-first) + SQL Server load-test bundles</td>
+<td>SQL Server (via DuckDB <code>mssql</code> extension)</td>
 <td>Postgres</td>
 <td>DuckDB (in-process)</td>
 </tr>
 <tr>
-<td>Load testing</td>
-<td>K6 bundle: DDL + chunked JSON + <code>test.js</code></td>
-<td>none</td>
-<td>none</td>
-</tr>
-<tr>
 <td>Install effort</td>
-<td><code>uv sync</code>; Go 1.22+ only if you build the K6 rig</td>
+<td><code>uv sync</code></td>
 <td>Postgres + shell + Ruby + client</td>
 <td>single <code>duckdb</code> binary</td>
 </tr>
@@ -1247,20 +1381,21 @@ the other three tools are original to this repo. See
 <h2 id="quick-start">Quick start</h2>
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-1">1</a></span>
 <span class="normal"><a href="#__codelineno-0-2">2</a></span>
-<span class="normal"><a href="#__codelineno-0-3">3</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1"></a>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/andrekamman/taxi-seed.git
-<a id="__codelineno-0-2" name="__codelineno-0-2"></a><span class="nb">cd</span><span class="w"> </span>taxi
-<a id="__codelineno-0-3" name="__codelineno-0-3"></a>./downloader/download_taxi_data.sh<span class="w"> </span>--recent<span class="w"> </span><span class="m">3</span><span class="w"> </span>yellow
+<span class="normal"><a href="#__codelineno-0-3">3</a></span>
+<span class="normal"><a href="#__codelineno-0-4">4</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1"></a>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/andrekamman/taxi-seed.git
+<a id="__codelineno-0-2" name="__codelineno-0-2"></a><span class="nb">cd</span><span class="w"> </span>taxi-seed
+<a id="__codelineno-0-3" name="__codelineno-0-3"></a>uv<span class="w"> </span>sync
+<a id="__codelineno-0-4" name="__codelineno-0-4"></a>uv<span class="w"> </span>run<span class="w"> </span>taxi-download<span class="w"> </span>yellow<span class="w"> </span>--recent<span class="w"> </span><span class="m">3</span>
 </code></pre></div></td></tr></table></div>
 <div class="admonition tip">
 <p class="admonition-title">Tip</p>
-<p>Downloads ~200 MB in 1–2 minutes on residential broadband. This Quick Start only exercises the downloader (bash + curl — no Python needed). To use the other three tools (schema-drift, normalize, k6-preprocess) you'll additionally need <code>uv sync</code> for the Python side; <a href="getting-started/">Getting Started</a> walks the full end-to-end path from clone to normalized parquet.</p>
+<p>Downloads ~200 MB in 1–2 minutes on residential broadband. This Quick Start only exercises the downloader, but every tool in the repo lives in the same <code>uv sync</code>-managed environment; <a href="getting-started/">Getting Started</a> walks the full end-to-end path from clone to normalized parquet.</p>
 </div>
 <h2 id="requirements">Requirements</h2>
 <ul>
-<li><code>bash</code> 4+ and <code>curl</code> (macOS/Linux ship both; on Windows install <a href="https://gitforwindows.org/">Git for Windows</a> and run in Git Bash). Required by the downloader; that's all the downloader needs.</li>
-<li>Python 3.12 or 3.13, and <a href="https://github.com/astral-sh/uv">uv</a> for Python environment management. Required by the other three tools (schema-drift, normalize, k6-preprocess), which are all Python.</li>
+<li>Python 3.12 or 3.13, and <a href="https://github.com/astral-sh/uv">uv</a> for Python environment management. Required by every tool in the repo, including the downloader.</li>
 <li>Disk sized to intent — see the <a href="guides/downloader/#disk-sizing">Downloader guide</a> for a sizing table.</li>
-<li>Individual tools list per-guide prerequisites (Go 1.22+ for the K6 binary build, SQL Server for load testing, etc.).</li>
+<li>Individual tools list per-guide prerequisites (a target database for the loader, etc.).</li>
 </ul>
 <h2 id="where-to-next">Where to next</h2>
 <ul>
@@ -1270,19 +1405,19 @@ the other three tools are original to this repo. See
   so you have a working pipeline before you dive into the deep-dive guides.</li>
 <li><strong><a href="guides/downloader/">Guides</a></strong> — one deep-dive per tool. Start with the
   Downloader guide for WAF classifier internals, the backoff ladder, and disk
-  sizing; the Normalizer, Drift analyzer, and Load-tester guides cover each
-  tool's flags, failure modes, and recommended production settings.</li>
+  sizing; the Normalizer and Drift analyzer guides cover each tool's flags,
+  failure modes, and recommended production settings.</li>
 <li><strong><a href="cookbook/">Cookbook</a></strong> — cross-cutting recipes that combine multiple
   tools: a nightly cron that mirrors + normalizes unattended, querying the
-  mirror with DuckDB <code>httpfs</code> without a full load, load-testing normalized
-  data at scale, and running the whole pipeline behind a corporate proxy.</li>
+  mirror with DuckDB <code>httpfs</code> without a full load, and running the whole
+  pipeline behind a corporate proxy.</li>
 </ul>
 <h2 id="acknowledgments">Acknowledgments</h2>
-<p>The <strong>downloader</strong> shell script was loosely based on
+<p>The <strong>downloader</strong> was loosely based on
 <a href="https://github.com/toddwschneider/nyc-taxi-data"><code>toddwschneider/nyc-taxi-data</code></a>
 (MIT) — specifically its convention for organizing TLC parquet by type and
-year. The rest of the repo (schema-drift analyzer, normalizer, k6-loadtest rig)
-is original work and shares no code with Todd's project. See
+year. The rest of the repo (schema-drift analyzer, normalizer, loader,
+orchestrator) is original work and shares no code with Todd's project. See
 <a href="https://github.com/andrekamman/taxi-seed/blob/main/THIRD_PARTY_NOTICES">THIRD_PARTY_NOTICES</a>
 for the full attribution.</p>
 

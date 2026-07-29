@@ -10,7 +10,7 @@
       
       
       
-        <link rel="canonical" href="https://andrekamman.github.io/taxi-seed/superpowers/notes/2026-07-22-mssql-extension-spike/">
+        <link rel="canonical" href="https://andrekamman.github.io/taxi-seed/superpowers/specs/2026-07-29-docs-audit-rewrite-design/">
       
       
       
@@ -23,7 +23,7 @@
     
     
       
-        <title>mssql extension spike — findings - taxi-seed</title>
+        <title>Documentation Audit & Rewrite — Design - taxi-seed</title>
       
     
     
@@ -74,7 +74,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#mssql-extension-spike-findings" class="md-skip">
+        <a href="#documentation-audit-rewrite-design" class="md-skip">
           Skip to content
         </a>
       
@@ -110,7 +110,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              mssql extension spike — findings
+              Documentation Audit &amp; Rewrite — Design
             
           </span>
         </div>
@@ -802,7 +802,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../specs/2026-07-19-monorepo-restructure-design/" class="md-nav__link">
+      <a href="../2026-07-19-monorepo-restructure-design/" class="md-nav__link">
         
   
   
@@ -830,7 +830,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../specs/2026-07-21-normalizer-design/" class="md-nav__link">
+      <a href="../2026-07-21-normalizer-design/" class="md-nav__link">
         
   
   
@@ -858,7 +858,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../specs/2026-07-22-documentation-design/" class="md-nav__link">
+      <a href="../2026-07-22-documentation-design/" class="md-nav__link">
         
   
   
@@ -886,7 +886,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../specs/2026-07-22-sql-loader-design/" class="md-nav__link">
+      <a href="../2026-07-22-sql-loader-design/" class="md-nav__link">
         
   
   
@@ -914,7 +914,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../specs/2026-07-23-orchestrator-design/" class="md-nav__link">
+      <a href="../2026-07-23-orchestrator-design/" class="md-nav__link">
         
   
   
@@ -942,7 +942,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../specs/2026-07-26-python-downloader-design/" class="md-nav__link">
+      <a href="../2026-07-26-python-downloader-design/" class="md-nav__link">
         
   
   
@@ -970,7 +970,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../specs/2026-07-26-configurable-data-dir-design/" class="md-nav__link">
+      <a href="../2026-07-26-configurable-data-dir-design/" class="md-nav__link">
         
   
   
@@ -998,7 +998,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../specs/2026-07-26-documentation-sync-design/" class="md-nav__link">
+      <a href="../2026-07-26-documentation-sync-design/" class="md-nav__link">
         
   
   
@@ -1080,22 +1080,22 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#confirmed-without-a-sql-server-community-repo-local-duckdb" class="md-nav__link">
+  <a href="#problem" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Confirmed WITHOUT a SQL Server (community repo + local DuckDB)
+        Problem
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Confirmed WITHOUT a SQL Server (community repo + local DuckDB)">
+    <nav class="md-nav" aria-label="Problem">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#version-pin-caveat-surface-to-maintainer" class="md-nav__link">
+  <a href="#root-cause-two-distinct-problems" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Version-pin caveat (surface to maintainer)
+        Root cause (two distinct problems)
       
     </span>
   </a>
@@ -1108,10 +1108,165 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#live-validation-complete-sql-server-2022-in-docker" class="md-nav__link">
+  <a href="#goal" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Live validation — COMPLETE (SQL Server 2022 in Docker)
+        Goal
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#scope" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Scope
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Scope">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#in-scope-18-living-doc-files" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        In scope — 18 living-doc files
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#out-of-scope" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Out of scope
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#approach-a-ground-truth-first-independent-parallel-audit" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Approach (A: ground-truth-first + independent parallel audit)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Approach (A: ground-truth-first + independent parallel audit)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#phase-1-establish-ground-truth" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Phase 1 — Establish ground truth
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phase-2-independent-parallel-audit" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Phase 2 — Independent parallel audit
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phase-3-surgical-rewrite-cross-doc-consistency" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Phase 3 — Surgical rewrite + cross-doc consistency
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phase-4-verification-definition-of-done" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Phase 4 — Verification &amp; definition of done
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phase-5-publish" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Phase 5 — Publish
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#published-historical-specs-decided-historical-banner" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Published historical specs (decided: historical banner)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#non-goals" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Non-goals
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#success-criteria" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Success criteria
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#risks-watch-items" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Risks / watch-items
       
     </span>
   </a>
@@ -1138,57 +1293,189 @@
   
 
 
-<h1 id="mssql-extension-spike-findings">mssql extension spike — findings</h1>
-<p><strong>Date:</strong> 2026-07-22
-<strong>Task:</strong> Task 1 of the SQL loader plan (<code>docs/superpowers/plans/2026-07-22-sql-loader.md</code>)
-<strong>Environment:</strong> macOS ARM64, DuckDB 1.4.4 (repo pin), <code>INSTALL mssql FROM community</code>.</p>
-<h2 id="confirmed-without-a-sql-server-community-repo-local-duckdb">Confirmed WITHOUT a SQL Server (community repo + local DuckDB)</h2>
-<ul>
-<li><code>INSTALL mssql FROM community; LOAD mssql;</code> succeeds on DuckDB 1.4.4 — no external system dependency. ✅</li>
-<li><strong>Installed extension version reports as <code>7e57d24</code></strong> — a git short-SHA, <strong>not</strong> a semver.
-  The DuckDB community-extension registry versions this extension by commit hash. The spec's
-  nominated pin <code>v0.2.1</code> is therefore not a value <code>INSTALL … FROM community</code> can return.
-  → <code>EXPECTED_MSSQL_EXT_VERSION = "7e57d24"</code> (see <code>loader/src/taxi_loader/connection.py</code>).
-  Read via <code>SELECT extension_version FROM duckdb_extensions() WHERE extension_name='mssql'</code>.</li>
-<li>Functions present (<code>SELECT function_name FROM duckdb_functions() WHERE function_name LIKE 'mssql%'</code>):
-  <code>mssql_azure_auth_test, mssql_close, mssql_exec, mssql_open, mssql_ping, mssql_pool_stats,
-  mssql_preload_catalog, mssql_refresh_cache, mssql_scan, mssql_version</code>.
-  The plan uses <code>mssql_exec</code> (scalar; DDL/DML, returns affected rows) and <code>mssql_scan(catalog, query)</code>
-  (table; reads). Both present. ✅ No <code>mssql_query</code> — the plan correctly uses <code>mssql_scan</code>.</li>
-</ul>
-<h3 id="version-pin-caveat-surface-to-maintainer">Version-pin caveat (surface to maintainer)</h3>
-<p>A commit-hash pin is brittle: whenever the community CI rebuilds the extension for DuckDB 1.4.x,
-the hash changes and the startup assertion (exit 2) will fire until <code>EXPECTED_MSSQL_EXT_VERSION</code>
-is bumped. This is exactly the spec's intent ("a version bump is a deliberate, tested change"),
-but the practical cadence of hash churn is higher than a semver would be. Options if it proves
-noisy: (a) relax the assertion to a warning, or (b) pin the DuckDB extension repo/version. Left as
-spec'd (hard assert) for v1.</p>
-<h2 id="live-validation-complete-sql-server-2022-in-docker">Live validation — COMPLETE (SQL Server 2022 in Docker)</h2>
-<p>The full env-gated integration suite (<code>tests/taxi_loader/test_load_integration.py</code>, 7 tests) now
-passes end-to-end against <code>mcr.microsoft.com/mssql/server:2022-latest</code> (amd64 under emulation on
-ARM64). Full repo suite: 125 passed with the server available. Two real bugs the README-grounded
-SQL missed were found and fixed here:</p>
+<h1 id="documentation-audit-rewrite-design">Documentation Audit &amp; Rewrite — Design</h1>
+<p><strong>Date:</strong> 2026-07-29
+<strong>Status:</strong> Approved (design)
+<strong>Scope owner:</strong> Andre Kamman</p>
+<h2 id="problem">Problem</h2>
+<p>The published documentation site (<a href="https://andrekamman.github.io/taxi-seed/">https://andrekamman.github.io/taxi-seed/</a>) is
+materially wrong. Its homepage still describes the repo as <code>taxi</code> with <strong>four
+tools including a "K6-based SQL Server load tester"</strong>, calls the downloader a
+"shell script", and quotes stale figures. None of this reflects the current
+codebase: five tools plus a shared library, a Python downloader, no K6 (that
+tool and its design were moved to the separate <code>taxi-lab</code> repo), and the repo is
+named <code>taxi-seed</code>.</p>
+<h3 id="root-cause-two-distinct-problems">Root cause (two distinct problems)</h3>
 <ol>
-<li><strong>DuckDB rejects bind parameters in <code>ATTACH</code>.</strong> <code>ATTACH ? AS mssql (TYPE mssql)</code> → Parser Error.
-   Fix: interpolate the connection string as an escaped single-quoted literal (<code>_sql_str</code>); it is
-   still never logged. (<code>connection.py</code>)</li>
-<li><strong>The <code>mssql</code> extension's ATTACH "context" is process-global</strong>, surviving across DuckDB
-   connections. A leaked attach collides with the next attach of the same name ("Context 'mssql'
-   already exists"). Fix: <code>main()</code> now <code>DETACH</code>es + closes on exit; integration tests hold only one
-   <code>mssql</code> attach at a time. (<code>cli.py</code>, tests)</li>
+<li>
+<p><strong>Deploy gap.</strong> The docs deploy job in <code>.github/workflows/ci.yml</code> triggers
+   <strong>only on push to <code>main</code></strong> (<code>if: github.ref == 'refs/heads/main'</code>). All doc
+   cleanup work lands on <code>dev</code> (the repo's default branch, <code>origin/HEAD → dev</code>).
+   GitHub Pages serves from <code>gh-pages</code>, last built <strong>2026-07-26 from <code>main</code>'s
+   tip <code>fe33231</code></strong> — which predates the K6 purge. <code>dev</code> is 3 commits ahead of
+   <code>main</code> with zero divergence (clean fast-forward available). So the public
+   site is a pre-cleanup snapshot even though much of the source is already
+   fixed.</p>
+</li>
+<li>
+<p><strong>Untrusted source.</strong> The user has twice caught prior "comprehensive review"
+   claims that were incomplete. Even where source markdown looks clean, it must
+   be independently re-verified against the code rather than trusted.</p>
+</li>
 </ol>
-<p>The following spellings are now confirmed working against the live server:</p>
+<h2 id="goal">Goal</h2>
+<p>An <strong>independent, evidence-backed audit and rewrite</strong> of all <em>living</em>
+documentation, treating the current source as untrusted, verifying every
+checkable claim against the actual code/CLI, rewriting anything inaccurate or
+stale — and then fixing the deploy so the corrected docs actually reach the
+public site.</p>
+<p>"Done" is defined by evidence (a strict build, a link check, a re-read of
+rendered output, and a findings report), not by assertion.</p>
+<h2 id="scope">Scope</h2>
+<h3 id="in-scope-18-living-doc-files">In scope — 18 living-doc files</h3>
 <ul>
-<li><code>ATTACH 'Server=host,1433;Database=db;User Id=sa;Password=…;Encrypt=yes;TrustServerCertificate=yes' AS mssql (TYPE mssql)</code></li>
-<li>Provisioning via <code>SELECT mssql_exec('&lt;master-attach&gt;', 'IF DB_ID(''taxi'') IS NULL EXEC(''CREATE DATABASE [taxi]'')')</code></li>
-<li><code>SELECT mssql_exec('mssql', '&lt;CREATE TABLE …&gt;')</code> (confirm whether DDL must be <code>EXEC('…')</code>-wrapped)</li>
-<li>Append: <code>COPY (SELECT * FROM read_parquet([...])) TO 'mssql://mssql/dbo/&lt;table&gt;' (FORMAT 'bcp', CREATE_TABLE false, TABLOCK true, FLUSH_ROWS 100000)</code></li>
-<li>Reload: <code>DROP TABLE IF EXISTS &lt;fq&gt;</code> → explicit <code>CREATE TABLE</code> → append-style <code>COPY</code> (no <code>REPLACE</code>)</li>
-<li>Reads: <code>SELECT … FROM mssql_scan('mssql', '&lt;query&gt;')</code></li>
+<li><strong>Root:</strong> <code>README.md</code></li>
+<li><strong>Component READMEs (5):</strong> <code>downloader/README.md</code>, <code>loader/README.md</code>,
+  <code>normalize/README.md</code>, <code>orchestrator/README.md</code>, <code>schema-drift/README.md</code></li>
+<li><strong>Site pages (13):</strong> <code>docs/index.md</code>, <code>docs/getting-started.md</code>,
+  <code>docs/cookbook.md</code>, <code>docs/architecture.md</code>, <code>docs/contributing.md</code>,
+  <code>docs/operations/releasing.md</code>, <code>docs/reference/configuration.md</code>,
+  <code>docs/reference/exit-codes.md</code>, <code>docs/guides/{downloader, loader, normalize,
+  schema-drift, orchestrator}.md</code></li>
 </ul>
-<p><strong>To finish the live spike / run integration:</strong> start Docker, then
-<code>docker run -d --name mssql-it -e ACCEPT_EULA=Y -e MSSQL_SA_PASSWORD='Str0ng_Passw0rd!' -p 1433:1433 mcr.microsoft.com/mssql/server:2022-latest</code>
-and <code>MSSQL_PASSWORD='Str0ng_Passw0rd!' uv run --extra test pytest tests/taxi_loader/test_load_integration.py -v</code>.</p>
+<h3 id="out-of-scope">Out of scope</h3>
+<ul>
+<li><code>docs/superpowers/plans/*</code> — historical planning archive (also excluded from
+  the site build via <code>exclude_docs</code>).</li>
+<li><code>docs/superpowers/specs/*</code> — historical point-in-time design records. <strong>Not
+  rewritten.</strong> See "Published historical specs" below for the one light-touch
+  exception.</li>
+<li><code>taxi-lab-handoff/*</code> — intentionally staged for migration to the <code>taxi-lab</code>
+  repo; K6 content there is expected.</li>
+</ul>
+<h2 id="approach-a-ground-truth-first-independent-parallel-audit">Approach (A: ground-truth-first + independent parallel audit)</h2>
+<h3 id="phase-1-establish-ground-truth">Phase 1 — Establish ground truth</h3>
+<p>Build one reference sheet, captured directly from the code, as the <em>only</em>
+trusted source for the audit. Commit it as a scratch artifact so verdicts are
+reproducible.</p>
+<p>Contents:</p>
+<ul>
+<li><strong>CLI surface:</strong> <code>--help</code> output for all six commands — <code>taxi-download</code>,
+  <code>schema-drift</code>, <code>normalize</code>, <code>taxi-load</code>, <code>taxi-run</code>, <code>taxi-curate-mappings</code>
+  — capturing real subcommands, flags, and defaults.</li>
+<li><strong>Exit codes:</strong> the actual exit-code constants / <code>sys.exit(...)</code> sites per
+  tool.</li>
+<li><strong>Config keys:</strong> the real config schema each tool reads.</li>
+<li><strong>Corrected core facts:</strong> tool count (5 tools + shared lib), downloader
+  language (Python), repo name (<code>taxi-seed</code>), disk-size figures, WAF backoff
+  ladder, number of TLC series.</li>
+<li><strong>Path/naming conventions:</strong> <code>raw/</code> layout, parquet organization, etc.</li>
+</ul>
+<h3 id="phase-2-independent-parallel-audit">Phase 2 — Independent parallel audit</h3>
+<p>Fan out <strong>one subagent per file (18 total)</strong> using Superpowers'
+dispatching-parallel-agents. Each agent receives <strong>only</strong> the ground-truth sheet
+plus its single assigned doc — deliberately <em>not</em> any prior conclusions — and
+returns a structured findings ledger:</p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>claim</code></td>
+<td>A checkable statement (command, flag, number, path, exit code, cross-link)</td>
+</tr>
+<tr>
+<td><code>verdict</code></td>
+<td>CONFIRMED / WRONG / STALE / UNVERIFIABLE</td>
+</tr>
+<tr>
+<td><code>evidence</code></td>
+<td>The ground-truth line or code reference deciding it</td>
+</tr>
+<tr>
+<td><code>fix</code></td>
+<td>Concrete suggested correction</td>
+</tr>
+</tbody>
+</table>
+<p>Agents are instructed to be exhaustive and to mark anything they cannot verify
+as UNVERIFIABLE rather than assume. All 18 ledgers are aggregated into one
+findings table.</p>
+<h3 id="phase-3-surgical-rewrite-cross-doc-consistency">Phase 3 — Surgical rewrite + cross-doc consistency</h3>
+<ul>
+<li>Fix every WRONG/STALE finding while preserving good existing prose (this is a
+  surgical rewrite, not a from-scratch regeneration).</li>
+<li>Run a whole-corpus consistency pass: repo name (<code>taxi-seed</code>), tool count,
+  terminology ("downloader", not "shell script"), identical use of the six
+  command names everywhere, and resolution of every internal cross-link/anchor.</li>
+</ul>
+<h3 id="phase-4-verification-definition-of-done">Phase 4 — Verification &amp; definition of done</h3>
+<ul>
+<li><code>uv run --extra docs mkdocs build --strict</code> passes (strict fails on broken
+  links / nav).</li>
+<li>Link/anchor check across all rewritten pages.</li>
+<li>Re-read the <strong>rendered</strong> output (built HTML), confirming the homepage and each
+  guide against ground truth.</li>
+<li>Produce a final findings report: every WRONG/STALE item and its resolution,
+  for user spot-check.</li>
+</ul>
+<h3 id="phase-5-publish">Phase 5 — Publish</h3>
+<ul>
+<li>Work lands on <code>dev</code> as one reviewable commit (or a short, well-scoped series).</li>
+<li>Publishing = <strong>fast-forward <code>dev → main</code></strong>, which triggers <code>gh-deploy</code> and
+  rebuilds Pages. (Decision: keep <code>main</code> as the docs-publish gate; the workflow
+  is unchanged.)</li>
+<li>After deploy, confirm the live site reflects the corrected copy.</li>
+<li><strong>No push to <code>main</code> without explicit user go-ahead.</strong></li>
+</ul>
+<h2 id="published-historical-specs-decided-historical-banner">Published historical specs (decided: historical banner)</h2>
+<p>A few <code>superpowers/specs/*</code> files are in the site nav under "Design Specs" and
+still describe "four tools / K6". Their bodies stay untouched (they are
+historical records), but each spec that describes a since-removed or changed
+feature gets a single italic header line:</p>
+<blockquote>
+<p><em>Historical design record (as of YYYY-MM-DD); the K6 load tester was later
+moved to the separate <code>taxi-lab</code> repo.</em></p>
+</blockquote>
+<p>This is a targeted addition to affected specs only — not a rewrite, and not a
+nav change.</p>
+<h2 id="non-goals">Non-goals</h2>
+<ul>
+<li>No rewrite of historical plans/specs bodies.</li>
+<li>No change to the <code>taxi-lab-handoff/</code> content.</li>
+<li>No change to the deploy-branch strategy (main remains the gate).</li>
+<li>No code changes — documentation only. (If the audit surfaces a genuine
+  code/doc mismatch that is a <em>code</em> bug, it is reported, not silently fixed
+  here.)</li>
+</ul>
+<h2 id="success-criteria">Success criteria</h2>
+<ol>
+<li>All 18 living docs contain zero WRONG/STALE claims per the aggregated
+   findings table.</li>
+<li><code>mkdocs build --strict</code> is green; all internal links resolve.</li>
+<li>Repo name, tool count, and command names are consistent across every living
+   doc.</li>
+<li>Affected published specs carry the historical banner.</li>
+<li>After <code>dev → main</code> promotion, the live site homepage describes <code>taxi-seed</code>
+   with five tools + shared lib, a Python downloader, and no K6.</li>
+<li>A findings report documents what was wrong and how each item was resolved.</li>
+</ol>
+<h2 id="risks-watch-items">Risks / watch-items</h2>
+<ul>
+<li><strong>Naming asymmetry:</strong> entry points mix <code>taxi-</code>-prefixed (<code>taxi-download</code>,
+  <code>taxi-load</code>, <code>taxi-run</code>, <code>taxi-curate-mappings</code>) and unprefixed
+  (<code>schema-drift</code>, <code>normalize</code>) commands. Docs must match the real names exactly
+  — a likely source of existing errors.</li>
+<li><strong>UNVERIFIABLE claims:</strong> narrative/perf figures with no code source (e.g. disk
+  sizes, timings) must be either sourced, hedged, or removed — not asserted.</li>
+<li><strong>Overclaiming (again):</strong> the independent fan-out and the evidence-based
+  definition of done exist specifically to prevent a repeat of premature
+  "comprehensive" claims.</li>
+</ul>
 
 
 

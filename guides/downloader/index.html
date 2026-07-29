@@ -6,7 +6,7 @@
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
       
-        <meta name="description" content="Downloader, schema-drift analyzer, and K6 SQL Server load tester for NYC TLC taxi trip data">
+        <meta name="description" content="Downloader, schema-drift analyzer, normalizer, SQL Server loader, and orchestrator for NYC TLC taxi trip data">
       
       
       
@@ -27,7 +27,7 @@
     
     
       
-        <title>Downloader - taxi</title>
+        <title>Downloader - taxi-seed</title>
       
     
     
@@ -94,7 +94,7 @@
 
 <header class="md-header md-header--shadow" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="Header">
-    <a href="../.." title="taxi" class="md-header__button md-logo" aria-label="taxi" data-md-component="logo">
+    <a href="../.." title="taxi-seed" class="md-header__button md-logo" aria-label="taxi-seed" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
@@ -108,7 +108,7 @@
       <div class="md-header__ellipsis">
         <div class="md-header__topic">
           <span class="md-ellipsis">
-            taxi
+            taxi-seed
           </span>
         </div>
         <div class="md-header__topic" data-md-component="header-topic">
@@ -235,13 +235,13 @@
 
 <nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
-    <a href="../.." title="taxi" class="md-nav__button md-logo" aria-label="taxi" data-md-component="logo">
+    <a href="../.." title="taxi-seed" class="md-nav__button md-logo" aria-label="taxi-seed" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
 
     </a>
-    taxi
+    taxi-seed
   </label>
   
     <div class="md-nav__source">
@@ -670,14 +670,42 @@
   
   
     <li class="md-nav__item">
-      <a href="../k6-loadtest/" class="md-nav__link">
+      <a href="../loader/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    K6 Load Test
+    Loader
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../orchestrator/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Orchestrator
   
 
     
@@ -1054,14 +1082,14 @@
   
   
     <li class="md-nav__item">
-      <a href="../../superpowers/specs/2026-03-25-k6-sql-load-testing-design/" class="md-nav__link">
+      <a href="../../superpowers/specs/2026-07-22-documentation-design/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    K6 SQL load testing
+    Documentation site
   
 
     
@@ -1082,14 +1110,126 @@
   
   
     <li class="md-nav__item">
-      <a href="../../superpowers/specs/2026-07-22-documentation-design/" class="md-nav__link">
+      <a href="../../superpowers/specs/2026-07-22-sql-loader-design/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    Documentation site
+    SQL loader
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../superpowers/specs/2026-07-23-orchestrator-design/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Orchestrator
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../superpowers/specs/2026-07-26-python-downloader-design/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Python downloader
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../superpowers/specs/2026-07-26-configurable-data-dir-design/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Configurable data dir
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../superpowers/specs/2026-07-26-documentation-sync-design/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Documentation sync
   
 
     
@@ -1355,15 +1495,14 @@
 
 
 <h1 id="downloader">Downloader</h1>
-<p>The downloader is a bash script that mirrors NYC TLC parquet trip data from CloudFront to a local <code>raw/</code> directory. It walks each series chronologically, skips files you already have, validates every download, and knows the difference between a rate-limit block and a file that hasn't been published yet.</p>
-<p>It exists because of a specific ambiguity in TLC's CloudFront distribution: HTTP 403 is returned both for files that don't exist yet (with an S3-style <code>&lt;Code&gt;AccessDenied&lt;/Code&gt;</code> XML body) <em>and</em> for requests blocked by AWS WAF, the Web Application Firewall that CloudFront runs in front of the origin (with CloudFront's "The request could not be satisfied" HTML page). Naive downloaders can't tell them apart, so they either false-positive on rate limiting (backing off unnecessarily on missing files) or false-negative on missing files (hammering a WAF block and extending it). This script classifies the responses correctly and reacts appropriately to each.</p>
+<p>The downloader is <code>taxi_download</code>, a Python package that mirrors NYC TLC parquet trip data from CloudFront to a local <code>raw/</code> directory. It walks each series chronologically, skips files you already have, validates every download, and knows the difference between a rate-limit block and a file that hasn't been published yet.</p>
+<p>It exists because of a specific ambiguity in TLC's CloudFront distribution: HTTP 403 is returned both for files that don't exist yet (with an S3-style <code>&lt;Code&gt;AccessDenied&lt;/Code&gt;</code> XML body) <em>and</em> for requests blocked by AWS WAF, the Web Application Firewall that CloudFront runs in front of the origin. Naive downloaders can't tell them apart, so they either false-positive on rate limiting (backing off unnecessarily on missing files) or false-negative on missing files (hammering a WAF block and extending it). This package classifies the responses correctly and reacts appropriately to each.</p>
 <p>When <em>not</em> to use it: if you only need ad-hoc analytics and don't want the disk cost, DuckDB's <code>httpfs</code> extension querying CloudFront directly is often the right answer — see <a href="#alternatives">Alternatives</a> below. The downloader is for cases where you want a resumable local mirror: bulk analytics that will re-read the same months many times, offline work, feeding a database via a nightly job, or scheduled catch-up as new months publish.</p>
 <h2 id="prerequisites">Prerequisites</h2>
 <ul>
-<li><strong>bash 4+</strong> — check with <code>bash --version</code></li>
-<li><strong>curl</strong></li>
+<li><strong>Python ≥3.12</strong></li>
+<li><strong><a href="https://docs.astral.sh/uv/">uv</a></strong></li>
 </ul>
-<p>macOS and Linux ship both by default. On Windows, install <a href="https://gitforwindows.org/">Git for Windows</a> and run the script in Git Bash.</p>
 <p>Disk sized to your intent — see <a href="#disk-sizing">Disk sizing</a> below.</p>
 <h2 id="disk-sizing">Disk sizing</h2>
 <table>
@@ -1422,174 +1561,213 @@
 </tr>
 <tr>
 <td><strong>Full history (all four)</strong></td>
-<td><strong>≈75 GB</strong></td>
+<td><strong>≈40–100 GB</strong></td>
 <td><strong>6–10 hours</strong></td>
 </tr>
 </tbody>
 </table>
 <p>TLC adds roughly 2 GB/month across all types (mostly FHVHV). Plan capacity accordingly if you're building a long-lived mirror.</p>
 <h2 id="install">Install</h2>
-<p>None. It's a bash script — clone the repo and run it.</p>
-<h2 id="basic-usage">Basic usage</h2>
-<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-1"> 1</a></span>
-<span class="normal"><a href="#__codelineno-0-2"> 2</a></span>
-<span class="normal"><a href="#__codelineno-0-3"> 3</a></span>
-<span class="normal"><a href="#__codelineno-0-4"> 4</a></span>
-<span class="normal"><a href="#__codelineno-0-5"> 5</a></span>
-<span class="normal"><a href="#__codelineno-0-6"> 6</a></span>
-<span class="normal"><a href="#__codelineno-0-7"> 7</a></span>
-<span class="normal"><a href="#__codelineno-0-8"> 8</a></span>
-<span class="normal"><a href="#__codelineno-0-9"> 9</a></span>
-<span class="normal"><a href="#__codelineno-0-10">10</a></span>
-<span class="normal"><a href="#__codelineno-0-11">11</a></span>
-<span class="normal"><a href="#__codelineno-0-12">12</a></span>
-<span class="normal"><a href="#__codelineno-0-13">13</a></span>
-<span class="normal"><a href="#__codelineno-0-14">14</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1"></a><span class="c1"># Full history, all four types (~75 GB, 6–10 hours)</span>
-<a id="__codelineno-0-2" name="__codelineno-0-2"></a>./downloader/download_taxi_data.sh
-<a id="__codelineno-0-3" name="__codelineno-0-3"></a>
-<a id="__codelineno-0-4" name="__codelineno-0-4"></a><span class="c1"># Full history, one type only</span>
-<a id="__codelineno-0-5" name="__codelineno-0-5"></a>./downloader/download_taxi_data.sh<span class="w"> </span>yellow
-<a id="__codelineno-0-6" name="__codelineno-0-6"></a>
-<a id="__codelineno-0-7" name="__codelineno-0-7"></a><span class="c1"># Recent N months (default 3), all types</span>
-<a id="__codelineno-0-8" name="__codelineno-0-8"></a>./downloader/download_taxi_data.sh<span class="w"> </span>--recent
-<a id="__codelineno-0-9" name="__codelineno-0-9"></a>
-<a id="__codelineno-0-10" name="__codelineno-0-10"></a><span class="c1"># Recent N months (default 3), one type only</span>
-<a id="__codelineno-0-11" name="__codelineno-0-11"></a>./downloader/download_taxi_data.sh<span class="w"> </span>--recent<span class="w"> </span>yellow
-<a id="__codelineno-0-12" name="__codelineno-0-12"></a>
-<a id="__codelineno-0-13" name="__codelineno-0-13"></a><span class="c1"># Recent 5 months of one type</span>
-<a id="__codelineno-0-14" name="__codelineno-0-14"></a>./downloader/download_taxi_data.sh<span class="w"> </span>--recent<span class="w"> </span><span class="m">5</span><span class="w"> </span>yellow
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-1">1</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1"></a>uv<span class="w"> </span>sync
 </code></pre></div></td></tr></table></div>
-<p><code>TYPE</code> is one of: <code>yellow</code>, <code>green</code>, <code>fhv</code>, <code>fhvhv</code>.</p>
-<p>The script is idempotent: files already present under the output directory are skipped, and any file that fails PAR1 validation is deleted at the start of the next run and re-downloaded. You can safely <code>Ctrl-C</code> mid-run and re-invoke with the same arguments — it will pick up where it left off without duplicating work.</p>
+<p>Run at the repo root. This exposes the <code>taxi-download</code> console script (defined in the root <code>pyproject.toml</code>).</p>
+<h2 id="basic-usage">Basic usage</h2>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-1-1"> 1</a></span>
+<span class="normal"><a href="#__codelineno-1-2"> 2</a></span>
+<span class="normal"><a href="#__codelineno-1-3"> 3</a></span>
+<span class="normal"><a href="#__codelineno-1-4"> 4</a></span>
+<span class="normal"><a href="#__codelineno-1-5"> 5</a></span>
+<span class="normal"><a href="#__codelineno-1-6"> 6</a></span>
+<span class="normal"><a href="#__codelineno-1-7"> 7</a></span>
+<span class="normal"><a href="#__codelineno-1-8"> 8</a></span>
+<span class="normal"><a href="#__codelineno-1-9"> 9</a></span>
+<span class="normal"><a href="#__codelineno-1-10">10</a></span>
+<span class="normal"><a href="#__codelineno-1-11">11</a></span>
+<span class="normal"><a href="#__codelineno-1-12">12</a></span>
+<span class="normal"><a href="#__codelineno-1-13">13</a></span>
+<span class="normal"><a href="#__codelineno-1-14">14</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1"></a><span class="c1"># Full history, all four types (~40–100 GB, 6–10 hours)</span>
+<a id="__codelineno-1-2" name="__codelineno-1-2"></a>uv<span class="w"> </span>run<span class="w"> </span>taxi-download
+<a id="__codelineno-1-3" name="__codelineno-1-3"></a>
+<a id="__codelineno-1-4" name="__codelineno-1-4"></a><span class="c1"># Full history, one type only</span>
+<a id="__codelineno-1-5" name="__codelineno-1-5"></a>uv<span class="w"> </span>run<span class="w"> </span>taxi-download<span class="w"> </span>yellow
+<a id="__codelineno-1-6" name="__codelineno-1-6"></a>
+<a id="__codelineno-1-7" name="__codelineno-1-7"></a><span class="c1"># Recent N months (default 3), all types</span>
+<a id="__codelineno-1-8" name="__codelineno-1-8"></a>uv<span class="w"> </span>run<span class="w"> </span>taxi-download<span class="w"> </span>--recent
+<a id="__codelineno-1-9" name="__codelineno-1-9"></a>
+<a id="__codelineno-1-10" name="__codelineno-1-10"></a><span class="c1"># Recent N months (default 3), one type only</span>
+<a id="__codelineno-1-11" name="__codelineno-1-11"></a>uv<span class="w"> </span>run<span class="w"> </span>taxi-download<span class="w"> </span>--recent<span class="w"> </span><span class="m">3</span><span class="w"> </span>yellow
+<a id="__codelineno-1-12" name="__codelineno-1-12"></a>
+<a id="__codelineno-1-13" name="__codelineno-1-13"></a><span class="c1"># Recent 5 months of one type</span>
+<a id="__codelineno-1-14" name="__codelineno-1-14"></a>uv<span class="w"> </span>run<span class="w"> </span>taxi-download<span class="w"> </span>--recent<span class="w"> </span><span class="m">5</span><span class="w"> </span>yellow
+</code></pre></div></td></tr></table></div>
+<p>You can also invoke it as a module, which is equivalent and useful when the console script isn't on <code>PATH</code> (e.g., inside another virtualenv):</p>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-2-1">1</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1"></a>python<span class="w"> </span>-m<span class="w"> </span>taxi_download.cli<span class="w"> </span>--recent<span class="w"> </span><span class="m">3</span><span class="w"> </span>yellow
+</code></pre></div></td></tr></table></div>
+<p><code>data_type</code> is a positional argument, one of <code>yellow</code>, <code>green</code>, <code>fhv</code>, <code>fhvhv</code>; omit it to download all four.</p>
+<p><strong>Arg-ordering gotcha.</strong> <code>--recent</code> takes an optional integer (<code>nargs="?"</code>, default <code>3</code> when given with no value). Because argparse consumes the very next token as that integer, putting the type name directly after a bare <code>--recent</code> fails:</p>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-3-1">1</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1"></a>uv<span class="w"> </span>run<span class="w"> </span>taxi-download<span class="w"> </span>--recent<span class="w"> </span>yellow<span class="w">   </span><span class="c1"># FAILS: argparse tries int(&quot;yellow&quot;)</span>
+</code></pre></div></td></tr></table></div>
+<p>Use one of these instead:</p>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-4-1">1</a></span>
+<span class="normal"><a href="#__codelineno-4-2">2</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1"></a>uv<span class="w"> </span>run<span class="w"> </span>taxi-download<span class="w"> </span>--recent<span class="w"> </span><span class="m">3</span><span class="w"> </span>yellow<span class="w">   </span><span class="c1"># explicit N, then the type</span>
+<a id="__codelineno-4-2" name="__codelineno-4-2"></a>uv<span class="w"> </span>run<span class="w"> </span>taxi-download<span class="w"> </span>yellow<span class="w"> </span>--recent<span class="w">     </span><span class="c1"># type first, --recent defaults to 3</span>
+</code></pre></div></td></tr></table></div>
+<p>The tool is idempotent: files already present under <code>&lt;data-dir&gt;/raw/</code> are skipped, and any file that fails PAR1 validation is deleted at the start of the next run and re-downloaded. You can safely <code>Ctrl-C</code> mid-run and re-invoke with the same arguments — it will pick up where it left off without duplicating work.</p>
 <h2 id="windows-wsl">Windows / WSL</h2>
-<p><strong>Git Bash (native Windows).</strong> Install <a href="https://gitforwindows.org/">Git for Windows</a>, open Git Bash, <code>cd</code> to your clone, and run the script exactly as documented above. No extra config needed for small pulls.</p>
-<p><strong>WSL2 — the VHDX growth problem.</strong> WSL2 stores your Linux filesystem in a VHDX file on your Windows <code>C:</code> drive. Every byte written under the WSL2 root (including <code>~</code>, <code>/home</code>, <code>/tmp</code>, <code>/opt</code>) goes into this VHDX file. Full-history TLC data is 100+ GB. The catch: <strong>the VHDX does not shrink when you delete files.</strong> If you download 75 GB into WSL, then <code>rm -rf</code> it, your <code>C:</code> drive is still 75 GB smaller until you manually compact the VHDX with <code>wsl --shutdown</code> + <code>diskpart</code>, or <code>Optimize-VHD</code> in an elevated PowerShell.</p>
-<p><strong>The fix: point downloads at a Windows path from inside WSL.</strong> Anything under <code>/mnt/c/...</code> writes directly to the Windows filesystem, bypassing the VHDX entirely:</p>
-<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-1-1">1</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1"></a><span class="nv">OUTPUT_DIR</span><span class="o">=</span>/mnt/c/Users/<span class="nv">$USER</span>/taxi-data<span class="w"> </span>./downloader/download_taxi_data.sh<span class="w"> </span>--recent<span class="w"> </span><span class="m">3</span><span class="w"> </span>yellow
+<p><strong>Native Windows / Git Bash / PowerShell.</strong> Install Python and <a href="https://docs.astral.sh/uv/">uv</a>, then run the commands above exactly as documented. No extra config needed for small pulls.</p>
+<p><strong>WSL2 — the VHDX growth problem.</strong> WSL2 stores your Linux filesystem in a VHDX file on your Windows <code>C:</code> drive. Every byte written under the WSL2 root (including <code>~</code>, <code>/home</code>, <code>/tmp</code>, <code>/opt</code>) goes into this VHDX file. A full-history TLC mirror is roughly 40–100 GB, depending on how many of the four series and how much history you mirror. The catch: <strong>the VHDX does not shrink when you delete files.</strong> If you download that much data into WSL, then <code>rm -rf</code> it, your <code>C:</code> drive stays exactly as full until you manually compact the VHDX with <code>wsl --shutdown</code> + <code>diskpart</code>, or <code>Optimize-VHD</code> in an elevated PowerShell.</p>
+<p><strong>The fix: point downloads at a Windows path from inside WSL.</strong> Use <code>--data-dir</code> to redirect the output root — files land under <code>&lt;data-dir&gt;/raw</code>, so anything under <code>/mnt/c/...</code> writes directly to the Windows filesystem, bypassing the VHDX entirely:</p>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-5-1">1</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1"></a>uv<span class="w"> </span>run<span class="w"> </span>taxi-download<span class="w"> </span>--recent<span class="w"> </span><span class="m">3</span><span class="w"> </span>yellow<span class="w"> </span>--data-dir<span class="w"> </span>/mnt/c/Users/<span class="nv">$USER</span>/taxi-data
 </code></pre></div></td></tr></table></div>
 <p>Deleting files there frees space immediately, and you can point Windows-side tools at the same directory without a WSL round-trip.</p>
-<p><strong>The interactive prompt.</strong> When the script detects it's running inside WSL and <code>OUTPUT_DIR</code> still resolves to the Linux filesystem, it prints a warning about VHDX growth and prompts <code>Continue? [y/N]</code>. In non-interactive contexts (cron, CI, <code>&lt; /dev/null</code>) it proceeds without prompting — the warning is informational only.</p>
 <h2 id="what-makes-it-different">What makes it different</h2>
 <h3 id="waf-aware-classifier">WAF-aware classifier</h3>
+<p>Each request is a full streaming <code>GET</code> — there's no <code>Range</code>-header partial-content probing. The response is classified by status code and, for <code>403</code>s, by the response body:</p>
 <pre class="mermaid"><code>flowchart TD
-  A[curl request] --&gt;|HTTP 200 or 206| B{starts with PAR1?}
-  B --&gt;|yes| C[ok — download]
-  B --&gt;|no| D[ratelimit — intercept page]
-  A --&gt;|HTTP 403| E{body contains?}
-  E --&gt;|AccessDenied XML| F[notfound — not published yet]
-  E --&gt;|CloudFront HTML| G[ratelimit — WAF block]
-  E --&gt;|other| F
-  A --&gt;|HTTP 404| F
-  A --&gt;|HTTP 429/502/503/504| G
-  A --&gt;|timeout/reset| G</code></pre>
-<p>The script probes each URL with a small ranged request; based on the status code and the first few bytes of the body, it decides whether to download the file, skip it as unpublished, or back off because a WAF rule fired.</p>
-<p>Three response types get special handling:</p>
+  A[GET request] --&gt;|200, body starts with PAR1| B[OK — stream to disk]
+  A --&gt;|200, body does NOT start with PAR1| C[RATELIMIT — WAF intercept page]
+  A --&gt;|404| D[NOTFOUND]
+  A --&gt;|403, body contains accessdenied/nosuchkey| D
+  A --&gt;|403, any other body| E[RATELIMIT — WAF block]
+  A --&gt;|429 or 5xx| E
+  A --&gt;|httpx.HTTPError e.g. timeout/reset| F[NETERROR — retried like ratelimit]</code></pre>
+<p>Four outcomes, from <code>_classify_status</code> and <code>fetch_one</code> in <code>download.py</code>:</p>
 <ul>
-<li><strong><code>403</code> with <code>AccessDenied</code> XML</strong> — the file legitimately isn't published yet. This is the boundary signal used by the full-history walker to stop cleanly at the end of a series.</li>
-<li><strong><code>403</code> with CloudFront HTML</strong> — the WAF has flagged your requests. Triggers the exponential backoff ladder.</li>
-<li><strong><code>200</code> with a body that doesn't start with <code>PAR1</code></strong> — usually a WAF intercept page served with a 200 code. Treated as a rate-limit event, not a corrupt file, because retrying with a fresh connection often succeeds.</li>
+<li><strong><code>404</code></strong> — <code>NOTFOUND</code>.</li>
+<li><strong><code>403</code> with a body containing <code>accessdenied</code> or <code>nosuchkey</code></strong> (case-insensitive) — <code>NOTFOUND</code>. The file legitimately isn't published yet. This is the boundary signal the full-history walker uses to stop cleanly at the end of a series.</li>
+<li><strong><code>403</code> with any other body</strong> — <code>RATELIMIT</code>. The WAF has flagged the request. Any other <code>403</code> variant (a CloudFront block page, an empty body, anything not matching the AccessDenied/NoSuchKey pattern) is treated as a rate-limit event, not a missing file.</li>
+<li><strong><code>429</code> or any <code>5xx</code></strong> — <code>RATELIMIT</code>.</li>
+<li><strong><code>200</code> but the downloaded body doesn't validate as PAR1 parquet</strong> — <code>RATELIMIT</code>. This is usually a WAF intercept page served with a <code>200</code> status; retrying with a fresh connection often succeeds.</li>
+<li><strong><code>httpx.HTTPError</code></strong> (connection reset, timeout, DNS failure, etc.) — <code>NETERROR</code>, retried exactly like <code>RATELIMIT</code>.</li>
 </ul>
 <h3 id="exponential-backoff">Exponential backoff</h3>
-<p>Consecutive rate-limit events trigger a <strong>5 → 15 → 60 minute</strong> wait ladder. After the third escalation the script aborts with a non-zero exit code so cron jobs surface the problem instead of sleeping indefinitely.</p>
-<p>The counter resets on any successful download. "Consecutive" means successive rate-limit events <em>without</em> an intervening success — a single successful file between two blocks resets you to backoff #1.</p>
+<p><code>download_month</code> retries a single month up to <code>MAX_RETRIES = 4</code> times on <code>RATELIMIT</code>/<code>NETERROR</code>, sleeping between attempts with a capped exponential delay: <strong>30s → 90s → 270s</strong>, capped at <strong>3600s</strong> (<code>BACKOFF_BASE_S=30</code>, <code>BACKOFF_FACTOR=3</code>, <code>BACKOFF_CAP_S=3600</code>). If all attempts are exhausted, the month counts as a "give up" for that run and the walker moves on — it does not sleep indefinitely or abort the whole process on a single month.</p>
+<p>In full-history mode, a <em>type</em> is abandoned early if it accumulates <code>MAX_CONSECUTIVE_GIVEUPS = 3</code> consecutive give-ups (per data type, reset by any successful download or <code>NOTFOUND</code> skip) — this stops a run from hammering every remaining month for hours against a sustained block. Recent-mode has no consecutive-giveup abort; it simply counts give-ups and reports them.</p>
 <h3 id="boundary-auto-termination">Boundary auto-termination</h3>
-<p>In full-history mode the walker moves chronologically forward from a hardcoded start year per series (<code>yellow=2009</code>, <code>green=2013</code>, <code>fhv=2015</code>, <code>fhvhv=2019</code>). When it hits a <code>notfound</code> response <em>after</em> having already downloaded at least one file for that type, it treats that as the end of published data — the walker stops for that type and moves on to the next. That's why running <code>./download_taxi_data.sh</code> cleanly terminates instead of walking forever into the future.</p>
+<p>In full-history mode the walker moves chronologically forward from a fixed start month per series:</p>
+<table>
+<thead>
+<tr>
+<th>Type</th>
+<th>Start month</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>yellow</td>
+<td>2009-01</td>
+</tr>
+<tr>
+<td>green</td>
+<td>2013-08</td>
+</tr>
+<tr>
+<td>fhv</td>
+<td>2015-01</td>
+</tr>
+<tr>
+<td>fhvhv</td>
+<td>2019-02</td>
+</tr>
+</tbody>
+</table>
+<p>When it hits a <code>NOTFOUND</code> response <em>after</em> having already downloaded (or found locally) at least one file for that type, it treats that as the end of published data and stops walking that type. A <code>NOTFOUND</code> encountered <em>before</em> any data has been seen is treated as a pre-series gap and the walker keeps going forward. That's why running <code>taxi-download</code> cleanly terminates instead of walking forever into the future.</p>
 <h3 id="par1-magic-byte-validation">PAR1 magic-byte validation</h3>
-<p>Every downloaded file is verified as valid parquet by checking the <code>PAR1</code> magic bytes at <strong>both</strong> head and tail. This catches two failure modes at once:</p>
+<p>Every downloaded file is verified as valid parquet by checking the <code>PAR1</code> magic bytes at <strong>both</strong> head and tail (and requiring at least 8 bytes total). This catches two failure modes at once:</p>
 <ul>
 <li><strong>Truncated downloads</strong> — dropped connection mid-transfer, missing tail marker.</li>
 <li><strong>WAF-intercept HTML</strong> that somehow landed at a <code>.parquet</code> path — HTML starts with <code>&lt;</code>, not <code>PAR1</code>.</li>
 </ul>
-<p>Any file failing this check is deleted at the start of the next run, so an interrupted download self-heals without manual cleanup.</p>
+<p>Downloads stream to a <code>&lt;name&gt;.parquet.part</code> temp file first; only after PAR1 validation passes is it atomically moved into place with <code>os.replace</code> (via <code>Path.replace</code>). Any existing file that fails PAR1 validation is deleted at the start of the next run (<code>clean_corrupt</code>), so an interrupted download self-heals without manual cleanup.</p>
 <h2 id="recent-mode-semantics">Recent-mode semantics</h2>
-<p>Walker rules, in order:</p>
+<p><code>download_recent</code> walker rules, in order:</p>
 <ol>
-<li>Start at the previous month (<code>current-1</code>). Walk backward one month at a time.</li>
-<li>Remote file downloads successfully → increment the "kept" counter.</li>
-<li>Remote returns "not published yet" (<code>403 + AccessDenied</code> XML) → skip, don't count, keep walking.</li>
-<li>Local file already exists at that path → <strong>STOP</strong> walking. This is the incremental catch-up semantic.</li>
-<li>Loop terminates when the counter hits <code>N</code>, OR the local-encounter break fires, OR <code>max_lookback_months</code> is reached (safety cap for genuinely-empty-series edge cases).</li>
+<li>Start at the previous calendar month (<code>current - 1</code>). Walk backward one month at a time via <code>months_backward</code>.</li>
+<li>Remote file downloads successfully → increment the "downloaded" counter.</li>
+<li>Remote returns <code>NOTFOUND</code> (<code>403</code>+AccessDenied/NoSuchKey, or <code>404</code>) → skip, don't count, keep walking backward.</li>
+<li>Local file already exists at that path → <strong>STOP</strong> walking immediately. This is the incremental catch-up semantic.</li>
+<li>Loop terminates when the downloaded counter reaches <code>N</code>, OR the local-encounter break fires, OR <code>MAX_LOOKBACK = 18</code> months have been examined (safety cap for genuinely-empty-series edge cases).</li>
 </ol>
-<p>Three worked examples. Assume today is <strong>2026-07-22</strong> and yellow publishes with a ~2 month lag.</p>
+<p>Three worked examples. Assume today is <strong>2026-07-27</strong> and yellow publishes with a ~2 month lag.</p>
 <p><strong>Example 1: Fresh checkout, <code>--recent 3 yellow</code>.</strong></p>
 <ul>
-<li>Tries 2026-06 → <code>notfound</code> (not yet published)</li>
+<li>Tries 2026-06 → <code>NOTFOUND</code> (not yet published)</li>
 <li>Tries 2026-05 → downloads</li>
 <li>Tries 2026-04 → downloads</li>
 <li>Tries 2026-03 → downloads</li>
 </ul>
-<p>Result: 3 files, walked back 4 months.</p>
+<p>Result: 3 downloaded, examined 4 months.</p>
 <p><strong>Example 2: Same setup a month later, <code>--recent 3 yellow</code>.</strong></p>
 <ul>
-<li>Tries 2026-07 → <code>notfound</code></li>
+<li>Tries 2026-07 → <code>NOTFOUND</code></li>
 <li>Tries 2026-06 → downloads</li>
 <li>Tries 2026-05 → already local → <strong>STOP</strong></li>
 </ul>
 <p>Result: 1 new file. This is the intended incremental catch-up outcome — you get the new month and nothing else.</p>
 <p><strong>Example 3: Already caught up, <code>--recent 3 yellow</code>.</strong></p>
 <ul>
-<li>Tries 2026-06 → <code>notfound</code></li>
+<li>Tries 2026-06 → <code>NOTFOUND</code></li>
 <li>Tries 2026-05 → already local → <strong>STOP</strong></li>
 </ul>
 <p>Result: 0 new files, exits cleanly.</p>
-<p>If you delete a local file mid-history, subsequent <code>--recent</code> runs won't backfill it — they stop at the newer files above. Use <code>./download_taxi_data.sh yellow</code> to catch up everything from the hardcoded start year.</p>
+<p>If you delete a local file mid-history, subsequent <code>--recent</code> runs won't backfill it — they stop at the newer files above. Use <code>uv run taxi-download yellow</code> (no <code>--recent</code>) to walk the full history from the fixed start month.</p>
 <h2 id="output-layout">Output layout</h2>
-<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-2-1">1</a></span>
-<span class="normal"><a href="#__codelineno-2-2">2</a></span>
-<span class="normal"><a href="#__codelineno-2-3">3</a></span>
-<span class="normal"><a href="#__codelineno-2-4">4</a></span>
-<span class="normal"><a href="#__codelineno-2-5">5</a></span>
-<span class="normal"><a href="#__codelineno-2-6">6</a></span>
-<span class="normal"><a href="#__codelineno-2-7">7</a></span>
-<span class="normal"><a href="#__codelineno-2-8">8</a></span>
-<span class="normal"><a href="#__codelineno-2-9">9</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1"></a>raw/
-<a id="__codelineno-2-2" name="__codelineno-2-2"></a>  yellow/
-<a id="__codelineno-2-3" name="__codelineno-2-3"></a>    2024/
-<a id="__codelineno-2-4" name="__codelineno-2-4"></a>      yellow_tripdata_2024-01.parquet
-<a id="__codelineno-2-5" name="__codelineno-2-5"></a>      yellow_tripdata_2024-02.parquet
-<a id="__codelineno-2-6" name="__codelineno-2-6"></a>      ...
-<a id="__codelineno-2-7" name="__codelineno-2-7"></a>    2025/
-<a id="__codelineno-2-8" name="__codelineno-2-8"></a>      ...
-<a id="__codelineno-2-9" name="__codelineno-2-9"></a>  green/  fhv/  fhvhv/
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-6-1">1</a></span>
+<span class="normal"><a href="#__codelineno-6-2">2</a></span>
+<span class="normal"><a href="#__codelineno-6-3">3</a></span>
+<span class="normal"><a href="#__codelineno-6-4">4</a></span>
+<span class="normal"><a href="#__codelineno-6-5">5</a></span>
+<span class="normal"><a href="#__codelineno-6-6">6</a></span>
+<span class="normal"><a href="#__codelineno-6-7">7</a></span>
+<span class="normal"><a href="#__codelineno-6-8">8</a></span>
+<span class="normal"><a href="#__codelineno-6-9">9</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1"></a>raw/
+<a id="__codelineno-6-2" name="__codelineno-6-2"></a>  yellow/
+<a id="__codelineno-6-3" name="__codelineno-6-3"></a>    2024/
+<a id="__codelineno-6-4" name="__codelineno-6-4"></a>      yellow_tripdata_2024-01.parquet
+<a id="__codelineno-6-5" name="__codelineno-6-5"></a>      yellow_tripdata_2024-02.parquet
+<a id="__codelineno-6-6" name="__codelineno-6-6"></a>      ...
+<a id="__codelineno-6-7" name="__codelineno-6-7"></a>    2025/
+<a id="__codelineno-6-8" name="__codelineno-6-8"></a>      ...
+<a id="__codelineno-6-9" name="__codelineno-6-9"></a>  green/  fhv/  fhvhv/
 </code></pre></div></td></tr></table></div>
 <p>Sample:</p>
-<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-3-1"> 1</a></span>
-<span class="normal"><a href="#__codelineno-3-2"> 2</a></span>
-<span class="normal"><a href="#__codelineno-3-3"> 3</a></span>
-<span class="normal"><a href="#__codelineno-3-4"> 4</a></span>
-<span class="normal"><a href="#__codelineno-3-5"> 5</a></span>
-<span class="normal"><a href="#__codelineno-3-6"> 6</a></span>
-<span class="normal"><a href="#__codelineno-3-7"> 7</a></span>
-<span class="normal"><a href="#__codelineno-3-8"> 8</a></span>
-<span class="normal"><a href="#__codelineno-3-9"> 9</a></span>
-<span class="normal"><a href="#__codelineno-3-10">10</a></span>
-<span class="normal"><a href="#__codelineno-3-11">11</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1"></a>$ find raw/ -name &#39;*.parquet&#39; | head
-<a id="__codelineno-3-2" name="__codelineno-3-2"></a>raw/yellow/2024/yellow_tripdata_2024-01.parquet
-<a id="__codelineno-3-3" name="__codelineno-3-3"></a>raw/yellow/2024/yellow_tripdata_2024-02.parquet
-<a id="__codelineno-3-4" name="__codelineno-3-4"></a>raw/yellow/2024/yellow_tripdata_2024-03.parquet
-<a id="__codelineno-3-5" name="__codelineno-3-5"></a>raw/yellow/2024/yellow_tripdata_2024-04.parquet
-<a id="__codelineno-3-6" name="__codelineno-3-6"></a>raw/yellow/2024/yellow_tripdata_2024-05.parquet
-<a id="__codelineno-3-7" name="__codelineno-3-7"></a>raw/yellow/2024/yellow_tripdata_2024-06.parquet
-<a id="__codelineno-3-8" name="__codelineno-3-8"></a>raw/yellow/2024/yellow_tripdata_2024-07.parquet
-<a id="__codelineno-3-9" name="__codelineno-3-9"></a>raw/yellow/2024/yellow_tripdata_2024-08.parquet
-<a id="__codelineno-3-10" name="__codelineno-3-10"></a>raw/yellow/2024/yellow_tripdata_2024-09.parquet
-<a id="__codelineno-3-11" name="__codelineno-3-11"></a>raw/yellow/2024/yellow_tripdata_2024-10.parquet
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-7-1"> 1</a></span>
+<span class="normal"><a href="#__codelineno-7-2"> 2</a></span>
+<span class="normal"><a href="#__codelineno-7-3"> 3</a></span>
+<span class="normal"><a href="#__codelineno-7-4"> 4</a></span>
+<span class="normal"><a href="#__codelineno-7-5"> 5</a></span>
+<span class="normal"><a href="#__codelineno-7-6"> 6</a></span>
+<span class="normal"><a href="#__codelineno-7-7"> 7</a></span>
+<span class="normal"><a href="#__codelineno-7-8"> 8</a></span>
+<span class="normal"><a href="#__codelineno-7-9"> 9</a></span>
+<span class="normal"><a href="#__codelineno-7-10">10</a></span>
+<span class="normal"><a href="#__codelineno-7-11">11</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1"></a>$ find raw/ -name &#39;*.parquet&#39; | head
+<a id="__codelineno-7-2" name="__codelineno-7-2"></a>raw/yellow/2024/yellow_tripdata_2024-01.parquet
+<a id="__codelineno-7-3" name="__codelineno-7-3"></a>raw/yellow/2024/yellow_tripdata_2024-02.parquet
+<a id="__codelineno-7-4" name="__codelineno-7-4"></a>raw/yellow/2024/yellow_tripdata_2024-03.parquet
+<a id="__codelineno-7-5" name="__codelineno-7-5"></a>raw/yellow/2024/yellow_tripdata_2024-04.parquet
+<a id="__codelineno-7-6" name="__codelineno-7-6"></a>raw/yellow/2024/yellow_tripdata_2024-05.parquet
+<a id="__codelineno-7-7" name="__codelineno-7-7"></a>raw/yellow/2024/yellow_tripdata_2024-06.parquet
+<a id="__codelineno-7-8" name="__codelineno-7-8"></a>raw/yellow/2024/yellow_tripdata_2024-07.parquet
+<a id="__codelineno-7-9" name="__codelineno-7-9"></a>raw/yellow/2024/yellow_tripdata_2024-08.parquet
+<a id="__codelineno-7-10" name="__codelineno-7-10"></a>raw/yellow/2024/yellow_tripdata_2024-09.parquet
+<a id="__codelineno-7-11" name="__codelineno-7-11"></a>raw/yellow/2024/yellow_tripdata_2024-10.parquet
 </code></pre></div></td></tr></table></div>
 <h2 id="configuration">Configuration</h2>
-<p><strong><code>OUTPUT_DIR</code></strong> — env var that overrides the default <code>raw/</code> output directory. Absolute path, or relative to the current working directory. Use it for WSL (redirect to <code>/mnt/c/...</code>), external drives, or NAS mount points:</p>
-<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-4-1">1</a></span>
-<span class="normal"><a href="#__codelineno-4-2">2</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1"></a><span class="nv">OUTPUT_DIR</span><span class="o">=</span>/mnt/nas/tlc-mirror<span class="w"> </span>./downloader/download_taxi_data.sh<span class="w"> </span>--recent<span class="w"> </span><span class="m">3</span>
-<a id="__codelineno-4-2" name="__codelineno-4-2"></a><span class="nv">OUTPUT_DIR</span><span class="o">=</span>/Volumes/BigDisk/taxi<span class="w"> </span>./downloader/download_taxi_data.sh<span class="w"> </span>yellow
+<p><strong><code>--data-dir DIR</code></strong> — base directory; files land under <code>DIR/raw</code> (default: <code>.</code>, i.e. <code>./raw</code>). Absolute path, or relative to the current working directory. Use it for WSL (redirect to <code>/mnt/c/...</code>), external drives, or NAS mount points:</p>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-8-1">1</a></span>
+<span class="normal"><a href="#__codelineno-8-2">2</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1"></a>uv<span class="w"> </span>run<span class="w"> </span>taxi-download<span class="w"> </span>--recent<span class="w"> </span><span class="m">3</span><span class="w"> </span>--data-dir<span class="w"> </span>/mnt/nas/tlc-mirror
+<a id="__codelineno-8-2" name="__codelineno-8-2"></a>uv<span class="w"> </span>run<span class="w"> </span>taxi-download<span class="w"> </span>yellow<span class="w"> </span>--data-dir<span class="w"> </span>/Volumes/BigDisk/taxi
 </code></pre></div></td></tr></table></div>
-<p><strong>Corporate proxy.</strong> The script uses <code>curl</code> under the hood, which honors the standard <code>HTTPS_PROXY</code> and <code>NO_PROXY</code> env vars:</p>
-<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-5-1">1</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1"></a><span class="nv">HTTPS_PROXY</span><span class="o">=</span>http://proxy.corp.internal:3128<span class="w"> </span>./downloader/download_taxi_data.sh<span class="w"> </span>--recent<span class="w"> </span><span class="m">3</span><span class="w"> </span>yellow
+<p><strong>Corporate proxy.</strong> The tool uses <code>httpx.Client</code>, which honors standard proxy environment variables (<code>HTTPS_PROXY</code>, <code>NO_PROXY</code>) via <code>trust_env</code> (the default):</p>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-9-1">1</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1"></a><span class="nv">HTTPS_PROXY</span><span class="o">=</span>http://proxy.corp.internal:3128<span class="w"> </span>uv<span class="w"> </span>run<span class="w"> </span>taxi-download<span class="w"> </span>--recent<span class="w"> </span><span class="m">3</span><span class="w"> </span>yellow
 </code></pre></div></td></tr></table></div>
 <p><strong>Scheduled runs.</strong> A daily cron entry to keep the mirror caught up with minimal disk churn:</p>
-<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-6-1">1</a></span>
-<span class="normal"><a href="#__codelineno-6-2">2</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1"></a># Run every day at 03:15, log to a rotating file
-<a id="__codelineno-6-2" name="__codelineno-6-2"></a>15 3 * * * cd /srv/taxi &amp;&amp; ./downloader/download_taxi_data.sh --recent 3 &gt;&gt; /var/log/taxi-downloader.log 2&gt;&amp;1
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-10-1">1</a></span>
+<span class="normal"><a href="#__codelineno-10-2">2</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1"></a># Run every day at 03:15, log to a rotating file
+<a id="__codelineno-10-2" name="__codelineno-10-2"></a>15 3 * * * cd /srv/taxi &amp;&amp; uv run taxi-download --recent 3 &gt;&gt; /var/log/taxi-downloader.log 2&gt;&amp;1
 </code></pre></div></td></tr></table></div>
-<p>Recent-mode's local-encounter break (see <a href="#recent-mode-semantics">Recent-mode semantics</a>) makes daily runs cheap: once you're caught up, each run tries one or two URLs and exits.</p>
+<p>Recent-mode's local-encounter break (see <a href="#recent-mode-semantics">Recent-mode semantics</a>) makes daily runs cheap: once you're caught up, each run tries one or two URLs per type and exits.</p>
 <h2 id="alternatives">Alternatives</h2>
 <table>
 <thead>
@@ -1623,25 +1801,27 @@
 </tbody>
 </table>
 <p>DuckDB <code>httpfs</code> in action, no downloader required:</p>
-<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-7-1">1</a></span>
-<span class="normal"><a href="#__codelineno-7-2">2</a></span>
-<span class="normal"><a href="#__codelineno-7-3">3</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1"></a><span class="n">INSTALL</span><span class="w"> </span><span class="n">httpfs</span><span class="p">;</span><span class="w"> </span><span class="k">LOAD</span><span class="w"> </span><span class="n">httpfs</span><span class="p">;</span>
-<a id="__codelineno-7-2" name="__codelineno-7-2"></a><span class="k">SELECT</span><span class="w"> </span><span class="k">count</span><span class="p">(</span><span class="o">*</span><span class="p">)</span>
-<a id="__codelineno-7-3" name="__codelineno-7-3"></a><span class="k">FROM</span><span class="w"> </span><span class="n">read_parquet</span><span class="p">(</span><span class="s1">&#39;https://d37ci6vzurychx.cloudfront.net/trip-data/yellow_tripdata_2024-01.parquet&#39;</span><span class="p">);</span>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-11-1">1</a></span>
+<span class="normal"><a href="#__codelineno-11-2">2</a></span>
+<span class="normal"><a href="#__codelineno-11-3">3</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1"></a><span class="n">INSTALL</span><span class="w"> </span><span class="n">httpfs</span><span class="p">;</span><span class="w"> </span><span class="k">LOAD</span><span class="w"> </span><span class="n">httpfs</span><span class="p">;</span>
+<a id="__codelineno-11-2" name="__codelineno-11-2"></a><span class="k">SELECT</span><span class="w"> </span><span class="k">count</span><span class="p">(</span><span class="o">*</span><span class="p">)</span>
+<a id="__codelineno-11-3" name="__codelineno-11-3"></a><span class="k">FROM</span><span class="w"> </span><span class="n">read_parquet</span><span class="p">(</span><span class="s1">&#39;https://d37ci6vzurychx.cloudfront.net/trip-data/yellow_tripdata_2024-01.parquet&#39;</span><span class="p">);</span>
 </code></pre></div></td></tr></table></div>
 <h2 id="troubleshooting">Troubleshooting</h2>
 <p><strong>Q: I'm getting rate-limited constantly.</strong>
-A: Check the backoff ladder is engaging — you should see <code>Rate limit / WAF block detected (backoff #1)</code> and <code>Pausing for 5 minute(s)</code> messages. If the script aborts after 3 escalations (backoff #3 = 60 min), the WAF has flagged your IP for a longer window than 60 min; try again in a few hours from a different network or with a VPN.</p>
-<p><strong>Q: The script says the file is corrupt and re-downloads it every time.</strong>
-A: Almost always a partial download from a previously interrupted run. The PAR1 head+tail check catches this at the start of every run and cleans up. Just let the next run finish; the file will download correctly.</p>
+A: Real progress output looks like <code>yellow: downloaded X, gave up on Y</code> per type, then <code>total downloaded: N</code> at the end. A large <code>Y</code> relative to <code>X</code> means most attempts are hitting <code>RATELIMIT</code>/<code>NETERROR</code> and exhausting the 30s→90s→270s (cap 3600s) retry ladder per month. In full-history mode, once a type accumulates 3 consecutive give-ups it stops early rather than continuing to hammer the WAF. If that happens, the WAF has flagged your IP for longer than the backoff ladder covers; try again in a few hours from a different network or with a VPN.</p>
+<p><strong>Q: The tool says it cleaned corrupt files.</strong>
+A: You'll see <code>cleaned N corrupt parquet file(s)</code> at the start of a run if any existing <code>*.parquet</code> file under <code>&lt;data-dir&gt;/raw</code> fails the PAR1 head+tail check — almost always a partial download from a previously interrupted run (before atomic replace could complete, or from an older run). Those files are deleted before the run starts, and the run will re-download them.</p>
+<p><strong>Q: What's the exit code mean?</strong>
+A: <code>main()</code> returns <code>0</code> unless a type finished with <code>downloaded == 0</code> and <code>gaveup &gt; 0</code> — i.e., that type made zero progress and hit at least one exhausted retry — in which case the overall exit code is <code>2</code>. A type that downloaded at least one file, or gave up on zero months, does not trigger the non-zero exit even if some months were skipped as give-ups.</p>
 <p><strong>Q: I want to point downloads at S3 instead of local disk.</strong>
-A: Not supported today. The script writes to a local path via <code>curl -o</code>. You could <code>rclone sync</code> the local mirror to S3 after each run. PR welcome to add native cloud support.</p>
+A: Not supported today. The tool writes to a local path (streamed to <code>&lt;name&gt;.parquet.part</code>, then atomically moved into place). You could <code>rclone sync</code> the local mirror to S3 after each run. PR welcome to add native cloud support.</p>
 <p><strong>Q: Full history took longer than the estimate.</strong>
 A: Residential broadband varies; TLC has occasional slow days; FHVHV files are the largest (avg ~420 MB each vs yellow's ~147 MB). Check ETA against your actual link speed, not the sizing table's mid-range estimates.</p>
 <p><strong>Q: Can I run multiple types in parallel to speed things up?</strong>
-A: Not recommended. The WAF rate-limits per source IP, so parallel invocations tend to trip the backoff ladder on both jobs and end up slower than a sequential run. If you really need to parallelize, run the parallel workers from separate egress IPs (e.g., different cloud regions).</p>
+A: Not recommended. The WAF rate-limits per source IP, so parallel invocations tend to trip the backoff ladder on both jobs and end up slower than a sequential run (each <code>taxi-download</code> invocation already downloads all requested types sequentially within one process). If you really need to parallelize, run separate invocations from separate egress IPs (e.g., different cloud regions).</p>
 <p><strong>Q: How do I mirror to a machine without internet, using a jump host?</strong>
-A: Run the downloader on the jump host with <code>OUTPUT_DIR</code> pointing at a shared path, then <code>rsync -a</code> the <code>raw/</code> tree to the destination. The layout is stable, so incremental <code>rsync</code> runs are cheap.</p>
+A: Run the downloader on the jump host with <code>--data-dir</code> pointing at a shared path, then <code>rsync -a</code> the <code>raw/</code> tree to the destination. The layout is stable, so incremental <code>rsync</code> runs are cheap.</p>
 
 
 

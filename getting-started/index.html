@@ -6,7 +6,7 @@
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
       
-        <meta name="description" content="Downloader, schema-drift analyzer, and K6 SQL Server load tester for NYC TLC taxi trip data">
+        <meta name="description" content="Downloader, schema-drift analyzer, normalizer, SQL Server loader, and orchestrator for NYC TLC taxi trip data">
       
       
       
@@ -27,7 +27,7 @@
     
     
       
-        <title>Getting Started - taxi</title>
+        <title>Getting Started - taxi-seed</title>
       
     
     
@@ -94,7 +94,7 @@
 
 <header class="md-header md-header--shadow" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="Header">
-    <a href=".." title="taxi" class="md-header__button md-logo" aria-label="taxi" data-md-component="logo">
+    <a href=".." title="taxi-seed" class="md-header__button md-logo" aria-label="taxi-seed" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
@@ -108,7 +108,7 @@
       <div class="md-header__ellipsis">
         <div class="md-header__topic">
           <span class="md-ellipsis">
-            taxi
+            taxi-seed
           </span>
         </div>
         <div class="md-header__topic" data-md-component="header-topic">
@@ -235,13 +235,13 @@
 
 <nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
-    <a href=".." title="taxi" class="md-nav__button md-logo" aria-label="taxi" data-md-component="logo">
+    <a href=".." title="taxi-seed" class="md-nav__button md-logo" aria-label="taxi-seed" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
 
     </a>
-    taxi
+    taxi-seed
   </label>
   
     <div class="md-nav__source">
@@ -585,14 +585,42 @@
   
   
     <li class="md-nav__item">
-      <a href="../guides/k6-loadtest/" class="md-nav__link">
+      <a href="../guides/loader/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    K6 Load Test
+    Loader
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../guides/orchestrator/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Orchestrator
   
 
     
@@ -969,14 +997,14 @@
   
   
     <li class="md-nav__item">
-      <a href="../superpowers/specs/2026-03-25-k6-sql-load-testing-design/" class="md-nav__link">
+      <a href="../superpowers/specs/2026-07-22-documentation-design/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    K6 SQL load testing
+    Documentation site
   
 
     
@@ -997,14 +1025,126 @@
   
   
     <li class="md-nav__item">
-      <a href="../superpowers/specs/2026-07-22-documentation-design/" class="md-nav__link">
+      <a href="../superpowers/specs/2026-07-22-sql-loader-design/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    Documentation site
+    SQL loader
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../superpowers/specs/2026-07-23-orchestrator-design/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Orchestrator
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../superpowers/specs/2026-07-26-python-downloader-design/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Python downloader
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../superpowers/specs/2026-07-26-configurable-data-dir-design/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Configurable data dir
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../superpowers/specs/2026-07-26-documentation-sync-design/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Documentation sync
   
 
     
@@ -1193,19 +1333,18 @@
 <ul>
 <li>Python 3.12 or 3.13.</li>
 <li><a href="https://github.com/astral-sh/uv">uv</a> installed.</li>
-<li>curl (present on macOS and most Linux; on Windows install <a href="https://gitforwindows.org/">Git for Windows</a> and run everything in Git Bash).</li>
-<li>~300 MB free disk (<code>--recent 3 yellow</code> is ~200 MB; venv + wheels are ~100 MB).</li>
+<li>~300 MB free disk (<code>yellow --recent 3</code> is ~200 MB; venv + wheels are ~100 MB).</li>
 <li>Optional: <a href="https://duckdb.org/docs/installation/">DuckDB CLI</a> for the "look at what you got" step (not required; you can do the same via <code>uv run python -c "..."</code>).</li>
 </ul>
 <div class="admonition warning">
 <p class="admonition-title">WSL users</p>
-<p>If you're running on WSL2, your data will land on the Linux filesystem — which grows the WSL2 VHDX on your Windows C: drive and does NOT shrink when files are deleted. Point downloads at a Windows path with <code>OUTPUT_DIR=/mnt/c/Users/$USER/taxi-data</code> instead. See the <a href="../guides/downloader/#windows-wsl">Downloader guide's WSL section</a> for full details.</p>
+<p>If you're running on WSL2, your data will land on the Linux filesystem — which grows the WSL2 VHDX on your Windows C: drive and does NOT shrink when files are deleted. Point downloads at a Windows path with <code>uv run taxi-download --data-dir /mnt/c/Users/$USER/taxi-data yellow --recent 3</code> instead. See the <a href="../guides/downloader/#windows-wsl">Downloader guide's WSL section</a> for full details.</p>
 </div>
 <h2 id="1-clone-and-install">1. Clone and install</h2>
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-1">1</a></span>
 <span class="normal"><a href="#__codelineno-0-2">2</a></span>
 <span class="normal"><a href="#__codelineno-0-3">3</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1"></a>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/andrekamman/taxi-seed.git
-<a id="__codelineno-0-2" name="__codelineno-0-2"></a><span class="nb">cd</span><span class="w"> </span>taxi
+<a id="__codelineno-0-2" name="__codelineno-0-2"></a><span class="nb">cd</span><span class="w"> </span>taxi-seed
 <a id="__codelineno-0-3" name="__codelineno-0-3"></a>uv<span class="w"> </span>sync<span class="w"> </span>--extra<span class="w"> </span><span class="nb">test</span>
 </code></pre></div></td></tr></table></div>
 <p>The <code>--extra test</code> flag pulls in pytest alongside the runtime dependencies so you can verify the install by running the suite in the next step. If you'd rather skip that, plain <code>uv sync</code> will install just the runtime.</p>
@@ -1222,65 +1361,23 @@
 <span class="normal"><a href="#__codelineno-2-2">2</a></span>
 <span class="normal"><a href="#__codelineno-2-3">3</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1"></a>........................................................................ [ 86%]
 <a id="__codelineno-2-2" name="__codelineno-2-2"></a>...........                                                              [100%]
-<a id="__codelineno-2-3" name="__codelineno-2-3"></a>83 passed in 0.94s
+<a id="__codelineno-2-3" name="__codelineno-2-3"></a>N passed in &lt;n&gt;.&lt;nn&gt;s
 </code></pre></div></td></tr></table></div>
 <p>The exact test count grows as the suite grows; what matters is that there are no failures. The first invocation of <code>uv run</code> also builds the virtualenv (<code>.venv/</code>), so expect a one-time delay of 5–20 seconds while wheels are resolved and installed. Subsequent invocations reuse the cached environment.</p>
 <h2 id="3-download-three-recent-months-of-yellow">3. Download three recent months of yellow</h2>
-<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-3-1">1</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1"></a>./downloader/download_taxi_data.sh<span class="w"> </span>--recent<span class="w"> </span><span class="m">3</span><span class="w"> </span>yellow
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-3-1">1</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1"></a>uv<span class="w"> </span>run<span class="w"> </span>taxi-download<span class="w"> </span>yellow<span class="w"> </span>--recent<span class="w"> </span><span class="m">3</span>
 </code></pre></div></td></tr></table></div>
 <p>Expected output:</p>
-<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-4-1"> 1</a></span>
-<span class="normal"><a href="#__codelineno-4-2"> 2</a></span>
-<span class="normal"><a href="#__codelineno-4-3"> 3</a></span>
-<span class="normal"><a href="#__codelineno-4-4"> 4</a></span>
-<span class="normal"><a href="#__codelineno-4-5"> 5</a></span>
-<span class="normal"><a href="#__codelineno-4-6"> 6</a></span>
-<span class="normal"><a href="#__codelineno-4-7"> 7</a></span>
-<span class="normal"><a href="#__codelineno-4-8"> 8</a></span>
-<span class="normal"><a href="#__codelineno-4-9"> 9</a></span>
-<span class="normal"><a href="#__codelineno-4-10">10</a></span>
-<span class="normal"><a href="#__codelineno-4-11">11</a></span>
-<span class="normal"><a href="#__codelineno-4-12">12</a></span>
-<span class="normal"><a href="#__codelineno-4-13">13</a></span>
-<span class="normal"><a href="#__codelineno-4-14">14</a></span>
-<span class="normal"><a href="#__codelineno-4-15">15</a></span>
-<span class="normal"><a href="#__codelineno-4-16">16</a></span>
-<span class="normal"><a href="#__codelineno-4-17">17</a></span>
-<span class="normal"><a href="#__codelineno-4-18">18</a></span>
-<span class="normal"><a href="#__codelineno-4-19">19</a></span>
-<span class="normal"><a href="#__codelineno-4-20">20</a></span>
-<span class="normal"><a href="#__codelineno-4-21">21</a></span>
-<span class="normal"><a href="#__codelineno-4-22">22</a></span>
-<span class="normal"><a href="#__codelineno-4-23">23</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1"></a>Checking for corrupt parquet files...
-<a id="__codelineno-4-2" name="__codelineno-4-2"></a>  No corrupt files found
-<a id="__codelineno-4-3" name="__codelineno-4-3"></a>
-<a id="__codelineno-4-4" name="__codelineno-4-4"></a>NYC TLC Trip Data Downloader
-<a id="__codelineno-4-5" name="__codelineno-4-5"></a>Generating URL list up to: 2026-06
-<a id="__codelineno-4-6" name="__codelineno-4-6"></a>
-<a id="__codelineno-4-7" name="__codelineno-4-7"></a>Downloading recent 3 months (yellow)...
-<a id="__codelineno-4-8" name="__codelineno-4-8"></a>Will walk back through older not-yet-published months, and stop
-<a id="__codelineno-4-9" name="__codelineno-4-9"></a>at the first locally-existing file (assumes prior runs are caught up).
-<a id="__codelineno-4-10" name="__codelineno-4-10"></a>
-<a id="__codelineno-4-11" name="__codelineno-4-11"></a>--- yellow: looking for 3 recent months ---
-<a id="__codelineno-4-12" name="__codelineno-4-12"></a>  Trying yellow_tripdata_2026-06.parquet...
-<a id="__codelineno-4-13" name="__codelineno-4-13"></a>    Not published yet, trying older month
-<a id="__codelineno-4-14" name="__codelineno-4-14"></a>  Trying yellow_tripdata_2026-05.parquet...
-<a id="__codelineno-4-15" name="__codelineno-4-15"></a>    Saved to yellow/2026/yellow_tripdata_2026-05.parquet
-<a id="__codelineno-4-16" name="__codelineno-4-16"></a>  Trying yellow_tripdata_2026-04.parquet...
-<a id="__codelineno-4-17" name="__codelineno-4-17"></a>    Saved to yellow/2026/yellow_tripdata_2026-04.parquet
-<a id="__codelineno-4-18" name="__codelineno-4-18"></a>  Trying yellow_tripdata_2026-03.parquet...
-<a id="__codelineno-4-19" name="__codelineno-4-19"></a>    Saved to yellow/2026/yellow_tripdata_2026-03.parquet
-<a id="__codelineno-4-20" name="__codelineno-4-20"></a>  Downloaded 3 new file(s) for yellow (walked back 4 month(s))
-<a id="__codelineno-4-21" name="__codelineno-4-21"></a>
-<a id="__codelineno-4-22" name="__codelineno-4-22"></a>Download complete!
-<a id="__codelineno-4-23" name="__codelineno-4-23"></a>Files saved to: raw/&lt;type&gt;/&lt;year&gt;/
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-4-1">1</a></span>
+<span class="normal"><a href="#__codelineno-4-2">2</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1"></a>yellow: downloaded 3, gave up on 0
+<a id="__codelineno-4-2" name="__codelineno-4-2"></a>total downloaded: 3
 </code></pre></div></td></tr></table></div>
-<p>Here's what happened: the walker started at the previous month (2026-06 in this example), found it wasn't published yet, then walked backward and downloaded the three most recent published months. Total: ~200 MB in ~1–2 min on a typical connection.</p>
-<p>The <code>--recent N</code> flag differs from <code>--from</code> / <code>--to</code>: it always anchors to "today minus one month" and walks backward until it either finds <code>N</code> new files or hits a locally-existing file (which signals it can stop, because prior runs already caught up to that point). That makes it the right flag for a nightly cron; use <code>--from YYYY-MM --to YYYY-MM</code> when you want an explicit window instead.</p>
-<p>The downloader also skips corrupt local files by silently overwriting them, and it validates each new download by opening it with a lightweight parquet reader before declaring it saved. The <a href="../guides/downloader/">Downloader guide</a> covers the WAF classifier that distinguishes "not published yet" from "throttled" from "hard 4xx" — a distinction that matters when you're building automation on top.</p>
+<p>If a previous run left a corrupt partial file behind, you'll see an extra leading line: <code>cleaned 1 corrupt parquet file(s)</code> (the downloader deletes and re-fetches any local file that fails PAR1 validation). Here's what happened: the downloader walked backward from last month and downloaded the three most recent published months. Total: ~200 MB in ~1–2 min on a typical connection.</p>
+<p><code>--recent N</code> (default 3) always anchors to "today minus one month" and walks backward until it either finds <code>N</code> new files or hits a locally-existing file (which signals it can stop, because prior runs already caught up to that point). That makes it the right flag for a nightly cron. Omit <code>--recent</code> for a full-history download instead. Use <code>--data-dir DIR</code> to change where files land (they're always written under <code>&lt;DIR&gt;/raw</code>; the default is <code>.</code>).</p>
+<p>The downloader also skips corrupt local files by deleting and re-fetching them, and it validates each new download by checking the PAR1 parquet magic bytes before declaring it saved. The <a href="../guides/downloader/">Downloader guide</a> covers the WAF classifier that distinguishes "not published yet" from "throttled" from "hard 4xx" — a distinction that matters when you're building automation on top.</p>
 <div class="admonition warning">
 <p class="admonition-title">Windows / WSL disk usage</p>
-<p>On WSL2 the raw parquet lands on the Linux filesystem and permanently grows your WSL2 VHDX. See the <a href="../guides/downloader/#windows-wsl">Downloader guide</a> for the <code>OUTPUT_DIR</code> workaround.</p>
+<p>On WSL2 the raw parquet lands on the Linux filesystem and permanently grows your WSL2 VHDX. See the <a href="../guides/downloader/#windows-wsl">Downloader guide</a> for the <code>--data-dir</code> workaround.</p>
 </div>
 <h2 id="4-look-at-what-you-got">4. Look at what you got</h2>
 <p><strong>Find the files:</strong></p>
@@ -1383,7 +1480,7 @@
 </code></pre></div></td></tr></table></div>
 <p>Read the report top-to-bottom: each transition block corresponds to one month-to-month schema change. Look for high-confidence rename pairs (those are safe to accept), and pay special attention to the "Unresolved" section — those items need a human to decide whether the column was dropped, renamed to something the heuristic missed, or something else.</p>
 <p>Rename detection uses a combination of positional overlap (adjacent-in-file-order), type compatibility, and name similarity — so <code>pickup_longitude -&gt; PULocationID</code> is flagged high-confidence only when the surrounding columns line up in a way that makes accidental co-occurrence unlikely. On real historical data the yellow trips schema went through three major transitions (2015-07, 2016-07, and the 2016 payment-column split); running <code>schema-drift --types yellow</code> against a full mirror surfaces all three.</p>
-<p>The <a href="../guides/schema-drift/">Schema Drift guide</a> covers the report format in detail and describes all three modes (report / mapping / diff).</p>
+<p>The <a href="../guides/schema-drift/">Schema Drift guide</a> covers the report format in detail and describes all three modes (default taxi-aware, <code>--generic</code>, and <code>--verify-data</code>).</p>
 <h2 id="6-optional-normalize">6. (Optional) Normalize</h2>
 <p>Normalize rewrites historical parquet so every file matches the latest schema. It halts on data loss (lossy casts, dropped columns) unless you explicitly acknowledge each such change by filling in an <code>ack_date:</code> in the mapping file. On first run for a taxi type it bootstraps a mapping and asks you to review it — even when there's nothing to review.</p>
 <p><strong>First run:</strong></p>
@@ -1420,16 +1517,15 @@
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-17-1">1</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-17-1" name="__codelineno-17-1"></a>find<span class="w"> </span>raw-normalized/yellow<span class="w"> </span>-name<span class="w"> </span><span class="s1">&#39;*.parquet&#39;</span>
 </code></pre></div></td></tr></table></div>
 <p>Expected: three normalized files under <code>raw-normalized/yellow/2026/</code>.</p>
-<p>On this tiny recent sample the tool is essentially a passthrough — the target schema equals the raw schema, so files copy over unchanged. In production, <code>raw-normalized/</code> is the layer downstream tools should point at: the K6 load test reads from it, and the DuckDB <code>httpfs</code> recipes in the cookbook query it. Rerunning normalize is idempotent — files already present in <code>raw-normalized/</code> are skipped, so nightly cron jobs stay cheap.</p>
+<p>On this tiny recent sample the tool is essentially a passthrough — the target schema equals the raw schema, so files copy over unchanged. In production, <code>raw-normalized/</code> is the layer downstream tools should point at: the loader reads from it to populate a target database, and the DuckDB <code>httpfs</code> recipes in the cookbook query it. Rerunning normalize is idempotent — files already present in <code>raw-normalized/</code> are skipped, so nightly cron jobs stay cheap.</p>
 <p>The <a href="../guides/normalize/">Normalize guide</a> walks through the real-world case where drift exists and the mapping is nontrivial (renames, type coercions, dropped columns, and the <code>ack_date:</code> gate).</p>
 <h2 id="where-to-next">Where to next</h2>
 <ul>
 <li><strong><a href="../guides/downloader/">Downloader guide</a></strong> — WAF classifier, disk sizing table, WSL warning explained in detail.</li>
 <li><strong><a href="../guides/schema-drift/">Schema Drift guide</a></strong> — three modes, how rename detection works, programmatic API.</li>
 <li><strong><a href="../guides/normalize/">Normalize guide</a></strong> — three-state model, bootstrap+amend semantics, two worked examples.</li>
-<li><strong><a href="../guides/k6-loadtest/">K6 Load Test guide</a></strong> — building the custom K6 binary, config, running against a local Docker SQL Server.</li>
 <li><strong><a href="../cookbook/">Cookbook</a></strong> — nightly cron, DuckDB <code>httpfs</code>, corporate proxy, populating a fresh dev SQL Server.</li>
-<li><strong><a href="../architecture/">Architecture</a></strong> — the four-tool DAG and the core design principles.</li>
+<li><strong><a href="../architecture/">Architecture</a></strong> — the pipeline DAG and the core design principles.</li>
 </ul>
 
 

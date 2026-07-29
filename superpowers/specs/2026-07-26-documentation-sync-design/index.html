@@ -10,9 +10,13 @@
       
       
       
-        <link rel="canonical" href="https://andrekamman.github.io/taxi-seed/superpowers/notes/2026-07-22-mssql-extension-spike/">
+        <link rel="canonical" href="https://andrekamman.github.io/taxi-seed/superpowers/specs/2026-07-26-documentation-sync-design/">
       
       
+        <link rel="prev" href="../2026-07-26-configurable-data-dir-design/">
+      
+      
+        <link rel="next" href="../../../contributing/">
       
       
         
@@ -23,7 +27,7 @@
     
     
       
-        <title>mssql extension spike — findings - taxi-seed</title>
+        <title>Documentation sync - taxi-seed</title>
       
     
     
@@ -74,7 +78,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#mssql-extension-spike-findings" class="md-skip">
+        <a href="#documentation-sync-design" class="md-skip">
           Skip to content
         </a>
       
@@ -110,7 +114,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              mssql extension spike — findings
+              Documentation sync
             
           </span>
         </div>
@@ -752,18 +756,20 @@
       
   
   
+    
   
   
+  
     
     
     
     
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" checked>
         
           
           <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="0">
@@ -784,7 +790,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="true">
           <label class="md-nav__title" for="__nav_8">
             <span class="md-nav__icon md-icon"></span>
             
@@ -802,7 +808,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../specs/2026-07-19-monorepo-restructure-design/" class="md-nav__link">
+      <a href="../2026-07-19-monorepo-restructure-design/" class="md-nav__link">
         
   
   
@@ -830,7 +836,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../specs/2026-07-21-normalizer-design/" class="md-nav__link">
+      <a href="../2026-07-21-normalizer-design/" class="md-nav__link">
         
   
   
@@ -858,7 +864,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../specs/2026-07-22-documentation-design/" class="md-nav__link">
+      <a href="../2026-07-22-documentation-design/" class="md-nav__link">
         
   
   
@@ -886,7 +892,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../specs/2026-07-22-sql-loader-design/" class="md-nav__link">
+      <a href="../2026-07-22-sql-loader-design/" class="md-nav__link">
         
   
   
@@ -914,7 +920,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../specs/2026-07-23-orchestrator-design/" class="md-nav__link">
+      <a href="../2026-07-23-orchestrator-design/" class="md-nav__link">
         
   
   
@@ -942,7 +948,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../specs/2026-07-26-python-downloader-design/" class="md-nav__link">
+      <a href="../2026-07-26-python-downloader-design/" class="md-nav__link">
         
   
   
@@ -970,7 +976,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../specs/2026-07-26-configurable-data-dir-design/" class="md-nav__link">
+      <a href="../2026-07-26-configurable-data-dir-design/" class="md-nav__link">
         
   
   
@@ -995,10 +1001,37 @@
                 
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="../../specs/2026-07-26-documentation-sync-design/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Documentation sync
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   
@@ -1014,6 +1047,120 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#problem" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Problem
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#ground-truth-verified-against-code" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Ground truth (verified against code)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#scope" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Scope
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Scope">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-surgical-corrections-to-existing-docs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Surgical corrections to existing docs
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-two-new-guides" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Two new guides
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-k6-purge-with-stash" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. k6 purge with stash
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#verification" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Verification
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#non-goals" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Non-goals
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -1080,22 +1227,66 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#confirmed-without-a-sql-server-community-repo-local-duckdb" class="md-nav__link">
+  <a href="#problem" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Confirmed WITHOUT a SQL Server (community repo + local DuckDB)
+        Problem
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Confirmed WITHOUT a SQL Server (community repo + local DuckDB)">
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#ground-truth-verified-against-code" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Ground truth (verified against code)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#scope" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Scope
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Scope">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#version-pin-caveat-surface-to-maintainer" class="md-nav__link">
+  <a href="#1-surgical-corrections-to-existing-docs" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Version-pin caveat (surface to maintainer)
+        1. Surgical corrections to existing docs
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-two-new-guides" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Two new guides
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-k6-purge-with-stash" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. k6 purge with stash
       
     </span>
   </a>
@@ -1108,10 +1299,21 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#live-validation-complete-sql-server-2022-in-docker" class="md-nav__link">
+  <a href="#verification" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Live validation — COMPLETE (SQL Server 2022 in Docker)
+        Verification
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#non-goals" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Non-goals
       
     </span>
   </a>
@@ -1138,57 +1340,106 @@
   
 
 
-<h1 id="mssql-extension-spike-findings">mssql extension spike — findings</h1>
-<p><strong>Date:</strong> 2026-07-22
-<strong>Task:</strong> Task 1 of the SQL loader plan (<code>docs/superpowers/plans/2026-07-22-sql-loader.md</code>)
-<strong>Environment:</strong> macOS ARM64, DuckDB 1.4.4 (repo pin), <code>INSTALL mssql FROM community</code>.</p>
-<h2 id="confirmed-without-a-sql-server-community-repo-local-duckdb">Confirmed WITHOUT a SQL Server (community repo + local DuckDB)</h2>
+<h1 id="documentation-sync-design">Documentation Sync — Design</h1>
+<p><strong>Date:</strong> 2026-07-26
+<strong>Status:</strong> Approved
+<strong>Topic:</strong> Bring all user-facing documentation back in line with the current codebase.</p>
+<h2 id="problem">Problem</h2>
+<p>The documentation describes a repo that no longer exists. Since the docs were
+last touched, the codebase changed substantially:</p>
 <ul>
-<li><code>INSTALL mssql FROM community; LOAD mssql;</code> succeeds on DuckDB 1.4.4 — no external system dependency. ✅</li>
-<li><strong>Installed extension version reports as <code>7e57d24</code></strong> — a git short-SHA, <strong>not</strong> a semver.
-  The DuckDB community-extension registry versions this extension by commit hash. The spec's
-  nominated pin <code>v0.2.1</code> is therefore not a value <code>INSTALL … FROM community</code> can return.
-  → <code>EXPECTED_MSSQL_EXT_VERSION = "7e57d24"</code> (see <code>loader/src/taxi_loader/connection.py</code>).
-  Read via <code>SELECT extension_version FROM duckdb_extensions() WHERE extension_name='mssql'</code>.</li>
-<li>Functions present (<code>SELECT function_name FROM duckdb_functions() WHERE function_name LIKE 'mssql%'</code>):
-  <code>mssql_azure_auth_test, mssql_close, mssql_exec, mssql_open, mssql_ping, mssql_pool_stats,
-  mssql_preload_catalog, mssql_refresh_cache, mssql_scan, mssql_version</code>.
-  The plan uses <code>mssql_exec</code> (scalar; DDL/DML, returns affected rows) and <code>mssql_scan(catalog, query)</code>
-  (table; reads). Both present. ✅ No <code>mssql_query</code> — the plan correctly uses <code>mssql_scan</code>.</li>
+<li>The repo was renamed <code>taxi</code> → <code>taxi-seed</code>.</li>
+<li>The downloader was rewritten from a bash script (<code>downloader/download_taxi_data.sh</code>)
+  into a Python package (<code>taxi_download</code>, console script <code>taxi-download</code>). The bash
+  script and its test were deleted.</li>
+<li><code>k6-loadtest</code> was removed from this repo (it is moving to a separate <code>taxi-lab</code> repo).</li>
+<li>Two new tools shipped: <code>loader</code> (<code>taxi-load</code>) and <code>orchestrator</code>
+  (<code>taxi-run</code>, <code>taxi-curate-mappings</code>), plus a <code>shared</code> library (<code>taxi_shared</code>).</li>
+<li>A configurable <code>--data-dir</code> flag was threaded across
+  downloader / normalize / loader / orchestrator.</li>
 </ul>
-<h3 id="version-pin-caveat-surface-to-maintainer">Version-pin caveat (surface to maintainer)</h3>
-<p>A commit-hash pin is brittle: whenever the community CI rebuilds the extension for DuckDB 1.4.x,
-the hash changes and the startup assertion (exit 2) will fire until <code>EXPECTED_MSSQL_EXT_VERSION</code>
-is bumped. This is exactly the spec's intent ("a version bump is a deliberate, tested change"),
-but the practical cadence of hash churn is higher than a semver would be. Options if it proves
-noisy: (a) relax the assertion to a warning, or (b) pin the DuckDB extension repo/version. Left as
-spec'd (hard assert) for v1.</p>
-<h2 id="live-validation-complete-sql-server-2022-in-docker">Live validation — COMPLETE (SQL Server 2022 in Docker)</h2>
-<p>The full env-gated integration suite (<code>tests/taxi_loader/test_load_integration.py</code>, 7 tests) now
-passes end-to-end against <code>mcr.microsoft.com/mssql/server:2022-latest</code> (amd64 under emulation on
-ARM64). Full repo suite: 125 passed with the server available. Two real bugs the README-grounded
-SQL missed were found and fixed here:</p>
-<ol>
-<li><strong>DuckDB rejects bind parameters in <code>ATTACH</code>.</strong> <code>ATTACH ? AS mssql (TYPE mssql)</code> → Parser Error.
-   Fix: interpolate the connection string as an escaped single-quoted literal (<code>_sql_str</code>); it is
-   still never logged. (<code>connection.py</code>)</li>
-<li><strong>The <code>mssql</code> extension's ATTACH "context" is process-global</strong>, surviving across DuckDB
-   connections. A leaked attach collides with the next attach of the same name ("Context 'mssql'
-   already exists"). Fix: <code>main()</code> now <code>DETACH</code>es + closes on exit; integration tests hold only one
-   <code>mssql</code> attach at a time. (<code>cli.py</code>, tests)</li>
-</ol>
-<p>The following spellings are now confirmed working against the live server:</p>
+<p>As a result: quick-start commands are broken, install instructions are wrong,
+flags / env vars / exit codes documented don't match the code, k6 is presented as a
+live component, and the two newest tools are largely undocumented (their READMEs even
+link to guide pages that 404).</p>
+<h2 id="ground-truth-verified-against-code">Ground truth (verified against code)</h2>
 <ul>
-<li><code>ATTACH 'Server=host,1433;Database=db;User Id=sa;Password=…;Encrypt=yes;TrustServerCertificate=yes' AS mssql (TYPE mssql)</code></li>
-<li>Provisioning via <code>SELECT mssql_exec('&lt;master-attach&gt;', 'IF DB_ID(''taxi'') IS NULL EXEC(''CREATE DATABASE [taxi]'')')</code></li>
-<li><code>SELECT mssql_exec('mssql', '&lt;CREATE TABLE …&gt;')</code> (confirm whether DDL must be <code>EXEC('…')</code>-wrapped)</li>
-<li>Append: <code>COPY (SELECT * FROM read_parquet([...])) TO 'mssql://mssql/dbo/&lt;table&gt;' (FORMAT 'bcp', CREATE_TABLE false, TABLOCK true, FLUSH_ROWS 100000)</code></li>
-<li>Reload: <code>DROP TABLE IF EXISTS &lt;fq&gt;</code> → explicit <code>CREATE TABLE</code> → append-style <code>COPY</code> (no <code>REPLACE</code>)</li>
-<li>Reads: <code>SELECT … FROM mssql_scan('mssql', '&lt;query&gt;')</code></li>
+<li><strong>Console scripts</strong> (<code>pyproject.toml [project.scripts]</code>): <code>normalize</code>,
+  <code>schema-drift</code>, <code>taxi-curate-mappings</code>, <code>taxi-download</code>, <code>taxi-load</code>, <code>taxi-run</code>.</li>
+<li><strong>Wheel packages</strong> (6): <code>taxi_download</code>, <code>taxi_loader</code>, <code>taxi_normalize</code>,
+  <code>taxi_orchestrate</code>, <code>schema_drift</code>, <code>taxi_shared</code>.</li>
+<li><strong>Deps:</strong> <code>duckdb</code>, <code>httpx</code>, <code>pyyaml</code>. <code>requires-python &gt;= 3.12</code>. Installed via
+  <code>uv sync</code> at the <strong>repo root</strong> (single root package, not per-subdirectory).</li>
+<li><strong>Downloader</strong> (<code>taxi_download</code>): positional <code>data_type</code> (yellow/green/fhv/fhvhv;
+  omit = all), <code>--recent [N]</code> (default N=3), <code>--data-dir DIR</code> (files land under
+  <code>DIR/raw</code>, default <code>.</code>). No <code>--from</code>/<code>--to</code>, no <code>OUTPUT_DIR</code>. Uses <code>httpx</code> (not curl).
+  Per-month retry backoff 30 → 90 → 270s capped at 3600s, <code>MAX_RETRIES=4</code>;
+  full-history walk aborts a type after <code>MAX_CONSECUTIVE_GIVEUPS=3</code>. Exit <code>2</code> only when
+  a type finished with <code>downloaded==0 and gaveup&gt;0</code>, else <code>0</code>. Start dates:
+  yellow 2009-01, green 2013-08, fhv 2015-01, fhvhv 2019-02.</li>
+<li><strong><code>MSSQL_PASSWORD</code></strong> is read by <code>taxi-load</code> and <code>taxi-run</code> (required for the load stage).</li>
+<li><strong>CI</strong> (<code>ci.yml</code>): <code>test</code> (matrix 3.12/3.13), <code>docs</code> (push→main only, <code>mkdocs gh-deploy</code>),
+  <code>integration</code> (SQL Server service, Python 3.13).</li>
 </ul>
-<p><strong>To finish the live spike / run integration:</strong> start Docker, then
-<code>docker run -d --name mssql-it -e ACCEPT_EULA=Y -e MSSQL_SA_PASSWORD='Str0ng_Passw0rd!' -p 1433:1433 mcr.microsoft.com/mssql/server:2022-latest</code>
-and <code>MSSQL_PASSWORD='Str0ng_Passw0rd!' uv run --extra test pytest tests/taxi_loader/test_load_integration.py -v</code>.</p>
+<p>The full per-file discrepancy list lives in the audit conducted during brainstorming;
+this spec captures the decisions and the shape of the work, not every line.</p>
+<h2 id="scope">Scope</h2>
+<p>Three categories of change.</p>
+<h3 id="1-surgical-corrections-to-existing-docs">1. Surgical corrections to existing docs</h3>
+<p>Driven by the code-verified audit. Files: <code>README.md</code>, <code>docs/index.md</code>,
+<code>docs/getting-started.md</code>, <code>mkdocs.yml</code>, <code>docs/guides/downloader.md</code>,
+<code>docs/guides/normalize.md</code>, <code>docs/guides/schema-drift.md</code>, <code>docs/architecture.md</code>,
+<code>docs/cookbook.md</code>, <code>docs/contributing.md</code>, <code>docs/reference/configuration.md</code>,
+<code>docs/reference/exit-codes.md</code>, <code>docs/operations/releasing.md</code>.</p>
+<p>Key corrections:</p>
+<ul>
+<li>Rename <code>taxi</code> → <code>taxi-seed</code> (titles, <code>cd taxi</code>, mkdocs <code>site_name</code>/<code>site_description</code>).</li>
+<li>Downloader: bash → Python everywhere; real flags, backoff, exit codes, start dates;
+  drop <code>OUTPUT_DIR</code> and curl. <code>downloader.md</code> is a near-total rewrite.</li>
+<li>Framing: "four tools" → the actual set (downloader, schema-drift, normalize, loader,
+  orchestrator + shared lib). Remove k6 as a live component.</li>
+<li>Reference: rewrite exit-codes for <code>taxi-download</code>; add <code>taxi-load</code>, <code>taxi-run</code>,
+  <code>taxi-curate-mappings</code>; drop k6-preprocess. In configuration, drop the k6 YAML section,
+  fix the <code>OUTPUT_DIR</code>/<code>MSSQL_PASSWORD</code>/proxy rows, and document <code>--data-dir</code>.</li>
+<li>normalize guide: document <code>--data-dir</code>; fix exit-2 wording, "Amended by" header on
+  amend, scaffold comment text, SUGGESTED punctuation.</li>
+<li>schema-drift guide: install at repo root; confidence 0.7 (default/taxi mode) vs
+  0.6 (generic mode).</li>
+<li>architecture: 5 tools + shared; Python downloader; loader &amp; orchestrator are <strong>built</strong>,
+  not "not yet built"; updated DAG and repo layout.</li>
+<li>cookbook: replace bash-downloader and k6 recipes with <code>taxi-download</code> / <code>taxi-load</code> /
+  <code>taxi-run</code>.</li>
+<li>Test-count claims: replace brittle hardcoded numbers ("83 tests", "under a second")
+  with durable phrasing that distinguishes the fast unit suite from the SQL-Server
+  integration/e2e tests.</li>
+</ul>
+<h3 id="2-two-new-guides">2. Two new guides</h3>
+<p>Author <code>docs/guides/loader.md</code> and <code>docs/guides/orchestrator.md</code> matching the depth and
+house style of the existing guides, verified against source. Add both to the mkdocs nav.
+Fix the broken <code>guides/loader/</code> and <code>guides/orchestrator/</code> links in the respective
+component READMEs.</p>
+<h3 id="3-k6-purge-with-stash">3. k6 purge with stash</h3>
+<p>Remove all k6 references from the live docs. Move the k6 design spec
+(<code>docs/superpowers/specs/2026-03-25-k6-sql-load-testing-design.md</code>) and plan
+(<code>docs/superpowers/plans/2026-03-25-k6-sql-load-testing.md</code>) into a new git-tracked,
+non-published top-level directory <code>taxi-lab-handoff/</code>, with a short README noting the
+files are staged for migration to the <code>taxi-lab</code> repo. Remove the k6 spec from the
+mkdocs nav.</p>
+<p>Out of scope: the leftover untracked <code>k6-loadtest/</code> <code>.pyc</code> directory (code, not docs) —
+flag it to the user but do not touch it as part of this work.</p>
+<h2 id="verification">Verification</h2>
+<ul>
+<li><code>mkdocs build --strict</code> succeeds (no broken links, no nav/orphan warnings).</li>
+<li>The doc-relevant test suite passes.</li>
+<li>Spot-check: every documented command, flag, env var, and exit code matches the code.</li>
+</ul>
+<h2 id="non-goals">Non-goals</h2>
+<ul>
+<li>No code changes (only documentation and doc-adjacent file moves).</li>
+<li>No new features; no refactoring beyond the doc content itself.</li>
+<li>No rewrite of the historical <code>superpowers/plans</code> and <code>superpowers/specs</code> archive
+  (point-in-time records), except moving the k6 spec/plan to the handoff dir.</li>
+</ul>
 
 
 

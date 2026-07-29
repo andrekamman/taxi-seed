@@ -10,13 +10,13 @@
       
       
       
-        <link rel="canonical" href="https://andrekamman.github.io/taxi-seed/operations/releasing/">
+        <link rel="canonical" href="https://andrekamman.github.io/taxi-seed/guides/orchestrator/">
       
       
-        <link rel="prev" href="../../reference/exit-codes/">
+        <link rel="prev" href="../loader/">
       
       
-        <link rel="next" href="../../superpowers/specs/2026-07-19-monorepo-restructure-design/">
+        <link rel="next" href="../../cookbook/">
       
       
         
@@ -27,7 +27,7 @@
     
     
       
-        <title>Releasing - taxi-seed</title>
+        <title>Orchestrator - taxi-seed</title>
       
     
     
@@ -78,7 +78,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#releasing" class="md-skip">
+        <a href="#orchestrator" class="md-skip">
           Skip to content
         </a>
       
@@ -114,7 +114,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Releasing
+              Orchestrator
             
           </span>
         </div>
@@ -316,18 +316,20 @@
       
   
   
+    
   
   
+  
     
     
     
     
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
         
           
           <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
@@ -348,7 +350,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
           <label class="md-nav__title" for="__nav_3">
             <span class="md-nav__icon md-icon"></span>
             
@@ -366,7 +368,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../guides/downloader/" class="md-nav__link">
+      <a href="../downloader/" class="md-nav__link">
         
   
   
@@ -394,7 +396,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../guides/schema-drift/" class="md-nav__link">
+      <a href="../schema-drift/" class="md-nav__link">
         
   
   
@@ -422,7 +424,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../guides/normalize/" class="md-nav__link">
+      <a href="../normalize/" class="md-nav__link">
         
   
   
@@ -450,7 +452,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../guides/loader/" class="md-nav__link">
+      <a href="../loader/" class="md-nav__link">
         
   
   
@@ -475,10 +477,37 @@
                 
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="../../guides/orchestrator/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Orchestrator
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   
@@ -494,6 +523,114 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#prerequisites" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Prerequisites
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#install" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Install
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#basic-usage" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Basic usage
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#how-stages-chain" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How stages chain
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#flags" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Flags
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#exit-codes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Exit codes
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#taxi-curate-mappings" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        taxi-curate-mappings
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#troubleshooting" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Troubleshooting
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -674,20 +811,18 @@
       
   
   
-    
   
   
-  
     
     
     
     
     
-    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" checked>
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" >
         
           
           <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
@@ -708,7 +843,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="true">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_7">
             <span class="md-nav__icon md-icon"></span>
             
@@ -723,37 +858,10 @@
                 
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Releasing
-  
-
-    
-  </span>
-  
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../../operations/releasing/" class="md-nav__link">
         
   
   
@@ -769,120 +877,6 @@
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#branch-model" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Branch model
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#the-ci-gate" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        The CI gate
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#releasing-test-prod" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Releasing (test → prod)
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Releasing (test → prod)">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#cut-a-prerelease-testpypi" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Cut a prerelease (TestPyPI)
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#cut-a-final-release-pypi" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Cut a final release (PyPI)
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#safety-gotchas" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Safety / gotchas
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#one-time-setup-checklist" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        One-time setup checklist
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#optional-custom-docs-domain" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Optional — custom docs domain
-      
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -1227,10 +1221,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#branch-model" class="md-nav__link">
+  <a href="#prerequisites" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Branch model
+        Prerequisites
       
     </span>
   </a>
@@ -1238,10 +1232,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#the-ci-gate" class="md-nav__link">
+  <a href="#install" class="md-nav__link">
     <span class="md-ellipsis">
       
-        The CI gate
+        Install
       
     </span>
   </a>
@@ -1249,60 +1243,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#releasing-test-prod" class="md-nav__link">
+  <a href="#basic-usage" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Releasing (test → prod)
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Releasing (test → prod)">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#cut-a-prerelease-testpypi" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Cut a prerelease (TestPyPI)
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#cut-a-final-release-pypi" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Cut a final release (PyPI)
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#safety-gotchas" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Safety / gotchas
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#one-time-setup-checklist" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        One-time setup checklist
+        Basic usage
       
     </span>
   </a>
@@ -1310,10 +1254,54 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#optional-custom-docs-domain" class="md-nav__link">
+  <a href="#how-stages-chain" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Optional — custom docs domain
+        How stages chain
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#flags" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Flags
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#exit-codes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Exit codes
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#taxi-curate-mappings" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        taxi-curate-mappings
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#troubleshooting" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Troubleshooting
       
     </span>
   </a>
@@ -1340,180 +1328,135 @@
   
 
 
-<h1 id="releasing">Releasing</h1>
-<p>This page is the operator's runbook for the branch model, the CI gate that protects it, and the tag-driven release flow that publishes <code>taxi-seed</code> to PyPI. If you are looking for how to build and test locally as a contributor, see <a href="../../contributing/">Contributing</a> instead — this page is about promoting code from a merged PR to a published package.</p>
-<h2 id="branch-model">Branch model</h2>
+<h1 id="orchestrator">Orchestrator</h1>
+<p><code>taxi-run</code> runs the pipeline as one command: download → normalize → (opt-in) load, per data type, honoring each stage's own exit-code contract rather than reinventing one. It exists so a cron job or CI step can invoke a single tool instead of chaining three, while still stopping cleanly the moment a type needs a human (normalize found unresolved mapping items) or a stage genuinely fails. A companion command, <code>taxi-curate-mappings</code>, auto-accepts detected schema drift into complete mapping YAMLs for cases where you want the pipeline to run unattended and are comfortable with heuristic acknowledgments.</p>
+<h2 id="prerequisites">Prerequisites</h2>
 <ul>
-<li><strong><code>dev</code></strong> is the default branch and the integration branch. Feature branches are cut from <code>dev</code>, and pull requests target <code>dev</code> — not <code>main</code>.</li>
-<li><strong><code>main</code></strong> is the stable, released branch. Nothing lands on <code>main</code> directly; it only moves forward by merging <code>dev</code> into it once <code>dev</code> is in a state worth shipping.</li>
-<li>The docs site deploys from <code>main</code> (see the <code>docs</code> job in <code>.github/workflows/ci.yml</code>, gated on <code>push</code> to <code>refs/heads/main</code>), so <code>main</code> is also "what's live on the docs site" at any given moment.</li>
-<li>Releases are tagged <strong>on <code>main</code></strong>, after the promotion merge — never on <code>dev</code> and never on a feature branch. The version published to PyPI is whatever <code>main</code> looked like when the tag was pushed.</li>
+<li><code>uv sync</code> in the repo root — this also pulls in the <a href="../downloader/">downloader</a>, <a href="../normalize/">normalize</a>, and <a href="../loader/">loader</a> packages that <code>taxi-run</code> shells out to.</li>
+<li>Everything the stages you enable need: for <code>--load</code>, a reachable SQL Server and <code>MSSQL_PASSWORD</code> set (see the <a href="../loader/#prerequisites">loader guide</a>).</li>
 </ul>
-<p>The promotion path in order: feature branch → PR into <code>dev</code> → <code>dev</code> passes CI → PR/merge <code>dev</code> into <code>main</code> → tag <code>main</code> → release workflow runs.</p>
-<h2 id="the-ci-gate">The CI gate</h2>
-<p><code>.github/workflows/ci.yml</code> defines three jobs — <code>test</code>, <code>docs</code>, and <code>integration</code>. A pull request runs <code>test</code> and <code>integration</code>; <code>docs</code> only runs (and deploys) on a <code>push</code> to <code>main</code>, so it does not gate PRs.</p>
+<h2 id="install">Install</h2>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-1">1</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1"></a>uv<span class="w"> </span>sync
+</code></pre></div></td></tr></table></div>
+<p>Exposes two console scripts from the root <code>pyproject.toml</code>: <code>taxi-run</code> (<code>taxi_orchestrate.cli:main</code>) and <code>taxi-curate-mappings</code> (<code>taxi_orchestrate.curate:main</code>).</p>
+<h2 id="basic-usage">Basic usage</h2>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-1-1"> 1</a></span>
+<span class="normal"><a href="#__codelineno-1-2"> 2</a></span>
+<span class="normal"><a href="#__codelineno-1-3"> 3</a></span>
+<span class="normal"><a href="#__codelineno-1-4"> 4</a></span>
+<span class="normal"><a href="#__codelineno-1-5"> 5</a></span>
+<span class="normal"><a href="#__codelineno-1-6"> 6</a></span>
+<span class="normal"><a href="#__codelineno-1-7"> 7</a></span>
+<span class="normal"><a href="#__codelineno-1-8"> 8</a></span>
+<span class="normal"><a href="#__codelineno-1-9"> 9</a></span>
+<span class="normal"><a href="#__codelineno-1-10">10</a></span>
+<span class="normal"><a href="#__codelineno-1-11">11</a></span>
+<span class="normal"><a href="#__codelineno-1-12">12</a></span>
+<span class="normal"><a href="#__codelineno-1-13">13</a></span>
+<span class="normal"><a href="#__codelineno-1-14">14</a></span>
+<span class="normal"><a href="#__codelineno-1-15">15</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1"></a><span class="c1"># Download + normalize all four types (no load)</span>
+<a id="__codelineno-1-2" name="__codelineno-1-2"></a>uv<span class="w"> </span>run<span class="w"> </span>taxi-run
+<a id="__codelineno-1-3" name="__codelineno-1-3"></a>
+<a id="__codelineno-1-4" name="__codelineno-1-4"></a><span class="c1"># Download + normalize one type</span>
+<a id="__codelineno-1-5" name="__codelineno-1-5"></a>uv<span class="w"> </span>run<span class="w"> </span>taxi-run<span class="w"> </span>yellow
+<a id="__codelineno-1-6" name="__codelineno-1-6"></a>
+<a id="__codelineno-1-7" name="__codelineno-1-7"></a><span class="c1"># Recent-mode download, then normalize</span>
+<a id="__codelineno-1-8" name="__codelineno-1-8"></a>uv<span class="w"> </span>run<span class="w"> </span>taxi-run<span class="w"> </span>yellow<span class="w"> </span>--recent<span class="w"> </span><span class="m">3</span>
+<a id="__codelineno-1-9" name="__codelineno-1-9"></a>
+<a id="__codelineno-1-10" name="__codelineno-1-10"></a><span class="c1"># Also load into SQL Server</span>
+<a id="__codelineno-1-11" name="__codelineno-1-11"></a><span class="nb">export</span><span class="w"> </span><span class="nv">MSSQL_PASSWORD</span><span class="o">=</span>your-password
+<a id="__codelineno-1-12" name="__codelineno-1-12"></a>uv<span class="w"> </span>run<span class="w"> </span>taxi-run<span class="w"> </span>yellow<span class="w"> </span>--load
+<a id="__codelineno-1-13" name="__codelineno-1-13"></a>
+<a id="__codelineno-1-14" name="__codelineno-1-14"></a><span class="c1"># See the planned stages without running anything</span>
+<a id="__codelineno-1-15" name="__codelineno-1-15"></a>uv<span class="w"> </span>run<span class="w"> </span>taxi-run<span class="w"> </span>yellow<span class="w"> </span>--recent<span class="w"> </span><span class="m">3</span><span class="w"> </span>--load<span class="w"> </span>--dry-run
+</code></pre></div></td></tr></table></div>
+<p><code>data_type</code> is a positional argument, one of <code>yellow</code>, <code>green</code>, <code>fhv</code>, <code>fhvhv</code>; omit it to run all four in turn.</p>
+<h2 id="how-stages-chain">How stages chain</h2>
+<p>For each requested type, <code>taxi-run</code> invokes each planned stage as a subprocess (<code>python -m taxi_download.cli</code>, <code>python -m taxi_normalize.cli</code>, <code>python -m taxi_loader.cli</code>) from the detected repo root, and classifies the stage's exit code (<code>pipeline.classify</code>) into one of: <code>ok</code>, <code>needs_review</code>, <code>failed</code>, <code>partial</code>, or <code>conn_error</code>. That classification drives two independent decisions:</p>
 <ul>
-<li><strong><code>test</code></strong> — unit tests across the Python version matrix (3.12, 3.13).</li>
-<li><strong><code>docs</code></strong> — builds and deploys the documentation site; gated on <code>push</code> to <code>refs/heads/main</code>, not on pull requests.</li>
-<li><strong><code>integration</code></strong> — end-to-end tests against a real SQL Server container (loader integration + pipeline e2e), on Python 3.13.</li>
+<li><strong><code>halt_type</code></strong> — stop processing <em>this type's</em> remaining stages. Set for any non-zero download exit, a normalize exit of <code>1</code> or <code>3</code> (needs review) or anything else non-zero (failed), but <em>not</em> for a load exit of <code>0</code> or <code>1</code> (load partial doesn't block anything — load is always the last stage anyway).</li>
+<li><strong><code>abort_run</code></strong> — skip the load stage for <strong>all remaining types</strong> in this invocation, not just the current one. Only a loader exit <code>2</code> triggers this: it's ambiguous between a connection/config problem (which would fail every subsequent type's load identically) and a per-type <code>TypeMappingError</code>, and the deliberate conservative choice is to over-abort — the exit <code>2</code> still surfaces on that type's own record either way.</li>
 </ul>
-<p>Merging into <code>dev</code> or <code>main</code> is blocked until <code>integration</code> passes — it is configured as a <strong>required status check</strong> (see the one-time setup below for the exact command that wires this up).</p>
-<div class="admonition warning">
-<p class="admonition-title">The required check is named <code>integration</code></p>
-<p>Branch protection matches on the job name, not on what the job does. If the <code>integration</code> job in <code>.github/workflows/ci.yml</code> is ever renamed, the branch-protection rule silently stops matching anything — GitHub will show the merge button as available even though no equivalent check ran. Renaming that job and updating branch protection have to happen in the same PR.</p>
-</div>
-<h2 id="releasing-test-prod">Releasing (test → prod)</h2>
-<p>The published version is derived entirely from the git tag via <code>hatch-vcs</code> — there is no version string to bump in <code>pyproject.toml</code>. Pushing a tag is the release action.</p>
-<p><code>.github/workflows/release.yml</code> triggers on any tag matching <code>v*</code> and classifies it as prerelease or final by shape:</p>
+<p>Repo root is auto-detected by walking up from the current directory looking for a <code>pyproject.toml</code> alongside a <code>normalize/mappings/</code> directory (<code>find_repo_root</code>); if none is found, it falls back to the current directory. <code>--data-dir</code> overrides where stage subprocesses read/write (<code>DIR/raw</code>, <code>DIR/raw-normalized</code>) but does not change where the repo root itself is located.</p>
+<p>At the end of the run, a summary table is printed (<code>type</code>, <code>download</code>, <code>normalize</code>, <code>load</code>, <code>outcome</code> columns) via <code>report.render_summary</code>, with a per-type label like <code>LOADED</code>, <code>NEEDS REVIEW</code>, <code>LOAD PARTIAL</code>, <code>LOAD ERROR</code>, <code>DOWNLOAD FAILED</code>, <code>NORMALIZE ERROR</code>, or <code>OK</code>.</p>
+<h2 id="flags">Flags</h2>
+<p><strong><code>--recent [N]</code></strong> — pass recent-mode through to the downloader. Bare <code>--recent</code> (no value) requests the downloader's own default (3 months); <code>--recent 5</code> requests 5. Omit <code>--recent</code> entirely to walk full history instead.</p>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-2-1">1</a></span>
+<span class="normal"><a href="#__codelineno-2-2">2</a></span>
+<span class="normal"><a href="#__codelineno-2-3">3</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1"></a>uv<span class="w"> </span>run<span class="w"> </span>taxi-run<span class="w"> </span>yellow<span class="w"> </span>--recent<span class="w">        </span><span class="c1"># downloader&#39;s default recent window</span>
+<a id="__codelineno-2-2" name="__codelineno-2-2"></a>uv<span class="w"> </span>run<span class="w"> </span>taxi-run<span class="w"> </span>yellow<span class="w"> </span>--recent<span class="w"> </span><span class="m">5</span><span class="w">      </span><span class="c1"># 5 most recent months</span>
+<a id="__codelineno-2-3" name="__codelineno-2-3"></a>uv<span class="w"> </span>run<span class="w"> </span>taxi-run<span class="w">                        </span><span class="c1"># full history, all four types</span>
+</code></pre></div></td></tr></table></div>
+<p><strong><code>--skip-download</code></strong> — skip the download stage; normalize (and optionally load) run against whatever is already in the local <code>raw/</code> mirror.</p>
+<p><strong><code>--download-only</code></strong> — only run the download stage; normalize and load are skipped for every type. <strong>Conflicts with <code>--load</code></strong>: passing both exits immediately with code 2 and an error message, before any stage runs.</p>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-3-1">1</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1"></a>uv<span class="w"> </span>run<span class="w"> </span>taxi-run<span class="w"> </span>--download-only<span class="w"> </span>--load<span class="w">   </span><span class="c1"># error: --download-only cannot be combined with --load (exit 2)</span>
+</code></pre></div></td></tr></table></div>
+<p><strong><code>--load</code></strong> — after a successful normalize, also load that type's normalized parquet into SQL Server via <code>taxi-load</code>. Requires <code>MSSQL_PASSWORD</code> to be set in the environment; if it isn't, <code>taxi-run</code> exits 2 immediately, before running any stage for any type.</p>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-4-1">1</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1"></a>uv<span class="w"> </span>run<span class="w"> </span>taxi-run<span class="w"> </span>yellow<span class="w"> </span>--load<span class="w">   </span><span class="c1"># error: MSSQL_PASSWORD environment variable is required for --load (exit 2, if unset)</span>
+</code></pre></div></td></tr></table></div>
+<p><strong><code>--data-dir DIR</code></strong> — base data directory forwarded to every stage: download writes to <code>DIR/raw</code>, normalize reads <code>DIR/raw</code> and writes <code>DIR/raw-normalized</code>, load reads <code>DIR/raw-normalized</code>. Default: the detected repo root.</p>
+<p><strong><code>--sample VALUE</code></strong> — forwarded verbatim to normalize's <code>--sample</code> flag (see the <a href="../normalize/#the-sample-flag">normalize guide</a>).</p>
+<p><strong><code>--dry-run</code></strong> — print the planned stage list per type (e.g. <code>download -&gt; normalize -&gt; load</code>) and exit 0 without invoking any subprocess.</p>
+<p><strong>Load-only pass-through flags</strong> — meaningful only when <code>--load</code> is set; forwarded to <code>taxi-load</code> unchanged: <code>--host</code> (default <code>localhost</code>), <code>--port</code> (default <code>1433</code>), <code>--database</code> (default <code>taxi</code>), <code>--schema</code> (default <code>dbo</code>), <code>--user</code> (default <code>sa</code>), <code>--flush-rows</code> (default <code>100000</code>), <code>--full-refresh</code>. See the <a href="../loader/#configuration">loader guide</a> for what each controls.</p>
+<h2 id="exit-codes">Exit codes</h2>
 <table>
 <thead>
 <tr>
-<th>Tag shape</th>
-<th>Example</th>
-<th>Classified as</th>
-<th>Destination</th>
+<th>Code</th>
+<th>Meaning</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td><code>vX.Y.Z</code></td>
-<td><code>v0.2.0</code></td>
-<td>final</td>
-<td>PyPI + GitHub Release</td>
+<td>0</td>
+<td>Every planned stage for every type completed cleanly (<code>ok</code>) — a genuinely clean run — or <code>--dry-run</code> printed the per-type plan and exited without running anything.</td>
 </tr>
 <tr>
-<td>anything else matching <code>v*</code></td>
-<td><code>v0.2.0rc1</code>, <code>v0.2.0a1</code>, <code>v0.2.0b1</code>, <code>v0.2.0.dev1</code></td>
-<td>prerelease</td>
-<td>TestPyPI + GitHub prerelease</td>
+<td>1</td>
+<td>No stage failed outright, but at least one type stopped at <code>needs_review</code> — normalize returned 1 (unresolved mapping items) or 3 (first-run scaffold awaiting review) for that type. Nothing operationally broke; a human has follow-up work.</td>
+</tr>
+<tr>
+<td>2</td>
+<td>At least one stage classified as <code>failed</code>, <code>partial</code>, or <code>conn_error</code> — download failed outright, normalize hit a real configuration error, the loader reported a partial load, or the loader hit a connection/config error or <code>TypeMappingError</code>. Also returned immediately for the <code>--download-only</code> + <code>--load</code> conflict or a missing <code>MSSQL_PASSWORD</code> when <code>--load</code> is set, before any stage runs.</td>
 </tr>
 </tbody>
 </table>
-<p>Both paths run the same <code>build</code> job first (checkout with full history/tags for <code>hatch-vcs</code>, <code>uv sync --extra test</code>, <code>pytest -q</code> as a guard, <code>uv build</code>), then fan out to <code>testpypi</code> or <code>pypi</code> based on the classification, then create the GitHub release/prerelease from the built artifacts. Publishing uses OIDC Trusted Publishing (<code>id-token: write</code>) — there are no PyPI tokens stored anywhere in the repo or its secrets.</p>
-<h3 id="cut-a-prerelease-testpypi">Cut a prerelease (TestPyPI)</h3>
-<p>From an up-to-date <code>main</code>:</p>
-<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-1">1</a></span>
-<span class="normal"><a href="#__codelineno-0-2">2</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1"></a>git<span class="w"> </span>tag<span class="w"> </span>v0.2.0rc1
-<a id="__codelineno-0-2" name="__codelineno-0-2"></a>git<span class="w"> </span>push<span class="w"> </span>origin<span class="w"> </span>v0.2.0rc1
-</code></pre></div></td></tr></table></div>
-<p>This runs the <code>build</code> job, then the <code>testpypi</code> job (environment <code>testpypi</code>, no approval required), then creates a GitHub prerelease. Watch it in the Actions tab or with:</p>
-<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-1-1">1</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1"></a>gh<span class="w"> </span>run<span class="w"> </span>watch
-</code></pre></div></td></tr></table></div>
-<p>Verify the published artifact installs before promoting further:</p>
-<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-2-1">1</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1"></a>pip<span class="w"> </span>install<span class="w"> </span>-i<span class="w"> </span>https://test.pypi.org/simple/<span class="w"> </span>taxi-seed<span class="o">==</span><span class="m">0</span>.2.0rc1
-</code></pre></div></td></tr></table></div>
-<h3 id="cut-a-final-release-pypi">Cut a final release (PyPI)</h3>
-<p>Once the prerelease has been verified, tag the same commit (or a later one on <code>main</code>) with the final version:</p>
-<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-3-1">1</a></span>
-<span class="normal"><a href="#__codelineno-3-2">2</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1"></a>git<span class="w"> </span>tag<span class="w"> </span>v0.2.0
-<a id="__codelineno-3-2" name="__codelineno-3-2"></a>git<span class="w"> </span>push<span class="w"> </span>origin<span class="w"> </span>v0.2.0
-</code></pre></div></td></tr></table></div>
-<p>This runs <code>build</code>, then the <code>pypi</code> job — which waits for approval in the <code>pypi</code> GitHub Environment (the required reviewer configured during one-time setup) before it publishes — then creates the GitHub Release. Approve the deployment from the Actions run page (or <code>gh run watch</code>, which surfaces the pending-approval state) when you're ready for it to go live.</p>
-<h3 id="safety-gotchas">Safety / gotchas</h3>
-<ul>
-<li><strong>The required reviewer on the <code>pypi</code> Environment is the only gate protecting production PyPI.</strong> If that environment is created without a required reviewer (or not created at all), a final <code>vX.Y.Z</code> tag publishes to real PyPI unattended — there is no other approval step in the path. Don't skip step 3 of the one-time setup below.</li>
-<li><strong><code>release.yml</code> triggers on any <code>v*</code> tag pushed to any branch</strong>, not just <code>main</code>. Only create release tags on <code>main</code>, per the branch model above — an accidental <code>v1.0.0</code> tag pushed on a feature branch or on <code>dev</code> would build from that commit and publish it just the same.</li>
-</ul>
-<h2 id="one-time-setup-checklist">One-time setup checklist</h2>
-<p>These are manual, out-of-band steps — they only need to happen once per repo, not per release.</p>
-<ol>
-<li>
-<p><strong>Create and default <code>dev</code>.</strong></p>
-<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-4-1">1</a></span>
-<span class="normal"><a href="#__codelineno-4-2">2</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1"></a>git<span class="w"> </span>checkout<span class="w"> </span>-b<span class="w"> </span>dev<span class="w"> </span>main
-<a id="__codelineno-4-2" name="__codelineno-4-2"></a>git<span class="w"> </span>push<span class="w"> </span>-u<span class="w"> </span>origin<span class="w"> </span>dev
-</code></pre></div></td></tr></table></div>
-<p>Then in GitHub: <strong>Settings → General → Default branch</strong> → switch it to <code>dev</code>. New PRs and <code>git clone</code> will target <code>dev</code> from then on.</p>
-</li>
-<li>
-<p><strong>Register PyPI + TestPyPI Trusted Publishers.</strong> Both PyPI and TestPyPI support registering a <em>pending</em> publisher before the project has ever been uploaded — this is what lets the very first <code>pypi</code>/<code>testpypi</code> job authenticate via OIDC with nothing to configure on the GitHub side beyond the environment name. On each of <a href="https://pypi.org/manage/account/publishing/">pypi.org</a> and <a href="https://test.pypi.org/manage/account/publishing/">test.pypi.org</a>, add a pending publisher with:</p>
-<table>
-<thead>
-<tr>
-<th>Field</th>
-<th>Value</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>PyPI project name</td>
-<td><code>taxi-seed</code></td>
-</tr>
-<tr>
-<td>Owner</td>
-<td><code>andrekamman</code></td>
-</tr>
-<tr>
-<td>Repository name</td>
-<td><code>taxi-seed</code></td>
-</tr>
-<tr>
-<td>Workflow name</td>
-<td><code>release.yml</code></td>
-</tr>
-<tr>
-<td>Environment name</td>
-<td><code>pypi</code> (on pypi.org) / <code>testpypi</code> (on test.pypi.org)</td>
-</tr>
-</tbody>
-</table>
-</li>
-<li>
-<p><strong>Create the GitHub Environments.</strong> <strong>Settings → Environments</strong>:</p>
-<ul>
-<li><code>testpypi</code> — no protection rules. The prerelease flow should be fast and unattended.</li>
-<li><code>pypi</code> — add yourself (or the release approver) as a <strong>required reviewer</strong>. This is the actual production approval gate: the <code>pypi</code> job in <code>release.yml</code> will not run until someone approves the deployment.</li>
-</ul>
-</li>
-<li>
-<p><strong>Turn on branch protection for both <code>dev</code> and <code>main</code></strong>, requiring the <code>integration</code> check on each. Both branches get the identical rule — <code>dev</code> because feature-branch PRs land there, and <code>main</code> because <code>dev</code>→<code>main</code> promotion PRs need the same gate to keep <code>main</code> releasable:</p>
+<p>Precedence is <strong>2 &gt; 1 &gt; 0</strong>: <code>pipeline.overall_exit_code</code> scans every stage outcome across every type and returns 2 if any outcome is in the failure set (<code>failed</code>, <code>partial</code>, <code>conn_error</code>), else 1 if any is <code>needs_review</code>, else 0.</p>
+<p>Note the one subtlety: a loader exit of <code>1</code> (partial load) classifies as <code>partial</code>, which <strong>is</strong> counted among the exit-2 statuses in <code>overall_exit_code</code> — so a partial load on any type escalates the whole run's exit code to 2, even though that type's own stage exit was 1. This is intentional: a partial load is a real operational anomaly (some rows may be missing from SQL Server), not merely "needs human review of a mapping file," so it's treated with the same urgency as a hard failure at the orchestrator level.</p>
+<h2 id="taxi-curate-mappings"><code>taxi-curate-mappings</code></h2>
+<p><code>taxi-curate-mappings [TYPE]</code> is a separate, deliberately-invoked bulk-accept utility for schema drift — it does <strong>not</strong> run as part of <code>taxi-run</code>. It drives off <code>normalize</code>'s own planner (<code>plan_file</code>) so the mapping it produces is exactly what <code>normalize</code> will accept with zero unresolved items, then writes every acknowledgment with <code>ack_by: auto-curated</code> and a <code>reason:</code> explaining what was detected.</p>
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-5-1">1</a></span>
 <span class="normal"><a href="#__codelineno-5-2">2</a></span>
-<span class="normal"><a href="#__codelineno-5-3">3</a></span>
-<span class="normal"><a href="#__codelineno-5-4">4</a></span>
-<span class="normal"><a href="#__codelineno-5-5">5</a></span>
-<span class="normal"><a href="#__codelineno-5-6">6</a></span>
-<span class="normal"><a href="#__codelineno-5-7">7</a></span>
-<span class="normal"><a href="#__codelineno-5-8">8</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1"></a>gh<span class="w"> </span>api<span class="w"> </span>-X<span class="w"> </span>PUT<span class="w"> </span>repos/andrekamman/taxi-seed/branches/dev/protection<span class="w"> </span>--input<span class="w"> </span>-<span class="w"> </span><span class="s">&lt;&lt;&#39;JSON&#39;</span>
-<a id="__codelineno-5-2" name="__codelineno-5-2"></a><span class="s">{</span>
-<a id="__codelineno-5-3" name="__codelineno-5-3"></a><span class="s">  &quot;required_status_checks&quot;: { &quot;strict&quot;: true, &quot;contexts&quot;: [&quot;integration&quot;] },</span>
-<a id="__codelineno-5-4" name="__codelineno-5-4"></a><span class="s">  &quot;enforce_admins&quot;: true,</span>
-<a id="__codelineno-5-5" name="__codelineno-5-5"></a><span class="s">  &quot;required_pull_request_reviews&quot;: null,</span>
-<a id="__codelineno-5-6" name="__codelineno-5-6"></a><span class="s">  &quot;restrictions&quot;: null</span>
-<a id="__codelineno-5-7" name="__codelineno-5-7"></a><span class="s">}</span>
-<a id="__codelineno-5-8" name="__codelineno-5-8"></a><span class="s">JSON</span>
+<span class="normal"><a href="#__codelineno-5-3">3</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1"></a>uv<span class="w"> </span>run<span class="w"> </span>taxi-curate-mappings<span class="w"> </span>yellow
+<a id="__codelineno-5-2" name="__codelineno-5-2"></a>uv<span class="w"> </span>run<span class="w"> </span>taxi-curate-mappings<span class="w">                       </span><span class="c1"># all four types</span>
+<a id="__codelineno-5-3" name="__codelineno-5-3"></a>uv<span class="w"> </span>run<span class="w"> </span>taxi-curate-mappings<span class="w"> </span>yellow<span class="w"> </span>--raw-dir<span class="w"> </span>raw<span class="w"> </span>--mappings-dir<span class="w"> </span>normalize/mappings
 </code></pre></div></td></tr></table></div>
-<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-6-1">1</a></span>
-<span class="normal"><a href="#__codelineno-6-2">2</a></span>
-<span class="normal"><a href="#__codelineno-6-3">3</a></span>
-<span class="normal"><a href="#__codelineno-6-4">4</a></span>
-<span class="normal"><a href="#__codelineno-6-5">5</a></span>
-<span class="normal"><a href="#__codelineno-6-6">6</a></span>
-<span class="normal"><a href="#__codelineno-6-7">7</a></span>
-<span class="normal"><a href="#__codelineno-6-8">8</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1"></a>gh<span class="w"> </span>api<span class="w"> </span>-X<span class="w"> </span>PUT<span class="w"> </span>repos/andrekamman/taxi-seed/branches/main/protection<span class="w"> </span>--input<span class="w"> </span>-<span class="w"> </span><span class="s">&lt;&lt;&#39;JSON&#39;</span>
-<a id="__codelineno-6-2" name="__codelineno-6-2"></a><span class="s">{</span>
-<a id="__codelineno-6-3" name="__codelineno-6-3"></a><span class="s">  &quot;required_status_checks&quot;: { &quot;strict&quot;: true, &quot;contexts&quot;: [&quot;integration&quot;] },</span>
-<a id="__codelineno-6-4" name="__codelineno-6-4"></a><span class="s">  &quot;enforce_admins&quot;: true,</span>
-<a id="__codelineno-6-5" name="__codelineno-6-5"></a><span class="s">  &quot;required_pull_request_reviews&quot;: null,</span>
-<a id="__codelineno-6-6" name="__codelineno-6-6"></a><span class="s">  &quot;restrictions&quot;: null</span>
-<a id="__codelineno-6-7" name="__codelineno-6-7"></a><span class="s">}</span>
-<a id="__codelineno-6-8" name="__codelineno-6-8"></a><span class="s">JSON</span>
-</code></pre></div></td></tr></table></div>
-<p>Note: GitHub only lists a check name as selectable in the Settings UI after it has run at least once on the repo (e.g. via one open PR) — but the API above accepts the <code>integration</code> name regardless of whether the UI has seen it yet, so this can be run before or after that first PR.</p>
-</li>
-</ol>
-<h2 id="optional-custom-docs-domain">Optional — custom docs domain</h2>
-<p>The docs site can be pointed at <code>taxi-seed.com</code> instead of the default <code>andrekamman.github.io/taxi-seed/</code> URL. This is not required for anything above and can be done at any time:</p>
+<p>For each type, it:</p>
 <ol>
-<li>
-<p>Add a <code>docs/CNAME</code> file to the repo containing exactly:</p>
-<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-7-1">1</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1"></a>taxi-seed.com
-</code></pre></div></td></tr></table></div>
-<p><code>mkdocs gh-deploy</code> copies everything under <code>docs/</code> into the published site, so this file will land at the root of <code>gh-pages</code> automatically on the next docs deploy.
-2. In GitHub: <strong>Settings → Pages</strong>, set the custom domain to <code>taxi-seed.com</code> and enable "Enforce HTTPS" once the certificate has provisioned.
-3. Add the DNS records at your registrar: either an <code>ALIAS</code>/<code>ANAME</code> (or the four GitHub Pages <code>A</code> records) for the apex domain, or a <code>CNAME</code> record if serving from a subdomain — pointing at <code>andrekamman.github.io</code>.</p>
-</li>
+<li>Runs <code>detect_drift</code> against every raw parquet file to get rename candidates and the target-file pin (reusing an existing mapping's <code>target:</code> if one exists).</li>
+<li>Iteratively re-plans against the normalizer's own logic (up to 8 rounds), and for every unresolved item:</li>
+<li><strong>Renames</strong> — accepted if the candidate cast is "executable" (target is a string type, same type family, or numeric→numeric); otherwise the column is dropped as acknowledged data loss instead of producing a mapping that would crash at cast time.</li>
+<li><strong>Lossy casts</strong> — auto-acknowledged (<code>ack_date</code> = today) if the cast is executable; a non-executable same-name cast (e.g. a string column TLC later ships as numeric) is <strong>not</strong> auto-acked — it raises and lists the blocking column(s), since auto-accepting it would produce a mapping that crashes <code>normalize</code> at runtime.</li>
+<li><strong>Unmapped drops</strong> — acknowledged as data loss if no viable rename exists.</li>
+<li>Writes the mapping YAML (<code>normalize/mappings/&lt;type&gt;.yaml</code>) with a header noting it was auto-curated, and re-validates until nothing is unresolved (or raises after 8 rounds if the drift is ambiguous/cyclic).</li>
 </ol>
+<p>After all requested types are processed, it writes an audit report to <code>&lt;mappings-dir&gt;/CURATION-REPORT.md</code> listing, per type, every acknowledgment-required decision (lossy casts, data-loss drops) to verify and every auto-accepted rename with its confidence — renames are heuristic and worth a second look even though they weren't blocking.</p>
+<p><strong>Flags:</strong> <code>data_type</code> (positional, optional, defaults to all four), <code>--raw-dir</code> (default <code>raw</code>), <code>--mappings-dir</code> (default <code>normalize/mappings</code>).</p>
+<p><strong>Exit codes:</strong> <code>0</code> if every requested type curated cleanly (or was skipped because <code>&lt;raw-dir&gt;/&lt;type&gt;</code> doesn't exist — printed as <code>&lt;type&gt;: no raw files at &lt;raw-dir&gt;/&lt;type&gt;, skipping</code>, not an error); <code>2</code> if any type raised (no raw files found for an existing type's directory check, no file matching the target name, a non-executable cast needing manual mapping, or unresolved items remaining after 8 rounds) — the loop continues to the next type and the overall exit code is the max observed.</p>
+<p>Because it writes machine-accepted mapping YAMLs directly, treat its output the way you'd treat any other auto-generated config: review the diff (especially the <code>CURATION-REPORT.md</code>) before merging, the same way you'd review a <code>normalize</code>-amended mapping by hand.</p>
+<h2 id="troubleshooting">Troubleshooting</h2>
+<p><strong>Q: <code>error: --download-only cannot be combined with --load</code>.</strong>
+A: The two flags are mutually exclusive by design — <code>--download-only</code> explicitly means "stop after mirroring," so pairing it with <code>--load</code> is a contradiction the CLI rejects up front (exit 2) rather than silently picking one.</p>
+<p><strong>Q: <code>error: MSSQL_PASSWORD environment variable is required for --load</code>.</strong>
+A: Set it before invoking, same as the <a href="../loader/#prerequisites">loader</a>: <code>export MSSQL_PASSWORD=...</code>. Checked once up front for the whole run, before any type's stages execute.</p>
+<p><strong>Q: A type shows <code>NEEDS REVIEW</code> in the summary and load never ran for it.</strong>
+A: Normalize exited <code>1</code> or <code>3</code> (unresolved mapping items or first-run scaffold) for that type, which halts that type's remaining stages — load included. Resolve it the normal way: edit <code>normalize/mappings/&lt;type&gt;.yaml</code> and re-run, or use <code>taxi-curate-mappings</code> if you want it auto-resolved.</p>
+<p><strong>Q: One type's <code>LOAD ERROR</code> seems to have skipped load for every type after it.</strong>
+A: That's <code>abort_run</code> firing — a loader exit <code>2</code> (connection/config error, or a <code>TypeMappingError</code>) is treated as likely to recur identically for every subsequent type's load, so the orchestrator stops attempting the load stage for the rest of the run rather than repeating a doomed connection attempt N times. Download and normalize still run normally for the remaining types.</p>
+<p><strong>Q: <code>taxi-curate-mappings</code> raised <code>non-executable cast(s) need manual mapping</code>.</strong>
+A: A column changed from a string type to a numeric/temporal type (or similarly incompatible family) between historical files — casting it automatically could crash at runtime on real data (e.g. a <code>payment_type</code> column that was <code>'CASH'</code>/<code>'CREDIT'</code> text becoming a numeric code). This needs a human decision (a <code>value_maps</code> entry or an explicit drop), so the tool refuses to auto-accept it. Add the mapping by hand in <code>normalize/mappings/&lt;type&gt;.yaml</code> and re-run <code>normalize</code> directly.</p>
+<p><strong>Q: Where do I find what <code>taxi-curate-mappings</code> actually changed?</strong>
+A: <code>&lt;mappings-dir&gt;/CURATION-REPORT.md</code>, regenerated on every run — it lists every lossy cast and data-loss drop that needs verification, plus every auto-accepted rename with its detection confidence.</p>
 
 
 

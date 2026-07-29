@@ -6,14 +6,14 @@
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
       
-        <meta name="description" content="Downloader, schema-drift analyzer, and K6 SQL Server load tester for NYC TLC taxi trip data">
+        <meta name="description" content="Downloader, schema-drift analyzer, normalizer, SQL Server loader, and orchestrator for NYC TLC taxi trip data">
       
       
       
         <link rel="canonical" href="https://andrekamman.github.io/taxi-seed/contributing/">
       
       
-        <link rel="prev" href="../superpowers/specs/2026-07-22-documentation-design/">
+        <link rel="prev" href="../superpowers/specs/2026-07-26-documentation-sync-design/">
       
       
       
@@ -25,7 +25,7 @@
     
     
       
-        <title>Contributing - taxi</title>
+        <title>Contributing - taxi-seed</title>
       
     
     
@@ -92,7 +92,7 @@
 
 <header class="md-header md-header--shadow" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="Header">
-    <a href=".." title="taxi" class="md-header__button md-logo" aria-label="taxi" data-md-component="logo">
+    <a href=".." title="taxi-seed" class="md-header__button md-logo" aria-label="taxi-seed" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
@@ -106,7 +106,7 @@
       <div class="md-header__ellipsis">
         <div class="md-header__topic">
           <span class="md-ellipsis">
-            taxi
+            taxi-seed
           </span>
         </div>
         <div class="md-header__topic" data-md-component="header-topic">
@@ -233,13 +233,13 @@
 
 <nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
-    <a href=".." title="taxi" class="md-nav__button md-logo" aria-label="taxi" data-md-component="logo">
+    <a href=".." title="taxi-seed" class="md-nav__button md-logo" aria-label="taxi-seed" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
 
     </a>
-    taxi
+    taxi-seed
   </label>
   
     <div class="md-nav__source">
@@ -448,14 +448,42 @@
   
   
     <li class="md-nav__item">
-      <a href="../guides/k6-loadtest/" class="md-nav__link">
+      <a href="../guides/loader/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    K6 Load Test
+    Loader
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../guides/orchestrator/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Orchestrator
   
 
     
@@ -832,14 +860,14 @@
   
   
     <li class="md-nav__item">
-      <a href="../superpowers/specs/2026-03-25-k6-sql-load-testing-design/" class="md-nav__link">
+      <a href="../superpowers/specs/2026-07-22-documentation-design/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    K6 SQL load testing
+    Documentation site
   
 
     
@@ -860,14 +888,126 @@
   
   
     <li class="md-nav__item">
-      <a href="../superpowers/specs/2026-07-22-documentation-design/" class="md-nav__link">
+      <a href="../superpowers/specs/2026-07-22-sql-loader-design/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    Documentation site
+    SQL loader
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../superpowers/specs/2026-07-23-orchestrator-design/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Orchestrator
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../superpowers/specs/2026-07-26-python-downloader-design/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Python downloader
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../superpowers/specs/2026-07-26-configurable-data-dir-design/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Configurable data dir
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../superpowers/specs/2026-07-26-documentation-sync-design/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Documentation sync
   
 
     
@@ -1194,22 +1334,23 @@
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-1">1</a></span>
 <span class="normal"><a href="#__codelineno-0-2">2</a></span>
 <span class="normal"><a href="#__codelineno-0-3">3</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1"></a>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/andrekamman/taxi-seed.git
-<a id="__codelineno-0-2" name="__codelineno-0-2"></a><span class="nb">cd</span><span class="w"> </span>taxi
+<a id="__codelineno-0-2" name="__codelineno-0-2"></a><span class="nb">cd</span><span class="w"> </span>taxi-seed
 <a id="__codelineno-0-3" name="__codelineno-0-3"></a>uv<span class="w"> </span>sync<span class="w"> </span>--extra<span class="w"> </span><span class="nb">test</span><span class="w"> </span>--extra<span class="w"> </span>docs
 </code></pre></div></td></tr></table></div>
 <ul>
 <li><code>--extra test</code> installs <code>pytest</code> (and any test-only dependencies) so you can run the test suite.</li>
 <li><code>--extra docs</code> installs <code>mkdocs</code>, <code>mkdocs-material</code>, and <code>pymdown-extensions</code> so you can build the documentation site locally.</li>
 </ul>
-<p>Both extras are optional at runtime; the tools themselves (<code>downloader</code>, <code>schema-drift</code>, <code>k6-preprocess</code>, <code>taxi_normalize</code>) work with a bare <code>uv sync</code>. Contributors will almost always want both, so the command above is the recommended default.</p>
+<p>Both extras are optional at runtime; the tools themselves (<code>taxi-download</code>, <code>schema-drift</code>, <code>normalize</code>, <code>taxi-load</code>, <code>taxi-run</code>, <code>taxi-curate-mappings</code>) work with a bare <code>uv sync</code>. Contributors will almost always want both, so the command above is the recommended default.</p>
 <p><code>uv sync</code> creates a project-local <code>.venv/</code>. You do not need to activate it — every command in this guide uses <code>uv run</code> as the entry point, which resolves the interpreter and the extras on each invocation. If you prefer an activated shell, <code>source .venv/bin/activate</code> works, but the CI and every example below run without activation.</p>
 <h2 id="running-the-test-suite">Running the test suite</h2>
-<p>The full suite runs in about a second on a modern laptop — there is no reason to skip it:</p>
+<p>The unit-test portion of the suite (everything except <code>tests/taxi_loader/test_load_integration.py</code> and <code>tests/e2e/</code>, both of which need a real SQL Server container) runs in about a second on a modern laptop — there is no reason to skip it:</p>
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-1-1">1</a></span>
-<span class="normal"><a href="#__codelineno-1-2">2</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1"></a><span class="c1"># Full suite</span>
+<span class="normal"><a href="#__codelineno-1-2">2</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1"></a><span class="c1"># Unit suite (hermetic, no external services)</span>
 <a id="__codelineno-1-2" name="__codelineno-1-2"></a>uv<span class="w"> </span>run<span class="w"> </span>--extra<span class="w"> </span><span class="nb">test</span><span class="w"> </span>pytest<span class="w"> </span>-q
 </code></pre></div></td></tr></table></div>
-<p>Expected output on a clean tree: <code>83 passed in &lt;n&gt;.&lt;nn&gt;s</code> (the count grows as tests are added). If you see a failure that does not reproduce for you locally in isolation, run the offending test with <code>-vv</code> and check whether a fixture is leaking state — every fixture in this repo is required to be <code>tmp_path</code>-scoped, and any cross-test leak is a bug worth reporting.</p>
+<p>Expected output on a clean tree: <code>N passed in &lt;n&gt;.&lt;nn&gt;s</code> (the count grows as tests are added; treat any failure, not a specific number, as the signal). If you see a failure that does not reproduce for you locally in isolation, run the offending test with <code>-vv</code> and check whether a fixture is leaking state — every fixture in this repo is required to be <code>tmp_path</code>-scoped, and any cross-test leak is a bug worth reporting.</p>
+<p>The full suite also includes SQL-Server integration and end-to-end tests (loader integration + pipeline e2e) that need a real SQL Server container — these are what CI's <code>integration</code> job runs, and they are not sub-second. See <code>.github/workflows/ci.yml</code> for how CI brings up the container.</p>
 <p>To narrow the run to one component while iterating:</p>
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-2-1">1</a></span>
 <span class="normal"><a href="#__codelineno-2-2">2</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1"></a><span class="c1"># One component (all tests in one directory)</span>
@@ -1222,7 +1363,7 @@
 </code></pre></div></td></tr></table></div>
 <p>Add <code>-x</code> to stop at the first failure, or <code>--lf</code> to re-run only the tests that failed on the previous run.</p>
 <h2 id="adding-a-new-test">Adding a new test</h2>
-<p>The fixture pattern is documented by example in <a href="https://github.com/andrekamman/taxi-seed/blob/main/tests/taxi_normalize/conftest.py"><code>tests/taxi_normalize/conftest.py</code></a>. Fixtures build synthetic parquet families with DuckDB using <code>COPY (SELECT * FROM VALUES ...) TO '&lt;path&gt;' (FORMAT PARQUET)</code> — no network, no fixture files checked into the tree, and each test receives its own <code>tmp_path</code> so there is no shared state between tests. The upside is that the whole suite is hermetic and finishes in under a second even as the corpus grows; the downside is that new tests have to describe the schema they need, rather than pointing at a fixture file on disk.</p>
+<p>The fixture pattern is documented by example in <a href="https://github.com/andrekamman/taxi-seed/blob/dev/tests/taxi_normalize/conftest.py"><code>tests/taxi_normalize/conftest.py</code></a>. Fixtures build synthetic parquet families with DuckDB using <code>COPY (SELECT * FROM VALUES ...) TO '&lt;path&gt;' (FORMAT PARQUET)</code> — no network, no fixture files checked into the tree, and each test receives its own <code>tmp_path</code> so there is no shared state between tests. The upside is that the whole suite is hermetic and finishes in under a second even as the corpus grows; the downside is that new tests have to describe the schema they need, rather than pointing at a fixture file on disk.</p>
 <p>Reuse the existing families wherever possible:</p>
 <ul>
 <li><code>yellow_family</code> — three-era yellow-taxi drift (2009 old columns → 2015 mid-drift → 2024 target schema with <code>airport_fee</code>).</li>
@@ -1275,7 +1416,7 @@
 <ul>
 <li>Tests pass locally (<code>uv run --extra test pytest -q</code>).</li>
 <li>Docs pass <code>mkdocs build --strict</code> if you touched anything under <code>docs/</code>, any component <code>README.md</code>, or <code>mkdocs.yml</code>.</li>
-<li>Commit messages follow the existing convention: <code>type(scope): imperative subject</code> (e.g. <code>feat(downloader): OUTPUT_DIR env var</code>, <code>docs(normalize): fix ack_date example</code>). Small PRs with a single well-scoped commit are easier to review than one PR with many mixed commits.</li>
+<li>Commit messages follow the existing convention: <code>type(scope): imperative subject</code> (e.g. <code>feat(downloader): --data-dir flag</code>, <code>docs(normalize): fix ack_date example</code>). Small PRs with a single well-scoped commit are easier to review than one PR with many mixed commits.</li>
 <li>If you changed user-facing behavior, update the relevant guide + reference page in the same PR — a doc-drift PR later is a lot more expensive than a two-line edit now.</li>
 <li>If you added a new sub-project or major feature, write a design spec in <code>docs/superpowers/specs/</code> first. The spec does not need to be long, but it should make the tradeoffs you considered explicit so the reviewer can push back on the decision, not the code.</li>
 </ul>
@@ -1283,8 +1424,8 @@
 <p>There is no enforced formatter today — the conventions below are informal but consistent across the tree.</p>
 <ul>
 <li><strong>Python</strong> — <code>from __future__ import annotations</code> at the top of every module; explicit exit-code semantics on every CLI; error-first paths (validate all inputs → err out on any problem → then do work); <code>ack_date</code> and other ISO-8601 dates are always strings, never numeric.</li>
-<li><strong>Bash</strong> — <code>set -euo pipefail</code> where feasible; no <code>#!/bin/sh</code> shebangs (the scripts use bash 4+ features like arrays and <code>[[ ]]</code>).</li>
-<li><strong>SQL</strong> — single-quoted string literals; DuckDB dialect is the default, with occasional SQL Server dialect in <code>taxi_shared/</code> (the load-tester side of the tree).</li>
+<li><strong>Bash</strong> (<code>scripts/</code>, e.g. <code>scripts/e2e-smoke.sh</code>) — <code>set -euo pipefail</code> where feasible; no <code>#!/bin/sh</code> shebangs (scripts use bash 4+ features like arrays and <code>[[ ]]</code>).</li>
+<li><strong>SQL</strong> — single-quoted string literals; DuckDB dialect is the default, with occasional SQL Server dialect in <code>taxi_shared/</code> (the SQL Server / loader side of the tree).</li>
 <li><strong>Formatting</strong> — no <code>ruff</code>, no <code>black</code>, no <code>isort</code> in CI today. PRs that add one (with a matching CI check) are welcome; please raise an issue first so we can agree on config.</li>
 <li><strong>Typing</strong> — Python code uses standard <code>typing</code> / <code>collections.abc</code> annotations on public function signatures, with <code>from __future__ import annotations</code> making everything a string at runtime. There is no <code>mypy</code> gate in CI; annotations are treated as documentation, not enforcement.</li>
 <li><strong>Logging / output</strong> — CLIs write structured, human-readable status lines to stdout and errors to stderr. Exit codes carry the machine-readable signal; do not encode failure state in stdout formatting.</li>
@@ -1293,10 +1434,10 @@
 <h2 id="where-design-decisions-live">Where design decisions live</h2>
 <ul>
 <li><a href="../superpowers/specs/2026-07-19-monorepo-restructure-design/"><code>docs/superpowers/specs/</code></a> — one design spec per major sub-project. Answers "why is this shaped this way?". Current specs:<ul>
-<li><a href="../superpowers/specs/2026-07-19-monorepo-restructure-design/">Monorepo restructure</a> — why the four tools live in one repo with shared tooling instead of four separate repos.</li>
+<li><a href="../superpowers/specs/2026-07-19-monorepo-restructure-design/">Monorepo restructure</a> — why the five tools live in one repo with shared tooling instead of five separate repos.</li>
 <li><a href="../superpowers/specs/2026-07-21-normalizer-design/">Normalizer</a> — the "data loss is a first-class error" contract, the mapping YAML shape, and the <code>ack_date</code> acknowledgment protocol.</li>
-<li><a href="../superpowers/specs/2026-03-25-k6-sql-load-testing-design/">K6 SQL load testing</a> — the DDL + chunked JSON + <code>test.js</code> bundle format and the real-vs-synthetic mode split.</li>
 <li><a href="../superpowers/specs/2026-07-22-documentation-design/">Documentation site</a> — how the site is structured, what belongs in guides vs cookbook vs reference, and the strict-build convention.</li>
+<li>SQL load testing (legacy) — the design for this has moved with the tool to the separate <code>taxi-lab</code> repo.</li>
 </ul>
 </li>
 <li><code>docs/superpowers/plans/</code> — implementation plans for each spec. Answers "how did we get from design to code?". Kept in the repo but excluded from the published site because they read as working notes rather than reference material.</li>

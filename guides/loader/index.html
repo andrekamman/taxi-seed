@@ -10,13 +10,13 @@
       
       
       
-        <link rel="canonical" href="https://andrekamman.github.io/taxi-seed/reference/configuration/">
+        <link rel="canonical" href="https://andrekamman.github.io/taxi-seed/guides/loader/">
       
       
-        <link rel="prev" href="../../architecture/">
+        <link rel="prev" href="../normalize/">
       
       
-        <link rel="next" href="../exit-codes/">
+        <link rel="next" href="../orchestrator/">
       
       
         
@@ -27,7 +27,7 @@
     
     
       
-        <title>Configuration - taxi-seed</title>
+        <title>Loader - taxi-seed</title>
       
     
     
@@ -78,7 +78,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#configuration-reference" class="md-skip">
+        <a href="#loader" class="md-skip">
           Skip to content
         </a>
       
@@ -114,7 +114,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Configuration
+              Loader
             
           </span>
         </div>
@@ -316,18 +316,20 @@
       
   
   
+    
   
   
+  
     
     
     
     
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
         
           
           <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
@@ -348,7 +350,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
           <label class="md-nav__title" for="__nav_3">
             <span class="md-nav__icon md-icon"></span>
             
@@ -366,7 +368,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../guides/downloader/" class="md-nav__link">
+      <a href="../downloader/" class="md-nav__link">
         
   
   
@@ -394,7 +396,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../guides/schema-drift/" class="md-nav__link">
+      <a href="../schema-drift/" class="md-nav__link">
         
   
   
@@ -422,7 +424,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../guides/normalize/" class="md-nav__link">
+      <a href="../normalize/" class="md-nav__link">
         
   
   
@@ -447,10 +449,37 @@
                 
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="../../guides/loader/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Loader
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   
@@ -466,6 +495,147 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#prerequisites" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Prerequisites
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#install" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Install
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#basic-usage" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Basic usage
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#one-table-per-year-per-type" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        One table per year per type
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#idempotent-reconcile-skip-append-truncate-reload" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Idempotent reconcile: skip / append / truncate-reload
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#the-dry-run-flag" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The --dry-run flag
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#the-full-refresh-flag" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The --full-refresh flag
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#the-data-dir-and-input-dir-flags" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The --data-dir and --input-dir flags
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Configuration
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#exit-codes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Exit codes
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#troubleshooting" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Troubleshooting
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -478,7 +648,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../guides/orchestrator/" class="md-nav__link">
+      <a href="../orchestrator/" class="md-nav__link">
         
   
   
@@ -564,20 +734,18 @@
       
   
   
-    
   
   
-  
     
     
     
     
     
-    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" checked>
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
         
           
           <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
@@ -598,7 +766,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="true">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_6">
             <span class="md-nav__icon md-icon"></span>
             
@@ -613,37 +781,10 @@
                 
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Configuration
-  
-
-    
-  </span>
-  
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../../reference/configuration/" class="md-nav__link">
         
   
   
@@ -659,153 +800,6 @@
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#normalize-mapping-yaml" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Normalize mapping YAML
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Normalize mapping YAML">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#top-level-fields" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Top-level fields
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#lossycastentry-fields" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        LossyCastEntry fields
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#datalossentry-fields" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        DataLossEntry fields
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#automatic-behavior-no-mapping-entry-needed" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Automatic behavior (no mapping entry needed)
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#what-triggers-an-error" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        What triggers an error
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#emitted-yaml-shape" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Emitted YAML shape
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#fully-worked-example" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Fully-worked example
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#loader-rejected-shapes" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Loader-rejected shapes
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#loader-and-orchestrator-configuration" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Loader and orchestrator configuration
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#environment-variables" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Environment variables
-      
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -818,7 +812,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../exit-codes/" class="md-nav__link">
+      <a href="../../reference/exit-codes/" class="md-nav__link">
         
   
   
@@ -1260,115 +1254,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#normalize-mapping-yaml" class="md-nav__link">
+  <a href="#prerequisites" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Normalize mapping YAML
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Normalize mapping YAML">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#top-level-fields" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Top-level fields
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#lossycastentry-fields" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        LossyCastEntry fields
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#datalossentry-fields" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        DataLossEntry fields
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#automatic-behavior-no-mapping-entry-needed" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Automatic behavior (no mapping entry needed)
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#what-triggers-an-error" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        What triggers an error
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#emitted-yaml-shape" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Emitted YAML shape
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#fully-worked-example" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Fully-worked example
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#loader-rejected-shapes" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Loader-rejected shapes
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#loader-and-orchestrator-configuration" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Loader and orchestrator configuration
+        Prerequisites
       
     </span>
   </a>
@@ -1376,10 +1265,109 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#environment-variables" class="md-nav__link">
+  <a href="#install" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Environment variables
+        Install
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#basic-usage" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Basic usage
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#one-table-per-year-per-type" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        One table per year per type
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#idempotent-reconcile-skip-append-truncate-reload" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Idempotent reconcile: skip / append / truncate-reload
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#the-dry-run-flag" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The --dry-run flag
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#the-full-refresh-flag" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The --full-refresh flag
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#the-data-dir-and-input-dir-flags" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The --data-dir and --input-dir flags
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Configuration
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#exit-codes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Exit codes
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#troubleshooting" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Troubleshooting
       
     </span>
   </a>
@@ -1406,249 +1394,184 @@
   
 
 
-<h1 id="configuration-reference">Configuration reference</h1>
-<p>Field-by-field schema for every YAML configuration file in the repo, plus the environment variables the tools honor. Guides in the <a href="../../guides/normalize/">Guides section</a> explain the <em>why</em> of each field; this page lists the <em>what</em>, the <em>type</em>, and the <em>default</em>.</p>
-<h2 id="normalize-mapping-yaml">Normalize mapping YAML</h2>
-<p><strong>File path:</strong> <code>normalize/mappings/&lt;type&gt;.yaml</code> where <code>&lt;type&gt;</code> is one of <code>yellow</code>, <code>green</code>, <code>fhv</code>, <code>fhvhv</code>.</p>
-<p>Emitted by <code>normalize &lt;type&gt;</code> on bootstrap (first run against a type with no mapping) and amended in place on subsequent runs with unresolved items. Hand-edited by the user between runs to accept or reject SUGGESTED entries and to fill in <code>ack_date:</code> on TODO blocks. Consumed by every subsequent <code>normalize &lt;type&gt;</code> run.</p>
-<h3 id="top-level-fields">Top-level fields</h3>
-<table>
-<thead>
-<tr>
-<th>Field</th>
-<th>Type</th>
-<th>Required</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>target</code></td>
-<td>string</td>
-<td>yes</td>
-<td>Filename (basename) of the target parquet in <code>raw/&lt;type&gt;/**/</code>. Pins the schema that every historical file will be conformed to. Bootstrap picks the newest file at generation time; humans can bump it manually when a new "latest" appears.</td>
-</tr>
-<tr>
-<td><code>renames</code></td>
-<td>dict[str, str]</td>
-<td>no</td>
-<td>Map of <code>&lt;old_name&gt;: &lt;new_name&gt;</code>. Both must be strings. Applies when the historical column name is <code>&lt;old_name&gt;</code> and the target has <code>&lt;new_name&gt;</code>.</td>
-</tr>
-<tr>
-<td><code>lossy_casts</code></td>
-<td>dict[str, LossyCastEntry]</td>
-<td>no</td>
-<td>Explicit acknowledgments for type casts that could lose data (range or precision). Keyed by the target column name.</td>
-</tr>
-<tr>
-<td><code>acknowledged_data_loss</code></td>
-<td>dict[str, DataLossEntry]</td>
-<td>no</td>
-<td>Explicit acknowledgments for historical columns that have data but no place to land in the target schema (and no rename mapping). Keyed by the historical column name.</td>
-</tr>
-<tr>
-<td><code>value_maps</code></td>
-<td>dict[str, dict]</td>
-<td>no</td>
-<td>Column value remapping, keyed by column name. Each entry is either a bare <code>{source_value: target_value}</code> map, or <code>{map: {...}, on_unmapped: "error"\|"null"}</code> (default policy <code>"error"</code>) to control behavior for values not present in the map.</td>
-</tr>
-</tbody>
-</table>
-<p>Unknown top-level keys are rejected by the loader.</p>
-<h3 id="lossycastentry-fields"><code>LossyCastEntry</code> fields</h3>
-<table>
-<thead>
-<tr>
-<th>Field</th>
-<th>Type</th>
-<th>Required</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>from</code></td>
-<td>string</td>
-<td>yes</td>
-<td>Historical column's DuckDB type (<code>DOUBLE</code>, <code>INTEGER</code>, <code>VARCHAR</code>, etc.).</td>
-</tr>
-<tr>
-<td><code>to</code></td>
-<td>string</td>
-<td>yes</td>
-<td>Target column's DuckDB type. Cast target used at runtime.</td>
-</tr>
-<tr>
-<td><code>ack_date</code></td>
-<td>string (ISO-8601 date)</td>
-<td><strong>yes</strong></td>
-<td>Anything truthy counts as acknowledgment; convention is <code>YYYY-MM-DD</code>. Its presence is what the tool enforces.</td>
-</tr>
-<tr>
-<td><code>ack_by</code></td>
-<td>string</td>
-<td>no</td>
-<td>Recommended for audit trails. Any identifier (GitHub handle, email, name).</td>
-</tr>
-<tr>
-<td><code>reason</code></td>
-<td>string</td>
-<td>no</td>
-<td>Recommended. One-sentence justification. Survives amend cycles; free-form YAML body comments do not.</td>
-</tr>
-</tbody>
-</table>
-<h3 id="datalossentry-fields"><code>DataLossEntry</code> fields</h3>
-<table>
-<thead>
-<tr>
-<th>Field</th>
-<th>Type</th>
-<th>Required</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>ack_date</code></td>
-<td>string (ISO-8601 date)</td>
-<td><strong>yes</strong></td>
-<td>Same convention as <code>LossyCastEntry.ack_date</code>.</td>
-</tr>
-<tr>
-<td><code>ack_by</code></td>
-<td>string</td>
-<td>no</td>
-<td>Recommended.</td>
-</tr>
-<tr>
-<td><code>reason</code></td>
-<td>string</td>
-<td>no</td>
-<td>Recommended.</td>
-</tr>
-</tbody>
-</table>
-<h3 id="automatic-behavior-no-mapping-entry-needed">Automatic behavior (no mapping entry needed)</h3>
+<h1 id="loader">Loader</h1>
+<p><code>taxi-load</code> bulk-loads normalized TLC parquet (<code>raw-normalized/&lt;type&gt;/&lt;year&gt;/*.parquet</code>) into SQL Server, one table per year per type, entirely through DuckDB and the <code>mssql</code> community extension — no ODBC driver, no separate ETL framework. It reconciles what's on disk against what's already loaded and picks, per year, one of three actions: skip, append the new months, or truncate and reload the whole year. That reconciliation is what makes re-running the tool after a fresh <code>normalize</code> pass (or after TLC ships a new month) safe and cheap.</p>
+<h2 id="prerequisites">Prerequisites</h2>
 <ul>
-<li><strong>All-null column drop.</strong> Historical column always-null across every file AND missing from target → dropped. No data lost.</li>
-<li><strong>Missing-in-historical null-fill.</strong> Column present in target but missing from a given historical file → filled with <code>NULL</code>.</li>
-<li><strong>Safe widening cast.</strong> Type change where the target can represent every possible source value (<code>INT</code> → <code>BIGINT</code>, <code>FLOAT</code> → <code>DOUBLE</code>, <code>VARCHAR(10)</code> → <code>VARCHAR(50)</code>) → auto-cast.</li>
+<li>Normalized parquet under <code>raw-normalized/&lt;type&gt;/&lt;year&gt;/</code> — produced by the <a href="../normalize/">normalize</a> guide's tool.</li>
+<li>A reachable SQL Server instance (local, container, or remote). The <code>mssql</code> DuckDB extension is installed automatically on first run; you don't need to install anything server-side beyond SQL Server itself.</li>
+<li>The <code>MSSQL_PASSWORD</code> environment variable set. There is no <code>--password</code> flag — the password only ever comes from the environment, so it never shows up in shell history or process listings.</li>
+<li><code>uv sync</code> in the repo root.</li>
 </ul>
-<h3 id="what-triggers-an-error">What triggers an error</h3>
-<ul>
-<li>Historical column has non-null data, is missing from target, and has no entry in <code>renames:</code> or <code>acknowledged_data_loss:</code>.</li>
-<li>Type cast between historical and target could lose data (range or precision) and has no entry in <code>lossy_casts:</code>.</li>
-<li><code>lossy_casts:</code> or <code>acknowledged_data_loss:</code> entry missing <code>ack_date:</code>.</li>
-</ul>
-<p>On error, the tool amends the mapping file with new SUGGESTED/TODO entries for every unresolved item, prints the consolidated report, and exits <code>1</code>. Nothing is written to <code>raw-normalized/</code>.</p>
-<h3 id="emitted-yaml-shape">Emitted YAML shape</h3>
-<p>On bootstrap the tool writes a <strong>timeline header</strong> (one comment line per detected schema-drift transition) followed by <code>target:</code>, <code>renames:</code>, <code>lossy_casts:</code>, and <code>acknowledged_data_loss:</code>. Every SUGGESTED rename appears as a commented <code># SUGGESTED (confidence X%, data-verified) — uncomment to accept:</code> line above a commented <code># &lt;old&gt;: &lt;new&gt;</code> line. Every TODO ack appears as a commented block ending in <code># ack_date:</code> (empty — you fill it in).</p>
-<p>On amend, existing semantic entries survive, new SUGGESTED/TODO items are appended below them, and the timeline header is regenerated. <strong>Free-form body comments in the YAML do not survive</strong> — PyYAML strips them on parse. Put reasoning in the <code>reason:</code> field of an ack entry, or in the git commit message.</p>
-<h3 id="fully-worked-example">Fully-worked example</h3>
-<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-1"> 1</a></span>
-<span class="normal"><a href="#__codelineno-0-2"> 2</a></span>
-<span class="normal"><a href="#__codelineno-0-3"> 3</a></span>
-<span class="normal"><a href="#__codelineno-0-4"> 4</a></span>
-<span class="normal"><a href="#__codelineno-0-5"> 5</a></span>
-<span class="normal"><a href="#__codelineno-0-6"> 6</a></span>
-<span class="normal"><a href="#__codelineno-0-7"> 7</a></span>
-<span class="normal"><a href="#__codelineno-0-8"> 8</a></span>
-<span class="normal"><a href="#__codelineno-0-9"> 9</a></span>
-<span class="normal"><a href="#__codelineno-0-10">10</a></span>
-<span class="normal"><a href="#__codelineno-0-11">11</a></span>
-<span class="normal"><a href="#__codelineno-0-12">12</a></span>
-<span class="normal"><a href="#__codelineno-0-13">13</a></span>
-<span class="normal"><a href="#__codelineno-0-14">14</a></span>
-<span class="normal"><a href="#__codelineno-0-15">15</a></span>
-<span class="normal"><a href="#__codelineno-0-16">16</a></span>
-<span class="normal"><a href="#__codelineno-0-17">17</a></span>
-<span class="normal"><a href="#__codelineno-0-18">18</a></span>
-<span class="normal"><a href="#__codelineno-0-19">19</a></span>
-<span class="normal"><a href="#__codelineno-0-20">20</a></span>
-<span class="normal"><a href="#__codelineno-0-21">21</a></span>
-<span class="normal"><a href="#__codelineno-0-22">22</a></span>
-<span class="normal"><a href="#__codelineno-0-23">23</a></span>
-<span class="normal"><a href="#__codelineno-0-24">24</a></span>
-<span class="normal"><a href="#__codelineno-0-25">25</a></span>
-<span class="normal"><a href="#__codelineno-0-26">26</a></span>
-<span class="normal"><a href="#__codelineno-0-27">27</a></span>
-<span class="normal"><a href="#__codelineno-0-28">28</a></span>
-<span class="normal"><a href="#__codelineno-0-29">29</a></span>
-<span class="normal"><a href="#__codelineno-0-30">30</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1"></a><span class="c1"># Generated by `normalize yellow` on 2026-07-22.</span>
-<a id="__codelineno-0-2" name="__codelineno-0-2"></a><span class="c1"># Detected drift transitions:</span>
-<a id="__codelineno-0-3" name="__codelineno-0-3"></a><span class="c1">#   2013-01 -&gt; 2015-01: renamed pu_datetime-&gt;tpep_pickup_datetime; added PULocationID</span>
-<a id="__codelineno-0-4" name="__codelineno-0-4"></a><span class="c1">#   2016-06 -&gt; 2016-07: dropped pickup_latitude, pickup_longitude</span>
-<a id="__codelineno-0-5" name="__codelineno-0-5"></a><span class="c1">#   2020-01 -&gt; 2020-02: added congestion_surcharge</span>
-<a id="__codelineno-0-6" name="__codelineno-0-6"></a><span class="c1">#   2023-01 -&gt; 2023-02: added airport_fee</span>
-<a id="__codelineno-0-7" name="__codelineno-0-7"></a>
-<a id="__codelineno-0-8" name="__codelineno-0-8"></a><span class="nt">target</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">yellow_tripdata_2024-01.parquet</span>
-<a id="__codelineno-0-9" name="__codelineno-0-9"></a>
-<a id="__codelineno-0-10" name="__codelineno-0-10"></a><span class="nt">renames</span><span class="p">:</span>
-<a id="__codelineno-0-11" name="__codelineno-0-11"></a><span class="w">  </span><span class="nt">pu_datetime</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">tpep_pickup_datetime</span>
-<a id="__codelineno-0-12" name="__codelineno-0-12"></a><span class="w">  </span><span class="nt">do_datetime</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">tpep_dropoff_datetime</span>
-<a id="__codelineno-0-13" name="__codelineno-0-13"></a>
-<a id="__codelineno-0-14" name="__codelineno-0-14"></a><span class="nt">lossy_casts</span><span class="p">:</span>
-<a id="__codelineno-0-15" name="__codelineno-0-15"></a><span class="w">  </span><span class="nt">passenger_count</span><span class="p">:</span>
-<a id="__codelineno-0-16" name="__codelineno-0-16"></a><span class="w">    </span><span class="nt">from</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">DOUBLE</span>
-<a id="__codelineno-0-17" name="__codelineno-0-17"></a><span class="w">    </span><span class="nt">to</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">BIGINT</span>
-<a id="__codelineno-0-18" name="__codelineno-0-18"></a><span class="w">    </span><span class="nt">ack_date</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2026-07-21</span>
-<a id="__codelineno-0-19" name="__codelineno-0-19"></a><span class="w">    </span><span class="nt">ack_by</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">andrekamman</span>
-<a id="__codelineno-0-20" name="__codelineno-0-20"></a><span class="w">    </span><span class="nt">reason</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Values</span><span class="nv"> </span><span class="s">are</span><span class="nv"> </span><span class="s">logically</span><span class="nv"> </span><span class="s">integer;</span><span class="nv"> </span><span class="s">the</span><span class="nv"> </span><span class="s">2011-2014</span><span class="nv"> </span><span class="s">DOUBLE</span><span class="nv"> </span><span class="s">was</span><span class="nv"> </span><span class="s">a</span><span class="nv"> </span><span class="s">data-entry</span><span class="nv"> </span><span class="s">choice.&quot;</span>
-<a id="__codelineno-0-21" name="__codelineno-0-21"></a>
-<a id="__codelineno-0-22" name="__codelineno-0-22"></a><span class="nt">acknowledged_data_loss</span><span class="p">:</span>
-<a id="__codelineno-0-23" name="__codelineno-0-23"></a><span class="w">  </span><span class="nt">pickup_latitude</span><span class="p">:</span>
-<a id="__codelineno-0-24" name="__codelineno-0-24"></a><span class="w">    </span><span class="nt">ack_date</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2026-07-21</span>
-<a id="__codelineno-0-25" name="__codelineno-0-25"></a><span class="w">    </span><span class="nt">ack_by</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">andrekamman</span>
-<a id="__codelineno-0-26" name="__codelineno-0-26"></a><span class="w">    </span><span class="nt">reason</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Coarse-grained</span><span class="nv"> </span><span class="s">location</span><span class="nv"> </span><span class="s">data</span><span class="nv"> </span><span class="s">superseded</span><span class="nv"> </span><span class="s">by</span><span class="nv"> </span><span class="s">PULocationID</span><span class="nv"> </span><span class="s">zones.&quot;</span>
-<a id="__codelineno-0-27" name="__codelineno-0-27"></a><span class="w">  </span><span class="nt">pickup_longitude</span><span class="p">:</span>
-<a id="__codelineno-0-28" name="__codelineno-0-28"></a><span class="w">    </span><span class="nt">ack_date</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2026-07-21</span>
-<a id="__codelineno-0-29" name="__codelineno-0-29"></a><span class="w">    </span><span class="nt">ack_by</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">andrekamman</span>
-<a id="__codelineno-0-30" name="__codelineno-0-30"></a><span class="w">    </span><span class="nt">reason</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Same</span><span class="nv"> </span><span class="s">rationale</span><span class="nv"> </span><span class="s">as</span><span class="nv"> </span><span class="s">pickup_latitude.&quot;</span>
+<h2 id="install">Install</h2>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-1">1</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1"></a>uv<span class="w"> </span>sync
 </code></pre></div></td></tr></table></div>
-<h3 id="loader-rejected-shapes">Loader-rejected shapes</h3>
-<p>The loader is strict — anything outside the listed structure raises <code>MappingError</code>:</p>
+<p>This exposes the <code>taxi-load</code> console script (defined in the root <code>pyproject.toml</code>, <code>taxi_loader.cli:main</code>). You can also invoke it as a module:</p>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-1-1">1</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1"></a>python<span class="w"> </span>-m<span class="w"> </span>taxi_loader.cli<span class="w"> </span>yellow
+</code></pre></div></td></tr></table></div>
+<h2 id="basic-usage">Basic usage</h2>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-2-1"> 1</a></span>
+<span class="normal"><a href="#__codelineno-2-2"> 2</a></span>
+<span class="normal"><a href="#__codelineno-2-3"> 3</a></span>
+<span class="normal"><a href="#__codelineno-2-4"> 4</a></span>
+<span class="normal"><a href="#__codelineno-2-5"> 5</a></span>
+<span class="normal"><a href="#__codelineno-2-6"> 6</a></span>
+<span class="normal"><a href="#__codelineno-2-7"> 7</a></span>
+<span class="normal"><a href="#__codelineno-2-8"> 8</a></span>
+<span class="normal"><a href="#__codelineno-2-9"> 9</a></span>
+<span class="normal"><a href="#__codelineno-2-10">10</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1"></a><span class="nb">export</span><span class="w"> </span><span class="nv">MSSQL_PASSWORD</span><span class="o">=</span>your-password
+<a id="__codelineno-2-2" name="__codelineno-2-2"></a>
+<a id="__codelineno-2-3" name="__codelineno-2-3"></a><span class="c1"># Load one type</span>
+<a id="__codelineno-2-4" name="__codelineno-2-4"></a>uv<span class="w"> </span>run<span class="w"> </span>taxi-load<span class="w"> </span>yellow
+<a id="__codelineno-2-5" name="__codelineno-2-5"></a>
+<a id="__codelineno-2-6" name="__codelineno-2-6"></a><span class="c1"># Load all four types (yellow, green, fhv, fhvhv)</span>
+<a id="__codelineno-2-7" name="__codelineno-2-7"></a>uv<span class="w"> </span>run<span class="w"> </span>taxi-load
+<a id="__codelineno-2-8" name="__codelineno-2-8"></a>
+<a id="__codelineno-2-9" name="__codelineno-2-9"></a><span class="c1"># See the plan without writing anything</span>
+<a id="__codelineno-2-10" name="__codelineno-2-10"></a>uv<span class="w"> </span>run<span class="w"> </span>taxi-load<span class="w"> </span>yellow<span class="w"> </span>--dry-run
+</code></pre></div></td></tr></table></div>
+<p><code>data_type</code> is a positional argument, one of <code>yellow</code>, <code>green</code>, <code>fhv</code>, <code>fhvhv</code>; omit it to load all four in turn.</p>
+<h2 id="one-table-per-year-per-type">One table per year per type</h2>
+<p>Every <code>(type, year)</code> pair gets its own table, named <code>&lt;type&gt;_&lt;year&gt;</code> (e.g. <code>yellow_2024</code>, <code>fhvhv_2019</code>) in the configured schema (<code>dbo</code> by default). The table's DDL is derived directly from the parquet: the loader runs <code>DESCRIBE</code> on a sample month, maps each DuckDB column type to a SQL Server type (<code>taxi_shared.type_mapping.map_duckdb_to_mssql</code> — e.g. <code>DOUBLE</code>→<code>FLOAT</code>, <code>VARCHAR</code>→<code>NVARCHAR(MAX)</code>, <code>TIMESTAMP</code>→<code>DATETIME2</code>, <code>DECIMAL(p,s)</code> preserved), and generates a <code>CREATE TABLE</code> statement. There is no manual DDL to maintain — the schema tracks whatever <code>normalize</code> last wrote.</p>
+<p>If a column's DuckDB type has no SQL Server equivalent, <code>map_duckdb_to_mssql</code> raises <code>TypeMappingError</code> and that type's load fails (see <a href="#exit-codes">Exit codes</a>).</p>
+<p>Data actually moves via DuckDB's <code>COPY ... TO 'mssql://mssql/&lt;schema&gt;/&lt;table&gt;' (FORMAT 'bcp', ...)</code>, which streams through the <code>mssql</code> extension's bulk-copy path rather than row-by-row inserts.</p>
+<h2 id="idempotent-reconcile-skip-append-truncate-reload">Idempotent reconcile: skip / append / truncate-reload</h2>
+<p>The loader tracks what it has already loaded in a bookkeeping table, <code>&lt;schema&gt;._load_manifest</code>, with one row per loaded month (primary key <code>(data_type, year, month)</code>, plus <code>source_file</code>, <code>row_count</code>, <code>loaded_at</code>). Every run, for every <code>(type, year)</code> present either on disk or in the manifest, it decides one of three actions by comparing disk parquet against the manifest and the live table's row count:</p>
 <ul>
-<li>Missing file → <code>Mapping file not found: {path}</code>.</li>
-<li>Empty file → <code>Empty mapping file: {path}</code>.</li>
-<li>YAML that parses to something other than a dict → <code>Mapping file must be a YAML mapping</code>.</li>
-<li>Unknown top-level key → <code>Unknown top-level key: {key}</code> (only <code>target</code>, <code>renames</code>, <code>lossy_casts</code>, <code>acknowledged_data_loss</code>, <code>value_maps</code> are allowed).</li>
-<li>Missing <code>target:</code> → <code>Missing required field: target</code>.</li>
-<li><code>renames:</code> where a key or value is not a string → <code>Rename entry must be string-&gt;string, got {…}: {…}</code>.</li>
-<li><code>lossy_casts.&lt;col&gt;</code> that is not a dict → <code>lossy_casts.{col} must be a dict</code>.</li>
-<li><code>lossy_casts.&lt;col&gt;</code> missing <code>from:</code>, <code>to:</code>, or <code>ack_date:</code> → <code>lossy_casts.{col}: missing required field {field}</code>.</li>
+<li><strong>skip</strong> — the manifest's months exactly match disk (same months, same row counts) and the table's actual row count matches the manifest's recorded total. Nothing to do.</li>
+<li><strong>append</strong> — every manifest month still matches its disk file, and disk has one or more new months not yet in the manifest. Only the new months are copied; the existing table and its rows are untouched.</li>
+<li><strong>truncate + reload</strong> — anything smells inconsistent: <code>--full-refresh</code> was passed, the live table's row count doesn't match the manifest's recorded sum (someone loaded outside this tool, or a prior run was interrupted after the <code>COPY</code> but before the manifest write), a month recorded in the manifest is no longer on disk, or a month's row count changed on disk (re-normalized data). The table is dropped, recreated from the current parquet schema, and every month for that year is copied in one <code>COPY</code> statement.</li>
 </ul>
-<p>The strictness is deliberate: silent tolerance of a mistyped field name would defeat the whole "explicit acknowledgment" model.</p>
-<h2 id="loader-and-orchestrator-configuration">Loader and orchestrator configuration</h2>
-<p>There is no YAML config file for the loader or the orchestrator — <code>taxi-load</code> and <code>taxi-run</code> are configured entirely through CLI flags (<code>--host</code>, <code>--port</code>, <code>--database</code>, <code>--schema</code>, <code>--user</code>, <code>--data-dir</code>/<code>--input-dir</code>, <code>--flush-rows</code>, <code>--full-refresh</code>, <code>--dry-run</code>, and, for <code>taxi-run</code>, <code>--recent</code>, <code>--skip-download</code>, <code>--download-only</code>, <code>--load</code>, <code>--sample</code>) plus one required environment variable, <code>MSSQL_PASSWORD</code>, whenever a load is involved. See <a href="../../guides/loader/">Loader</a> and <a href="../../guides/orchestrator/">Orchestrator</a> for the full flag reference.</p>
-<h2 id="environment-variables">Environment variables</h2>
+<p>This is computed by the pure function <code>reconcile()</code> (<code>taxi_loader/reconcile.py</code>) from three inputs gathered up front: the disk parquet files (with per-file row counts from parquet metadata), the manifest rows for that type, and the live table row counts — no database writes happen during planning.</p>
+<p><strong>Durability model</strong>, applied while executing the plan (<code>load.py:execute_year_plan</code>):</p>
+<ul>
+<li>On <strong>append</strong>, months are loaded one at a time; a month's manifest row is written only <em>after</em> that month's <code>COPY</code> succeeds. If the process dies mid-append, the manifest accurately reflects what actually landed — a re-run appends the remaining months rather than silently believing they're already loaded.</li>
+<li>On <strong>reload</strong>, the table is dropped and recreated, the year's manifest rows are deleted up front, all months for the year are copied in a single <code>COPY</code> statement, and manifest rows for every month are written afterward.</li>
+<li>A year that had manifest rows but now has <strong>zero</strong> files on disk (the whole year vanished) is treated as a reload target with no months: the table is dropped and the manifest rows for that year are deleted, but nothing is recreated.</li>
+</ul>
+<h2 id="the-dry-run-flag">The <code>--dry-run</code> flag</h2>
+<p><code>--dry-run</code> prints the reconciliation plan per type/year (<code>skip</code>, <code>append month(s) NN, NN</code>, or <code>truncate + reload (N month file(s))</code>) and exits without touching SQL Server data. It still connects and attaches — read-only — so the plan reflects the real manifest and table state, <em>except</em> when the target database doesn't exist yet: in that case the attach is allowed to fail silently, and every year is reported as fresh (no manifest, no table-count lookups), since there's nothing on the server to compare against.</p>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-3-1">1</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1"></a>uv<span class="w"> </span>run<span class="w"> </span>taxi-load<span class="w"> </span>yellow<span class="w"> </span>--dry-run
+</code></pre></div></td></tr></table></div>
+<h2 id="the-full-refresh-flag">The <code>--full-refresh</code> flag</h2>
+<p><code>--full-refresh</code> forces every <code>(type, year)</code> being processed onto the <strong>truncate + reload</strong> path, regardless of what the manifest says. Use it to rebuild a year after fixing a mapping bug in <code>normalize</code>, or to recover from a manifest you no longer trust.</p>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-4-1">1</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1"></a>uv<span class="w"> </span>run<span class="w"> </span>taxi-load<span class="w"> </span>yellow<span class="w"> </span>--full-refresh
+</code></pre></div></td></tr></table></div>
+<h2 id="the-data-dir-and-input-dir-flags">The <code>--data-dir</code> and <code>--input-dir</code> flags</h2>
+<p><strong><code>--data-dir DIR</code></strong> — base directory; the loader reads <code>DIR/raw-normalized/&lt;type&gt;/&lt;year&gt;/*.parquet</code> (default: unset — when <code>--input-dir</code> is also not given, falls back to bare <code>raw-normalized</code> in the current directory).</p>
+<p><strong><code>--input-dir DIR</code></strong> — overrides <code>--data-dir</code> entirely: the loader reads <code>DIR/&lt;type&gt;/&lt;year&gt;/*.parquet</code> directly. Use this when your normalized output doesn't live under a <code>raw-normalized/</code> subdirectory.</p>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-5-1">1</a></span>
+<span class="normal"><a href="#__codelineno-5-2">2</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1"></a>uv<span class="w"> </span>run<span class="w"> </span>taxi-load<span class="w"> </span>yellow<span class="w"> </span>--data-dir<span class="w"> </span>/mnt/nas/tlc-mirror
+<a id="__codelineno-5-2" name="__codelineno-5-2"></a>uv<span class="w"> </span>run<span class="w"> </span>taxi-load<span class="w"> </span>yellow<span class="w"> </span>--input-dir<span class="w"> </span>/mnt/nas/tlc-mirror/normalized-output
+</code></pre></div></td></tr></table></div>
+<p>If a type has no parquet at all under the resolved input directory, that type is skipped with a message (<code>&lt;type&gt;: no parquet under &lt;dir&gt;/&lt;type&gt;, skipping</code>) and contributes success (exit 0) for that type — this is the same "nothing to do yet" posture as the other tools in this repo.</p>
+<h2 id="configuration">Configuration</h2>
 <table>
 <thead>
 <tr>
-<th>Variable</th>
-<th>Used by</th>
-<th>Description</th>
+<th>Flag</th>
+<th>Default</th>
+<th>Meaning</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td><code>MSSQL_PASSWORD</code></td>
-<td><code>taxi-load</code> / <code>taxi-run</code></td>
-<td>SQL Server password. Required whenever a load happens: always for <code>taxi-load</code>, and for <code>taxi-run</code> only when <code>--load</code> is passed. There is no <code>--password</code> flag — this is deliberate so the password never appears in <code>ps</code> output or shell history via an argument.</td>
+<td><code>data_type</code> (positional)</td>
+<td>all four</td>
+<td><code>yellow</code>, <code>green</code>, <code>fhv</code>, or <code>fhvhv</code>. Omit to load all four in sequence.</td>
 </tr>
 <tr>
-<td><code>HTTPS_PROXY</code> / <code>HTTP_PROXY</code></td>
-<td>httpx (downloader), uv, gh</td>
-<td>Standard HTTP proxy env vars. The downloader honors them implicitly via httpx.</td>
+<td><code>--host</code></td>
+<td><code>localhost</code></td>
+<td>SQL Server hostname.</td>
 </tr>
 <tr>
-<td><code>NO_PROXY</code></td>
-<td>httpx (downloader), uv, gh</td>
-<td>Standard bypass list. Include <code>localhost</code> if you run SQL Server locally and need it to bypass a corporate proxy.</td>
+<td><code>--port</code></td>
+<td><code>1433</code></td>
+<td>SQL Server port.</td>
+</tr>
+<tr>
+<td><code>--database</code></td>
+<td><code>taxi</code></td>
+<td>Target database name. Created automatically if it doesn't exist (non-dry-run only). Must match <code>[A-Za-z_][A-Za-z0-9_]*</code>.</td>
+</tr>
+<tr>
+<td><code>--schema</code></td>
+<td><code>dbo</code></td>
+<td>Target schema. Created automatically if non-<code>dbo</code> and absent (non-dry-run only). Must match <code>[A-Za-z_][A-Za-z0-9_]*</code>.</td>
+</tr>
+<tr>
+<td><code>--user</code></td>
+<td><code>sa</code></td>
+<td>SQL Server login.</td>
+</tr>
+<tr>
+<td><code>--data-dir</code></td>
+<td><em>(unset)</em></td>
+<td>Base dir; reads <code>&lt;data-dir&gt;/raw-normalized</code> unless <code>--input-dir</code> is given; falls back to bare <code>raw-normalized</code> when neither flag is given.</td>
+</tr>
+<tr>
+<td><code>--input-dir</code></td>
+<td><em>(unset)</em></td>
+<td>Reads <code>&lt;input-dir&gt;/&lt;type&gt;/&lt;year&gt;/*.parquet</code> directly; overrides <code>--data-dir</code>.</td>
+</tr>
+<tr>
+<td><code>--flush-rows</code></td>
+<td><code>100000</code></td>
+<td>BCP commit batch size passed to the <code>mssql</code> extension's <code>COPY</code>.</td>
+</tr>
+<tr>
+<td><code>--full-refresh</code></td>
+<td>off</td>
+<td>Force truncate + reload of every year processed, ignoring the manifest.</td>
+</tr>
+<tr>
+<td><code>--dry-run</code></td>
+<td>off</td>
+<td>Print the reconciliation plan; write nothing.</td>
 </tr>
 </tbody>
 </table>
-<p><code>--data-dir</code> is the shared "base directory" flag across the downloader, normalize, loader, and orchestrator — each tool resolves its own subdirectory beneath it (<code>&lt;data-dir&gt;/raw</code>, <code>&lt;data-dir&gt;/raw-normalized</code>, etc.). The loader also accepts <code>--input-dir</code> to point directly at a normalized-parquet directory, overriding the <code>--data-dir</code>-derived path.</p>
+<p><code>MSSQL_PASSWORD</code> is the only accepted source for the password — there is no <code>--password</code> flag.</p>
+<h2 id="exit-codes">Exit codes</h2>
+<table>
+<thead>
+<tr>
+<th>Code</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0</td>
+<td>Every requested type either loaded successfully, was a no-op (<code>--dry-run</code>), or had no parquet under the resolved input dir (skipped as "nothing to load yet").</td>
+</tr>
+<tr>
+<td>1</td>
+<td>At least one type failed mid-load (a <code>duckdb.Error</code> or a loader-internal error during <code>COPY</code>/DDL execution) — a partial load; other types may have still succeeded.</td>
+</tr>
+<tr>
+<td>2</td>
+<td>An identifier/config error (invalid <code>--schema</code> or <code>--database</code>), a missing <code>MSSQL_PASSWORD</code>, a connection/provisioning failure (installing the <code>mssql</code> extension, an unexpected extension version, attaching the database, creating the database/schema), or a per-type <code>TypeMappingError</code> (a DuckDB column type with no SQL Server equivalent).</td>
+</tr>
+</tbody>
+</table>
+<p>When multiple types are processed in one invocation (no positional <code>data_type</code>), the overall exit code is the <strong>maximum</strong> across all per-type outcomes — so a <code>TypeMappingError</code> on one type (2) outranks a mid-load failure on another (1), which outranks types that loaded cleanly (0). Note that the DuckDB extension install/attach/provisioning check happens once, up front, before any type is processed — a failure there returns 2 immediately without attempting any type.</p>
+<h2 id="troubleshooting">Troubleshooting</h2>
+<p><strong>Q: <code>error: MSSQL_PASSWORD environment variable is required</code>.</strong>
+A: Set it before invoking: <code>export MSSQL_PASSWORD=...</code> (or <code>MSSQL_PASSWORD=... uv run taxi-load yellow</code>). There is no flag alternative — this is deliberate so the password never appears in <code>ps</code> output or shell history via an argument.</p>
+<p><strong>Q: <code>error: invalid schema '...' : must match [A-Za-z_][A-Za-z0-9_]*</code> (or <code>database</code>).</strong>
+A: <code>--schema</code> and <code>--database</code> are validated against a strict identifier pattern before anything touches SQL Server, since they're interpolated into DDL (<code>CREATE DATABASE</code>, <code>CREATE SCHEMA</code>) rather than passed as bind parameters. Rename to a plain identifier, or quote/alias it on the SQL Server side and point <code>--database</code>/<code>--schema</code> at that name instead.</p>
+<p><strong>Q: <code>error: mssql extension version '...' != expected '7e57d24'</code>.</strong>
+A: The loader pins the exact community-registry build of the <code>mssql</code> DuckDB extension it was tested against. A version mismatch means <code>INSTALL mssql FROM community</code> resolved to a different build than expected (the community registry updated). This is a deliberate hard-stop, not a warning — bumping <code>EXPECTED_MSSQL_EXT_VERSION</code> in <code>taxi_loader/connection.py</code> is a decision that should be made after re-testing, not silently.</p>
+<p><strong>Q: <code>error: yellow: No SQL Server mapping for DuckDB type: '...'</code>.</strong>
+A: A <code>TypeMappingError</code> — a normalized parquet column has a DuckDB type with no entry in <code>taxi_shared.type_mapping</code>. Add the mapping there, or check whether <code>normalize</code> should have cast the column to something already mapped.</p>
+<p><strong>Q: <code>error: yellow failed mid-load: ...</code>.</strong>
+A: The type got partway through a <code>COPY</code> or DDL statement and DuckDB (or the <code>mssql</code> extension) raised. Common causes: SQL Server connectivity dropped mid-run, a constraint violation, or disk/log space exhausted on the SQL Server side. Re-running is safe — the reconcile logic will pick up from the manifest's actual state (the affected year likely reloads rather than silently continuing a corrupt append).</p>
+<p><strong>Q: The plan says <code>truncate + reload</code> for a year I didn't expect to change.</strong>
+A: This fires whenever the live table's row count doesn't match the manifest's recorded sum for that year — which can mean rows were inserted/deleted outside <code>taxi-load</code>, a prior run was interrupted between the <code>COPY</code> and the manifest write, or <code>normalize</code> re-wrote that year's parquet with different row counts. Run with <code>--dry-run</code> first to see exactly which years are affected before committing to a reload.</p>
+<p><strong>Q: <code>&lt;type&gt;: no parquet under &lt;dir&gt;/&lt;type&gt;, skipping</code>.</strong>
+A: Nothing has been normalized for that type yet at the resolved input directory. Run <a href="../normalize/">normalize</a> for that type first, or check <code>--data-dir</code>/<code>--input-dir</code> if your normalized output lives elsewhere. This is not an error — the type contributes exit 0.</p>
 
 
 

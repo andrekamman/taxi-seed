@@ -6,7 +6,7 @@
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
       
-        <meta name="description" content="Downloader, schema-drift analyzer, and K6 SQL Server load tester for NYC TLC taxi trip data">
+        <meta name="description" content="Downloader, schema-drift analyzer, normalizer, SQL Server loader, and orchestrator for NYC TLC taxi trip data">
       
       
       
@@ -27,7 +27,7 @@
     
     
       
-        <title>Exit codes - taxi</title>
+        <title>Exit codes - taxi-seed</title>
       
     
     
@@ -94,7 +94,7 @@
 
 <header class="md-header md-header--shadow" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="Header">
-    <a href="../.." title="taxi" class="md-header__button md-logo" aria-label="taxi" data-md-component="logo">
+    <a href="../.." title="taxi-seed" class="md-header__button md-logo" aria-label="taxi-seed" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
@@ -108,7 +108,7 @@
       <div class="md-header__ellipsis">
         <div class="md-header__topic">
           <span class="md-ellipsis">
-            taxi
+            taxi-seed
           </span>
         </div>
         <div class="md-header__topic" data-md-component="header-topic">
@@ -235,13 +235,13 @@
 
 <nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
-    <a href="../.." title="taxi" class="md-nav__button md-logo" aria-label="taxi" data-md-component="logo">
+    <a href="../.." title="taxi-seed" class="md-nav__button md-logo" aria-label="taxi-seed" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
 
     </a>
-    taxi
+    taxi-seed
   </label>
   
     <div class="md-nav__source">
@@ -450,14 +450,42 @@
   
   
     <li class="md-nav__item">
-      <a href="../../guides/k6-loadtest/" class="md-nav__link">
+      <a href="../../guides/loader/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    K6 Load Test
+    Loader
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/orchestrator/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Orchestrator
   
 
     
@@ -676,15 +704,15 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#downloader-download_taxi_datash" class="md-nav__link">
+  <a href="#downloader-taxi-download" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Downloader (download_taxi_data.sh)
+        Downloader (taxi-download)
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Downloader (download_taxi_data.sh)">
+    <nav class="md-nav" aria-label="Downloader (taxi-download)">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
@@ -692,17 +720,6 @@
     <span class="md-ellipsis">
       
         Rate-limit / WAF handling
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#interactive-vs-non-interactive" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Interactive vs non-interactive
       
     </span>
   </a>
@@ -765,30 +782,35 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#k6-preprocess-uv-run-k6-preprocess" class="md-nav__link">
+  <a href="#loader-taxi-load" class="md-nav__link">
     <span class="md-ellipsis">
       
-        K6-preprocess (uv run k6-preprocess)
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="K6-preprocess (uv run k6-preprocess)">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#common-exit-1-messages" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Common exit-1 messages
+        Loader (taxi-load)
       
     </span>
   </a>
   
 </li>
-        
-      </ul>
-    </nav>
+      
+        <li class="md-nav__item">
+  <a href="#orchestrator-taxi-run" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Orchestrator (taxi-run)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#mapping-curator-taxi-curate-mappings" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Mapping curator (taxi-curate-mappings)
+      
+    </span>
+  </a>
   
 </li>
       
@@ -1022,14 +1044,14 @@
   
   
     <li class="md-nav__item">
-      <a href="../../superpowers/specs/2026-03-25-k6-sql-load-testing-design/" class="md-nav__link">
+      <a href="../../superpowers/specs/2026-07-22-documentation-design/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    K6 SQL load testing
+    Documentation site
   
 
     
@@ -1050,14 +1072,126 @@
   
   
     <li class="md-nav__item">
-      <a href="../../superpowers/specs/2026-07-22-documentation-design/" class="md-nav__link">
+      <a href="../../superpowers/specs/2026-07-22-sql-loader-design/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    Documentation site
+    SQL loader
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../superpowers/specs/2026-07-23-orchestrator-design/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Orchestrator
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../superpowers/specs/2026-07-26-python-downloader-design/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Python downloader
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../superpowers/specs/2026-07-26-configurable-data-dir-design/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Configurable data dir
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../superpowers/specs/2026-07-26-documentation-sync-design/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Documentation sync
   
 
     
@@ -1132,15 +1266,15 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#downloader-download_taxi_datash" class="md-nav__link">
+  <a href="#downloader-taxi-download" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Downloader (download_taxi_data.sh)
+        Downloader (taxi-download)
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Downloader (download_taxi_data.sh)">
+    <nav class="md-nav" aria-label="Downloader (taxi-download)">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
@@ -1148,17 +1282,6 @@
     <span class="md-ellipsis">
       
         Rate-limit / WAF handling
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#interactive-vs-non-interactive" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Interactive vs non-interactive
       
     </span>
   </a>
@@ -1221,30 +1344,35 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#k6-preprocess-uv-run-k6-preprocess" class="md-nav__link">
+  <a href="#loader-taxi-load" class="md-nav__link">
     <span class="md-ellipsis">
       
-        K6-preprocess (uv run k6-preprocess)
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="K6-preprocess (uv run k6-preprocess)">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#common-exit-1-messages" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Common exit-1 messages
+        Loader (taxi-load)
       
     </span>
   </a>
   
 </li>
-        
-      </ul>
-    </nav>
+      
+        <li class="md-nav__item">
+  <a href="#orchestrator-taxi-run" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Orchestrator (taxi-run)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#mapping-curator-taxi-curate-mappings" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Mapping curator (taxi-curate-mappings)
+      
+    </span>
+  </a>
   
 </li>
       
@@ -1293,8 +1421,8 @@
 <h1 id="exit-codes">Exit codes</h1>
 <p>Every CLI in this repo follows the same convention: <code>0</code> on success, non-zero on specific failure classes documented per-tool. Scripts consuming these tools — a CI job, a cron wrapper, a Makefile, a shell one-liner — can branch on the exit code without parsing stderr.</p>
 <p>The tables below list the <em>emitted</em> codes. Codes are stable and part of the tools' contract: changing one is a breaking change and requires a version bump.</p>
-<h2 id="downloader-download_taxi_datash">Downloader (<code>download_taxi_data.sh</code>)</h2>
-<p>The downloader is a bash script; codes are set with <code>exit N</code>. It never uses <code>set -e</code>, so intermediate curl failures are handled inline and do not surface as a raw curl exit code.</p>
+<h2 id="downloader-taxi-download">Downloader (<code>taxi-download</code>)</h2>
+<p><code>taxi-download</code> is the Python console script (<code>downloader/src/taxi_download/cli.py</code>); it classifies every CloudFront response before choosing to retry, skip, or back off, and reports one summary line per requested type (<code>&lt;type&gt;: downloaded N, gave up on M</code>).</p>
 <table>
 <thead>
 <tr>
@@ -1306,31 +1434,25 @@
 <tbody>
 <tr>
 <td>0</td>
-<td>All requested downloads succeeded or were already present locally. <code>--help</code> also exits 0.</td>
+<td>Every requested type either downloaded successfully or was already present locally (<code>downloaded == 0</code> with <code>gaveup == 0</code> also counts as success — nothing to do).</td>
 <td>None. Idempotent success — safe to re-run.</td>
 </tr>
 <tr>
-<td>1</td>
-<td>Unknown option, unrecognized data type, WSL confirmation prompt declined, or persistent rate-limit / WAF block after 3 backoff attempts (the 5 min → 15 min → 60 min ladder was exhausted).</td>
-<td>If unknown-option: run with <code>--help</code>. If WSL prompt: re-run with <code>OUTPUT_DIR</code> set to a <code>/mnt/c/...</code> path (or accept the prompt). If backoff-exhaustion: wait several hours — WAF cooldowns often exceed the 60 min ladder cap — and retry from a different network or via a VPN.</td>
-</tr>
-<tr>
-<td>130</td>
-<td>User interrupted with Ctrl-C (standard shell convention: 128 + SIGINT).</td>
-<td>None.</td>
+<td>2</td>
+<td>At least one requested type finished with <code>downloaded == 0</code> and <code>gaveup &gt; 0</code> (every candidate file for that type hit a persistent rate-limit / WAF block or was otherwise unobtainable), or an argument error (unknown flag, invalid data type).</td>
+<td>Re-run later — CloudFront WAF cooldowns can outlast a single retry ladder — or retry from a different network. For argument errors, run with <code>--help</code>.</td>
 </tr>
 </tbody>
 </table>
+<p>There is no exit <code>1</code> and no <code>130</code>-on-Ctrl-C special case documented for this tool beyond the standard shell conventions below.</p>
 <h3 id="rate-limit-waf-handling">Rate-limit / WAF handling</h3>
 <p>CloudFront responds to requests in several distinguishable ways:</p>
 <ul>
-<li><strong>Existing file</strong> — HTTP 200/206 with a body that begins with the parquet magic bytes <code>PAR1</code>.</li>
+<li><strong>Existing file</strong> — HTTP 200 with a body that begins with the parquet magic bytes <code>PAR1</code>.</li>
 <li><strong>Not yet published</strong> — HTTP 403 with an S3-style <code>AccessDenied</code> XML body (or a 404).</li>
 <li><strong>WAF / rate-limit block</strong> — HTTP 403 with an HTML "The request could not be satisfied" page, or a direct HTTP 429 / 503.</li>
 </ul>
-<p>The downloader classifies every response before choosing to retry, skip, or back off. On a rate-limit classification, an exponential ladder kicks in: sleep 5 min, 15 min, 60 min, then abort with exit <code>1</code>. A single successful download resets the ladder to 0.</p>
-<h3 id="interactive-vs-non-interactive">Interactive vs non-interactive</h3>
-<p>The WSL confirmation prompt is only issued when stdin is a TTY (<code>[ -t 0 ]</code>). In non-interactive contexts (cron, CI, <code>nohup</code>, subshell redirections, <code>docker run</code> without <code>-it</code>) the script proceeds without prompting and writes to the resolved <code>output_dir</code> unchanged. This lets you script the downloader without worrying about the prompt blocking your job.</p>
+<p>On a rate-limit classification, <code>taxi-download</code> backs off and retries; if every attempt for a type is exhausted with zero successful downloads, that type reports <code>gaveup &gt; 0</code> and the overall exit code becomes 2.</p>
 <h2 id="normalize-uv-run-normalize">Normalize (<code>uv run normalize</code>)</h2>
 <table>
 <thead>
@@ -1353,8 +1475,8 @@
 </tr>
 <tr>
 <td>2</td>
-<td>Configuration error — missing raw data directory, malformed mapping YAML, or <code>target:</code> file not found under <code>raw/&lt;type&gt;/</code>.</td>
-<td>Fix the reported issue: check the raw-data path, validate the YAML, or bump <code>target:</code> to a file that actually exists.</td>
+<td>Configuration error — mapping failed to load (malformed YAML), <code>target:</code> file not found under <code>raw/&lt;type&gt;/</code>, or a first-run bootstrap analysis error.</td>
+<td>Fix the reported issue: validate the YAML, bump <code>target:</code> to a file that actually exists, or check the raw-data path.</td>
 </tr>
 <tr>
 <td>3</td>
@@ -1363,6 +1485,7 @@
 </tr>
 </tbody>
 </table>
+<p>A missing <code>raw/&lt;type&gt;/</code> directory is <strong>not</strong> a configuration error — it's treated as "nothing to normalize yet," prints <code>&lt;type&gt;: no raw files at &lt;raw_dir&gt;, skipping</code>, and exits <strong>0</strong> for that type.</p>
 <h3 id="multi-type-aggregation">Multi-type aggregation</h3>
 <p>When invoked with no argument (<code>uv run normalize</code>), the tool runs all four data types in turn and returns the <strong>highest</strong> exit code observed. A mixed run — e.g. <code>yellow</code> succeeds (0), <code>fhvhv</code> needs edits (1) — exits <code>1</code>. This keeps CI logic simple: any non-zero means "at least one type needs attention", and the code tells you what kind of attention.</p>
 <p>The ordering used by exit-code precedence, from lowest to highest: <code>0 → 1 → 2 → 3</code>. A first-run-plus-mapping-error scenario therefore exits <code>3</code> (the more actionable state), not <code>2</code>.</p>
@@ -1401,15 +1524,10 @@
 <td><code>--data-dir &lt;path&gt;</code> does not exist. Message: <code>Error: Data directory '&lt;path&gt;' does not exist.</code></td>
 <td>Check the path. Default is <code>raw/</code> relative to CWD; pass <code>--data-dir</code> explicitly if your mirror lives elsewhere.</td>
 </tr>
-<tr>
-<td>2</td>
-<td>Argument error (argparse default). Unknown flag, missing required value, invalid <code>--types</code> entry, etc.</td>
-<td>Run with <code>--help</code> to see the flag list.</td>
-</tr>
 </tbody>
 </table>
 <p>Schema-drift itself does not raise on missing columns, mismatched types, or ambiguous renames — those are reported <em>in</em> the output, not in the exit code. If you want a CI job that fails when new drift appears, diff the report against a checked-in baseline; the exit code alone will not signal it.</p>
-<h2 id="k6-preprocess-uv-run-k6-preprocess">K6-preprocess (<code>uv run k6-preprocess</code>)</h2>
+<h2 id="loader-taxi-load">Loader (<code>taxi-load</code>)</h2>
 <table>
 <thead>
 <tr>
@@ -1421,43 +1539,78 @@
 <tbody>
 <tr>
 <td>0</td>
-<td>Success — DDL, chunks, <code>test.js</code>, and <code>manifest.json</code> written to <code>--output</code> (default <code>k6-loadtest/output/</code>).</td>
-<td>Apply the DDL and run K6.</td>
+<td>Every requested type either loaded successfully, was a no-op (<code>--dry-run</code>), or had no parquet under the resolved input dir (skipped as "nothing to load yet").</td>
+<td>None.</td>
 </tr>
 <tr>
 <td>1</td>
-<td>Any exception raised during preprocessing. Common causes: missing <code>--config</code> file, malformed YAML, config validation failure (missing required section/field, unknown <code>mode:</code>, <code>workload</code> percentages that don't sum to 100, <code>path:</code> glob that matches no files, invalid <code>think_time</code> duration string). The failing message is printed to stderr as <code>Error: {message}</code>.</td>
-<td>Read the stderr message; it names the failing field or the missing file. Fix and re-run.</td>
+<td>At least one type failed mid-load (a <code>duckdb.Error</code> or a loader-internal error during <code>COPY</code>/DDL execution) — a partial load; other types may have still succeeded.</td>
+<td>Re-run — the reconcile logic picks up from the manifest's actual state.</td>
 </tr>
 <tr>
 <td>2</td>
-<td>Argument error (argparse default). Missing the required <code>--config</code> flag, unknown option.</td>
-<td>Run with <code>--help</code>.</td>
+<td>An identifier/config error (invalid <code>--schema</code> or <code>--database</code>), a missing <code>MSSQL_PASSWORD</code>, a connection/provisioning failure (installing the <code>mssql</code> extension, an unexpected extension version, attaching the database, creating the database/schema), or a per-type <code>TypeMappingError</code> (a DuckDB column type with no SQL Server equivalent).</td>
+<td>Check the stderr message; set <code>MSSQL_PASSWORD</code>, fix the identifier, or add the missing type mapping.</td>
 </tr>
 </tbody>
 </table>
-<h3 id="common-exit-1-messages">Common exit-1 messages</h3>
-<p>The messages below all correspond to exit <code>1</code> and come from <code>ConfigError</code> in <code>k6_loadtest/config.py</code>:</p>
-<ul>
-<li><code>Missing required section: {data_sources|targets|scenarios}</code> — the top-level YAML is missing one of the three required blocks.</li>
-<li><code>Data source {name!r}: mode must be 'parquet' or 'synthetic', got {mode!r}</code> — unknown <code>mode:</code> value.</li>
-<li><code>Data source {name!r}: missing required field {field!r}</code> — a required per-mode field (<code>columns</code>, <code>key_columns</code>, <code>path</code>) is absent.</li>
-<li><code>Data source {name!r}: synthetic column {col!r} must have a 'type' field</code> — a synthetic column entry has no <code>type:</code>.</li>
-<li><code>Data source {name!r}: key_column {kc!r} not found in columns</code> — <code>key_columns:</code> references a name that is not declared under <code>columns:</code>.</li>
-<li><code>Data source {name!r}: path {…} matches no files</code> — the parquet glob resolved to zero files at preprocess time.</li>
-<li><code>Target {name!r}: missing required field {field!r}</code> — a target is missing one of <code>host</code>, <code>port</code>, <code>database</code>, <code>username</code>, <code>password</code>, <code>table</code>.</li>
-<li><code>Scenario {name!r}: target {target!r} not found in targets</code> / <code>data_source {…} not found in data_sources</code> — a scenario references a name that does not exist at the top level.</li>
-<li><code>Scenario {name!r}: ordering must be 'parallel' or 'sequential', got {ordering!r}</code> — unknown <code>ordering:</code> value.</li>
-<li><code>Scenario {name!r}: workload percentages must sum to 100, got {total}</code> — the <code>insert</code>/<code>update</code>/<code>delete</code> mix doesn't add up.</li>
-<li><code>Scenario {name!r}: missing required field 'k6'</code> — no <code>k6:</code> block, so there's no executor to generate.</li>
-<li><code>Invalid duration format: {value!r} (expected e.g. '200ms' or '1s')</code> — a <code>think_time.min</code> or <code>think_time.max</code> value doesn't match the duration grammar.</li>
-</ul>
-<p>Every message is prefixed with <code>Error:</code> when printed to stderr. Grepping for <code>Error:</code> in your CI log surfaces preprocess failures quickly.</p>
+<p>When multiple types are processed in one invocation (no positional <code>data_type</code>), the overall exit code is the <strong>maximum</strong> across all per-type outcomes — a <code>TypeMappingError</code> on one type (2) outranks a mid-load failure on another (1), which outranks types that loaded cleanly (0). See <a href="../../guides/loader/#exit-codes">Loader → Exit codes</a> for the full writeup.</p>
+<h2 id="orchestrator-taxi-run">Orchestrator (<code>taxi-run</code>)</h2>
+<table>
+<thead>
+<tr>
+<th>Code</th>
+<th>Meaning</th>
+<th>Suggested action</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0</td>
+<td>Every planned stage for every type completed cleanly — a genuinely clean run — or <code>--dry-run</code> printed the per-type plan and exited without running anything.</td>
+<td>None.</td>
+</tr>
+<tr>
+<td>1</td>
+<td>No stage failed outright, but at least one type stopped at <code>needs_review</code> — normalize returned 1 (unresolved mapping items) or 3 (first-run scaffold awaiting review) for that type.</td>
+<td>Resolve the mapping YAML for the flagged type(s) and re-run.</td>
+</tr>
+<tr>
+<td>2</td>
+<td>At least one stage classified as <code>failed</code>, <code>partial</code>, or <code>conn_error</code> (download failed, normalize hit a real config error, or the loader reported a partial load / connection-config error / <code>TypeMappingError</code>). Also returned immediately for <code>--download-only</code> combined with <code>--load</code>, or for a missing <code>MSSQL_PASSWORD</code> when <code>--load</code> is set — before any stage runs.</td>
+<td>Check the per-type summary printed at the end of the run; fix the failing stage and re-run.</td>
+</tr>
+</tbody>
+</table>
+<p>Precedence is <strong>2 &gt; 1 &gt; 0</strong>: <code>pipeline.overall_exit_code</code> returns 2 if any stage outcome is in the failure set (<code>failed</code>, <code>partial</code>, <code>conn_error</code>), else 1 if any is <code>needs_review</code>, else 0. Note that a loader exit of <code>1</code> (partial load) classifies as <code>partial</code>, which <strong>is</strong> counted among the exit-2 statuses at the orchestrator level — so a partial load on any type escalates the whole run's exit code to 2, even though that type's own stage exit was 1. See <a href="../../guides/orchestrator/#exit-codes">Orchestrator → Exit codes</a> for the full writeup.</p>
+<h2 id="mapping-curator-taxi-curate-mappings">Mapping curator (<code>taxi-curate-mappings</code>)</h2>
+<table>
+<thead>
+<tr>
+<th>Code</th>
+<th>Meaning</th>
+<th>Suggested action</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0</td>
+<td>Every requested type curated cleanly, or was skipped because <code>&lt;raw-dir&gt;/&lt;type&gt;</code> doesn't exist (not an error).</td>
+<td>None.</td>
+</tr>
+<tr>
+<td>2</td>
+<td>At least one type raised: a <code>FileNotFoundError</code> (no parquet files for that type, or the mapping's <code>target</code> file is missing) or a <code>RuntimeError</code> (a non-executable cast needing manual mapping, or unresolved items remaining after 8 curation rounds); argument errors also exit 2.</td>
+<td>Read the stderr message for the blocking column/type and resolve it by hand in the mapping YAML.</td>
+</tr>
+</tbody>
+</table>
+<p>Multiple types aggregate via <code>max()</code>, same as the other multi-type tools in this repo. See <a href="../../guides/orchestrator/#taxi-curate-mappings">Orchestrator → <code>taxi-curate-mappings</code></a> for the full writeup.</p>
 <h2 id="standard-shell-conventions">Standard shell conventions</h2>
 <p>The tools in this repo do not invent exit codes beyond what's documented above; standard shell conventions still apply on top:</p>
 <ul>
 <li><code>130</code> — SIGINT (Ctrl-C). Bash reports this for any tool killed by SIGINT — not just the downloader.</li>
-<li><code>137</code> — SIGKILL (128 + 9). Often means an OOM kill; the Linux OOM killer sends SIGKILL. Rerun with a smaller dataset (<code>--sample</code> for normalize, <code>max_rows</code> for k6-preprocess parquet mode) or on a machine with more RAM.</li>
+<li><code>137</code> — SIGKILL (128 + 9). Often means an OOM kill; the Linux OOM killer sends SIGKILL. Rerun with a smaller dataset (<code>--sample</code> for normalize) or on a machine with more RAM.</li>
 <li><code>143</code> — SIGTERM (128 + 15). A container orchestrator or <code>systemd</code> sent a graceful-shutdown signal. Increase the shutdown timeout or split the work into smaller batches.</li>
 </ul>
 <p>None of these are emitted by the tools themselves — they come from the surrounding process manager. If you see one, the tool never got to run its own exit logic.</p>

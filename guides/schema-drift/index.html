@@ -6,7 +6,7 @@
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
       
-        <meta name="description" content="Downloader, schema-drift analyzer, and K6 SQL Server load tester for NYC TLC taxi trip data">
+        <meta name="description" content="Downloader, schema-drift analyzer, normalizer, SQL Server loader, and orchestrator for NYC TLC taxi trip data">
       
       
       
@@ -27,7 +27,7 @@
     
     
       
-        <title>Schema Drift - taxi</title>
+        <title>Schema Drift - taxi-seed</title>
       
     
     
@@ -94,7 +94,7 @@
 
 <header class="md-header md-header--shadow" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="Header">
-    <a href="../.." title="taxi" class="md-header__button md-logo" aria-label="taxi" data-md-component="logo">
+    <a href="../.." title="taxi-seed" class="md-header__button md-logo" aria-label="taxi-seed" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
@@ -108,7 +108,7 @@
       <div class="md-header__ellipsis">
         <div class="md-header__topic">
           <span class="md-ellipsis">
-            taxi
+            taxi-seed
           </span>
         </div>
         <div class="md-header__topic" data-md-component="header-topic">
@@ -235,13 +235,13 @@
 
 <nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
-    <a href="../.." title="taxi" class="md-nav__button md-logo" aria-label="taxi" data-md-component="logo">
+    <a href="../.." title="taxi-seed" class="md-nav__button md-logo" aria-label="taxi-seed" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
 
     </a>
-    taxi
+    taxi-seed
   </label>
   
     <div class="md-nav__source">
@@ -637,14 +637,42 @@
   
   
     <li class="md-nav__item">
-      <a href="../k6-loadtest/" class="md-nav__link">
+      <a href="../loader/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    K6 Load Test
+    Loader
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../orchestrator/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Orchestrator
   
 
     
@@ -1021,14 +1049,14 @@
   
   
     <li class="md-nav__item">
-      <a href="../../superpowers/specs/2026-03-25-k6-sql-load-testing-design/" class="md-nav__link">
+      <a href="../../superpowers/specs/2026-07-22-documentation-design/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    K6 SQL load testing
+    Documentation site
   
 
     
@@ -1049,14 +1077,126 @@
   
   
     <li class="md-nav__item">
-      <a href="../../superpowers/specs/2026-07-22-documentation-design/" class="md-nav__link">
+      <a href="../../superpowers/specs/2026-07-22-sql-loader-design/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    Documentation site
+    SQL loader
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../superpowers/specs/2026-07-23-orchestrator-design/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Orchestrator
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../superpowers/specs/2026-07-26-python-downloader-design/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Python downloader
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../superpowers/specs/2026-07-26-configurable-data-dir-design/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Configurable data dir
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../superpowers/specs/2026-07-26-documentation-sync-design/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Documentation sync
   
 
     
@@ -1290,15 +1430,15 @@
 
 <h1 id="schema-drift">Schema Drift</h1>
 <p>The <code>schema-drift</code> tool analyzes a family of parquet files representing different time periods and reports how their schemas changed over time. It walks the files in chronological order, identifies the transition points where the schema actually changed, and at each transition classifies the deltas as columns added, columns removed, columns type-changed, or columns renamed. Rename detection uses a domain-aware heuristic (with an optional data-verification pass) or a purely data-driven mode for non-TLC datasets.</p>
-<p>It is used two ways. As a standalone CLI it produces a human-readable text report — useful before you ingest historical TLC data so you know exactly what shape shifts to expect. Programmatically, <code>normalize bootstrap</code> calls the same analyzer to seed its mapping YAML with the tool's rename suggestions, which you then review and edit before running a full normalize.</p>
+<p>It is used two ways. As a standalone CLI it produces a human-readable text report — useful before you ingest historical TLC data so you know exactly what shape shifts to expect. Programmatically, <code>normalize</code>'s automatic first-run bootstrap (there is no separate subcommand — <code>normalize</code> is a flat argparse CLI; bootstrapping is internal first-run behavior) calls the same analyzer to seed its mapping YAML with the tool's rename suggestions, which you then review and edit before running a full normalize.</p>
 <h2 id="when-to-use-it">When to use it</h2>
 <p>Two scenarios drive most usage:</p>
 <ul>
 <li><strong>Before ingesting historical TLC data.</strong> Know what schema changes you're going to hit before you write ingest code. The report tells you exactly which columns appear/disappear and at which month, so you can plan your ingest schema and write the right conditionals up-front instead of hitting DuckDB parse errors mid-load.</li>
-<li><strong>Before authoring a <code>normalize</code> mapping.</strong> Run the tool, review the SUGGESTED renames, and decide which to accept. <code>normalize bootstrap</code> runs this analyzer for you and writes its suggestions into a mapping YAML, but running it standalone first lets you inspect the raw suggestions (and their confidences) without the bootstrap step overwriting anything.</li>
+<li><strong>Before authoring a <code>normalize</code> mapping.</strong> Run the tool, review the SUGGESTED renames, and decide which to accept. <code>normalize</code>'s automatic first-run bootstrap runs this analyzer for you and writes its suggestions into a mapping YAML, but running <code>schema-drift</code> standalone first lets you inspect the raw suggestions (and their confidences) without the bootstrap step overwriting anything.</li>
 </ul>
 <h2 id="prerequisites">Prerequisites</h2>
-<p>Install dependencies with <code>uv sync</code> in the <code>schema-drift/</code> directory.</p>
+<p>Install dependencies with <code>uv sync</code> in the repo root.</p>
 <p>You need a parquet family: either the <a href="../downloader/">downloader</a>'s <code>raw/</code> mirror or any directory of parquet files whose names follow the convention <code>&lt;type&gt;_tripdata_YYYY-MM.parquet</code>. That pattern is required — the analyzer extracts the period from the filename to order the files and label the transitions.</p>
 <h2 id="basic-usage">Basic usage</h2>
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-1">1</a></span>
@@ -1322,7 +1462,7 @@
 <p>The tool has three modes for detecting renames. Pick the right one based on your dataset and what you plan to do with the output.</p>
 <p><strong>Default (taxi mode)</strong> — Uses a built-in NYC-TLC-specific abbreviation dictionary (<code>amt→amount</code>, <code>pu→pickup</code>, <code>do→dropoff</code>, <code>tpep→</code> empty prefix, etc.) plus semantic categories (pickup vs dropoff, coordinate, location_id, amount, datetime) to detect renames by name similarity alone. Fast — no data sampling is performed. Best for TLC data specifically.</p>
 <p><strong><code>--generic</code></strong> — No domain knowledge. Detects renames purely by comparing column data between periods: null ratios, cardinality, min/max ranges, top values. Slower because it samples row data. Best for non-TLC datasets. The report explicitly marks every suggested rename as "requires human review".</p>
-<p><strong><code>--verify-data</code></strong> — Taxi mode plus a sampled data comparison to verify low-confidence rename candidates. Slower than default but faster than <code>--generic</code>. Best when you plan to trust the output programmatically — for example, feeding results into <code>normalize bootstrap</code> without hand-reviewing every suggestion.</p>
+<p><strong><code>--verify-data</code></strong> — Taxi mode plus a sampled data comparison to verify low-confidence rename candidates. Slower than default but faster than <code>--generic</code>. Best when you plan to trust the output programmatically — for example, feeding results into <code>normalize</code>'s first-run bootstrap without hand-reviewing every suggestion.</p>
 <p>Decision helper:</p>
 <ul>
 <li>TLC data + first look → default.</li>
@@ -1440,7 +1580,8 @@
 <h3 id="data-verification">Data verification</h3>
 <p>For candidate pairs whose name similarity clears the threshold, the tool can compare column data across the transition: null ratios, cardinality, min/max ranges, top values. Agreement across dimensions boosts the confidence score; disagreement penalizes it or rejects the pair outright. In <code>--verify-data</code> mode, rejected pairs get demoted back into added/removed; in <code>--generic</code> mode, data comparison is the <em>only</em> signal.</p>
 <h3 id="confidence-threshold">Confidence threshold</h3>
-<p>The default cutoff is 0.6. Anything below that shows in the report as an unresolved add/remove pair — the tool didn't have enough evidence to call it a rename, and a human needs to decide. Anything at or above 0.6 is emitted as a SUGGESTED rename with its confidence percentage and, when applicable, a <code>✓ data verified</code> / <code>✗ data mismatch</code> marker.</p>
+<p>The cutoff depends on the mode. <strong>Default (taxi) mode</strong> scores renames by name similarity and applies a <strong>0.7</strong> cutoff; if the candidate pair's types don't match, the name-similarity score is first penalized ×0.7, so a type-mismatched pair needs a near-perfect name match to clear the bar. <strong><code>--generic</code> mode</strong> has no name signal to fall back on — it scores renames purely by data similarity and cuts off at <strong>0.6</strong> instead.</p>
+<p>Anything below the relevant threshold shows in the report as an unresolved add/remove pair — the tool didn't have enough evidence to call it a rename, and a human needs to decide. Anything at or above the threshold is emitted as a SUGGESTED rename with its confidence percentage and, when applicable, a <code>✓ data verified</code> / <code>✗ data mismatch</code> marker.</p>
 <p>In practice, TLC renames tend to score in the 75–95% band. Anything lower is worth a manual look at the two candidate columns before you accept it as a rename in a <code>normalize</code> mapping.</p>
 <h2 id="programmatic-api">Programmatic API</h2>
 <p>For notebooks or pipeline code, call the analyzer directly:</p>
