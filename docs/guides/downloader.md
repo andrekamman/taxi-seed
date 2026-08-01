@@ -242,10 +242,12 @@ Recent-mode's local-encounter break (see [Recent-mode semantics](#recent-mode-se
 
 ## Alternatives
 
+This downloader does one job: mirror the TLC parquet files to local disk, one file per month per type. It resumes where it left off, distinguishes a WAF block page from a genuinely missing object so it retries only the former, and stops early on files you already have so a scheduled re-run is cheap. It does not query, normalize, or load the data — those are [separate tools](../index.md) in this repo. Other options cover different ground:
+
 | Tool | When to use it | When NOT to use it |
 |---|---|---|
 | **This downloader** | Building a resumable local mirror; scheduled catch-up; feeding a database or ETL | You only need one-off queries and don't want the disk cost |
-| [`toddwschneider/nyc-taxi-data`](https://github.com/toddwschneider/nyc-taxi-data) | Postgres/ClickHouse importing with SQL loader scripts | You need resumable + WAF-aware retry (it's a one-shot wget loop) |
+| [`toddwschneider/nyc-taxi-data`](https://github.com/toddwschneider/nyc-taxi-data) | Postgres/ClickHouse importing with SQL loader scripts | You need resumable downloads or WAF-aware retry |
 | DuckDB `httpfs` extension | Ad-hoc analytics, no local mirror needed | Repeated full-scan queries (each query re-downloads); offline work |
 | HuggingFace mirrors | Exploratory ML work with the [dataset ports](https://huggingface.co/datasets?search=nyc+taxi) | Production pipelines (snapshots are stale) |
 
