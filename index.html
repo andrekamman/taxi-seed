@@ -334,17 +334,6 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#how-it-compares" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        How it compares
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
   <a href="#quick-start" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1206,17 +1195,6 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#how-it-compares" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        How it compares
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
   <a href="#quick-start" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1329,55 +1307,6 @@ the other tools are original to this repo. See
   nightly cron can go from "check for new months" to "target database is
   up to date" without hand-wiring the individual tools together.</li>
 </ul>
-<h2 id="how-it-compares">How it compares</h2>
-<table>
-<thead>
-<tr>
-<th>Feature</th>
-<th>this repo</th>
-<th><code>toddwschneider/nyc-taxi-data</code></th>
-<th><code>duckdb httpfs</code></th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>Primary use case</td>
-<td>resumable mirror + normalize + load</td>
-<td>one-shot Postgres load</td>
-<td>ad-hoc SQL over remote parquet</td>
-</tr>
-<tr>
-<td>Resumable download</td>
-<td>yes; stop-on-local incremental catch-up</td>
-<td>one-shot <code>wget</code> loop</td>
-<td>no local mirror needed</td>
-</tr>
-<tr>
-<td>WAF-aware retry</td>
-<td>classifier + 30s/90s/270s exponential backoff (capped 3600s)</td>
-<td>none — fails on WAF block page</td>
-<td>N/A (single HTTP range request per scan)</td>
-</tr>
-<tr>
-<td>Schema handling</td>
-<td>drift analyzer + rename-verified mapping YAML</td>
-<td>fixed columns; breaks on drift</td>
-<td>trusts remote schema per query</td>
-</tr>
-<tr>
-<td>Target database</td>
-<td>SQL Server (via DuckDB <code>mssql</code> extension)</td>
-<td>Postgres</td>
-<td>DuckDB (in-process)</td>
-</tr>
-<tr>
-<td>Install effort</td>
-<td><code>uv sync</code></td>
-<td>Postgres + shell + Ruby + client</td>
-<td>single <code>duckdb</code> binary</td>
-</tr>
-</tbody>
-</table>
 <h2 id="quick-start">Quick start</h2>
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-1">1</a></span>
 <span class="normal"><a href="#__codelineno-0-2">2</a></span>
