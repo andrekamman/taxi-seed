@@ -49,17 +49,6 @@ the other tools are original to this repo. See
   nightly cron can go from "check for new months" to "target database is
   up to date" without hand-wiring the individual tools together.
 
-## How it compares
-
-| Feature            | this repo                                          | `toddwschneider/nyc-taxi-data`   | `duckdb httpfs`                          |
-| ------------------ | -------------------------------------------------- | -------------------------------- | ---------------------------------------- |
-| Primary use case   | resumable mirror + normalize + load                | one-shot Postgres load           | ad-hoc SQL over remote parquet           |
-| Resumable download | yes; stop-on-local incremental catch-up            | one-shot `wget` loop             | no local mirror needed                   |
-| WAF-aware retry    | classifier + 30s/90s/270s exponential backoff (capped 3600s) | none — fails on WAF block page   | N/A (single HTTP range request per scan) |
-| Schema handling    | drift analyzer + rename-verified mapping YAML      | fixed columns; breaks on drift   | trusts remote schema per query           |
-| Target database    | SQL Server (via DuckDB `mssql` extension)          | Postgres                         | DuckDB (in-process)                      |
-| Install effort     | `uv sync`                                          | Postgres + shell + Ruby + client | single `duckdb` binary                   |
-
 ## Quick start
 
 ```bash
