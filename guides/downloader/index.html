@@ -1769,6 +1769,7 @@
 </code></pre></div></td></tr></table></div>
 <p>Recent-mode's local-encounter break (see <a href="#recent-mode-semantics">Recent-mode semantics</a>) makes daily runs cheap: once you're caught up, each run tries one or two URLs per type and exits.</p>
 <h2 id="alternatives">Alternatives</h2>
+<p>This downloader does one job: mirror the TLC parquet files to local disk, one file per month per type. It resumes where it left off, distinguishes a WAF block page from a genuinely missing object so it retries only the former, and stops early on files you already have so a scheduled re-run is cheap. It does not query, normalize, or load the data — those are <a href="../../">separate tools</a> in this repo. Other options cover different ground:</p>
 <table>
 <thead>
 <tr>
@@ -1786,7 +1787,7 @@
 <tr>
 <td><a href="https://github.com/toddwschneider/nyc-taxi-data"><code>toddwschneider/nyc-taxi-data</code></a></td>
 <td>Postgres/ClickHouse importing with SQL loader scripts</td>
-<td>You need resumable + WAF-aware retry (it's a one-shot wget loop)</td>
+<td>You need resumable downloads or WAF-aware retry</td>
 </tr>
 <tr>
 <td>DuckDB <code>httpfs</code> extension</td>
