@@ -38,4 +38,7 @@ def generate_delete_sql(
 
 def generate_create_table_sql(table: str, columns: dict[str, str]) -> str:
     col_defs = [f"    {name} {sql_type}" for name, sql_type in columns.items()]
-    return f"CREATE TABLE {table} (\n{',\n'.join(col_defs)}\n);"
+    return (
+        f"CREATE TABLE {table} (\n{',\n'.join(col_defs)}\n"
+        f") WITH (DATA_COMPRESSION = PAGE);"
+    )
