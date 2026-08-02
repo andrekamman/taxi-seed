@@ -33,17 +33,22 @@ def manifest_fq(schema: str) -> str:
 def build_manifest_ddl(schema: str) -> list[str]:
     fq = manifest_fq(schema)
     create = generate_create_table_sql(fq, MANIFEST_COLUMNS).rstrip(";\n ")
-    # `create` ends with the closing paren of the column list, e.g.:
-    #   CREATE TABLE dbo._load_manifest (\n    data_type NVARCHAR(16),\n    ...\n)
-    # Splice the PK constraint in as a table constraint before that paren so
-    # the whole table (including its PK) is created atomically in one
-    # statement -- see ensure_manifest_table's OBJECT_ID guard.
-    body = create.removesuffix(")").rstrip()
+    # `create` ends with the table-options clause, e.g.:
+    #   CREATE TABLE dbo._load_manifest (\n    data_type NVARCHAR(16),\n    ...\n
+    #   ) WITH (DATA_COMPRESSION = PAGE)
+    # Peel that WITH(...) clause off first, then splice the PK constraint in
+    # as a table constraint before the column list's closing paren, and
+    # re-append WITH(...) at the very end -- so the whole table (including
+    # its PK, and its compression) is created atomically in one statement --
+    # see ensure_manifest_table's OBJECT_ID guard.
+    options = " WITH (DATA_COMPRESSION = PAGE)"
+    body = create.removesuffix(options)
+    body = body.removesuffix(")").rstrip()
     pk_name = f"PK_{schema}_{MANIFEST_TABLE}"
     ddl = (
         f"{body},\n"
         f"    CONSTRAINT {pk_name} PRIMARY KEY (data_type, year, month)\n"
-        f")"
+        f"){options}"
     )
     return [ddl]
 
