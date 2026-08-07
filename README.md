@@ -5,11 +5,13 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Docs](https://img.shields.io/badge/docs-online-brightgreen)](https://andrekamman.github.io/taxi-seed/)
 
-`taxi-seed` is one repo, one Python package with five tools (plus a shared library) for working with the NYC Taxi & Limousine Commission (TLC) trip record data set: a WAF-aware CloudFront **downloader** (WAF = Web Application Firewall — the layer AWS uses to block traffic that looks like a scraper), a **schema-drift** analyzer, a **normalize** step that halts on any data loss unless the operator explicitly acknowledges the drift, a **loader** that lands normalized parquet into a target database, and an **orchestrator** that drives the whole download → normalize → load pipeline end-to-end. The project is MIT-licensed. The downloader was loosely based on [`toddwschneider/nyc-taxi-data`](https://github.com/toddwschneider/nyc-taxi-data); the other tools are original to this repo. See [Acknowledgments](#acknowledgments) for details.
+The New York City Taxi and Limousine Commission (TLC) publishes a record of every taxi and for-hire vehicle trip in the city. The records start in 2009 and arrive as monthly parquet files.
 
-- **WAF-aware CloudFront downloader** with a 30s / 90s / 270s exponential backoff ladder (capped at 3600s) and stop-on-local incremental catch-up so nightly crons stay cheap once the mirror is warm.
-- **Normalizer that treats data loss as a first-class error** — missing columns, lossy casts, and silent renames halt the run; explicit `ack_date` acknowledgment is required before drift is written through.
-- **Loader + orchestrator** that land normalized parquet into a target database and drive the full pipeline end-to-end on a schedule.
+`taxi-seed` mirrors that data set, normalizes it, and loads it into a database. It is one repo and one Python package holding five tools plus a shared library — see [Components](#components) for each one. The project is MIT-licensed. The downloader was loosely based on [`toddwschneider/nyc-taxi-data`](https://github.com/toddwschneider/nyc-taxi-data); the other tools are original to this repo. See [Acknowledgments](#acknowledgments) for details.
+
+- **A downloader that survives AWS WAF.** WAF is the Web Application Firewall AWS uses to block traffic that looks like a scraper, and it is the failure you hit first when you mirror the TLC bucket at volume. The downloader tells a real `403 AccessDenied` from a WAF block page, waits 30s, then 90s, then 270s across four attempts, and stops the moment it meets a file it already has. A nightly cron therefore stays cheap once the mirror is warm.
+- **A normalizer that treats data loss as an error.** Missing columns, lossy casts, and silent renames all halt the run. An operator must acknowledge the drift with an `ack_date` before it is written through.
+- **A loader and an orchestrator for the whole pipeline.** The loader lands normalized parquet in a target database, page-compressed. The orchestrator drives download → normalize → load as one scheduled run.
 
 **→ Full documentation: <https://andrekamman.github.io/taxi-seed/>**
 
@@ -30,7 +32,7 @@ Each component has a short `README.md` that points at the guide on the site; the
 
 ## Install
 
-`taxi-seed` is published to PyPI as one distribution carrying all five CLIs (`taxi-download`, `schema-drift`, `normalize`, `taxi-load`, `taxi-run`):
+`taxi-seed` is published to PyPI as one distribution. It puts six commands on your PATH — `taxi-download`, `schema-drift`, `normalize`, `taxi-load`, `taxi-run`, and `taxi-curate-mappings`:
 
 ```bash
 uv tool install taxi-seed     # isolated env, every CLI on PATH
@@ -50,7 +52,7 @@ uv run taxi-download yellow --recent 3
 
 Downloads ~200 MB in 1–2 minutes on residential broadband. This Quick Start only exercises the downloader. All tools live in one `uv sync`-managed environment; the [Getting Started tutorial](https://andrekamman.github.io/taxi-seed/getting-started/) walks the full end-to-end path from clone to normalized parquet. Installed from PyPI instead? Same commands, without the `uv run` prefix.
 
-A full-history mirror is roughly 40–100 GB (depending on how many of the four series and how much history you mirror) and takes 6–10 hours end-to-end; the downloader is designed to be resumable, incremental, and cheap to re-run on a schedule rather than something you kick off once and hope survives.
+A full-history mirror is roughly 40–100 GB (depending on how many of the four trip types and how much history you mirror) and takes 6–10 hours end-to-end. The downloader is therefore built to be resumable, incremental, and cheap to re-run on a schedule.
 
 ## Requirements
 
@@ -66,7 +68,7 @@ The [documentation site](https://andrekamman.github.io/taxi-seed/) is the source
 
 - **[Installation](https://andrekamman.github.io/taxi-seed/install/)** — installing the released package from PyPI vs working from a clone.
 - **[Getting Started](https://andrekamman.github.io/taxi-seed/getting-started/)** — 10-minute end-to-end walkthrough from clone to normalized parquet.
-- **[Guides](https://andrekamman.github.io/taxi-seed/guides/downloader/)** — one deep-dive per tool (Downloader, Schema Drift, Normalize).
+- **[Guides](https://andrekamman.github.io/taxi-seed/guides/downloader/)** — one deep-dive per tool: Downloader, Schema Drift, Normalize, Loader, Orchestrator.
 - **[Cookbook](https://andrekamman.github.io/taxi-seed/cookbook/)** — cross-cutting recipes (nightly cron, DuckDB `httpfs` querying, corporate proxy).
 - **[Architecture](https://andrekamman.github.io/taxi-seed/architecture/)** — how the tools fit together end-to-end.
 - **[Reference](https://andrekamman.github.io/taxi-seed/reference/configuration/)** — configuration keys and exit codes.

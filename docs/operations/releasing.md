@@ -52,7 +52,7 @@ This runs the `build` job, then the `testpypi` job (environment `testpypi`, no a
 gh run watch
 ```
 
-Verify the published artifact installs before promoting further. TestPyPI does not mirror `duckdb`, `httpx`, or `pyyaml`, so the runtime dependencies have to resolve against real PyPI:
+Verify the published artifact installs before promoting further. TestPyPI is not a mirror of PyPI. It happens to carry unrelated uploads under the names `duckdb` and `pyyaml` (newest stable `1.3.2.post1` and `3.11` respectively — neither satisfies this project's floors), and nothing at all under `httpx`. So the runtime dependencies have to resolve against real PyPI:
 
 ```bash
 pip install \

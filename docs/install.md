@@ -1,14 +1,14 @@
 # Installation
 
-`taxi-seed` is published to [PyPI](https://pypi.org/project/taxi-seed/) as a single distribution that carries all five CLIs plus the shared library. There are two ways to get it, and they are not interchangeable:
+`taxi-seed` is published to [PyPI](https://pypi.org/project/taxi-seed/) as a single distribution carrying all six commands plus the shared library. There are two ways to get it, and they suit different jobs:
 
 - **Install the released package** if you want to *run* the tools — mirror the TLC bucket, analyze drift, load a database.
 - **Work from a clone** if you want to *develop* on the repo, or if you want the curated normalize mappings that live in the repo rather than in the wheel (see [Curated mappings are not in the wheel](#mappings) below).
 
 Both require Python 3.12 or 3.13.
 
-!!! warning "`taxi-download` is not in the current PyPI release"
-    The published `0.1.0` predates the Python downloader — it exposes `normalize`, `schema-drift`, `taxi-curate-mappings`, `taxi-load`, and `taxi-run`, but not `taxi-download`. Until `v0.2.0` is tagged on `main`, install from a clone if you need the downloader. Everything else on this page describes the package as it stands in the repo today.
+!!! note "Use 0.2.0 or newer"
+    `0.1.0` predates the Python downloader, so it ships every command except `taxi-download`. It also shipped a `k6_loadtest` package that shadows the one in [taxi-lab](https://github.com/andrekamman/taxi-lab). `0.2.0` fixed both and is the current release.
 
 ## From PyPI
 
@@ -66,7 +66,7 @@ pip install -U taxi-seed      # pip installs
 
 ### Installing a prerelease
 
-Prerelease tags (`v0.2.0rc1`, `v0.2.0a1`, …) publish to [TestPyPI](https://test.pypi.org/project/taxi-seed/) instead of PyPI. TestPyPI does not mirror `duckdb`, `httpx`, or `pyyaml`, so you have to leave the runtime dependencies pointed at real PyPI:
+Prerelease tags (`v0.2.0rc1`, `v0.2.0a1`, …) publish to [TestPyPI](https://test.pypi.org/project/taxi-seed/) instead of PyPI. TestPyPI is not a mirror of PyPI. It happens to carry unrelated uploads under the names `duckdb` and `pyyaml` (newest stable `1.3.2.post1` and `3.11` respectively — neither satisfies this project's floors), and nothing at all under `httpx`. So the runtime dependencies have to resolve against real PyPI:
 
 ```bash
 pip install \
@@ -116,7 +116,7 @@ Two ways to get the curated mappings under an installed workflow:
       https://raw.githubusercontent.com/andrekamman/taxi-seed/main/normalize/mappings/yellow.yaml
     ```
 
-    Repeat per data type. Everything else (`raw/`, `raw-normalized/`) is already relative to `--data-dir`.
+    Repeat per trip type. Everything else (`raw/`, `raw-normalized/`) is already relative to `--data-dir`.
 
 2. Or run `normalize` / `taxi-run` from a clone, and use the PyPI install only for `taxi-download`, `schema-drift`, and `taxi-load` — those three are fully self-contained and need no repo files.
 
