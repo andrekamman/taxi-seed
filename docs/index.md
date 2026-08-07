@@ -51,24 +51,40 @@ the other tools are original to this repo. See
 
 ## Quick start
 
-```bash
-git clone https://github.com/andrekamman/taxi-seed.git
-cd taxi-seed
-uv sync
-uv run taxi-download yellow --recent 3
-```
+`taxi-seed` is published to [PyPI](https://pypi.org/project/taxi-seed/) as one distribution carrying all five CLIs:
+
+=== "Install the release"
+
+    ```bash
+    uv tool install taxi-seed        # or: pip install taxi-seed
+    taxi-download yellow --recent 3
+    ```
+
+=== "From a clone"
+
+    ```bash
+    git clone https://github.com/andrekamman/taxi-seed.git
+    cd taxi-seed
+    uv sync
+    uv run taxi-download yellow --recent 3
+    ```
 
 !!! tip
-    Downloads ~200 MB in 1–2 minutes on residential broadband. This Quick Start only exercises the downloader, but every tool in the repo lives in the same `uv sync`-managed environment; [Getting Started](getting-started.md) walks the full end-to-end path from clone to normalized parquet.
+    Downloads ~200 MB in 1–2 minutes on residential broadband. This Quick Start only exercises the downloader, but every tool ships in the same distribution; [Getting Started](getting-started.md) walks the full end-to-end path to normalized parquet.
+
+Examples throughout these docs are written for the clone workflow and prefix commands with `uv run` — drop the prefix if you installed from PyPI. See [Installation](install.md) for both paths, upgrading, prereleases from TestPyPI, and the one caveat that matters for installed users: the curated normalize mappings live in the repo, not in the wheel.
 
 ## Requirements
 
-- Python 3.12 or 3.13, and [uv](https://github.com/astral-sh/uv) for Python environment management. Required by every tool in the repo, including the downloader.
+- Python 3.12 or 3.13. [uv](https://github.com/astral-sh/uv) is used for the clone workflow and throughout these docs; a PyPI install works with plain `pip` and needs no `uv`.
 - Disk sized to intent — see the [Downloader guide](guides/downloader.md#disk-sizing) for a sizing table.
 - Individual tools list per-guide prerequisites (a target database for the loader, etc.).
 
 ## Where to next
 
+- **[Installation](install.md)** — installing the released package from PyPI
+  (`uv tool install`, `pip`, `uvx`), upgrading, installing a prerelease from
+  TestPyPI, and how an installed workflow differs from a clone.
 - **[Getting Started](getting-started.md)** — a 10-minute end-to-end tutorial
   that walks from a clean laptop to a normalized parquet directory, covering
   clone, `uv sync`, a small `--recent` download, and the first normalizer run

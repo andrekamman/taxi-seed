@@ -1,6 +1,7 @@
 # taxi-seed
 
 [![CI](https://github.com/andrekamman/taxi-seed/actions/workflows/ci.yml/badge.svg)](https://github.com/andrekamman/taxi-seed/actions/workflows/ci.yml)
+[![PyPI](https://img.shields.io/pypi/v/taxi-seed)](https://pypi.org/project/taxi-seed/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Docs](https://img.shields.io/badge/docs-online-brightgreen)](https://andrekamman.github.io/taxi-seed/)
 
@@ -27,6 +28,17 @@ One repo, five tools plus a shared library:
 
 Each component has a short `README.md` that points at the guide on the site; the guide is authoritative.
 
+## Install
+
+`taxi-seed` is published to PyPI as one distribution carrying all five CLIs (`taxi-download`, `schema-drift`, `normalize`, `taxi-load`, `taxi-run`):
+
+```bash
+uv tool install taxi-seed     # isolated env, every CLI on PATH
+pip install taxi-seed         # or into a venv of your own
+```
+
+Releases are cut by tagging `main` (`vX.Y.Z` → PyPI, anything else `v*` → TestPyPI) via `.github/workflows/release.yml`. See the [Installation page](https://andrekamman.github.io/taxi-seed/install/) for upgrading, prereleases from TestPyPI, and the one caveat for installed users — the curated normalize mappings live in this repo, not in the wheel — and the [Releasing runbook](https://andrekamman.github.io/taxi-seed/operations/releasing/) for the maintainer side.
+
 ## Quick start
 
 ```bash
@@ -36,13 +48,13 @@ uv sync
 uv run taxi-download yellow --recent 3
 ```
 
-Downloads ~200 MB in 1–2 minutes on residential broadband. This Quick Start only exercises the downloader. All tools live in one `uv sync`-managed environment; the [Getting Started tutorial](https://andrekamman.github.io/taxi-seed/getting-started/) walks the full end-to-end path from clone to normalized parquet.
+Downloads ~200 MB in 1–2 minutes on residential broadband. This Quick Start only exercises the downloader. All tools live in one `uv sync`-managed environment; the [Getting Started tutorial](https://andrekamman.github.io/taxi-seed/getting-started/) walks the full end-to-end path from clone to normalized parquet. Installed from PyPI instead? Same commands, without the `uv run` prefix.
 
 A full-history mirror is roughly 40–100 GB (depending on how many of the four series and how much history you mirror) and takes 6–10 hours end-to-end; the downloader is designed to be resumable, incremental, and cheap to re-run on a schedule rather than something you kick off once and hope survives.
 
 ## Requirements
 
-- Python 3.12 or 3.13, [uv](https://github.com/astral-sh/uv). Required by every tool in the repo, including the downloader.
+- Python 3.12 or 3.13. [uv](https://github.com/astral-sh/uv) for the clone workflow; a PyPI install works with plain `pip`.
 - Disk sized to intent — see the [Downloader guide](https://andrekamman.github.io/taxi-seed/guides/downloader/#disk-sizing).
 - Individual tools list per-guide prerequisites (a target database for the loader, etc.).
 
@@ -52,6 +64,7 @@ Everything runs on macOS, Linux, and Windows (via Git Bash). CI runs the test su
 
 The [documentation site](https://andrekamman.github.io/taxi-seed/) is the source of truth. High-level sections:
 
+- **[Installation](https://andrekamman.github.io/taxi-seed/install/)** — installing the released package from PyPI vs working from a clone.
 - **[Getting Started](https://andrekamman.github.io/taxi-seed/getting-started/)** — 10-minute end-to-end walkthrough from clone to normalized parquet.
 - **[Guides](https://andrekamman.github.io/taxi-seed/guides/downloader/)** — one deep-dive per tool (Downloader, Schema Drift, Normalize).
 - **[Cookbook](https://andrekamman.github.io/taxi-seed/cookbook/)** — cross-cutting recipes (nightly cron, DuckDB `httpfs` querying, corporate proxy).
