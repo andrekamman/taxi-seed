@@ -22,6 +22,9 @@ cd taxi-seed
 uv sync --extra test
 ```
 
+!!! note "Just want to run the tools?"
+    `taxi-seed` is on [PyPI](https://pypi.org/project/taxi-seed/) — `uv tool install taxi-seed` (or `pip install taxi-seed`) puts every CLI on your `PATH` with no clone at all. This tutorial uses a clone because it verifies the install by running the test suite in step 2, and because the normalizer step reads the curated mappings that live in the repo rather than in the wheel. If you installed from PyPI instead, run the commands below without the `uv run` prefix and skip step 2 — see [Installation](install.md) for the full comparison.
+
 The `--extra test` flag pulls in pytest alongside the runtime dependencies so you can verify the install by running the suite in the next step. If you'd rather skip that, plain `uv sync` will install just the runtime.
 
 `uv sync` reads `pyproject.toml` + `uv.lock` and materializes the exact locked versions into `.venv/`. If you already have a system Python but no `uv`, the [uv install script](https://github.com/astral-sh/uv#installation) is a single-line `curl | sh` (or `brew install uv` on macOS). uv also manages the interpreter itself, so you don't need to pre-install Python 3.12 or 3.13 — it'll fetch a compatible build the first time you run `uv sync`.
