@@ -69,8 +69,15 @@ def manifest_table_exists(conn: duckdb.DuckDBPyConnection, cfg: ConnConfig) -> b
 def ensure_manifest_table(conn: duckdb.DuckDBPyConnection, cfg: ConnConfig) -> None:
     if manifest_table_exists(conn, cfg):
         return
-    for stmt in build_manifest_ddl(cfg.schema):
-        _exec(conn, stmt)
+    try:
+        for stmt in build_manifest_ddl(cfg.schema):
+            _exec(conn, stmt)
+    except duckdb.Error:
+        # Every concurrent worker calls this on start-up and only one can win
+        # the CREATE. The table is built in a single statement (see
+        # build_manifest_ddl), so a loser has nothing half-made to clean up.
+        if not manifest_table_exists(conn, cfg):
+            raise
 
 
 def read_manifest(conn: duckdb.DuckDBPyConnection, cfg: ConnConfig,
