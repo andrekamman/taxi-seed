@@ -292,6 +292,33 @@
   
   
     <li class="md-nav__item">
+      <a href="../../install/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Installation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../getting-started/" class="md-nav__link">
         
   
@@ -329,10 +356,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" checked>
         
           
-          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
             
   
   
@@ -350,8 +377,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
-          <label class="md-nav__title" for="__nav_3">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_4">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -795,10 +822,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" >
         
           
-          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
             
   
   
@@ -816,8 +843,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_6">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -905,10 +932,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" >
         
           
-          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="0">
             
   
   
@@ -926,8 +953,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_7">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -987,10 +1014,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_9" >
         
           
-          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_9" id="__nav_9_label" tabindex="0">
             
   
   
@@ -1008,8 +1035,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_8">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_9_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_9">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -1495,7 +1522,7 @@
 
 
 <h1 id="downloader">Downloader</h1>
-<p>The downloader is <code>taxi_download</code>, a Python package that mirrors NYC TLC parquet trip data from CloudFront to a local <code>raw/</code> directory. It walks each series chronologically, skips files you already have, validates every download, and knows the difference between a rate-limit block and a file that hasn't been published yet.</p>
+<p>The downloader is <code>taxi_download</code>, a Python package that mirrors NYC TLC parquet trip data from CloudFront to a local <code>raw/</code> directory. It walks each trip type chronologically, skips files you already have, validates every download, and knows the difference between a rate-limit block and a file that hasn't been published yet.</p>
 <p>It exists because of a specific ambiguity in TLC's CloudFront distribution: HTTP 403 is returned both for files that don't exist yet (with an S3-style <code>&lt;Code&gt;AccessDenied&lt;/Code&gt;</code> XML body) <em>and</em> for requests blocked by AWS WAF, the Web Application Firewall that CloudFront runs in front of the origin. Naive downloaders can't tell them apart, so they either false-positive on rate limiting (backing off unnecessarily on missing files) or false-negative on missing files (hammering a WAF block and extending it). This package classifies the responses correctly and reacts appropriately to each.</p>
 <p>When <em>not</em> to use it: if you only need ad-hoc analytics and don't want the disk cost, DuckDB's <code>httpfs</code> extension querying CloudFront directly is often the right answer — see <a href="#alternatives">Alternatives</a> below. The downloader is for cases where you want a resumable local mirror: bulk analytics that will re-read the same months many times, offline work, feeding a database via a nightly job, or scheduled catch-up as new months publish.</p>
 <h2 id="prerequisites">Prerequisites</h2>
@@ -1615,7 +1642,7 @@
 <p>The tool is idempotent: files already present under <code>&lt;data-dir&gt;/raw/</code> are skipped, and any file that fails PAR1 validation is deleted at the start of the next run and re-downloaded. You can safely <code>Ctrl-C</code> mid-run and re-invoke with the same arguments — it will pick up where it left off without duplicating work.</p>
 <h2 id="windows-wsl">Windows / WSL</h2>
 <p><strong>Native Windows / Git Bash / PowerShell.</strong> Install Python and <a href="https://docs.astral.sh/uv/">uv</a>, then run the commands above exactly as documented. No extra config needed for small pulls.</p>
-<p><strong>WSL2 — the VHDX growth problem.</strong> WSL2 stores your Linux filesystem in a VHDX file on your Windows <code>C:</code> drive. Every byte written under the WSL2 root (including <code>~</code>, <code>/home</code>, <code>/tmp</code>, <code>/opt</code>) goes into this VHDX file. A full-history TLC mirror is roughly 40–100 GB, depending on how many of the four series and how much history you mirror. The catch: <strong>the VHDX does not shrink when you delete files.</strong> If you download that much data into WSL, then <code>rm -rf</code> it, your <code>C:</code> drive stays exactly as full until you manually compact the VHDX with <code>wsl --shutdown</code> + <code>diskpart</code>, or <code>Optimize-VHD</code> in an elevated PowerShell.</p>
+<p><strong>WSL2 — the VHDX growth problem.</strong> WSL2 stores your Linux filesystem in a VHDX file on your Windows <code>C:</code> drive. Every byte written under the WSL2 root (including <code>~</code>, <code>/home</code>, <code>/tmp</code>, <code>/opt</code>) goes into this VHDX file. A full-history TLC mirror is roughly 40–100 GB, depending on how many of the four trip types and how much history you mirror. The catch: <strong>the VHDX does not shrink when you delete files.</strong> If you download that much data into WSL, then <code>rm -rf</code> it, your <code>C:</code> drive stays exactly as full until you manually compact the VHDX with <code>wsl --shutdown</code> + <code>diskpart</code>, or <code>Optimize-VHD</code> in an elevated PowerShell.</p>
 <p><strong>The fix: point downloads at a Windows path from inside WSL.</strong> Use <code>--data-dir</code> to redirect the output root — files land under <code>&lt;data-dir&gt;/raw</code>, so anything under <code>/mnt/c/...</code> writes directly to the Windows filesystem, bypassing the VHDX entirely:</p>
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-5-1">1</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1"></a>uv<span class="w"> </span>run<span class="w"> </span>taxi-download<span class="w"> </span>--recent<span class="w"> </span><span class="m">3</span><span class="w"> </span>yellow<span class="w"> </span>--data-dir<span class="w"> </span>/mnt/c/Users/<span class="nv">$USER</span>/taxi-data
 </code></pre></div></td></tr></table></div>
@@ -1634,17 +1661,19 @@
 <p>Four outcomes, from <code>_classify_status</code> and <code>fetch_one</code> in <code>download.py</code>:</p>
 <ul>
 <li><strong><code>404</code></strong> — <code>NOTFOUND</code>.</li>
-<li><strong><code>403</code> with a body containing <code>accessdenied</code> or <code>nosuchkey</code></strong> (case-insensitive) — <code>NOTFOUND</code>. The file legitimately isn't published yet. This is the boundary signal the full-history walker uses to stop cleanly at the end of a series.</li>
+<li><strong><code>403</code> with a body containing <code>accessdenied</code> or <code>nosuchkey</code></strong> (case-insensitive) — <code>NOTFOUND</code>. The file legitimately isn't published yet. This is the boundary signal the full-history walker uses to stop cleanly at the end of a trip type's published history.</li>
 <li><strong><code>403</code> with any other body</strong> — <code>RATELIMIT</code>. The WAF has flagged the request. Any other <code>403</code> variant (a CloudFront block page, an empty body, anything not matching the AccessDenied/NoSuchKey pattern) is treated as a rate-limit event, not a missing file.</li>
 <li><strong><code>429</code> or any <code>5xx</code></strong> — <code>RATELIMIT</code>.</li>
 <li><strong><code>200</code> but the downloaded body doesn't validate as PAR1 parquet</strong> — <code>RATELIMIT</code>. This is usually a WAF intercept page served with a <code>200</code> status; retrying with a fresh connection often succeeds.</li>
 <li><strong><code>httpx.HTTPError</code></strong> (connection reset, timeout, DNS failure, etc.) — <code>NETERROR</code>, retried exactly like <code>RATELIMIT</code>.</li>
 </ul>
 <h3 id="exponential-backoff">Exponential backoff</h3>
-<p><code>download_month</code> retries a single month up to <code>MAX_RETRIES = 4</code> times on <code>RATELIMIT</code>/<code>NETERROR</code>, sleeping between attempts with a capped exponential delay: <strong>30s → 90s → 270s</strong>, capped at <strong>3600s</strong> (<code>BACKOFF_BASE_S=30</code>, <code>BACKOFF_FACTOR=3</code>, <code>BACKOFF_CAP_S=3600</code>). If all attempts are exhausted, the month counts as a "give up" for that run and the walker moves on — it does not sleep indefinitely or abort the whole process on a single month.</p>
-<p>In full-history mode, a <em>type</em> is abandoned early if it accumulates <code>MAX_CONSECUTIVE_GIVEUPS = 3</code> consecutive give-ups (per data type, reset by any successful download or <code>NOTFOUND</code> skip) — this stops a run from hammering every remaining month for hours against a sustained block. Recent-mode has no consecutive-giveup abort; it simply counts give-ups and reports them.</p>
+<p><code>download_month</code> makes up to <code>MAX_RETRIES = 4</code> attempts at a single month on <code>RATELIMIT</code>/<code>NETERROR</code>, and sleeps between them. Four attempts means three sleeps: <strong>30s, then 90s, then 270s</strong> — <code>BACKOFF_BASE_S * BACKOFF_FACTOR ** attempt</code>, with <code>BACKOFF_BASE_S = 30</code> and <code>BACKOFF_FACTOR = 3</code>. Total wait per month is 390s.</p>
+<p>The delay is also capped at <code>BACKOFF_CAP_S = 3600</code>, but at four attempts that cap never binds — the ladder would have to reach a sixth attempt (7290s) to hit it. Raise <code>MAX_RETRIES</code> and the cap starts to matter.</p>
+<p>Once the attempts are exhausted the month counts as a "give up" for that run and the walker moves on. It never sleeps indefinitely, and one bad month never aborts the process.</p>
+<p>In full-history mode, a <em>type</em> is abandoned early if it accumulates <code>MAX_CONSECUTIVE_GIVEUPS = 3</code> consecutive give-ups (per trip type, reset by any successful download or <code>NOTFOUND</code> skip) — this stops a run from hammering every remaining month for hours against a sustained block. Recent-mode has no consecutive-giveup abort; it simply counts give-ups and reports them.</p>
 <h3 id="boundary-auto-termination">Boundary auto-termination</h3>
-<p>In full-history mode the walker moves chronologically forward from a fixed start month per series:</p>
+<p>In full-history mode the walker moves chronologically forward from a fixed start month per trip type:</p>
 <table>
 <thead>
 <tr>
@@ -1671,7 +1700,7 @@
 </tr>
 </tbody>
 </table>
-<p>When it hits a <code>NOTFOUND</code> response <em>after</em> having already downloaded (or found locally) at least one file for that type, it treats that as the end of published data and stops walking that type. A <code>NOTFOUND</code> encountered <em>before</em> any data has been seen is treated as a pre-series gap and the walker keeps going forward. That's why running <code>taxi-download</code> cleanly terminates instead of walking forever into the future.</p>
+<p>When it hits a <code>NOTFOUND</code> response <em>after</em> having already downloaded (or found locally) at least one file for that type, it treats that as the end of published data and stops walking that type. A <code>NOTFOUND</code> encountered <em>before</em> any data has been seen is treated as a gap before that trip type's data begins and the walker keeps going forward. That's why running <code>taxi-download</code> cleanly terminates instead of walking forever into the future.</p>
 <h3 id="par1-magic-byte-validation">PAR1 magic-byte validation</h3>
 <p>Every downloaded file is verified as valid parquet by checking the <code>PAR1</code> magic bytes at <strong>both</strong> head and tail (and requiring at least 8 bytes total). This catches two failure modes at once:</p>
 <ul>
@@ -1686,7 +1715,7 @@
 <li>Remote file downloads successfully → increment the "downloaded" counter.</li>
 <li>Remote returns <code>NOTFOUND</code> (<code>403</code>+AccessDenied/NoSuchKey, or <code>404</code>) → skip, don't count, keep walking backward.</li>
 <li>Local file already exists at that path → <strong>STOP</strong> walking immediately. This is the incremental catch-up semantic.</li>
-<li>Loop terminates when the downloaded counter reaches <code>N</code>, OR the local-encounter break fires, OR <code>MAX_LOOKBACK = 18</code> months have been examined (safety cap for genuinely-empty-series edge cases).</li>
+<li>Loop terminates when the downloaded counter reaches <code>N</code>, OR the local-encounter break fires, OR <code>MAX_LOOKBACK = 18</code> months have been examined (safety cap for a trip type with no data at all).</li>
 </ol>
 <p>Three worked examples. Assume today is <strong>2026-07-27</strong> and yellow publishes with a ~2 month lag.</p>
 <p><strong>Example 1: Fresh checkout, <code>--recent 3 yellow</code>.</strong></p>

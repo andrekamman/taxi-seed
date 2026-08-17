@@ -292,6 +292,33 @@
   
   
     <li class="md-nav__item">
+      <a href="../../install/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Installation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../getting-started/" class="md-nav__link">
         
   
@@ -329,10 +356,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" checked>
         
           
-          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
             
   
   
@@ -350,8 +377,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
-          <label class="md-nav__title" for="__nav_3">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_4">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -556,6 +583,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#page-compression" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Page compression
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#idempotent-reconcile-skip-append-truncate-reload" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -745,10 +783,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" >
         
           
-          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
             
   
   
@@ -766,8 +804,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_6">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -855,10 +893,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" >
         
           
-          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="0">
             
   
   
@@ -876,8 +914,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_7">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -937,10 +975,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_9" >
         
           
-          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_9" id="__nav_9_label" tabindex="0">
             
   
   
@@ -958,8 +996,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_8">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_9_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_9">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -1298,6 +1336,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#page-compression" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Page compression
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#idempotent-reconcile-skip-append-truncate-reload" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1435,6 +1484,29 @@
 <p>Every <code>(type, year)</code> pair gets its own table, named <code>&lt;type&gt;_&lt;year&gt;</code> (e.g. <code>yellow_2024</code>, <code>fhvhv_2019</code>) in the configured schema (<code>dbo</code> by default). The table's DDL is derived directly from the parquet: the loader runs <code>DESCRIBE</code> on a sample month, maps each DuckDB column type to a SQL Server type (<code>taxi_shared.type_mapping.map_duckdb_to_mssql</code> — e.g. <code>DOUBLE</code>→<code>FLOAT</code>, <code>VARCHAR</code>→<code>NVARCHAR(MAX)</code>, <code>TIMESTAMP</code>→<code>DATETIME2</code>, <code>DECIMAL(p,s)</code> preserved), and generates a <code>CREATE TABLE</code> statement. There is no manual DDL to maintain — the schema tracks whatever <code>normalize</code> last wrote.</p>
 <p>If a column's DuckDB type has no SQL Server equivalent, <code>map_duckdb_to_mssql</code> raises <code>TypeMappingError</code> and that type's load fails (see <a href="#exit-codes">Exit codes</a>).</p>
 <p>Data actually moves via DuckDB's <code>COPY ... TO 'mssql://mssql/&lt;schema&gt;/&lt;table&gt;' (FORMAT 'bcp', ...)</code>, which streams through the <code>mssql</code> extension's bulk-copy path rather than row-by-row inserts.</p>
+<h2 id="page-compression">Page compression</h2>
+<p>Every table the loader creates is page-compressed. The generated DDL ends with a <code>WITH</code> clause:</p>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-3-1">1</a></span>
+<span class="normal"><a href="#__codelineno-3-2">2</a></span>
+<span class="normal"><a href="#__codelineno-3-3">3</a></span>
+<span class="normal"><a href="#__codelineno-3-4">4</a></span>
+<span class="normal"><a href="#__codelineno-3-5">5</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1"></a><span class="k">CREATE</span><span class="w"> </span><span class="k">TABLE</span><span class="w"> </span><span class="n">dbo</span><span class="p">.</span><span class="n">yellow_2024</span><span class="w"> </span><span class="p">(</span>
+<a id="__codelineno-3-2" name="__codelineno-3-2"></a><span class="w">    </span><span class="n">VendorID</span><span class="w"> </span><span class="nb">INT</span><span class="p">,</span>
+<a id="__codelineno-3-3" name="__codelineno-3-3"></a><span class="w">    </span><span class="n">tpep_pickup_datetime</span><span class="w"> </span><span class="n">DATETIME2</span><span class="p">,</span>
+<a id="__codelineno-3-4" name="__codelineno-3-4"></a><span class="w">    </span><span class="p">...</span>
+<a id="__codelineno-3-5" name="__codelineno-3-5"></a><span class="p">)</span><span class="w"> </span><span class="k">WITH</span><span class="w"> </span><span class="p">(</span><span class="n">DATA_COMPRESSION</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">PAGE</span><span class="p">);</span>
+</code></pre></div></td></tr></table></div>
+<p>This is unconditional — there is no flag and no configuration key. It applies to the <code>&lt;type&gt;_&lt;year&gt;</code> data tables and to the <code>_load_manifest</code> bookkeeping table, because both are built by the same <code>taxi_shared.sql_generator.generate_create_table_sql</code>.</p>
+<p>Taxi data compresses well: the columns repeat heavily within a page (vendor IDs, location IDs, rate codes, payment types), which is the pattern page compression's dictionary and prefix stages are built for. The result is a smaller database and fewer pages read per query.</p>
+<p>Two things to know:</p>
+<ul>
+<li><strong>Every edition supports it.</strong> Data compression stopped being an Enterprise-only feature in SQL Server 2016 SP1, so Express and Developer both take this DDL. (Backup compression is a separate feature and is still edition-limited.)</li>
+<li><strong>Compressing the manifest is a consequence, not a goal.</strong> <code>_load_manifest</code> holds one row per loaded month, so compressing it saves nothing worth measuring. It is compressed because it shares the generator, and that was accepted as a side effect.</li>
+</ul>
+<p>To undo it for a table you have already loaded:</p>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-4-1">1</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1"></a><span class="k">ALTER</span><span class="w"> </span><span class="k">TABLE</span><span class="w"> </span><span class="n">dbo</span><span class="p">.</span><span class="n">yellow_2024</span><span class="w"> </span><span class="n">REBUILD</span><span class="w"> </span><span class="k">WITH</span><span class="w"> </span><span class="p">(</span><span class="n">DATA_COMPRESSION</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">NONE</span><span class="p">);</span>
+</code></pre></div></td></tr></table></div>
+<p>A later <code>--full-refresh</code> (or any truncate-reload) recreates the table from the generator, so it comes back compressed.</p>
 <h2 id="idempotent-reconcile-skip-append-truncate-reload">Idempotent reconcile: skip / append / truncate-reload</h2>
 <p>The loader tracks what it has already loaded in a bookkeeping table, <code>&lt;schema&gt;._load_manifest</code>, with one row per loaded month (primary key <code>(data_type, year, month)</code>, plus <code>source_file</code>, <code>row_count</code>, <code>loaded_at</code>). Every run, for every <code>(type, year)</code> present either on disk or in the manifest, it decides one of three actions by comparing disk parquet against the manifest and the live table's row count:</p>
 <ul>
@@ -1451,18 +1523,18 @@
 </ul>
 <h2 id="the-dry-run-flag">The <code>--dry-run</code> flag</h2>
 <p><code>--dry-run</code> prints the reconciliation plan per type/year (<code>skip</code>, <code>append month(s) NN, NN</code>, or <code>truncate + reload (N month file(s))</code>) and exits without touching SQL Server data. It still connects and attaches — read-only — so the plan reflects the real manifest and table state, <em>except</em> when the target database doesn't exist yet: in that case the attach is allowed to fail silently, and every year is reported as fresh (no manifest, no table-count lookups), since there's nothing on the server to compare against.</p>
-<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-3-1">1</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1"></a>uv<span class="w"> </span>run<span class="w"> </span>taxi-load<span class="w"> </span>yellow<span class="w"> </span>--dry-run
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-5-1">1</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1"></a>uv<span class="w"> </span>run<span class="w"> </span>taxi-load<span class="w"> </span>yellow<span class="w"> </span>--dry-run
 </code></pre></div></td></tr></table></div>
 <h2 id="the-full-refresh-flag">The <code>--full-refresh</code> flag</h2>
 <p><code>--full-refresh</code> forces every <code>(type, year)</code> being processed onto the <strong>truncate + reload</strong> path, regardless of what the manifest says. Use it to rebuild a year after fixing a mapping bug in <code>normalize</code>, or to recover from a manifest you no longer trust.</p>
-<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-4-1">1</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1"></a>uv<span class="w"> </span>run<span class="w"> </span>taxi-load<span class="w"> </span>yellow<span class="w"> </span>--full-refresh
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-6-1">1</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1"></a>uv<span class="w"> </span>run<span class="w"> </span>taxi-load<span class="w"> </span>yellow<span class="w"> </span>--full-refresh
 </code></pre></div></td></tr></table></div>
 <h2 id="the-data-dir-and-input-dir-flags">The <code>--data-dir</code> and <code>--input-dir</code> flags</h2>
 <p><strong><code>--data-dir DIR</code></strong> — base directory; the loader reads <code>DIR/raw-normalized/&lt;type&gt;/&lt;year&gt;/*.parquet</code> (default: unset — when <code>--input-dir</code> is also not given, falls back to bare <code>raw-normalized</code> in the current directory).</p>
 <p><strong><code>--input-dir DIR</code></strong> — overrides <code>--data-dir</code> entirely: the loader reads <code>DIR/&lt;type&gt;/&lt;year&gt;/*.parquet</code> directly. Use this when your normalized output doesn't live under a <code>raw-normalized/</code> subdirectory.</p>
-<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-5-1">1</a></span>
-<span class="normal"><a href="#__codelineno-5-2">2</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1"></a>uv<span class="w"> </span>run<span class="w"> </span>taxi-load<span class="w"> </span>yellow<span class="w"> </span>--data-dir<span class="w"> </span>/mnt/nas/tlc-mirror
-<a id="__codelineno-5-2" name="__codelineno-5-2"></a>uv<span class="w"> </span>run<span class="w"> </span>taxi-load<span class="w"> </span>yellow<span class="w"> </span>--input-dir<span class="w"> </span>/mnt/nas/tlc-mirror/normalized-output
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-7-1">1</a></span>
+<span class="normal"><a href="#__codelineno-7-2">2</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1"></a>uv<span class="w"> </span>run<span class="w"> </span>taxi-load<span class="w"> </span>yellow<span class="w"> </span>--data-dir<span class="w"> </span>/mnt/nas/tlc-mirror
+<a id="__codelineno-7-2" name="__codelineno-7-2"></a>uv<span class="w"> </span>run<span class="w"> </span>taxi-load<span class="w"> </span>yellow<span class="w"> </span>--input-dir<span class="w"> </span>/mnt/nas/tlc-mirror/normalized-output
 </code></pre></div></td></tr></table></div>
 <p>If a type has no parquet at all under the resolved input directory, that type is skipped with a message (<code>&lt;type&gt;: no parquet under &lt;dir&gt;/&lt;type&gt;, skipping</code>) and contributes success (exit 0) for that type — this is the same "nothing to do yet" posture as the other tools in this repo.</p>
 <h2 id="configuration">Configuration</h2>

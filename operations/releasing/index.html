@@ -292,6 +292,33 @@
   
   
     <li class="md-nav__item">
+      <a href="../../install/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Installation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../getting-started/" class="md-nav__link">
         
   
@@ -327,10 +354,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
         
           
-          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
             
   
   
@@ -348,8 +375,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_3">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -575,10 +602,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" >
         
           
-          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
             
   
   
@@ -596,8 +623,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_6">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -687,10 +714,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" checked>
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" checked>
         
           
-          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="0">
             
   
   
@@ -708,8 +735,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="true">
-          <label class="md-nav__title" for="__nav_7">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_8">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -910,10 +937,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_9" >
         
           
-          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_9" id="__nav_9_label" tabindex="0">
             
   
   
@@ -931,8 +958,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_8">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_9_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_9">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -1399,8 +1426,14 @@
 <p>This runs the <code>build</code> job, then the <code>testpypi</code> job (environment <code>testpypi</code>, no approval required), then creates a GitHub prerelease. Watch it in the Actions tab or with:</p>
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-1-1">1</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1"></a>gh<span class="w"> </span>run<span class="w"> </span>watch
 </code></pre></div></td></tr></table></div>
-<p>Verify the published artifact installs before promoting further:</p>
-<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-2-1">1</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1"></a>pip<span class="w"> </span>install<span class="w"> </span>-i<span class="w"> </span>https://test.pypi.org/simple/<span class="w"> </span>taxi-seed<span class="o">==</span><span class="m">0</span>.2.0rc1
+<p>Verify the published artifact installs before promoting further. TestPyPI is not a mirror of PyPI. It happens to carry unrelated uploads under the names <code>duckdb</code> and <code>pyyaml</code> (newest stable <code>1.3.2.post1</code> and <code>3.11</code> respectively — neither satisfies this project's floors), and nothing at all under <code>httpx</code>. So the runtime dependencies have to resolve against real PyPI:</p>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-2-1">1</a></span>
+<span class="normal"><a href="#__codelineno-2-2">2</a></span>
+<span class="normal"><a href="#__codelineno-2-3">3</a></span>
+<span class="normal"><a href="#__codelineno-2-4">4</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1"></a>pip<span class="w"> </span>install<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-2-2" name="__codelineno-2-2"></a><span class="w">  </span>--index-url<span class="w"> </span>https://test.pypi.org/simple/<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-2-3" name="__codelineno-2-3"></a><span class="w">  </span>--extra-index-url<span class="w"> </span>https://pypi.org/simple/<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-2-4" name="__codelineno-2-4"></a><span class="w">  </span>taxi-seed<span class="o">==</span><span class="m">0</span>.2.0rc1
 </code></pre></div></td></tr></table></div>
 <h3 id="cut-a-final-release-pypi">Cut a final release (PyPI)</h3>
 <p>Once the prerelease has been verified, tag the same commit (or a later one on <code>main</code>) with the final version:</p>
@@ -1409,6 +1442,12 @@
 <a id="__codelineno-3-2" name="__codelineno-3-2"></a>git<span class="w"> </span>push<span class="w"> </span>origin<span class="w"> </span>v0.2.0
 </code></pre></div></td></tr></table></div>
 <p>This runs <code>build</code>, then the <code>pypi</code> job — which waits for approval in the <code>pypi</code> GitHub Environment (the required reviewer configured during one-time setup) before it publishes — then creates the GitHub Release. Approve the deployment from the Actions run page (or <code>gh run watch</code>, which surfaces the pending-approval state) when you're ready for it to go live.</p>
+<p>Once it lands, confirm the release from a consumer's position — the console scripts are the part most likely to be wrong, since they change whenever a tool is added or removed:</p>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-4-1">1</a></span>
+<span class="normal"><a href="#__codelineno-4-2">2</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1"></a>uv<span class="w"> </span>tool<span class="w"> </span>install<span class="w"> </span>taxi-seed@0.2.0<span class="w"> </span>--force
+<a id="__codelineno-4-2" name="__codelineno-4-2"></a>taxi-download<span class="w"> </span>--help
+</code></pre></div></td></tr></table></div>
+<p>The user-facing install instructions are on the <a href="../../install/">Installation</a> page; update it in the same PR whenever a release adds, removes, or renames a CLI.</p>
 <h3 id="safety-gotchas">Safety / gotchas</h3>
 <ul>
 <li><strong>The required reviewer on the <code>pypi</code> Environment is the only gate protecting production PyPI.</strong> If that environment is created without a required reviewer (or not created at all), a final <code>vX.Y.Z</code> tag publishes to real PyPI unattended — there is no other approval step in the path. Don't skip step 3 of the one-time setup below.</li>
@@ -1419,9 +1458,9 @@
 <ol>
 <li>
 <p><strong>Create and default <code>dev</code>.</strong></p>
-<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-4-1">1</a></span>
-<span class="normal"><a href="#__codelineno-4-2">2</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1"></a>git<span class="w"> </span>checkout<span class="w"> </span>-b<span class="w"> </span>dev<span class="w"> </span>main
-<a id="__codelineno-4-2" name="__codelineno-4-2"></a>git<span class="w"> </span>push<span class="w"> </span>-u<span class="w"> </span>origin<span class="w"> </span>dev
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-5-1">1</a></span>
+<span class="normal"><a href="#__codelineno-5-2">2</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1"></a>git<span class="w"> </span>checkout<span class="w"> </span>-b<span class="w"> </span>dev<span class="w"> </span>main
+<a id="__codelineno-5-2" name="__codelineno-5-2"></a>git<span class="w"> </span>push<span class="w"> </span>-u<span class="w"> </span>origin<span class="w"> </span>dev
 </code></pre></div></td></tr></table></div>
 <p>Then in GitHub: <strong>Settings → General → Default branch</strong> → switch it to <code>dev</code>. New PRs and <code>git clone</code> will target <code>dev</code> from then on.</p>
 </li>
@@ -1467,22 +1506,6 @@
 </li>
 <li>
 <p><strong>Turn on branch protection for both <code>dev</code> and <code>main</code></strong>, requiring the <code>integration</code> check on each. Both branches get the identical rule — <code>dev</code> because feature-branch PRs land there, and <code>main</code> because <code>dev</code>→<code>main</code> promotion PRs need the same gate to keep <code>main</code> releasable:</p>
-<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-5-1">1</a></span>
-<span class="normal"><a href="#__codelineno-5-2">2</a></span>
-<span class="normal"><a href="#__codelineno-5-3">3</a></span>
-<span class="normal"><a href="#__codelineno-5-4">4</a></span>
-<span class="normal"><a href="#__codelineno-5-5">5</a></span>
-<span class="normal"><a href="#__codelineno-5-6">6</a></span>
-<span class="normal"><a href="#__codelineno-5-7">7</a></span>
-<span class="normal"><a href="#__codelineno-5-8">8</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1"></a>gh<span class="w"> </span>api<span class="w"> </span>-X<span class="w"> </span>PUT<span class="w"> </span>repos/andrekamman/taxi-seed/branches/dev/protection<span class="w"> </span>--input<span class="w"> </span>-<span class="w"> </span><span class="s">&lt;&lt;&#39;JSON&#39;</span>
-<a id="__codelineno-5-2" name="__codelineno-5-2"></a><span class="s">{</span>
-<a id="__codelineno-5-3" name="__codelineno-5-3"></a><span class="s">  &quot;required_status_checks&quot;: { &quot;strict&quot;: true, &quot;contexts&quot;: [&quot;integration&quot;] },</span>
-<a id="__codelineno-5-4" name="__codelineno-5-4"></a><span class="s">  &quot;enforce_admins&quot;: true,</span>
-<a id="__codelineno-5-5" name="__codelineno-5-5"></a><span class="s">  &quot;required_pull_request_reviews&quot;: null,</span>
-<a id="__codelineno-5-6" name="__codelineno-5-6"></a><span class="s">  &quot;restrictions&quot;: null</span>
-<a id="__codelineno-5-7" name="__codelineno-5-7"></a><span class="s">}</span>
-<a id="__codelineno-5-8" name="__codelineno-5-8"></a><span class="s">JSON</span>
-</code></pre></div></td></tr></table></div>
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-6-1">1</a></span>
 <span class="normal"><a href="#__codelineno-6-2">2</a></span>
 <span class="normal"><a href="#__codelineno-6-3">3</a></span>
@@ -1490,7 +1513,7 @@
 <span class="normal"><a href="#__codelineno-6-5">5</a></span>
 <span class="normal"><a href="#__codelineno-6-6">6</a></span>
 <span class="normal"><a href="#__codelineno-6-7">7</a></span>
-<span class="normal"><a href="#__codelineno-6-8">8</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1"></a>gh<span class="w"> </span>api<span class="w"> </span>-X<span class="w"> </span>PUT<span class="w"> </span>repos/andrekamman/taxi-seed/branches/main/protection<span class="w"> </span>--input<span class="w"> </span>-<span class="w"> </span><span class="s">&lt;&lt;&#39;JSON&#39;</span>
+<span class="normal"><a href="#__codelineno-6-8">8</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1"></a>gh<span class="w"> </span>api<span class="w"> </span>-X<span class="w"> </span>PUT<span class="w"> </span>repos/andrekamman/taxi-seed/branches/dev/protection<span class="w"> </span>--input<span class="w"> </span>-<span class="w"> </span><span class="s">&lt;&lt;&#39;JSON&#39;</span>
 <a id="__codelineno-6-2" name="__codelineno-6-2"></a><span class="s">{</span>
 <a id="__codelineno-6-3" name="__codelineno-6-3"></a><span class="s">  &quot;required_status_checks&quot;: { &quot;strict&quot;: true, &quot;contexts&quot;: [&quot;integration&quot;] },</span>
 <a id="__codelineno-6-4" name="__codelineno-6-4"></a><span class="s">  &quot;enforce_admins&quot;: true,</span>
@@ -1498,6 +1521,22 @@
 <a id="__codelineno-6-6" name="__codelineno-6-6"></a><span class="s">  &quot;restrictions&quot;: null</span>
 <a id="__codelineno-6-7" name="__codelineno-6-7"></a><span class="s">}</span>
 <a id="__codelineno-6-8" name="__codelineno-6-8"></a><span class="s">JSON</span>
+</code></pre></div></td></tr></table></div>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-7-1">1</a></span>
+<span class="normal"><a href="#__codelineno-7-2">2</a></span>
+<span class="normal"><a href="#__codelineno-7-3">3</a></span>
+<span class="normal"><a href="#__codelineno-7-4">4</a></span>
+<span class="normal"><a href="#__codelineno-7-5">5</a></span>
+<span class="normal"><a href="#__codelineno-7-6">6</a></span>
+<span class="normal"><a href="#__codelineno-7-7">7</a></span>
+<span class="normal"><a href="#__codelineno-7-8">8</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1"></a>gh<span class="w"> </span>api<span class="w"> </span>-X<span class="w"> </span>PUT<span class="w"> </span>repos/andrekamman/taxi-seed/branches/main/protection<span class="w"> </span>--input<span class="w"> </span>-<span class="w"> </span><span class="s">&lt;&lt;&#39;JSON&#39;</span>
+<a id="__codelineno-7-2" name="__codelineno-7-2"></a><span class="s">{</span>
+<a id="__codelineno-7-3" name="__codelineno-7-3"></a><span class="s">  &quot;required_status_checks&quot;: { &quot;strict&quot;: true, &quot;contexts&quot;: [&quot;integration&quot;] },</span>
+<a id="__codelineno-7-4" name="__codelineno-7-4"></a><span class="s">  &quot;enforce_admins&quot;: true,</span>
+<a id="__codelineno-7-5" name="__codelineno-7-5"></a><span class="s">  &quot;required_pull_request_reviews&quot;: null,</span>
+<a id="__codelineno-7-6" name="__codelineno-7-6"></a><span class="s">  &quot;restrictions&quot;: null</span>
+<a id="__codelineno-7-7" name="__codelineno-7-7"></a><span class="s">}</span>
+<a id="__codelineno-7-8" name="__codelineno-7-8"></a><span class="s">JSON</span>
 </code></pre></div></td></tr></table></div>
 <p>Note: GitHub only lists a check name as selectable in the Settings UI after it has run at least once on the repo (e.g. via one open PR) — but the API above accepts the <code>integration</code> name regardless of whether the UI has seen it yet, so this can be run before or after that first PR.</p>
 </li>
@@ -1507,7 +1546,7 @@
 <ol>
 <li>
 <p>Add a <code>docs/CNAME</code> file to the repo containing exactly:</p>
-<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-7-1">1</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1"></a>taxi-seed.com
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-8-1">1</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1"></a>taxi-seed.com
 </code></pre></div></td></tr></table></div>
 <p><code>mkdocs gh-deploy</code> copies everything under <code>docs/</code> into the published site, so this file will land at the root of <code>gh-pages</code> automatically on the next docs deploy.
 2. In GitHub: <strong>Settings → Pages</strong>, set the custom domain to <code>taxi-seed.com</code> and enable "Enforce HTTPS" once the certificate has provisioned.

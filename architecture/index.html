@@ -292,6 +292,33 @@
   
   
     <li class="md-nav__item">
+      <a href="../install/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Installation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../getting-started/" class="md-nav__link">
         
   
@@ -327,10 +354,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
         
           
-          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
             
   
   
@@ -348,8 +375,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_3">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -727,10 +754,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#whats-not-built-yet" class="md-nav__link">
+  <a href="#build-status" class="md-nav__link">
     <span class="md-ellipsis">
       
-        What's not built yet
+        Build status
       
     </span>
   </a>
@@ -760,10 +787,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" >
         
           
-          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
             
   
   
@@ -781,8 +808,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_6">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -870,10 +897,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" >
         
           
-          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="0">
             
   
   
@@ -891,8 +918,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_7">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -952,10 +979,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_9" >
         
           
-          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_9" id="__nav_9_label" tabindex="0">
             
   
   
@@ -973,8 +1000,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_8">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_9_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_9">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -1396,10 +1423,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#whats-not-built-yet" class="md-nav__link">
+  <a href="#build-status" class="md-nav__link">
     <span class="md-ellipsis">
       
-        What's not built yet
+        Build status
       
     </span>
   </a>
@@ -1540,7 +1567,7 @@
 <li><strong>Tests</strong> live in <code>tests/&lt;package_name&gt;/</code> rather than <code>&lt;component&gt;/tests/</code>. That way pytest discovers them with default settings and there's no ambiguity about which fixtures apply to which package.</li>
 <li><strong><code>docs/superpowers/</code></strong> contains design specs and implementation plans authored during development. They're kept publicly visible because they answer "why is X this way" better than after-the-fact prose can.</li>
 <li><strong><code>raw/</code></strong> and <code>raw-normalized/</code> are <code>.gitignore</code>d. Every user maintains their own local mirror — the repo carries the code, not the data. On a fresh clone, the pipeline builds those directories the first time it's run.</li>
-<li><strong><code>normalize/mappings/</code></strong> ships with curated YAML for each TLC data type. Those files <em>are</em> checked in — they're the human-reviewed record of every acknowledged drift decision, and they're what makes a fresh clone of the repo able to normalize the full historical dataset without re-doing the review work.</li>
+<li><strong><code>normalize/mappings/</code></strong> ships with curated YAML for each TLC trip type. Those files <em>are</em> checked in — they're the human-reviewed record of every acknowledged drift decision, and they're what makes a fresh clone of the repo able to normalize the full historical dataset without re-doing the review work.</li>
 </ul>
 <h2 id="the-pipeline-dag">The pipeline DAG</h2>
 <pre class="mermaid"><code>flowchart LR
@@ -1569,7 +1596,7 @@
 <li><strong>schema-drift</strong> reads the mirror and reports what's changed schema-wise across the years of parquet files. It doesn't rewrite anything; it just produces a report.</li>
 <li><strong>normalize</strong> rewrites historical files to match the latest schema, producing <code>raw-normalized/</code> — a directory of parquet with uniform columns and types across every month.</li>
 <li>The <strong>loader</strong> (<code>taxi-load</code>) bulk-loads normalized parquet into SQL Server, one table per type per year, through DuckDB's <code>mssql</code> community extension. It reconciles disk against what's already loaded and picks, per year, skip / append / truncate-reload — see the <a href="../guides/loader/">loader guide</a> for the full reconciliation model.</li>
-<li>The <strong>orchestrator</strong> (<code>taxi-run</code>) isn't a pipeline stage itself — it drives stages 1, 3, and 4 as subprocesses for one command, per data type, stopping a type early if a stage needs human review or fails outright. See the <a href="../guides/orchestrator/">orchestrator guide</a>.</li>
+<li>The <strong>orchestrator</strong> (<code>taxi-run</code>) isn't a pipeline stage itself — it drives stages 1, 3, and 4 as subprocesses for one command, per trip type, stopping a type early if a stage needs human review or fails outright. See the <a href="../guides/orchestrator/">orchestrator guide</a>.</li>
 </ol>
 <p>Each stage writes its output to disk; the next stage reads from disk. There is no in-memory pipeline, no shared process between the four data stages, and no coordinator baked into any one of them — <code>taxi-run</code> is an optional layer on top, not a requirement. That makes each stage individually restartable and individually inspectable — you can open the intermediate parquet in DuckDB, in Python, in DBeaver, or in any other tool that reads parquet, without any project-specific tooling.</p>
 <p><strong>Independence.</strong> No tool requires any of the others upstream:</p>
@@ -1590,7 +1617,7 @@
 <h2 id="core-design-principles">Core design principles</h2>
 <h3 id="waf-aware-retry">WAF-aware retry</h3>
 <p>The downloader treats CloudFront's 403 responses as a first-class classification problem. Blocked traffic (WAF) and missing files (S3 <code>AccessDenied</code>) both come back as HTTP 403; only the response body distinguishes them. Naive clients can't tell them apart and either false-positive on rate limiting (unnecessary backoff on files that just don't exist) or hammer through a WAF block, extending the ban.</p>
-<p>The downloader's classifier looks at the body, then applies an exponential backoff ladder (30s → 90s → 270s, capped at 3600s) when it sees a real WAF signal, and terminates cleanly at the year/month boundary when it has exhausted retries. A <code>404</code>-equivalent (S3 saying "this month wasn't published") is recorded and skipped without triggering backoff. That combination lets unattended catch-up runs stay well-behaved without a human sitting on them, and it lets the same tool be invoked from cron without risking a runaway retry loop against a live WAF policy.</p>
+<p>The downloader's classifier looks at the body. On a real WAF signal it makes four attempts, waiting 30s, then 90s, then 270s between them, and terminates cleanly at the year/month boundary once those are exhausted. A <code>404</code>-equivalent (S3 saying "this month wasn't published") is recorded and skipped without triggering backoff. That combination lets unattended catch-up runs stay well-behaved without a human sitting on them, and it lets the same tool be invoked from cron without risking a runaway retry loop against a live WAF policy.</p>
 <h3 id="data-loss-is-an-error">Data loss is an error</h3>
 <p>The normalizer refuses to silently drop columns or perform lossy casts. Every discarded column, every type-narrowing cast, every null-fill of a previously-required column requires an explicit <code>ack_date</code> in the mapping YAML acknowledging the decision. The rationale: normalization is lossy by definition (target schema ≠ source schema), and treating that as "just log a warning and move on" is exactly how production surprises happen years later.</p>
 <p>Making it a hard error forces the human to think about the trade-off once, then documents the decision in git history where the next person can find it. When a new drift shows up in a subsequent month, the normalizer's bootstrap+amend workflow produces a <em>commented</em> YAML entry for the new item — the pipeline breaks until a human uncomments it, and the reviewer can see exactly which month first introduced the change. Silent success is never a state the tool can end up in.</p>
@@ -1621,7 +1648,7 @@
 <p><code>shared/src/taxi_shared/</code> is deliberately small. Two modules:</p>
 <ul>
 <li><strong><code>type_mapping.py</code></strong> — DuckDB → SQL Server type mapping. Handles the common cases (<code>DOUBLE</code> → <code>FLOAT</code>, <code>VARCHAR</code> → <code>NVARCHAR(MAX)</code>, <code>TIMESTAMP</code> → <code>DATETIME2</code>, and so on) and the <code>DECIMAL(p,s)</code> parameterization where DuckDB's precision and scale are carried through to the SQL Server column definition.</li>
-<li><strong><code>sql_generator.py</code></strong> — <code>CREATE TABLE</code> DDL generation from a DuckDB schema. Used by the loader (<code>taxi_loader</code>) to derive each year's table DDL directly from the normalized parquet's schema.</li>
+<li><strong><code>sql_generator.py</code></strong> — <code>CREATE TABLE</code> DDL generation from a DuckDB schema. Used by the loader (<code>taxi_loader</code>) to derive each year's table DDL directly from the normalized parquet's schema. Generated tables are page-compressed (<code>WITH (DATA_COMPRESSION = PAGE)</code>), unconditionally — see the <a href="../guides/loader/#page-compression">Loader guide</a>.</li>
 </ul>
 <p>The downloader, schema-drift, and normalize don't import <code>taxi_shared</code> — none of them touch SQL Server. Keeping the shared library scoped to the SQL Server concern keeps its API surface small and its change cadence slow: type mappings change when SQL Server introduces a new type, which is roughly once a decade.</p>
 <p>The alternative — a fat "utilities" package that everything imports — would tie every tool's release cadence together and turn every shared-library refactor into a coordinated change across the whole repo. The current shape means <code>taxi_shared</code> can be evolved for SQL Server needs without any risk of breaking the downloader.</p>
@@ -1647,13 +1674,18 @@
 <li><code>tests/taxi_shared/</code> — DuckDB schemas fed through the type mapper and DDL generator; string-compare against expected <code>CREATE TABLE</code> output.</li>
 <li><code>tests/e2e/</code> — the full download → normalize → load pipeline run against generated fake data and a real SQL Server; skipped without <code>MSSQL_PASSWORD</code>.</li>
 </ul>
-<h2 id="whats-not-built-yet">What's not built yet</h2>
-<p>A few sub-projects are planned but not implemented. They're mentioned here because the current architecture leaves seams for them.</p>
+<h2 id="build-status">Build status</h2>
+<p>Every pipeline stage is built, and each has a guide linked from this page. The release
+pipeline is in place too:</p>
 <ul>
-<li><strong>dev/test/prod promotion + release pipeline</strong> — CI already runs <code>test</code>, <code>docs</code>, and <code>integration</code> jobs (<code>.github/workflows/ci.yml</code>) on every push. A tag-driven promotion flow — publishing to TestPyPI (test) and PyPI (prod) via Trusted Publishing, with the <code>integration</code> job as a required PR gate on <code>dev</code> — is designed (see spec below) but not yet wired up.</li>
+<li><code>.github/workflows/release.yml</code> publishes on any <code>v*</code> tag — <code>vX.Y.Z</code> to PyPI, anything
+  else to TestPyPI, both via Trusted Publishing. <code>v0.1.0</code> and <code>v0.2.0</code> are out.</li>
+<li>Work lands on <code>dev</code> through PRs and is promoted to <code>main</code> for a release. Both branches
+  require the <code>integration</code> job as a status check, and both enforce it for admins too.</li>
 </ul>
-<p>See spec: docs/superpowers/specs/2026-07-25-devtestprod-promotion-design.md.</p>
-<p>The mirror-download, drift-analysis, normalize, and SQL-Server-load stages are all built and covered by the guides linked from this page; this section is deliberately short because most of what used to be "not built yet" — the SQL Server loader and the orchestrator — has since landed.</p>
+<p>See the <a href="../operations/releasing/">Releasing runbook</a> for the maintainer side, and
+<code>docs/superpowers/specs/2026-07-25-devtestprod-promotion-design.md</code> for the design this
+followed.</p>
 
 
 

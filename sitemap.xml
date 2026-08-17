@@ -2,110 +2,114 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <url>
          <loc>https://andrekamman.github.io/taxi-seed/</loc>
-         <lastmod>2026-08-01</lastmod>
+         <lastmod>2026-08-17</lastmod>
     </url>
     <url>
          <loc>https://andrekamman.github.io/taxi-seed/architecture/</loc>
-         <lastmod>2026-08-01</lastmod>
+         <lastmod>2026-08-17</lastmod>
     </url>
     <url>
          <loc>https://andrekamman.github.io/taxi-seed/contributing/</loc>
-         <lastmod>2026-08-01</lastmod>
+         <lastmod>2026-08-17</lastmod>
     </url>
     <url>
          <loc>https://andrekamman.github.io/taxi-seed/cookbook/</loc>
-         <lastmod>2026-08-01</lastmod>
+         <lastmod>2026-08-17</lastmod>
     </url>
     <url>
          <loc>https://andrekamman.github.io/taxi-seed/getting-started/</loc>
-         <lastmod>2026-08-01</lastmod>
+         <lastmod>2026-08-17</lastmod>
+    </url>
+    <url>
+         <loc>https://andrekamman.github.io/taxi-seed/install/</loc>
+         <lastmod>2026-08-17</lastmod>
     </url>
     <url>
          <loc>https://andrekamman.github.io/taxi-seed/guides/downloader/</loc>
-         <lastmod>2026-08-01</lastmod>
+         <lastmod>2026-08-17</lastmod>
     </url>
     <url>
          <loc>https://andrekamman.github.io/taxi-seed/guides/loader/</loc>
-         <lastmod>2026-08-01</lastmod>
+         <lastmod>2026-08-17</lastmod>
     </url>
     <url>
          <loc>https://andrekamman.github.io/taxi-seed/guides/normalize/</loc>
-         <lastmod>2026-08-01</lastmod>
+         <lastmod>2026-08-17</lastmod>
     </url>
     <url>
          <loc>https://andrekamman.github.io/taxi-seed/guides/orchestrator/</loc>
-         <lastmod>2026-08-01</lastmod>
+         <lastmod>2026-08-17</lastmod>
     </url>
     <url>
          <loc>https://andrekamman.github.io/taxi-seed/guides/schema-drift/</loc>
-         <lastmod>2026-08-01</lastmod>
+         <lastmod>2026-08-17</lastmod>
     </url>
     <url>
          <loc>https://andrekamman.github.io/taxi-seed/operations/releasing/</loc>
-         <lastmod>2026-08-01</lastmod>
+         <lastmod>2026-08-17</lastmod>
     </url>
     <url>
          <loc>https://andrekamman.github.io/taxi-seed/reference/configuration/</loc>
-         <lastmod>2026-08-01</lastmod>
+         <lastmod>2026-08-17</lastmod>
     </url>
     <url>
          <loc>https://andrekamman.github.io/taxi-seed/reference/exit-codes/</loc>
-         <lastmod>2026-08-01</lastmod>
+         <lastmod>2026-08-17</lastmod>
     </url>
     <url>
          <loc>https://andrekamman.github.io/taxi-seed/superpowers/notes/2026-07-22-mssql-extension-spike/</loc>
-         <lastmod>2026-08-01</lastmod>
+         <lastmod>2026-08-17</lastmod>
     </url>
     <url>
          <loc>https://andrekamman.github.io/taxi-seed/superpowers/notes/2026-07-23-ci-fake-data-kickoff/</loc>
-         <lastmod>2026-08-01</lastmod>
+         <lastmod>2026-08-17</lastmod>
     </url>
     <url>
          <loc>https://andrekamman.github.io/taxi-seed/superpowers/specs/2026-07-19-monorepo-restructure-design/</loc>
-         <lastmod>2026-08-01</lastmod>
+         <lastmod>2026-08-17</lastmod>
     </url>
     <url>
          <loc>https://andrekamman.github.io/taxi-seed/superpowers/specs/2026-07-21-normalizer-design/</loc>
-         <lastmod>2026-08-01</lastmod>
+         <lastmod>2026-08-17</lastmod>
     </url>
     <url>
          <loc>https://andrekamman.github.io/taxi-seed/superpowers/specs/2026-07-22-documentation-design/</loc>
-         <lastmod>2026-08-01</lastmod>
+         <lastmod>2026-08-17</lastmod>
     </url>
     <url>
          <loc>https://andrekamman.github.io/taxi-seed/superpowers/specs/2026-07-22-sql-loader-design/</loc>
-         <lastmod>2026-08-01</lastmod>
+         <lastmod>2026-08-17</lastmod>
     </url>
     <url>
          <loc>https://andrekamman.github.io/taxi-seed/superpowers/specs/2026-07-23-ci-fake-data-design/</loc>
-         <lastmod>2026-08-01</lastmod>
+         <lastmod>2026-08-17</lastmod>
     </url>
     <url>
          <loc>https://andrekamman.github.io/taxi-seed/superpowers/specs/2026-07-23-normalize-multisource-valuemap-design/</loc>
-         <lastmod>2026-08-01</lastmod>
+         <lastmod>2026-08-17</lastmod>
     </url>
     <url>
          <loc>https://andrekamman.github.io/taxi-seed/superpowers/specs/2026-07-23-orchestrator-design/</loc>
-         <lastmod>2026-08-01</lastmod>
+         <lastmod>2026-08-17</lastmod>
     </url>
     <url>
          <loc>https://andrekamman.github.io/taxi-seed/superpowers/specs/2026-07-25-devtestprod-promotion-design/</loc>
-         <lastmod>2026-08-01</lastmod>
+         <lastmod>2026-08-17</lastmod>
     </url>
     <url>
          <loc>https://andrekamman.github.io/taxi-seed/superpowers/specs/2026-07-26-configurable-data-dir-design/</loc>
-         <lastmod>2026-08-01</lastmod>
+         <lastmod>2026-08-17</lastmod>
     </url>
     <url>
          <loc>https://andrekamman.github.io/taxi-seed/superpowers/specs/2026-07-26-documentation-sync-design/</loc>
-         <lastmod>2026-08-01</lastmod>
+         <lastmod>2026-08-17</lastmod>
     </url>
     <url>
          <loc>https://andrekamman.github.io/taxi-seed/superpowers/specs/2026-07-26-python-downloader-design/</loc>
-         <lastmod>2026-08-01</lastmod>
+         <lastmod>2026-08-17</lastmod>
     </url>
     <url>
          <loc>https://andrekamman.github.io/taxi-seed/superpowers/specs/2026-07-29-docs-audit-rewrite-design/</loc>
-         <lastmod>2026-08-01</lastmod>
+         <lastmod>2026-08-17</lastmod>
     </url>
 </urlset>

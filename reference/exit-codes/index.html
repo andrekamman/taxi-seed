@@ -292,6 +292,33 @@
   
   
     <li class="md-nav__item">
+      <a href="../../install/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Installation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../getting-started/" class="md-nav__link">
         
   
@@ -327,10 +354,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
         
           
-          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
             
   
   
@@ -348,8 +375,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_3">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -577,10 +604,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" checked>
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" checked>
         
           
-          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
             
   
   
@@ -598,8 +625,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="true">
-          <label class="md-nav__title" for="__nav_6">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_7">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -867,10 +894,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" >
         
           
-          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="0">
             
   
   
@@ -888,8 +915,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_7">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -949,10 +976,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_9" >
         
           
-          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_9" id="__nav_9_label" tabindex="0">
             
   
   
@@ -970,8 +997,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_8">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_9_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_9">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -1439,7 +1466,7 @@
 </tr>
 <tr>
 <td>2</td>
-<td>At least one requested type finished with <code>downloaded == 0</code> and <code>gaveup &gt; 0</code> (every candidate file for that type hit a persistent rate-limit / WAF block or was otherwise unobtainable), or an argument error (unknown flag, invalid data type).</td>
+<td>At least one requested type finished with <code>downloaded == 0</code> and <code>gaveup &gt; 0</code> (every candidate file for that type hit a persistent rate-limit / WAF block or was otherwise unobtainable), or an argument error (unknown flag, invalid trip type).</td>
 <td>Re-run later — CloudFront WAF cooldowns can outlast a single retry ladder — or retry from a different network. For argument errors, run with <code>--help</code>.</td>
 </tr>
 </tbody>
@@ -1465,7 +1492,7 @@
 <tbody>
 <tr>
 <td>0</td>
-<td>Success — all specified data types normalized (or all outputs were already present and skipped).</td>
+<td>Success — all specified trip types normalized (or all outputs were already present and skipped).</td>
 <td>None.</td>
 </tr>
 <tr>
@@ -1487,7 +1514,7 @@
 </table>
 <p>A missing <code>raw/&lt;type&gt;/</code> directory is <strong>not</strong> a configuration error — it's treated as "nothing to normalize yet," prints <code>&lt;type&gt;: no raw files at &lt;raw_dir&gt;, skipping</code>, and exits <strong>0</strong> for that type.</p>
 <h3 id="multi-type-aggregation">Multi-type aggregation</h3>
-<p>When invoked with no argument (<code>uv run normalize</code>), the tool runs all four data types in turn and returns the <strong>highest</strong> exit code observed. A mixed run — e.g. <code>yellow</code> succeeds (0), <code>fhvhv</code> needs edits (1) — exits <code>1</code>. This keeps CI logic simple: any non-zero means "at least one type needs attention", and the code tells you what kind of attention.</p>
+<p>When invoked with no argument (<code>uv run normalize</code>), the tool runs all four trip types in turn and returns the <strong>highest</strong> exit code observed. A mixed run — e.g. <code>yellow</code> succeeds (0), <code>fhvhv</code> needs edits (1) — exits <code>1</code>. This keeps CI logic simple: any non-zero means "at least one type needs attention", and the code tells you what kind of attention.</p>
 <p>The ordering used by exit-code precedence, from lowest to highest: <code>0 → 1 → 2 → 3</code>. A first-run-plus-mapping-error scenario therefore exits <code>3</code> (the more actionable state), not <code>2</code>.</p>
 <h3 id="ci-recipes">CI recipes</h3>
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-1">1</a></span>
