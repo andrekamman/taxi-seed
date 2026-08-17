@@ -2,7 +2,7 @@
 
 `taxi_download` — a Python package that mirrors NYC TLC parquet trip data from
 CloudFront to a local `raw/` directory. Rate-limit-aware backoff, PAR1
-corrupt-file validation, end-of-series detection, incremental catch-up.
+corrupt-file validation, end-of-history detection, incremental catch-up.
 
 Run it as a console script or a module:
 

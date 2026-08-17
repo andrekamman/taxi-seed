@@ -1,20 +1,26 @@
 # taxi-seed
 
-`taxi-seed` is one repo, one Python package with five tools (plus a shared
-library) for working with the NYC Taxi & Limousine Commission (TLC) trip
-record data set: a WAF-aware CloudFront downloader that recovers from block
-pages (WAF = Web Application Firewall — the layer AWS uses to block traffic
-that looks like a scraper), a schema-drift analyzer that combines column-name
-heuristics with data-verified rename detection, a normalizer that halts on any
-data loss unless the operator explicitly acknowledges the drift, a loader that
-lands normalized parquet into a target database, and an orchestrator that
-drives the download → normalize → load pipeline end-to-end. A
-full-history mirror is roughly 40–100 GB of parquet (depending on how many of
-the four series and how much history you mirror) and takes 6–10 hours to
-download end-to-end on residential broadband, so the pipeline is designed to
-be resumable, incremental, and cheap to re-run on a schedule rather than
-something you kick off once and hope survives. The project is MIT-licensed.
-The downloader was loosely based on
+The New York City Taxi and Limousine Commission (TLC) publishes a record of
+every taxi and for-hire vehicle trip in the city. The records start in 2009 and
+arrive as monthly parquet files.
+
+`taxi-seed` mirrors that data set, normalizes it, and loads it into a database.
+It is one repo and one Python package holding five tools plus a shared library:
+
+| Tool | What it does |
+|---|---|
+| **downloader** | Mirrors the TLC CloudFront bucket to local parquet, and recovers when AWS WAF blocks it. |
+| **schema-drift** | Reports column-name and column-shape drift across a mirror. |
+| **normalize** | Rewrites a mirror to one target schema. Halts if that would lose data. |
+| **loader** | Lands normalized parquet in a target database, page-compressed. |
+| **orchestrator** | Drives download → normalize → load as one pipeline. |
+
+A full-history mirror is roughly 40–100 GB of parquet, depending on how many of
+the four trip types you take and how much history. It takes 6–10 hours to download
+on residential broadband, so every tool here is built to be resumable,
+incremental, and cheap to re-run on a schedule.
+
+The project is MIT-licensed. The downloader was loosely based on
 [`toddwschneider/nyc-taxi-data`](https://github.com/toddwschneider/nyc-taxi-data);
 the other tools are original to this repo. See
 [Acknowledgments](#acknowledgments) for details.
@@ -24,13 +30,12 @@ the other tools are original to this repo. See
 - **WAF-aware downloading** — the CloudFront classifier distinguishes real
   `403 AccessDenied` responses (a missing object, retry is pointless) from HTML
   block pages served by AWS WAF (a transient rate limit, retry is mandatory),
-  which is the single most common failure mode when scraping the TLC bucket at
-  any real volume. When a block is detected the downloader walks a 30s → 90s → 270s
-  exponential backoff ladder (capped at 3600s) to ride out the WAF window without
-  hammering the origin, and the incremental catch-up mode stops the moment a
-  locally-existing file is encountered so scheduled runs stay cheap even once
-  the mirror is warm. The net effect is that a nightly cron survives WAF
-  incidents unattended instead of paging you at 03:00.
+  which is the failure you hit first when you scrape the TLC bucket at any real
+  volume. On a block, the downloader makes four attempts and waits 30s, then
+  90s, then 270s between them, which rides out the WAF window without hammering
+  the origin. Incremental catch-up stops the moment it meets a file that already
+  exists locally, so scheduled runs stay cheap once the mirror is warm. A nightly
+  cron therefore survives WAF incidents unattended.
 - **Data-loss-is-an-error normalization** — the normalizer treats any missing
   column, renamed column, or lossy type coercion as a hard failure rather than
   something to paper over. That means silent data loss on lossy `DOUBLE →
@@ -51,32 +56,48 @@ the other tools are original to this repo. See
 
 ## Quick start
 
-```bash
-git clone https://github.com/andrekamman/taxi-seed.git
-cd taxi-seed
-uv sync
-uv run taxi-download yellow --recent 3
-```
+`taxi-seed` is published to [PyPI](https://pypi.org/project/taxi-seed/) as one distribution, putting all six commands on your PATH:
+
+=== "Install the release"
+
+    ```bash
+    uv tool install taxi-seed        # or: pip install taxi-seed
+    taxi-download yellow --recent 3
+    ```
+
+=== "From a clone"
+
+    ```bash
+    git clone https://github.com/andrekamman/taxi-seed.git
+    cd taxi-seed
+    uv sync
+    uv run taxi-download yellow --recent 3
+    ```
 
 !!! tip
-    Downloads ~200 MB in 1–2 minutes on residential broadband. This Quick Start only exercises the downloader, but every tool in the repo lives in the same `uv sync`-managed environment; [Getting Started](getting-started.md) walks the full end-to-end path from clone to normalized parquet.
+    Downloads ~200 MB in 1–2 minutes on residential broadband. This Quick Start only exercises the downloader, but every tool ships in the same distribution; [Getting Started](getting-started.md) walks the full end-to-end path to normalized parquet.
+
+Examples throughout these docs are written for the clone workflow and prefix commands with `uv run` — drop the prefix if you installed from PyPI. See [Installation](install.md) for both paths, upgrading, prereleases from TestPyPI, and the one caveat that matters for installed users: the curated normalize mappings live in the repo, not in the wheel.
 
 ## Requirements
 
-- Python 3.12 or 3.13, and [uv](https://github.com/astral-sh/uv) for Python environment management. Required by every tool in the repo, including the downloader.
+- Python 3.12 or 3.13. [uv](https://github.com/astral-sh/uv) is used for the clone workflow and throughout these docs; a PyPI install works with plain `pip` and needs no `uv`.
 - Disk sized to intent — see the [Downloader guide](guides/downloader.md#disk-sizing) for a sizing table.
 - Individual tools list per-guide prerequisites (a target database for the loader, etc.).
 
 ## Where to next
 
+- **[Installation](install.md)** — installing the released package from PyPI
+  (`uv tool install`, `pip`, `uvx`), upgrading, installing a prerelease from
+  TestPyPI, and how an installed workflow differs from a clone.
 - **[Getting Started](getting-started.md)** — a 10-minute end-to-end tutorial
   that walks from a clean laptop to a normalized parquet directory, covering
   clone, `uv sync`, a small `--recent` download, and the first normalizer run
   so you have a working pipeline before you dive into the deep-dive guides.
-- **[Guides](guides/downloader.md)** — one deep-dive per tool. Start with the
-  Downloader guide for WAF classifier internals, the backoff ladder, and disk
-  sizing; the Normalizer and Drift analyzer guides cover each tool's flags,
-  failure modes, and recommended production settings.
+- **[Guides](guides/downloader.md)** — one deep-dive per tool: Downloader,
+  Schema Drift, Normalize, Loader, Orchestrator. Start with the Downloader guide
+  for the WAF classifier, the backoff waits, and disk sizing. Each of the others
+  covers that tool's flags, failure modes, and production settings.
 - **[Cookbook](cookbook.md)** — cross-cutting recipes that combine multiple
   tools: a nightly cron that mirrors + normalizes unattended, querying the
   mirror with DuckDB `httpfs` without a full load, and running the whole

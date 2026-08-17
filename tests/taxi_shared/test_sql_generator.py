@@ -61,3 +61,14 @@ def test_generate_create_table_sql():
     assert "pickup_time DATETIME2" in sql
     assert "passenger_count INT" in sql
     assert "fare_amount FLOAT" in sql
+
+
+def test_create_table_is_page_compressed():
+    sql = generate_create_table_sql("dbo.yellow_2015", {"a": "BIGINT"})
+    assert sql.endswith(") WITH (DATA_COMPRESSION = PAGE);")
+
+
+def test_create_table_still_lists_columns():
+    sql = generate_create_table_sql("dbo.t", {"a": "BIGINT", "b": "DATETIME2"})
+    assert "a BIGINT" in sql
+    assert "b DATETIME2" in sql

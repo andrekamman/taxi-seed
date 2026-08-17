@@ -56,7 +56,7 @@ A few things worth calling out:
 - **Tests** live in `tests/<package_name>/` rather than `<component>/tests/`. That way pytest discovers them with default settings and there's no ambiguity about which fixtures apply to which package.
 - **`docs/superpowers/`** contains design specs and implementation plans authored during development. They're kept publicly visible because they answer "why is X this way" better than after-the-fact prose can.
 - **`raw/`** and `raw-normalized/` are `.gitignore`d. Every user maintains their own local mirror — the repo carries the code, not the data. On a fresh clone, the pipeline builds those directories the first time it's run.
-- **`normalize/mappings/`** ships with curated YAML for each TLC data type. Those files *are* checked in — they're the human-reviewed record of every acknowledged drift decision, and they're what makes a fresh clone of the repo able to normalize the full historical dataset without re-doing the review work.
+- **`normalize/mappings/`** ships with curated YAML for each TLC trip type. Those files *are* checked in — they're the human-reviewed record of every acknowledged drift decision, and they're what makes a fresh clone of the repo able to normalize the full historical dataset without re-doing the review work.
 
 ## The pipeline DAG
 
@@ -89,7 +89,7 @@ flowchart LR
 2. **schema-drift** reads the mirror and reports what's changed schema-wise across the years of parquet files. It doesn't rewrite anything; it just produces a report.
 3. **normalize** rewrites historical files to match the latest schema, producing `raw-normalized/` — a directory of parquet with uniform columns and types across every month.
 4. The **loader** (`taxi-load`) bulk-loads normalized parquet into SQL Server, one table per type per year, through DuckDB's `mssql` community extension. It reconciles disk against what's already loaded and picks, per year, skip / append / truncate-reload — see the [loader guide](guides/loader.md) for the full reconciliation model.
-5. The **orchestrator** (`taxi-run`) isn't a pipeline stage itself — it drives stages 1, 3, and 4 as subprocesses for one command, per data type, stopping a type early if a stage needs human review or fails outright. See the [orchestrator guide](guides/orchestrator.md).
+5. The **orchestrator** (`taxi-run`) isn't a pipeline stage itself — it drives stages 1, 3, and 4 as subprocesses for one command, per trip type, stopping a type early if a stage needs human review or fails outright. See the [orchestrator guide](guides/orchestrator.md).
 
 Each stage writes its output to disk; the next stage reads from disk. There is no in-memory pipeline, no shared process between the four data stages, and no coordinator baked into any one of them — `taxi-run` is an optional layer on top, not a requirement. That makes each stage individually restartable and individually inspectable — you can open the intermediate parquet in DuckDB, in Python, in DBeaver, or in any other tool that reads parquet, without any project-specific tooling.
 
@@ -115,7 +115,7 @@ The pipeline shape is a strong suggestion, not a contract. `taxi-run` exists for
 
 The downloader treats CloudFront's 403 responses as a first-class classification problem. Blocked traffic (WAF) and missing files (S3 `AccessDenied`) both come back as HTTP 403; only the response body distinguishes them. Naive clients can't tell them apart and either false-positive on rate limiting (unnecessary backoff on files that just don't exist) or hammer through a WAF block, extending the ban.
 
-The downloader's classifier looks at the body, then applies an exponential backoff ladder (30s → 90s → 270s, capped at 3600s) when it sees a real WAF signal, and terminates cleanly at the year/month boundary when it has exhausted retries. A `404`-equivalent (S3 saying "this month wasn't published") is recorded and skipped without triggering backoff. That combination lets unattended catch-up runs stay well-behaved without a human sitting on them, and it lets the same tool be invoked from cron without risking a runaway retry loop against a live WAF policy.
+The downloader's classifier looks at the body. On a real WAF signal it makes four attempts, waiting 30s, then 90s, then 270s between them, and terminates cleanly at the year/month boundary once those are exhausted. A `404`-equivalent (S3 saying "this month wasn't published") is recorded and skipped without triggering backoff. That combination lets unattended catch-up runs stay well-behaved without a human sitting on them, and it lets the same tool be invoked from cron without risking a runaway retry loop against a live WAF policy.
 
 ### Data loss is an error
 
@@ -167,7 +167,7 @@ The design spec above documents the pre-monorepo layout (three separate repos) a
 `shared/src/taxi_shared/` is deliberately small. Two modules:
 
 - **`type_mapping.py`** — DuckDB → SQL Server type mapping. Handles the common cases (`DOUBLE` → `FLOAT`, `VARCHAR` → `NVARCHAR(MAX)`, `TIMESTAMP` → `DATETIME2`, and so on) and the `DECIMAL(p,s)` parameterization where DuckDB's precision and scale are carried through to the SQL Server column definition.
-- **`sql_generator.py`** — `CREATE TABLE` DDL generation from a DuckDB schema. Used by the loader (`taxi_loader`) to derive each year's table DDL directly from the normalized parquet's schema.
+- **`sql_generator.py`** — `CREATE TABLE` DDL generation from a DuckDB schema. Used by the loader (`taxi_loader`) to derive each year's table DDL directly from the normalized parquet's schema. Generated tables are page-compressed (`WITH (DATA_COMPRESSION = PAGE)`), unconditionally — see the [Loader guide](guides/loader.md#page-compression).
 
 The downloader, schema-drift, and normalize don't import `taxi_shared` — none of them touch SQL Server. Keeping the shared library scoped to the SQL Server concern keeps its API surface small and its change cadence slow: type mappings change when SQL Server introduces a new type, which is roughly once a decade.
 
@@ -199,12 +199,16 @@ Component-level test layouts:
 - `tests/taxi_shared/` — DuckDB schemas fed through the type mapper and DDL generator; string-compare against expected `CREATE TABLE` output.
 - `tests/e2e/` — the full download → normalize → load pipeline run against generated fake data and a real SQL Server; skipped without `MSSQL_PASSWORD`.
 
-## What's not built yet
+## Build status
 
-A few sub-projects are planned but not implemented. They're mentioned here because the current architecture leaves seams for them.
+Every pipeline stage is built, and each has a guide linked from this page. The release
+pipeline is in place too:
 
-- **dev/test/prod promotion + release pipeline** — CI already runs `test`, `docs`, and `integration` jobs (`.github/workflows/ci.yml`) on every push. A tag-driven promotion flow — publishing to TestPyPI (test) and PyPI (prod) via Trusted Publishing, with the `integration` job as a required PR gate on `dev` — is designed (see spec below) but not yet wired up.
+- `.github/workflows/release.yml` publishes on any `v*` tag — `vX.Y.Z` to PyPI, anything
+  else to TestPyPI, both via Trusted Publishing. `v0.1.0` and `v0.2.0` are out.
+- Work lands on `dev` through PRs and is promoted to `main` for a release. Both branches
+  require the `integration` job as a status check, and both enforce it for admins too.
 
-See spec: docs/superpowers/specs/2026-07-25-devtestprod-promotion-design.md.
-
-The mirror-download, drift-analysis, normalize, and SQL-Server-load stages are all built and covered by the guides linked from this page; this section is deliberately short because most of what used to be "not built yet" — the SQL Server loader and the orchestrator — has since landed.
+See the [Releasing runbook](operations/releasing.md) for the maintainer side, and
+`docs/superpowers/specs/2026-07-25-devtestprod-promotion-design.md` for the design this
+followed.

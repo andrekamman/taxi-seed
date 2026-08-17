@@ -47,6 +47,7 @@ exclude_docs: |
 
 nav:
   - Home: index.md
+  - Installation: install.md
   - Getting Started: getting-started.md
   - Guides:
       - Downloader: guides/downloader.md
