@@ -49,7 +49,20 @@ def parse_args(argv=None) -> argparse.Namespace:
                    help="force truncate+reload of every year")
     p.add_argument("--dry-run", action="store_true",
                    help="print the reconciliation plan and exit without writing")
-    return p.parse_args(argv)
+    p.add_argument("--year", type=int, default=None,
+                   help="load only this year; omit for every year on disk")
+    p.add_argument("--month", type=int, default=None, choices=range(1, 13),
+                   metavar="{1..12}",
+                   help="load only this month of --year. Each month is a "
+                        "separate parquet file, so separate processes may load "
+                        "different months of one year concurrently -- TABLOCK "
+                        "takes a BU lock, and BU locks are compatible.")
+    args = p.parse_args(argv)
+    if args.month is not None and args.year is None:
+        # A bare --month would mean "this month of every year", which is not a
+        # unit anything schedules, and would silently widen a worker's scope.
+        p.error("--month requires --year")
+    return args
 
 
 def resolve_input_dir(input_dir, data_dir) -> str:
@@ -61,7 +74,8 @@ def resolve_input_dir(input_dir, data_dir) -> str:
 
 
 def discover_month_files(conn: duckdb.DuckDBPyConnection, input_dir,
-                         data_type: str) -> list[MonthFile]:
+                         data_type: str, year: int | None = None,
+                         month: int | None = None) -> list[MonthFile]:
     base = Path(input_dir) / data_type
     months: list[MonthFile] = []
     if not base.exists():
@@ -70,10 +84,38 @@ def discover_month_files(conn: duckdb.DuckDBPyConnection, input_dir,
         m = _MONTH_RE.search(f.name)
         if not m:
             continue
-        year, month = int(m.group(1)), int(m.group(2))
-        months.append(MonthFile(year, month, str(f),
+        file_year, file_month = int(m.group(1)), int(m.group(2))
+        # Filter here, not after reconcile: reconcile derives its year set and
+        # its per-year count_year_table calls from this list, and a worker that
+        # owns one month must not count or plan the other 583.
+        if year is not None and file_year != year:
+            continue
+        if month is not None and file_month != month:
+            continue
+        months.append(MonthFile(file_year, file_month, str(f),
                                 load.parquet_row_count(conn, f)))
     return months
+
+
+def guard_month_mode(plans, month: int | None) -> None:
+    """In --month mode a RELOAD plan is fatal, not something to execute.
+
+    RELOAD drops and recreates the year table. With several workers loading
+    different months of that same year, one of them doing that would destroy the
+    others' work mid-flight. A year that needs rebuilding must be reset by the
+    caller before any month of it is dispatched.
+    """
+    if month is None:
+        return None
+    bad = [p.year for p in plans if p.action == RELOAD]
+    if bad:
+        raise LoaderError(
+            f"year(s) {bad} fail the integrity check (committed rows disagree "
+            f"with the manifest) and need a truncate+reload, which --month mode "
+            f"will not do while sibling months may be loading. Reset the year "
+            f"first, then re-dispatch its months."
+        )
+    return None
 
 
 def _describe_plan(data_type: str, plans) -> None:
@@ -90,10 +132,14 @@ def _describe_plan(data_type: str, plans) -> None:
 
 def _process_type(conn, cfg, data_type: str, input_dir: str,
                   flush_rows: int, full_refresh: bool, dry_run: bool,
-                  attached: bool) -> int:
-    disk = discover_month_files(conn, input_dir, data_type)
+                  attached: bool, year: int | None = None,
+                  month: int | None = None) -> int:
+    disk = discover_month_files(conn, input_dir, data_type, year=year, month=month)
     if not disk:
-        print(f"{data_type}: no parquet under {input_dir}/{data_type}, skipping")
+        scope = f" {year}" if year is not None else ""
+        scope += f"-{month:02d}" if month is not None else ""
+        print(f"{data_type}{scope}: no parquet under {input_dir}/{data_type}, "
+              f"skipping")
         return 0
 
     if dry_run and not attached:
@@ -108,6 +154,15 @@ def _process_type(conn, cfg, data_type: str, input_dir: str,
     else:
         manifest_rows = manifest.read_manifest(conn, cfg, data_type)
 
+    # Scope the manifest the same way as the disk walk, so reconcile compares
+    # like with like. Unscoped, a worker owning one month would see every other
+    # month's manifest rows as "on the manifest but missing from disk" and plan
+    # a whole-year RELOAD.
+    if year is not None:
+        manifest_rows = [r for r in manifest_rows if r.year == year]
+    if month is not None:
+        manifest_rows = [r for r in manifest_rows if r.month == month]
+
     if dry_run and not attached:
         table_counts = {}
     else:
@@ -117,6 +172,7 @@ def _process_type(conn, cfg, data_type: str, input_dir: str,
             for y in years
         }
     plans = reconcile(disk, manifest_rows, table_counts, full_refresh)
+    guard_month_mode(plans, month)
 
     if dry_run:
         print(f"{data_type}: plan")
@@ -181,7 +237,7 @@ def main(argv=None) -> int:
             try:
                 _process_type(conn, cfg, data_type, input_dir,
                               args.flush_rows, args.full_refresh, args.dry_run,
-                              attached)
+                              attached, year=args.year, month=args.month)
             except TypeMappingError as e:
                 print(f"error: {data_type}: {e}", file=sys.stderr)
                 overall = max(overall, 2)

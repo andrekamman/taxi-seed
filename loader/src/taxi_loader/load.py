@@ -87,9 +87,17 @@ def count_year_table(conn: duckdb.DuckDBPyConnection, cfg: ConnConfig, table: st
 
 
 def _ensure_table(conn, cfg, table: str, sample_parquet) -> None:
-    if not table_exists(conn, cfg, table):
-        ddl = build_create_table_sql(conn, _fq(cfg, table), sample_parquet)
+    if table_exists(conn, cfg, table):
+        return
+    ddl = build_create_table_sql(conn, _fq(cfg, table), sample_parquet)
+    try:
         conn.execute(f"SELECT mssql_exec('{ATTACH_NAME}', ?)", [ddl])
+    except duckdb.Error:
+        # Another worker loading a different month of this same year raced us to
+        # the CREATE. IF NOT EXISTS + CREATE is not atomic across sessions, so
+        # losing the race is expected, not an error -- re-check and continue.
+        if not table_exists(conn, cfg, table):
+            raise
 
 
 def execute_year_plan(conn: duckdb.DuckDBPyConnection, cfg: ConnConfig,
