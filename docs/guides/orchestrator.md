@@ -1,6 +1,6 @@
 # Orchestrator
 
-`taxi-run` runs the pipeline as one command: download → normalize → (opt-in) load, per data type, honoring each stage's own exit-code contract rather than reinventing one. It exists so a cron job or CI step can invoke a single tool instead of chaining three, while still stopping cleanly the moment a type needs a human (normalize found unresolved mapping items) or a stage genuinely fails. A companion command, `taxi-curate-mappings`, auto-accepts detected schema drift into complete mapping YAMLs for cases where you want the pipeline to run unattended and are comfortable with heuristic acknowledgments.
+`taxi-run` runs the pipeline as one command: download → normalize → (opt-in) load, per trip type, honoring each stage's own exit-code contract rather than reinventing one. It exists so a cron job or CI step can invoke a single tool instead of chaining three, while still stopping cleanly the moment a type needs a human (normalize found unresolved mapping items) or a stage genuinely fails. A companion command, `taxi-curate-mappings`, auto-accepts detected schema drift into complete mapping YAMLs for cases where you want the pipeline to run unattended and are comfortable with heuristic acknowledgments.
 
 ## Prerequisites
 

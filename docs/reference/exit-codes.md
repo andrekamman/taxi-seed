@@ -11,7 +11,7 @@ The tables below list the *emitted* codes. Codes are stable and part of the tool
 | Code | Meaning | Suggested action |
 |---|---|---|
 | 0 | Every requested type either downloaded successfully or was already present locally (`downloaded == 0` with `gaveup == 0` also counts as success — nothing to do). | None. Idempotent success — safe to re-run. |
-| 2 | At least one requested type finished with `downloaded == 0` and `gaveup > 0` (every candidate file for that type hit a persistent rate-limit / WAF block or was otherwise unobtainable), or an argument error (unknown flag, invalid data type). | Re-run later — CloudFront WAF cooldowns can outlast a single retry ladder — or retry from a different network. For argument errors, run with `--help`. |
+| 2 | At least one requested type finished with `downloaded == 0` and `gaveup > 0` (every candidate file for that type hit a persistent rate-limit / WAF block or was otherwise unobtainable), or an argument error (unknown flag, invalid trip type). | Re-run later — CloudFront WAF cooldowns can outlast a single retry ladder — or retry from a different network. For argument errors, run with `--help`. |
 
 There is no exit `1` and no `130`-on-Ctrl-C special case documented for this tool beyond the standard shell conventions below.
 
@@ -29,7 +29,7 @@ On a rate-limit classification, `taxi-download` backs off and retries; if every 
 
 | Code | Meaning | Suggested action |
 |---|---|---|
-| 0 | Success — all specified data types normalized (or all outputs were already present and skipped). | None. |
+| 0 | Success — all specified trip types normalized (or all outputs were already present and skipped). | None. |
 | 1 | Mapping incomplete — one or more unresolved items reported. The mapping YAML has been amended in place with new SUGGESTED/TODO entries for every unresolved column. | Review the amended `normalize/mappings/<type>.yaml`, uncomment the SUGGESTED lines you accept, fill in `ack_date:` on TODO blocks, re-run. |
 | 2 | Configuration error — mapping failed to load (malformed YAML), `target:` file not found under `raw/<type>/`, or a first-run bootstrap analysis error. | Fix the reported issue: validate the YAML, bump `target:` to a file that actually exists, or check the raw-data path. |
 | 3 | First run — no mapping YAML existed for this type. A scaffold has been generated at `normalize/mappings/<type>.yaml` from the raw data. | Review the scaffold, uncomment SUGGESTED renames you accept, fill in `ack_date:` for TODOs, re-run. |
@@ -38,7 +38,7 @@ A missing `raw/<type>/` directory is **not** a configuration error — it's trea
 
 ### Multi-type aggregation
 
-When invoked with no argument (`uv run normalize`), the tool runs all four data types in turn and returns the **highest** exit code observed. A mixed run — e.g. `yellow` succeeds (0), `fhvhv` needs edits (1) — exits `1`. This keeps CI logic simple: any non-zero means "at least one type needs attention", and the code tells you what kind of attention.
+When invoked with no argument (`uv run normalize`), the tool runs all four trip types in turn and returns the **highest** exit code observed. A mixed run — e.g. `yellow` succeeds (0), `fhvhv` needs edits (1) — exits `1`. This keeps CI logic simple: any non-zero means "at least one type needs attention", and the code tells you what kind of attention.
 
 The ordering used by exit-code precedence, from lowest to highest: `0 → 1 → 2 → 3`. A first-run-plus-mapping-error scenario therefore exits `3` (the more actionable state), not `2`.
 
