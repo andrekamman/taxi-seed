@@ -6,7 +6,7 @@ This page covers the four things you need to be productive in a PR: how to get a
 
 ## Branching & releases
 
-`dev` is the default and integration branch — branch from it, and open your PR **into `dev`**, not `main`. The `integration` check (SQL Server e2e tests) has to pass before a PR can merge; it's a required status check, so the merge button stays disabled until it's green. `main` only moves forward via a promotion merge from `dev`, and releases happen by tagging `main` — see [Operations → Releasing](operations/releasing.md) for the full tag-to-PyPI flow.
+`dev` is the default and integration branch — branch from it, and open your PR **into `dev`**, not `main`. The `integration` check (SQL Server e2e tests) has to pass before a PR can merge; it's a required status check, so the merge button stays disabled until it's green. `main` only moves forward via a promotion merge from `dev` — the `branch-guard` check fails any PR into `main` whose head branch isn't `dev` — and releases happen by tagging `main` — see [Operations → Releasing](operations/releasing.md) for the full tag-to-PyPI flow.
 
 ## Dev setup
 
