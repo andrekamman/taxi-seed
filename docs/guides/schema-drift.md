@@ -110,7 +110,7 @@ What each block means:
 - **`↔ Columns RENAMED`** — the heuristic thinks these are the same logical column under a new name. Each line shows the confidence percentage; `✓ data verified` appears when `--verify-data` confirmed the match against actual row data (`✗ data mismatch` demotes the rename back into added/removed).
 - **`+ ADDED` / `- REMOVED`** — genuinely new or gone. If a column got renamed, it appears in the rename block, not here.
 - **`~ Type CHANGED`** — same column name, different DuckDB type. Watch for widening (INTEGER → BIGINT) versus type shifts that indicate a semantic change.
-- **CROSS-TYPE SUMMARY** — for each column name seen anywhere, lists which data types have it. Useful for spotting which columns are shared across yellow/green/fhv/fhvhv versus which are type-specific.
+- **CROSS-TYPE SUMMARY** — for each column name seen anywhere, lists which trip types have it. Useful for spotting which columns are shared across yellow/green/fhv/fhvhv versus which are type-specific.
 
 ## How rename detection works
 

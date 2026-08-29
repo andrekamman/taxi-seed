@@ -1,6 +1,6 @@
 # Downloader
 
-The downloader is `taxi_download`, a Python package that mirrors NYC TLC parquet trip data from CloudFront to a local `raw/` directory. It walks each series chronologically, skips files you already have, validates every download, and knows the difference between a rate-limit block and a file that hasn't been published yet.
+The downloader is `taxi_download`, a Python package that mirrors NYC TLC parquet trip data from CloudFront to a local `raw/` directory. It walks each trip type chronologically, skips files you already have, validates every download, and knows the difference between a rate-limit block and a file that hasn't been published yet.
 
 It exists because of a specific ambiguity in TLC's CloudFront distribution: HTTP 403 is returned both for files that don't exist yet (with an S3-style `<Code>AccessDenied</Code>` XML body) *and* for requests blocked by AWS WAF, the Web Application Firewall that CloudFront runs in front of the origin. Naive downloaders can't tell them apart, so they either false-positive on rate limiting (backing off unnecessarily on missing files) or false-negative on missing files (hammering a WAF block and extending it). This package classifies the responses correctly and reacts appropriately to each.
 
@@ -84,7 +84,7 @@ The tool is idempotent: files already present under `<data-dir>/raw/` are skippe
 
 **Native Windows / Git Bash / PowerShell.** Install Python and [uv](https://docs.astral.sh/uv/), then run the commands above exactly as documented. No extra config needed for small pulls.
 
-**WSL2 — the VHDX growth problem.** WSL2 stores your Linux filesystem in a VHDX file on your Windows `C:` drive. Every byte written under the WSL2 root (including `~`, `/home`, `/tmp`, `/opt`) goes into this VHDX file. A full-history TLC mirror is roughly 40–100 GB, depending on how many of the four series and how much history you mirror. The catch: **the VHDX does not shrink when you delete files.** If you download that much data into WSL, then `rm -rf` it, your `C:` drive stays exactly as full until you manually compact the VHDX with `wsl --shutdown` + `diskpart`, or `Optimize-VHD` in an elevated PowerShell.
+**WSL2 — the VHDX growth problem.** WSL2 stores your Linux filesystem in a VHDX file on your Windows `C:` drive. Every byte written under the WSL2 root (including `~`, `/home`, `/tmp`, `/opt`) goes into this VHDX file. A full-history TLC mirror is roughly 40–100 GB, depending on how many of the four trip types and how much history you mirror. The catch: **the VHDX does not shrink when you delete files.** If you download that much data into WSL, then `rm -rf` it, your `C:` drive stays exactly as full until you manually compact the VHDX with `wsl --shutdown` + `diskpart`, or `Optimize-VHD` in an elevated PowerShell.
 
 **The fix: point downloads at a Windows path from inside WSL.** Use `--data-dir` to redirect the output root — files land under `<data-dir>/raw`, so anything under `/mnt/c/...` writes directly to the Windows filesystem, bypassing the VHDX entirely:
 
@@ -114,7 +114,7 @@ flowchart TD
 Four outcomes, from `_classify_status` and `fetch_one` in `download.py`:
 
 - **`404`** — `NOTFOUND`.
-- **`403` with a body containing `accessdenied` or `nosuchkey`** (case-insensitive) — `NOTFOUND`. The file legitimately isn't published yet. This is the boundary signal the full-history walker uses to stop cleanly at the end of a series.
+- **`403` with a body containing `accessdenied` or `nosuchkey`** (case-insensitive) — `NOTFOUND`. The file legitimately isn't published yet. This is the boundary signal the full-history walker uses to stop cleanly at the end of a trip type's published history.
 - **`403` with any other body** — `RATELIMIT`. The WAF has flagged the request. Any other `403` variant (a CloudFront block page, an empty body, anything not matching the AccessDenied/NoSuchKey pattern) is treated as a rate-limit event, not a missing file.
 - **`429` or any `5xx`** — `RATELIMIT`.
 - **`200` but the downloaded body doesn't validate as PAR1 parquet** — `RATELIMIT`. This is usually a WAF intercept page served with a `200` status; retrying with a fresh connection often succeeds.
@@ -122,13 +122,17 @@ Four outcomes, from `_classify_status` and `fetch_one` in `download.py`:
 
 ### Exponential backoff
 
-`download_month` retries a single month up to `MAX_RETRIES = 4` times on `RATELIMIT`/`NETERROR`, sleeping between attempts with a capped exponential delay: **30s → 90s → 270s**, capped at **3600s** (`BACKOFF_BASE_S=30`, `BACKOFF_FACTOR=3`, `BACKOFF_CAP_S=3600`). If all attempts are exhausted, the month counts as a "give up" for that run and the walker moves on — it does not sleep indefinitely or abort the whole process on a single month.
+`download_month` makes up to `MAX_RETRIES = 4` attempts at a single month on `RATELIMIT`/`NETERROR`, and sleeps between them. Four attempts means three sleeps: **30s, then 90s, then 270s** — `BACKOFF_BASE_S * BACKOFF_FACTOR ** attempt`, with `BACKOFF_BASE_S = 30` and `BACKOFF_FACTOR = 3`. Total wait per month is 390s.
 
-In full-history mode, a *type* is abandoned early if it accumulates `MAX_CONSECUTIVE_GIVEUPS = 3` consecutive give-ups (per data type, reset by any successful download or `NOTFOUND` skip) — this stops a run from hammering every remaining month for hours against a sustained block. Recent-mode has no consecutive-giveup abort; it simply counts give-ups and reports them.
+The delay is also capped at `BACKOFF_CAP_S = 3600`, but at four attempts that cap never binds — the ladder would have to reach a sixth attempt (7290s) to hit it. Raise `MAX_RETRIES` and the cap starts to matter.
+
+Once the attempts are exhausted the month counts as a "give up" for that run and the walker moves on. It never sleeps indefinitely, and one bad month never aborts the process.
+
+In full-history mode, a *type* is abandoned early if it accumulates `MAX_CONSECUTIVE_GIVEUPS = 3` consecutive give-ups (per trip type, reset by any successful download or `NOTFOUND` skip) — this stops a run from hammering every remaining month for hours against a sustained block. Recent-mode has no consecutive-giveup abort; it simply counts give-ups and reports them.
 
 ### Boundary auto-termination
 
-In full-history mode the walker moves chronologically forward from a fixed start month per series:
+In full-history mode the walker moves chronologically forward from a fixed start month per trip type:
 
 | Type   | Start month |
 |--------|-------------|
@@ -137,7 +141,7 @@ In full-history mode the walker moves chronologically forward from a fixed start
 | fhv    | 2015-01     |
 | fhvhv  | 2019-02     |
 
-When it hits a `NOTFOUND` response *after* having already downloaded (or found locally) at least one file for that type, it treats that as the end of published data and stops walking that type. A `NOTFOUND` encountered *before* any data has been seen is treated as a pre-series gap and the walker keeps going forward. That's why running `taxi-download` cleanly terminates instead of walking forever into the future.
+When it hits a `NOTFOUND` response *after* having already downloaded (or found locally) at least one file for that type, it treats that as the end of published data and stops walking that type. A `NOTFOUND` encountered *before* any data has been seen is treated as a gap before that trip type's data begins and the walker keeps going forward. That's why running `taxi-download` cleanly terminates instead of walking forever into the future.
 
 ### PAR1 magic-byte validation
 
@@ -156,7 +160,7 @@ Downloads stream to a `<name>.parquet.part` temp file first; only after PAR1 val
 2. Remote file downloads successfully → increment the "downloaded" counter.
 3. Remote returns `NOTFOUND` (`403`+AccessDenied/NoSuchKey, or `404`) → skip, don't count, keep walking backward.
 4. Local file already exists at that path → **STOP** walking immediately. This is the incremental catch-up semantic.
-5. Loop terminates when the downloaded counter reaches `N`, OR the local-encounter break fires, OR `MAX_LOOKBACK = 18` months have been examined (safety cap for genuinely-empty-series edge cases).
+5. Loop terminates when the downloaded counter reaches `N`, OR the local-encounter break fires, OR `MAX_LOOKBACK = 18` months have been examined (safety cap for a trip type with no data at all).
 
 Three worked examples. Assume today is **2026-07-27** and yellow publishes with a ~2 month lag.
 
