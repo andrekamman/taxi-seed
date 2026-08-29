@@ -52,10 +52,13 @@ This runs the `build` job, then the `testpypi` job (environment `testpypi`, no a
 gh run watch
 ```
 
-Verify the published artifact installs before promoting further:
+Verify the published artifact installs before promoting further. TestPyPI is not a mirror of PyPI. It happens to carry unrelated uploads under the names `duckdb` and `pyyaml` (newest stable `1.3.2.post1` and `3.11` respectively — neither satisfies this project's floors), and nothing at all under `httpx`. So the runtime dependencies have to resolve against real PyPI:
 
 ```bash
-pip install -i https://test.pypi.org/simple/ taxi-seed==0.2.0rc1
+pip install \
+  --index-url https://test.pypi.org/simple/ \
+  --extra-index-url https://pypi.org/simple/ \
+  taxi-seed==0.2.0rc1
 ```
 
 ### Cut a final release (PyPI)
@@ -68,6 +71,15 @@ git push origin v0.2.0
 ```
 
 This runs `build`, then the `pypi` job — which waits for approval in the `pypi` GitHub Environment (the required reviewer configured during one-time setup) before it publishes — then creates the GitHub Release. Approve the deployment from the Actions run page (or `gh run watch`, which surfaces the pending-approval state) when you're ready for it to go live.
+
+Once it lands, confirm the release from a consumer's position — the console scripts are the part most likely to be wrong, since they change whenever a tool is added or removed:
+
+```bash
+uv tool install taxi-seed@0.2.0 --force
+taxi-download --help
+```
+
+The user-facing install instructions are on the [Installation](../install.md) page; update it in the same PR whenever a release adds, removes, or renames a CLI.
 
 ### Safety / gotchas
 

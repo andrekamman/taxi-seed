@@ -46,6 +46,35 @@ If a column's DuckDB type has no SQL Server equivalent, `map_duckdb_to_mssql` ra
 
 Data actually moves via DuckDB's `COPY ... TO 'mssql://mssql/<schema>/<table>' (FORMAT 'bcp', ...)`, which streams through the `mssql` extension's bulk-copy path rather than row-by-row inserts.
 
+## Page compression
+
+Every table the loader creates is page-compressed. The generated DDL ends with a `WITH` clause:
+
+```sql
+CREATE TABLE dbo.yellow_2024 (
+    VendorID INT,
+    tpep_pickup_datetime DATETIME2,
+    ...
+) WITH (DATA_COMPRESSION = PAGE);
+```
+
+This is unconditional — there is no flag and no configuration key. It applies to the `<type>_<year>` data tables and to the `_load_manifest` bookkeeping table, because both are built by the same `taxi_shared.sql_generator.generate_create_table_sql`.
+
+Taxi data compresses well: the columns repeat heavily within a page (vendor IDs, location IDs, rate codes, payment types), which is the pattern page compression's dictionary and prefix stages are built for. The result is a smaller database and fewer pages read per query.
+
+Two things to know:
+
+- **Every edition supports it.** Data compression stopped being an Enterprise-only feature in SQL Server 2016 SP1, so Express and Developer both take this DDL. (Backup compression is a separate feature and is still edition-limited.)
+- **Compressing the manifest is a consequence, not a goal.** `_load_manifest` holds one row per loaded month, so compressing it saves nothing worth measuring. It is compressed because it shares the generator, and that was accepted as a side effect.
+
+To undo it for a table you have already loaded:
+
+```sql
+ALTER TABLE dbo.yellow_2024 REBUILD WITH (DATA_COMPRESSION = NONE);
+```
+
+A later `--full-refresh` (or any truncate-reload) recreates the table from the generator, so it comes back compressed.
+
 ## Idempotent reconcile: skip / append / truncate-reload
 
 The loader tracks what it has already loaded in a bookkeeping table, `<schema>._load_manifest`, with one row per loaded month (primary key `(data_type, year, month)`, plus `source_file`, `row_count`, `loaded_at`). Every run, for every `(type, year)` present either on disk or in the manifest, it decides one of three actions by comparing disk parquet against the manifest and the live table's row count:

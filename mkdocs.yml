@@ -44,9 +44,11 @@ markdown_extensions:
 
 exclude_docs: |
   superpowers/plans/
+  agents/
 
 nav:
   - Home: index.md
+  - Installation: install.md
   - Getting Started: getting-started.md
   - Guides:
       - Downloader: guides/downloader.md
