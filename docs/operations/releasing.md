@@ -13,13 +13,17 @@ The promotion path in order: feature branch → PR into `dev` → `dev` passes C
 
 ## The CI gate
 
-`.github/workflows/ci.yml` defines three jobs — `test`, `docs`, and `integration`. A pull request runs `test` and `integration`; `docs` only runs (and deploys) on a `push` to `main`, so it does not gate PRs.
+`.github/workflows/ci.yml` defines four jobs — `test`, `docs`, `integration`, and `branch-guard`. A pull request runs `test`, `integration`, and `branch-guard`; `docs` only runs (and deploys) on a `push` to `main`, so it does not gate PRs.
 
 - **`test`** — unit tests across the Python version matrix (3.12, 3.13).
 - **`docs`** — builds and deploys the documentation site; gated on `push` to `refs/heads/main`, not on pull requests.
 - **`integration`** — end-to-end tests against a real SQL Server container (loader integration + pipeline e2e), on Python 3.13.
+- **`branch-guard`** — fails a pull request that targets `main` from any head branch other than `dev`. It runs on every PR and passes trivially for PRs into `dev`, so it costs a few seconds and only bites when the branch model above is being bypassed.
 
-Merging into `dev` or `main` is blocked until `integration` passes — it is configured as a **required status check** (see the one-time setup below for the exact command that wires this up).
+Merging into `dev` or `main` is blocked until `integration` passes — it is configured as a **required status check** (see the one-time setup below for the exact command that wires this up) `main` additionally requires `branch-guard`.
+
+!!! warning "`branch-guard` is the only thing enforcing the branch model"
+    GitHub branch protection has no setting that restricts *which* head branch may open a pull request against a given base — protection gates checks and pushes, not PR topology. Without `branch-guard` as a required check on `main`, a feature branch can open and merge a PR straight into `main` while passing every other gate. That is exactly how [#9](https://github.com/andrekamman/taxi-seed/pull/9) bypassed `dev`.
 
 !!! warning "The required check is named `integration`"
     Branch protection matches on the job name, not on what the job does. If the `integration` job in `.github/workflows/ci.yml` is ever renamed, the branch-protection rule silently stops matching anything — GitHub will show the merge button as available even though no equivalent check ran. Renaming that job and updating branch protection have to happen in the same PR.
@@ -113,7 +117,7 @@ These are manual, out-of-band steps — they only need to happen once per repo, 
     - `testpypi` — no protection rules. The prerelease flow should be fast and unattended.
     - `pypi` — add yourself (or the release approver) as a **required reviewer**. This is the actual production approval gate: the `pypi` job in `release.yml` will not run until someone approves the deployment.
 
-4. **Turn on branch protection for both `dev` and `main`**, requiring the `integration` check on each. Both branches get the identical rule — `dev` because feature-branch PRs land there, and `main` because `dev`→`main` promotion PRs need the same gate to keep `main` releasable:
+4. **Turn on branch protection for both `dev` and `main`.** Both require the `integration` check — `dev` because feature-branch PRs land there, and `main` because `dev`→`main` promotion PRs need the same gate to keep `main` releasable. `main` additionally requires `branch-guard`, which is what actually enforces the branch model:
 
     ```bash
     gh api -X PUT repos/andrekamman/taxi-seed/branches/dev/protection --input - <<'JSON'
@@ -129,7 +133,7 @@ These are manual, out-of-band steps — they only need to happen once per repo, 
     ```bash
     gh api -X PUT repos/andrekamman/taxi-seed/branches/main/protection --input - <<'JSON'
     {
-      "required_status_checks": { "strict": true, "contexts": ["integration"] },
+      "required_status_checks": { "strict": true, "contexts": ["integration", "branch-guard"] },
       "enforce_admins": true,
       "required_pull_request_reviews": null,
       "restrictions": null
