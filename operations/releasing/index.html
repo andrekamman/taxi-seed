@@ -1378,13 +1378,18 @@
 </ul>
 <p>The promotion path in order: feature branch → PR into <code>dev</code> → <code>dev</code> passes CI → PR/merge <code>dev</code> into <code>main</code> → tag <code>main</code> → release workflow runs.</p>
 <h2 id="the-ci-gate">The CI gate</h2>
-<p><code>.github/workflows/ci.yml</code> defines three jobs — <code>test</code>, <code>docs</code>, and <code>integration</code>. A pull request runs <code>test</code> and <code>integration</code>; <code>docs</code> only runs (and deploys) on a <code>push</code> to <code>main</code>, so it does not gate PRs.</p>
+<p><code>.github/workflows/ci.yml</code> defines four jobs — <code>test</code>, <code>docs</code>, <code>integration</code>, and <code>branch-guard</code>. A pull request runs <code>test</code>, <code>integration</code>, and <code>branch-guard</code>; <code>docs</code> only runs (and deploys) on a <code>push</code> to <code>main</code>, so it does not gate PRs.</p>
 <ul>
 <li><strong><code>test</code></strong> — unit tests across the Python version matrix (3.12, 3.13).</li>
 <li><strong><code>docs</code></strong> — builds and deploys the documentation site; gated on <code>push</code> to <code>refs/heads/main</code>, not on pull requests.</li>
 <li><strong><code>integration</code></strong> — end-to-end tests against a real SQL Server container (loader integration + pipeline e2e), on Python 3.13.</li>
+<li><strong><code>branch-guard</code></strong> — fails a pull request that targets <code>main</code> from any head branch other than <code>dev</code>. It runs on every PR and passes trivially for PRs into <code>dev</code>, so it costs a few seconds and only bites when the branch model above is being bypassed.</li>
 </ul>
-<p>Merging into <code>dev</code> or <code>main</code> is blocked until <code>integration</code> passes — it is configured as a <strong>required status check</strong> (see the one-time setup below for the exact command that wires this up).</p>
+<p>Merging into <code>dev</code> or <code>main</code> is blocked until <code>integration</code> passes — it is configured as a <strong>required status check</strong> (see the one-time setup below for the exact command that wires this up) <code>main</code> additionally requires <code>branch-guard</code>.</p>
+<div class="admonition warning">
+<p class="admonition-title"><code>branch-guard</code> is the only thing enforcing the branch model</p>
+<p>GitHub branch protection has no setting that restricts <em>which</em> head branch may open a pull request against a given base — protection gates checks and pushes, not PR topology. Without <code>branch-guard</code> as a required check on <code>main</code>, a feature branch can open and merge a PR straight into <code>main</code> while passing every other gate. That is exactly how <a href="https://github.com/andrekamman/taxi-seed/pull/9">#9</a> bypassed <code>dev</code>.</p>
+</div>
 <div class="admonition warning">
 <p class="admonition-title">The required check is named <code>integration</code></p>
 <p>Branch protection matches on the job name, not on what the job does. If the <code>integration</code> job in <code>.github/workflows/ci.yml</code> is ever renamed, the branch-protection rule silently stops matching anything — GitHub will show the merge button as available even though no equivalent check ran. Renaming that job and updating branch protection have to happen in the same PR.</p>
@@ -1505,7 +1510,7 @@
 </ul>
 </li>
 <li>
-<p><strong>Turn on branch protection for both <code>dev</code> and <code>main</code></strong>, requiring the <code>integration</code> check on each. Both branches get the identical rule — <code>dev</code> because feature-branch PRs land there, and <code>main</code> because <code>dev</code>→<code>main</code> promotion PRs need the same gate to keep <code>main</code> releasable:</p>
+<p><strong>Turn on branch protection for both <code>dev</code> and <code>main</code>.</strong> Both require the <code>integration</code> check — <code>dev</code> because feature-branch PRs land there, and <code>main</code> because <code>dev</code>→<code>main</code> promotion PRs need the same gate to keep <code>main</code> releasable. <code>main</code> additionally requires <code>branch-guard</code>, which is what actually enforces the branch model:</p>
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-6-1">1</a></span>
 <span class="normal"><a href="#__codelineno-6-2">2</a></span>
 <span class="normal"><a href="#__codelineno-6-3">3</a></span>
@@ -1531,7 +1536,7 @@
 <span class="normal"><a href="#__codelineno-7-7">7</a></span>
 <span class="normal"><a href="#__codelineno-7-8">8</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1"></a>gh<span class="w"> </span>api<span class="w"> </span>-X<span class="w"> </span>PUT<span class="w"> </span>repos/andrekamman/taxi-seed/branches/main/protection<span class="w"> </span>--input<span class="w"> </span>-<span class="w"> </span><span class="s">&lt;&lt;&#39;JSON&#39;</span>
 <a id="__codelineno-7-2" name="__codelineno-7-2"></a><span class="s">{</span>
-<a id="__codelineno-7-3" name="__codelineno-7-3"></a><span class="s">  &quot;required_status_checks&quot;: { &quot;strict&quot;: true, &quot;contexts&quot;: [&quot;integration&quot;] },</span>
+<a id="__codelineno-7-3" name="__codelineno-7-3"></a><span class="s">  &quot;required_status_checks&quot;: { &quot;strict&quot;: true, &quot;contexts&quot;: [&quot;integration&quot;, &quot;branch-guard&quot;] },</span>
 <a id="__codelineno-7-4" name="__codelineno-7-4"></a><span class="s">  &quot;enforce_admins&quot;: true,</span>
 <a id="__codelineno-7-5" name="__codelineno-7-5"></a><span class="s">  &quot;required_pull_request_reviews&quot;: null,</span>
 <a id="__codelineno-7-6" name="__codelineno-7-6"></a><span class="s">  &quot;restrictions&quot;: null</span>
