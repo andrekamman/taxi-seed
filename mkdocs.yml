@@ -44,6 +44,7 @@ markdown_extensions:
 
 exclude_docs: |
   superpowers/plans/
+  agents/
 
 nav:
   - Home: index.md
