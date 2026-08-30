@@ -36,6 +36,12 @@ fallback-version = "0.0.0"
 [tool.hatch.version.raw-options]
 version_scheme = "no-guess-dev"
 local_scheme = "no-local-version"
+# Only v-prefixed tags are releases. Without this, ANY other tag reaching the repo
+# breaks version derivation outright -- setuptools-scm's default tag_regex accepts a
+# `word-` prefix, so a tag like `mssql-ext-1.5.5-e2b8c01` (used to carry the vendored
+# extension binaries) raises "Can't parse version from tag" and every build fails,
+# including CI and the release workflow, for anyone who has fetched tags.
+git_describe_command = "git describe --dirty --tags --long --match v*"
 
 [tool.hatch.build.targets.wheel]
 packages = [
@@ -62,3 +68,4 @@ taxi-curate-mappings = "taxi_orchestrate.curate:main"
 taxi-download = "taxi_download.cli:main"
 taxi-load = "taxi_loader.cli:main"
 taxi-run = "taxi_orchestrate.cli:main"
+taxi-vendor-extension = "taxi_loader.extension:main"
