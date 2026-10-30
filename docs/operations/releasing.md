@@ -90,6 +90,40 @@ The user-facing install instructions are on the [Installation](../install.md) pa
 - **The required reviewer on the `pypi` Environment is the only gate protecting production PyPI.** If that environment is created without a required reviewer (or not created at all), a final `vX.Y.Z` tag publishes to real PyPI unattended — there is no other approval step in the path. Don't skip step 3 of the one-time setup below.
 - **`release.yml` triggers on any `v*` tag pushed to any branch**, not just `main`. Only create release tags on `main`, per the branch model above — an accidental `v1.0.0` tag pushed on a feature branch or on `dev` would build from that commit and publish it just the same.
 
+## Refreshing the vendored mssql extension
+
+The loader does not `INSTALL mssql FROM community` at runtime. It loads a **vendored**
+extension that this repo mirrors as a release asset, because the community registry
+rebuilds: DuckDB 1.5.5 served build `37596c2` (`mssql_version() 0.2.3`) in mid-August 2026
+and `e2b8c01` (`0.2.4`) since 2026-08-18, with no DuckDB release between them. Builds also
+disappear — DuckDB 1.4.5 has no `mssql` build at all.
+
+These assets are **not** cut per taxi-seed release. They are keyed to a DuckDB version, so
+they are refreshed only when the DuckDB pin moves, which is why `release.yml` does not touch
+them.
+
+Bumping DuckDB is therefore a deliberate, four-step act:
+
+1. **Re-spike.** Install the new DuckDB, `FORCE INSTALL mssql FROM community` (a plain
+   `INSTALL` is a no-op when the extension is cached and will report the stale build as
+   current), and record `extension_version` and `mssql_version()`.
+2. **Re-vendor.** `taxi-vendor-extension --all --root <dir>` fetches every platform and
+   verifies each against the SHA-256 table. Update `DUCKDB_VERSION`, `EXPECTED_EXT_VERSION`,
+   `EXPECTED_MSSQL_VERSION` and `SHA256` in `loader/src/taxi_loader/extension.py` — they are
+   one fact expressed four ways, so they move together.
+3. **Publish** a `mssql-ext-<duckdb version>-<build>` release carrying the five
+   `.duckdb_extension.gz` files and a `SHA256SUMS.txt`, marked `--latest=false`.
+4. **Move the `duckdb` pin** in `pyproject.toml` to the exact new version. The vendored
+   directory is keyed by exact DuckDB version, so a mismatched pin silently orphans the
+   vendored extension.
+
+!!! warning "Only `v*` tags are releases"
+    `[tool.hatch.version.raw-options]` restricts `git describe` to `--match v*`. Without it,
+    a tag like `mssql-ext-1.5.5-e2b8c01` is accepted as a version candidate by
+    setuptools-scm's default `tag_regex` and then fails to parse, breaking version
+    derivation — and therefore every build, CI and the release workflow included — for
+    anyone who has fetched tags. Do not relax that setting.
+
 ## One-time setup checklist
 
 These are manual, out-of-band steps — they only need to happen once per repo, not per release.
