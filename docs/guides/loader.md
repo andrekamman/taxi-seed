@@ -1,6 +1,6 @@
 # Loader
 
-`taxi-load` bulk-loads normalized TLC parquet (`raw-normalized/<type>/<year>/*.parquet`) into SQL Server, one table per year per type, entirely through DuckDB and the `mssql` community extension — no ODBC driver, no separate ETL framework. It reconciles what's on disk against what's already loaded and picks, per year, one of three actions: skip, append the new months, or truncate and reload the whole year. That reconciliation is what makes re-running the tool after a fresh `normalize` pass (or after TLC ships a new month) safe and cheap.
+`taxi-load` bulk-loads normalized TLC parquet (`raw-normalized/<type>/<year>/*.parquet`) into SQL Server, one table per year per type, entirely through DuckDB and the `mssql` extension — no ODBC driver, no separate ETL framework. The extension is vendored rather than installed at runtime (see [Troubleshooting](#troubleshooting)). It reconciles what's on disk against what's already loaded and picks, per year, one of three actions: skip, append the new months, or truncate and reload the whole year. That reconciliation is what makes re-running the tool after a fresh `normalize` pass (or after TLC ships a new month) safe and cheap.
 
 ## Prerequisites
 
@@ -120,6 +120,20 @@ uv run taxi-load yellow --input-dir /mnt/nas/tlc-mirror/normalized-output
 
 If a type has no parquet at all under the resolved input directory, that type is skipped with a message (`<type>: no parquet under <dir>/<type>, skipping`) and contributes success (exit 0) for that type — this is the same "nothing to do yet" posture as the other tools in this repo.
 
+## The `--writers` flag
+
+**`--writers N`** — how many concurrent bulk-load connections a single `COPY` may open (`mssql_copy_parallel_writers`). Omit it and DuckDB derives the count from its thread count, capped at 8, which is the fastest configuration measured on this repo's tables. `--writers 1` loads serially, which is the tool to reach for when bisecting a load problem.
+
+This is in-process parallelism: one `COPY`, several bulk-load connections. It replaced an earlier design that ran one process per month and beat it by 1.65x on a 19.2M-row year, and by 1.44x at the same degree of parallelism — so the gain is the mechanism, not simply the count.
+
+`TABLOCK` is always on, and that matters more than the writer count. On the page-compressed heaps this loader creates, turning it off is 3.2x slower and produces a 36% larger table: without `TABLOCK` the writers contend on `PAGELATCH_EX` at the insert point and rows land in less densely packed pages. The extension's own `mssql_copy_tablock` default is `auto`, which resolves to *off* for any clustered target, so the loader sets it explicitly rather than letting table shape decide.
+
+## The `--require-existing-database` flag
+
+**`--require-existing-database`** — fail if the target database does not exist, instead of creating it.
+
+By default the loader creates the database if it is absent, with server-default file paths and sizes. That is wrong for any caller that provisions a presized database itself: if its provisioning step is skipped or fails soft, the loader would quietly produce a correctly-named database of entirely the wrong shape, and nothing notices until it fills up. With this flag that becomes a clean exit 2.
+
 ## Configuration
 
 | Flag | Default | Meaning |
@@ -156,8 +170,11 @@ A: Set it before invoking: `export MSSQL_PASSWORD=...` (or `MSSQL_PASSWORD=... u
 **Q: `error: invalid schema '...' : must match [A-Za-z_][A-Za-z0-9_]*` (or `database`).**
 A: `--schema` and `--database` are validated against a strict identifier pattern before anything touches SQL Server, since they're interpolated into DDL (`CREATE DATABASE`, `CREATE SCHEMA`) rather than passed as bind parameters. Rename to a plain identifier, or quote/alias it on the SQL Server side and point `--database`/`--schema` at that name instead.
 
-**Q: `error: mssql extension version '...' != expected '7e57d24'`.**
-A: The loader pins the exact community-registry build of the `mssql` DuckDB extension it was tested against. A version mismatch means `INSTALL mssql FROM community` resolved to a different build than expected (the community registry updated). This is a deliberate hard-stop, not a warning — bumping `EXPECTED_MSSQL_EXT_VERSION` in `taxi_loader/connection.py` is a decision that should be made after re-testing, not silently.
+**Q: `error: vendored mssql extension is not the pinned build: ...`.**
+A: The loader does not `INSTALL` the extension from the community registry — it loads a **vendored** copy, because that registry rebuilds. DuckDB 1.5.5 alone has served three different builds (`37596c2`, `e2b8c01`, `d35b617`), so what `INSTALL` returns today is not what was tested. The assertion checks both the build hash and `mssql_version()`, and the message names whichever disagreed: the hash catches a version re-pinned without re-spiking, the semver catches a stale vendored directory. Re-run `taxi-vendor-extension` against a clean directory. Changing the pinned values in `loader/src/taxi_loader/extension.py` is a decision to make after re-testing, not a way to silence this.
+
+**Q: `could not vendor the mssql extension`.**
+A: The loader fetches the extension on first use, preferring taxi-seed's own release mirror and falling back to the community CDN. The message lists what each source returned. Run `taxi-vendor-extension` (optionally `--root DIR`) to do it as a separate, retryable step; set `TAXI_EXTENSION_DIR` to point the loader at a directory you populated yourself, which is what the container does at image build time.
 
 **Q: `error: yellow: No SQL Server mapping for DuckDB type: '...'`.**
 A: A `TypeMappingError` — a normalized parquet column has a DuckDB type with no entry in `taxi_shared.type_mapping`. Add the mapping there, or check whether `normalize` should have cast the column to something already mapped.

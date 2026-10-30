@@ -43,12 +43,25 @@ def parse_args(argv=None) -> argparse.Namespace:
                         "(overrides --data-dir; default: raw-normalized)")
     p.add_argument("--data-dir", default=None,
                    help="base dir; reads <data-dir>/raw-normalized (unless --input-dir given)")
+    # Deliberately ours, not the extension's. mssql_copy_flush_rows now defaults to
+    # 102400, slightly above this -- but FLUSH_ROWS is the commit batch size and
+    # therefore the crash granularity a killed load leaves behind, which the reconcile's
+    # integrity check is sized around. Keeping our own value means it cannot shift under
+    # us when the extension is rebuilt.
     p.add_argument("--flush-rows", type=int, default=100000,
-                   help="BCP commit batch size")
+                   help="BCP commit batch size, and therefore the crash granularity "
+                        "of an interrupted load")
     p.add_argument("--full-refresh", action="store_true",
                    help="force truncate+reload of every year")
     p.add_argument("--dry-run", action="store_true",
                    help="print the reconciliation plan and exit without writing")
+    p.add_argument("--writers", type=int, default=None, metavar="N",
+                   help="concurrent bulk-load connections one COPY may open "
+                        "(mssql_copy_parallel_writers). Default derives from DuckDB's "
+                        "thread count, capped at 8. 1 loads serially.")
+    p.add_argument("--require-existing-database", action="store_true",
+                   help="fail if the target database is absent instead of creating it; "
+                        "for callers that provision a presized database themselves")
     p.add_argument("--year", type=int, default=None,
                    help="load only this year; omit for every year on disk")
     p.add_argument("--month", type=int, default=None, choices=range(1, 13),
@@ -214,7 +227,7 @@ def main(argv=None) -> int:
 
     # Connection / provisioning failures are exit 2 (nothing loaded).
     try:
-        conn = connect_duckdb()
+        conn = connect_duckdb(writers=args.writers)
         if args.dry_run:
             # Read-only: attach without provisioning; tolerate an absent database.
             try:
@@ -223,7 +236,8 @@ def main(argv=None) -> int:
             except LoaderConnectionError:
                 attached = False   # DB doesn't exist yet -> every year is fresh
         else:
-            ensure_database(conn, cfg)
+            ensure_database(conn, cfg,
+                            require_existing=args.require_existing_database)
             attach_target(conn, cfg)
             manifest.ensure_manifest_table(conn, cfg)
             attached = True
