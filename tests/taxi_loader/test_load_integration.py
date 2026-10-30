@@ -29,8 +29,8 @@ from conftest import write_month  # helper from tests/taxi_loader/conftest.py
 from taxi_loader import load, manifest
 from taxi_loader.cli import main
 from taxi_loader.connection import (
-    ATTACH_NAME, ConnConfig, _sql_str, attach_target, build_conn_string,
-    connect_duckdb, ensure_database,
+    ATTACH_NAME, ConnConfig, _sql_str, attach_target, connect_duckdb,
+    create_secret, ensure_database,
 )
 
 pytestmark = pytest.mark.skipif(
@@ -179,10 +179,8 @@ def test_dry_run_touches_nothing(normalized_family, capsys):
 
     # The database must NOT have been created by the dry-run.
     check_conn = connect_duckdb()
-    check_conn.execute(
-        f"ATTACH '{_sql_str(build_conn_string(cfg, 'master'))}' "
-        "AS mssql_check (TYPE mssql)"
-    )
+    name = create_secret(check_conn, cfg, "master", "mssql_check")
+    check_conn.execute(f"ATTACH '' AS mssql_check (TYPE mssql, SECRET {name})")
     row = check_conn.execute(
         "SELECT id FROM mssql_scan('mssql_check', ?)",
         [f"SELECT DB_ID('{dbname}') AS id"],

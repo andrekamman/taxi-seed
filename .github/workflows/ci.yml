@@ -66,6 +66,12 @@ jobs:
           enable-cache: true
       - run: uv python install 3.13
       - run: uv sync --extra test
+      - name: Vendor the mssql extension
+        # The loader loads the extension from a vendored directory rather than
+        # INSTALLing it from the community registry, which rebuilds. connect_duckdb
+        # would fetch it on first use anyway; doing it here makes a download failure
+        # attributable to the download instead of to a test.
+        run: uv run --extra test taxi-vendor-extension
       - name: Wait for SQL Server
         run: uv run python scripts/wait_for_mssql.py
       - name: Run loader integration + pipeline e2e tests

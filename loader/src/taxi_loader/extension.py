@@ -27,6 +27,7 @@ from __future__ import annotations
 
 import gzip
 import hashlib
+import os
 import platform
 import shutil
 import sys
@@ -78,6 +79,17 @@ def _urlopen(url: str):
     """
     req = urllib.request.Request(url, headers={"User-Agent": "taxi-seed/vendor-extension"})
     return urllib.request.urlopen(req)
+
+
+# Where a clone or a PyPI install keeps the vendored extension. The container
+# overrides it to a path baked at image build time.
+DEFAULT_ROOT = Path.home() / ".taxi-seed" / "extensions"
+ENV_ROOT = "TAXI_EXTENSION_DIR"
+
+
+def default_root() -> Path:
+    """Vendored-extension root: $TAXI_EXTENSION_DIR, else ~/.taxi-seed/extensions."""
+    return Path(os.environ.get(ENV_ROOT) or DEFAULT_ROOT)
 
 
 class ExtensionError(Exception):
@@ -221,22 +233,23 @@ def main(argv=None) -> int:
         prog="taxi-vendor-extension",
         description="Download and verify the pinned DuckDB mssql extension.",
     )
-    p.add_argument("--root", default=str(Path.home() / ".taxi-seed" / "extensions"),
-                   help="extension directory root (default: ~/.taxi-seed/extensions)")
+    p.add_argument("--root", default=None,
+                   help=f"extension directory root (default: ${ENV_ROOT} or {DEFAULT_ROOT})")
     p.add_argument("--platform", default=None,
                    help=f"override the platform ({', '.join(sorted(SHA256))})")
     p.add_argument("--all", action="store_true",
                    help="vendor every platform, for building a release or an image")
     args = p.parse_args(argv)
+    root = Path(args.root) if args.root else default_root()
 
     try:
         plats = sorted(SHA256) if args.all else [args.platform or platform_key()]
         for plat in plats:
-            path = fetch(Path(args.root), plat)
+            path = fetch(root, plat)
             print(f"ok  {plat}  {path}")
         print(f"\nDuckDB {DUCKDB_VERSION}, mssql build {EXPECTED_EXT_VERSION} "
               f"(version {EXPECTED_MSSQL_VERSION})")
-        print(f"Point DuckDB at it with: SET extension_directory = '{args.root}'")
+        print(f"Point DuckDB at it with: SET extension_directory = '{root}'")
     except ExtensionError as e:
         print(f"error: {e}", file=sys.stderr)
         return 2
