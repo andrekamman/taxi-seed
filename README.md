@@ -60,7 +60,7 @@ A full-history mirror is roughly 40–100 GB (depending on how many of the four 
 - Disk sized to intent — see the [Downloader guide](https://andrekamman.github.io/taxi-seed/guides/downloader/#disk-sizing).
 - Individual tools list per-guide prerequisites (a target database for the loader, etc.).
 
-Everything runs on macOS, Linux, and Windows (via Git Bash). CI runs the test suite and the strict docs build on every PR.
+Everything runs on macOS, Linux, and Windows (via Git Bash). CI runs the test suite on Python 3.12 and 3.13, the loader and pipeline integration tests against a real SQL Server, and a strict docs build, on every PR.
 
 ## Documentation map
 
