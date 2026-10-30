@@ -22,9 +22,25 @@ jobs:
       - name: Run tests
         run: uv run --extra test pytest -q
 
-  docs:
+  docs-build:
+    # Runs everywhere, including pull requests. mkdocs --strict turns a broken internal
+    # link into a failure instead of letting it rot: before this job existed, the only
+    # mkdocs invocation in CI was the gh-deploy below, so the first thing that proved
+    # the site built was the thing that published it.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v3
+        with:
+          enable-cache: true
+      - run: uv python install 3.12
+      - run: uv sync --extra docs
+      - name: Build the site strictly
+        run: uv run --extra docs mkdocs build --strict
+
+  docs-deploy:
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    needs: test
+    needs: [test, docs-build]
     runs-on: ubuntu-latest
     permissions:
       contents: write

@@ -42,9 +42,10 @@ version_scheme = "no-guess-dev"
 local_scheme = "no-local-version"
 # Only v-prefixed tags are releases. Without this, ANY other tag reaching the repo
 # breaks version derivation outright -- setuptools-scm's default tag_regex accepts a
-# `word-` prefix, so a tag like `mssql-ext-1.5.5-e2b8c01` (used to carry the vendored
-# extension binaries) raises "Can't parse version from tag" and every build fails,
-# including CI and the release workflow, for anyone who has fetched tags.
+# "word-" prefix, so the `mssql-ext-1.5.5-e2b8c01` tag that carries the vendored
+# extension binaries raises "Can't parse version from tag" and every build that
+# resolves a version fails: `uv sync` for anyone who has fetched tags, the docs
+# deploy job, and the release workflow (both of which use fetch-depth: 0).
 git_describe_command = "git describe --dirty --tags --long --match v*"
 
 [tool.hatch.build.targets.wheel]
