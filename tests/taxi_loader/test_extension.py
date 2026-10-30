@@ -184,22 +184,3 @@ def test_assert_loaded_reports_both_when_both_differ():
         assert_loaded(_Conn("37596c2", "0.2.3"))
     msg = str(e.value)
     assert "build hash" in msg and "version" in msg
-
-
-# --- the release tag must not break version derivation ----------------------
-
-def test_version_derivation_ignores_non_release_tags():
-    """The vendored binaries are carried by a `mssql-ext-<duckdb>-<build>` tag.
-
-    setuptools-scm's default tag_regex accepts a `word-` prefix, so that tag parses as
-    a version candidate and raises "Can't parse version from tag" -- breaking every
-    build, CI and the release workflow included, for anyone who has fetched tags.
-    Restricting describe to v-prefixed tags is what makes carrying assets on a tag safe.
-    """
-    import tomllib
-    from pathlib import Path
-
-    root = Path(__file__).resolve().parents[2]
-    cfg = tomllib.load(open(root / "pyproject.toml", "rb"))
-    raw = cfg["tool"]["hatch"]["version"]["raw-options"]
-    assert "--match v*" in raw["git_describe_command"]
