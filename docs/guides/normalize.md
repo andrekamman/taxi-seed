@@ -75,6 +75,33 @@ acknowledged_data_loss:
 
 See the [Reference → Configuration](../reference/configuration.md) page for the field-by-field schema.
 
+## Re-pinning `target:` changes the table shape
+
+`target:` names the file whose columns *are* the target schema. It is a fixed reference,
+not "whatever is newest", which is what lets a fresh clone normalize seventeen years of
+history reproducibly.
+
+Moving it is therefore a deliberate act with a cost downstream. When the TLC adds a column
+you want to keep, re-pinning to a file that carries it adopts that column for **every**
+year: months older than the new column null-fill it automatically, with no acknowledgment
+needed, because a target column with no source in the raw file is a `null_fill` rather than
+a drop.
+
+What it also does is change the loaded table's column set — and that is **not** something
+[`taxi-load`](loader.md) can detect. Its reconcile compares the months on disk, the rows in
+the load manifest and the committed row counts; it never compares column sets. So appending
+a newly-widened year into a table created from the old target fails at `COPY` with a column
+mismatch rather than triggering a rebuild.
+
+!!! warning "Re-pinning `target:` needs a one-time reload"
+    After moving `target:`, run the loader once with `--full-refresh` for the affected trip
+    types, or drop their year tables by hand. A plain re-run will not rebuild them, because
+    reconcile has no view of the schema.
+
+**This happened on 2026-10-31.** The TLC added a `request_source` column (`VARCHAR`) to
+yellow and green from 2026-06. Both mappings were re-pinned from `2026-05` to `2026-06` to
+adopt it; no existing column changed type. `fhv` and `fhvhv` were unaffected.
+
 ## Bootstrap and amend
 
 Both operations run the same underlying analysis; the difference is in whether existing content is preserved.

@@ -91,6 +91,21 @@ This is computed by the pure function `reconcile()` (`taxi_load/reconcile.py`) f
 - On **reload**, the table is dropped and recreated, the year's manifest rows are deleted up front, all months for the year are copied in a single `COPY` statement, and manifest rows for every month are written afterward.
 - A year that had manifest rows but now has **zero** files on disk (the whole year vanished) is treated as a reload target with no months: the table is dropped and the manifest rows for that year are deleted, but nothing is recreated.
 
+### What reconcile does not look at
+
+Reconcile decides from three observables: the months on disk, the rows in the load
+manifest, and the committed row count of the live table. **Column sets are not among
+them.**
+
+That is fine while the target schema is stable, which is the normal case — `target:` in a
+curated mapping is a fixed reference. But if that pin moves (see
+[Re-pinning `target:`](normalize.md#re-pinning-target-changes-the-table-shape)), the
+normalized parquet gains a column while the existing year table does not, and reconcile
+will choose `APPEND` because the row counts still agree. The `COPY` then fails on a column
+mismatch.
+
+The remedy is `--full-refresh` for the affected types, once, after re-pinning.
+
 ## The `--dry-run` flag
 
 `--dry-run` prints the reconciliation plan per type/year (`skip`, `append month(s) NN, NN`, or `truncate + reload (N month file(s))`) and exits without touching SQL Server data. It still connects and attaches — read-only — so the plan reflects the real manifest and table state, *except* when the target database doesn't exist yet: in that case the attach is allowed to fail silently, and every year is reported as fresh (no manifest, no table-count lookups), since there's nothing on the server to compare against.
