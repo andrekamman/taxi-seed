@@ -54,3 +54,12 @@ The following spellings are now confirmed working against the live server:
 **To finish the live spike / run integration:** start Docker, then
 `docker run -d --name mssql-it -e ACCEPT_EULA=Y -e MSSQL_SA_PASSWORD='Str0ng_Passw0rd!' -p 1433:1433 mcr.microsoft.com/mssql/server:2022-latest`
 and `MSSQL_PASSWORD='Str0ng_Passw0rd!' uv run --extra test pytest tests/taxi_loader/test_load_integration.py -v`.
+
+---
+
+**Superseded in part.** This spike concluded that the community registry versions the
+extension by commit hash and that no semver was available. The first half is right; the
+second is not — `mssql_version()` is listed among the functions above and reports a real
+semver. See [`2026-08-30-mssql-version-probe.md`](2026-08-30-mssql-version-probe.md) for the
+version ladder across every reachable build, and `loader/src/taxi_loader/extension.py` for
+what the loader does now, which is to vendor the binary rather than install it at runtime.
