@@ -1,7 +1,10 @@
 # Auto-curated by `taxi-curate-mappings green` on 2026-07-23.
+# `target:` was re-pinned by hand on 2026-10-31, from 2026-05 to 2026-06, to adopt
+# the `request_source` column the TLC added in 2026-06. See issue #37. Months before
+# 2026-06 null-fill it (planner Case C), so no acknowledgment is needed for them.
 # Every acknowledgment is machine-accepted; see CURATION-REPORT.md to verify.
 
-target: green_tripdata_2026-05.parquet
+target: green_tripdata_2026-06.parquet
 renames: {}
 lossy_casts:
   trip_type:
