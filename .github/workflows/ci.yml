@@ -93,7 +93,7 @@ jobs:
       - name: Run loader integration + pipeline e2e tests
         run: |
           uv run --extra test pytest \
-            tests/taxi_loader/test_load_integration.py \
+            tests/taxi_load/test_load_integration.py \
             tests/e2e/test_pipeline_e2e.py -v
 
   branch-guard:

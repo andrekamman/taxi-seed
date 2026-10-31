@@ -1,15 +1,15 @@
 # Schema Drift
 
-The `schema-drift` tool analyzes a family of parquet files representing different time periods and reports how their schemas changed over time. It walks the files in chronological order, identifies the transition points where the schema actually changed, and at each transition classifies the deltas as columns added, columns removed, columns type-changed, or columns renamed. Rename detection uses a domain-aware heuristic (with an optional data-verification pass) or a purely data-driven mode for non-TLC datasets.
+The `taxi-schema-drift` tool analyzes a family of parquet files representing different time periods and reports how their schemas changed over time. It walks the files in chronological order, identifies the transition points where the schema actually changed, and at each transition classifies the deltas as columns added, columns removed, columns type-changed, or columns renamed. Rename detection uses a domain-aware heuristic (with an optional data-verification pass) or a purely data-driven mode for non-TLC datasets.
 
-It is used two ways. As a standalone CLI it produces a human-readable text report — useful before you ingest historical TLC data so you know exactly what shape shifts to expect. Programmatically, `normalize`'s automatic first-run bootstrap (there is no separate subcommand — `normalize` is a flat argparse CLI; bootstrapping is internal first-run behavior) calls the same analyzer to seed its mapping YAML with the tool's rename suggestions, which you then review and edit before running a full normalize.
+It is used two ways. As a standalone CLI it produces a human-readable text report — useful before you ingest historical TLC data so you know exactly what shape shifts to expect. Programmatically, `taxi-normalize`'s automatic first-run bootstrap (there is no separate subcommand — `taxi-normalize` is a flat argparse CLI; bootstrapping is internal first-run behavior) calls the same analyzer to seed its mapping YAML with the tool's rename suggestions, which you then review and edit before running a full normalize.
 
 ## When to use it
 
 Two scenarios drive most usage:
 
 - **Before ingesting historical TLC data.** Know what schema changes you're going to hit before you write ingest code. The report tells you exactly which columns appear/disappear and at which month, so you can plan your ingest schema and write the right conditionals up-front instead of hitting DuckDB parse errors mid-load.
-- **Before authoring a `normalize` mapping.** Run the tool, review the SUGGESTED renames, and decide which to accept. `normalize`'s automatic first-run bootstrap runs this analyzer for you and writes its suggestions into a mapping YAML, but running `schema-drift` standalone first lets you inspect the raw suggestions (and their confidences) without the bootstrap step overwriting anything.
+- **Before authoring a `taxi-normalize` mapping.** Run the tool, review the SUGGESTED renames, and decide which to accept. `taxi-normalize`'s automatic first-run bootstrap runs this analyzer for you and writes its suggestions into a mapping YAML, but running `taxi-schema-drift` standalone first lets you inspect the raw suggestions (and their confidences) without the bootstrap step overwriting anything.
 
 ## Prerequisites
 
@@ -21,13 +21,13 @@ You need a parquet family: either the [downloader](downloader.md)'s `raw/` mirro
 
 ```bash
 # Default: analyze all four types (yellow, green, fhv, fhvhv) in raw/
-uv run schema-drift
+uv run taxi-schema-drift
 
 # One type only
-uv run schema-drift --types yellow
+uv run taxi-schema-drift --types yellow
 
 # Write to a file instead of stdout
-uv run schema-drift --output drift-report.txt
+uv run taxi-schema-drift --output drift-report.txt
 ```
 
 The default `--data-dir` is `raw/`. Pass `--data-dir some/other/dir` to point elsewhere. `--types` accepts any subset of `yellow green fhv fhvhv` (or, in generic mode, any subdirectory name). The report always includes a CROSS-TYPE SUMMARY that lists which columns appear in which type — even when you analyzed a single type, this section still renders (just with a single column of coverage).
@@ -40,7 +40,7 @@ The tool has three modes for detecting renames. Pick the right one based on your
 
 **`--generic`** — No domain knowledge. Detects renames purely by comparing column data between periods: null ratios, cardinality, min/max ranges, top values. Slower because it samples row data. Best for non-TLC datasets. The report explicitly marks every suggested rename as "requires human review".
 
-**`--verify-data`** — Taxi mode plus a sampled data comparison to verify low-confidence rename candidates. Slower than default but faster than `--generic`. Best when you plan to trust the output programmatically — for example, feeding results into `normalize`'s first-run bootstrap without hand-reviewing every suggestion.
+**`--verify-data`** — Taxi mode plus a sampled data comparison to verify low-confidence rename candidates. Slower than default but faster than `--generic`. Best when you plan to trust the output programmatically — for example, feeding results into `taxi-normalize`'s first-run bootstrap without hand-reviewing every suggestion.
 
 Decision helper:
 
@@ -136,7 +136,7 @@ The cutoff depends on the mode. **Default (taxi) mode** scores renames by name s
 
 Anything below the relevant threshold shows in the report as an unresolved add/remove pair — the tool didn't have enough evidence to call it a rename, and a human needs to decide. Anything at or above the threshold is emitted as a SUGGESTED rename with its confidence percentage and, when applicable, a `✓ data verified` / `✗ data mismatch` marker.
 
-In practice, TLC renames tend to score in the 75–95% band. Anything lower is worth a manual look at the two candidate columns before you accept it as a rename in a `normalize` mapping.
+In practice, TLC renames tend to score in the 75–95% band. Anything lower is worth a manual look at the two candidate columns before you accept it as a rename in a `taxi-normalize` mapping.
 
 ## Programmatic API
 
@@ -145,7 +145,7 @@ For notebooks or pipeline code, call the analyzer directly:
 ```python
 import duckdb
 from pathlib import Path
-from schema_drift.analyze import analyze_data_type
+from taxi_schema_drift.analyze import analyze_data_type
 
 conn = duckdb.connect(":memory:")
 result = analyze_data_type(
@@ -170,7 +170,7 @@ for change in result["changes"]:
 To render the same text report you get from the CLI, pass the list of results to `generate_report`:
 
 ```python
-from schema_drift.report import generate_report
+from taxi_schema_drift.report import generate_report
 print(generate_report([result]))
 ```
 

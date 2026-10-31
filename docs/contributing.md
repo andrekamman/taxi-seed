@@ -21,13 +21,13 @@ uv sync --extra test --extra docs
 - `--extra test` installs `pytest` (and any test-only dependencies) so you can run the test suite.
 - `--extra docs` installs `mkdocs`, `mkdocs-material`, and `pymdown-extensions` so you can build the documentation site locally.
 
-Both extras are optional at runtime; the tools themselves (`taxi-download`, `schema-drift`, `normalize`, `taxi-load`, `taxi-run`, `taxi-curate-mappings`) work with a bare `uv sync`. Contributors will almost always want both, so the command above is the recommended default.
+Both extras are optional at runtime; the tools themselves (`taxi-download`, `taxi-schema-drift`, `taxi-normalize`, `taxi-load`, `taxi-pipeline`, `taxi-curate-mappings`) work with a bare `uv sync`. Contributors will almost always want both, so the command above is the recommended default.
 
 `uv sync` creates a project-local `.venv/`. You do not need to activate it — every command in this guide uses `uv run` as the entry point, which resolves the interpreter and the extras on each invocation. If you prefer an activated shell, `source .venv/bin/activate` works, but the CI and every example below run without activation.
 
 ## Running the test suite
 
-The unit-test portion of the suite (everything except `tests/taxi_loader/test_load_integration.py` and `tests/e2e/`, both of which need a real SQL Server container) runs in about a second on a modern laptop — there is no reason to skip it:
+The unit-test portion of the suite (everything except `tests/taxi_load/test_load_integration.py` and `tests/e2e/`, both of which need a real SQL Server container) runs in about a second on a modern laptop — there is no reason to skip it:
 
 ```bash
 # Unit suite (hermetic, no external services)

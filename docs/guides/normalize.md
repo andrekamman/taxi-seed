@@ -1,10 +1,10 @@
 # Normalize
 
-**Data loss is a first-class error, not a warning.** The `normalize` tool rewrites historical TLC parquet to conform to the latest schema — but every silent drop of non-null data, every lossy cast, requires an explicit human acknowledgment written into a version-controlled mapping YAML. There is no `--force` flag. There is no "warn and continue" mode. If the tool can't prove a transformation is loss-free, it halts and asks.
+**Data loss is a first-class error, not a warning.** The `taxi-normalize` tool rewrites historical TLC parquet to conform to the latest schema — but every silent drop of non-null data, every lossy cast, requires an explicit human acknowledgment written into a version-controlled mapping YAML. There is no `--force` flag. There is no "warn and continue" mode. If the tool can't prove a transformation is loss-free, it halts and asks.
 
 The operational model is a two-phase loop: you run the tool, and it either (a) writes normalized parquet successfully or (b) rewrites a per-type mapping file with new items for you to review. You edit the mapping, re-run, and repeat until everything is resolved. On the first run against a raw type that has no mapping yet, the tool auto-generates the scaffold from the actual raw data and exits without writing any parquet. On every subsequent run it validates the mapping against the current raw data and, if new schema drift has appeared since the last run, amends the mapping in place with new SUGGESTED/TODO entries.
 
-This bootstrap-and-amend semantics is what makes `normalize` safe to run on a schedule. The orchestrator (`taxi-run`) already invokes `normalize` as part of its pipeline and classifies its exit codes (0/1/3) accordingly — only scheduling `taxi-run` itself on a cron is still future work — so when TLC ships new drift (they do, roughly once a year), you'll wake up to a mapping-file diff to review in a pull request, not a silent failure and not a wholesale scaffold regeneration that clobbers your prior decisions.
+This bootstrap-and-amend semantics is what makes `taxi-normalize` safe to run on a schedule. The orchestrator (`taxi-pipeline`) already invokes `taxi-normalize` as part of its pipeline and classifies its exit codes (0/1/3) accordingly — only scheduling `taxi-pipeline` itself on a cron is still future work — so when TLC ships new drift (they do, roughly once a year), you'll wake up to a mapping-file diff to review in a pull request, not a silent failure and not a wholesale scaffold regeneration that clobbers your prior decisions.
 
 ## Prerequisites
 
@@ -17,7 +17,7 @@ This bootstrap-and-amend semantics is what makes `normalize` safe to run on a sc
 uv sync
 ```
 
-That's it. `normalize` is exposed as a `uv run` entry point.
+That's it. `taxi-normalize` is exposed as a `uv run` entry point.
 
 ## The three-state model
 
@@ -84,7 +84,7 @@ Both operations run the same underlying analysis; the difference is in whether e
 Fires when no mapping file exists. Sequence:
 
 1. Scan `raw/<type>/**/*.parquet` via parquet metadata only — no data scan.
-2. Call `schema_drift.analyze.analyze_data_type()` in generic mode to compute the drift timeline plus rename candidates.
+2. Call `taxi_schema_drift.analyze.analyze_data_type()` in generic mode to compute the drift timeline plus rename candidates.
 3. Emit YAML with:
    - **Timeline header** — one comment line per detected transition, listing renames/adds/drops/type-changes between adjacent schema signatures.
    - **`target:`** — pinned to the newest raw file. This is the canonical schema all historical files will be rewritten to.
@@ -105,7 +105,7 @@ Fires when the mapping exists but the planner finds unresolved items. Sequence:
 
 The critical property: **your semantic decisions survive**. A rename you accepted stays accepted. An `ack_date` you filled in stays filled in. What you lose are the free-form comments you wrote in the file body — because there's no way for the tool to associate a comment with the entry it describes across an edit. Put reasoning in the `reason:` field of an ack entry instead, or in the git commit message.
 
-Operational rationale: the orchestrator (`taxi-run`) already runs `normalize` as part of its pipeline; only invoking it on a cron schedule is still future work. When TLC ships new drift, amend semantics mean the human wakes up to a mapping-file diff to review — not a silent failure, not a scaffold regenerated from scratch.
+Operational rationale: the orchestrator (`taxi-pipeline`) already runs `taxi-normalize` as part of its pipeline; only invoking it on a cron schedule is still future work. When TLC ships new drift, amend semantics mean the human wakes up to a mapping-file diff to review — not a silent failure, not a scaffold regenerated from scratch.
 
 ## The `ack_date` convention
 
@@ -146,7 +146,7 @@ Why the convention: the `ack_date` is the enforced pause-and-think. Its presence
 
 A missing `raw/<type>` directory is **not** a configuration error — it's treated as "nothing to normalize yet" and prints `<type>: no raw files at <raw_dir>, skipping`, exiting 0 for that type.
 
-When you invoke `normalize` with no argument, the tool runs all four types in turn and returns the highest exit code observed. This means a mixed run — say, `yellow` succeeds and `fhvhv` needs edits — exits 1, and CI can treat it as needs-attention.
+When you invoke `taxi-normalize` with no argument, the tool runs all four types in turn and returns the highest exit code observed. This means a mixed run — say, `yellow` succeeds and `fhvhv` needs edits — exits 1, and CI can treat it as needs-attention.
 
 ## The `--sample` flag
 
@@ -155,8 +155,8 @@ When you invoke `normalize` with no argument, the tool runs all four types in tu
 Reduce it only for very large datasets where bootstrap runtime becomes a problem:
 
 ```bash
-uv run normalize yellow --sample 10%
-uv run normalize yellow --sample 5000
+uv run taxi-normalize yellow --sample 10%
+uv run taxi-normalize yellow --sample 5000
 ```
 
 Important caveat: metadata-only checks (schema comparisons, null counts, min/max ranges) and precision scans (DOUBLE -> BIGINT truncation detection) **always full-scan** regardless of `--sample`. Sampling those risks a false-negative data-loss decision, which is exactly the failure mode the tool exists to prevent.
@@ -166,7 +166,7 @@ Important caveat: metadata-only checks (schema comparisons, null counts, min/max
 `--data-dir <dir>` controls where data is read from and written to. It reads raw parquet from `<data-dir>/raw/<type>` and writes normalized parquet to `<data-dir>/raw-normalized/<type>`. Default is `.` (the current directory).
 
 ```bash
-uv run normalize yellow --data-dir /path/to/data
+uv run taxi-normalize yellow --data-dir /path/to/data
 ```
 
 Note: the mapping file path is **not** affected by `--data-dir`. It's always resolved as `normalize/mappings/<type>.yaml` relative to the current working directory, regardless of where `--data-dir` points the raw/normalized data.
@@ -176,7 +176,7 @@ Note: the mapping file path is **not** affected by `--data-dir`. It's always res
 Assume you've mirrored the full yellow-taxi history to `raw/yellow/` via the downloader. Run:
 
 ```bash
-uv run normalize yellow
+uv run taxi-normalize yellow
 ```
 
 Expected output:
@@ -190,7 +190,7 @@ Next steps:
   1. Review normalize/mappings/yellow.yaml
   2. Uncomment SUGGESTED entries you accept, delete the rest
   3. Fill in `ack_date:` for each TODO to acknowledge lossy casts or data loss
-  4. Re-run: uv run normalize yellow
+  4. Re-run: uv run taxi-normalize yellow
 ```
 
 The generated `normalize/mappings/yellow.yaml` looks roughly like this:
@@ -277,7 +277,7 @@ You review and edit — accepting the SUGGESTED renames, acking the drops:
 Second run:
 
 ```bash
-uv run normalize yellow
+uv run taxi-normalize yellow
 ```
 
 Expected output:
@@ -301,7 +301,7 @@ Every historical file is now rewritten in the target file's schema. Downstream q
 Fast-forward to 2028. TLC has changed the format again — added a new column (`route_zone_hash`) and narrowed the type of `passenger_count` from `DOUBLE` to `INTEGER`. Your existing `normalize/mappings/yellow.yaml` from 2026 no longer covers everything. You re-run:
 
 ```bash
-uv run normalize yellow
+uv run taxi-normalize yellow
 ```
 
 Expected output:
@@ -370,7 +370,7 @@ Notice the existing entries are all preserved. Now you decide:
 Edit accordingly and re-run:
 
 ```bash
-uv run normalize yellow
+uv run taxi-normalize yellow
 ```
 
 Exit 0, normalized parquet reflects the new target schema, and every historical file is once again queryable under a single schema.

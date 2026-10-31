@@ -10,7 +10,7 @@ dependencies = [
     # Pinned EXACTLY, and it must stay that way. The vendored mssql extension lives in
     # a directory keyed by exact DuckDB version (v1.5.5/<platform>/), so a floating pin
     # silently orphans it. The version also travels with a specific extension build --
-    # see DUCKDB_VERSION in loader/src/taxi_loader/extension.py, which this must match.
+    # see DUCKDB_VERSION in load/src/taxi_load/extension.py, which this must match.
     "duckdb==1.5.5",
     "httpx>=0.27",
     "pyyaml>=6.0",
@@ -50,11 +50,11 @@ git_describe_command = "git describe --dirty --tags --long --match v*"
 
 [tool.hatch.build.targets.wheel]
 packages = [
-  "downloader/src/taxi_download",
-  "loader/src/taxi_loader",
+  "download/src/taxi_download",
+  "load/src/taxi_load",
   "normalize/src/taxi_normalize",
-  "orchestrator/src/taxi_orchestrate",
-  "schema-drift/src/schema_drift",
+  "pipeline/src/taxi_pipeline",
+  "schema-drift/src/taxi_schema_drift",
   "shared/src/taxi_shared",
 ]
 
@@ -67,10 +67,10 @@ docs = [
 ]
 
 [project.scripts]
-normalize = "taxi_normalize.cli:main"
-schema-drift = "schema_drift.cli:main"
-taxi-curate-mappings = "taxi_orchestrate.curate:main"
+taxi-curate-mappings = "taxi_pipeline.curate:main"
 taxi-download = "taxi_download.cli:main"
-taxi-load = "taxi_loader.cli:main"
-taxi-run = "taxi_orchestrate.cli:main"
-taxi-vendor-extension = "taxi_loader.extension:main"
+taxi-load = "taxi_load.cli:main"
+taxi-normalize = "taxi_normalize.cli:main"
+taxi-pipeline = "taxi_pipeline.cli:main"
+taxi-schema-drift = "taxi_schema_drift.cli:main"
+taxi-vendor-extension = "taxi_load.extension:main"

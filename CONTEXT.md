@@ -19,7 +19,7 @@ One of the four services the TLC publishes separately: `yellow`, `green`, `fhv`,
 _Avoid_: data type, series, taxi type, category
 _Note_: the code identifier is `data_type` and stays that way. Three strings the tools
 print still say "data type" (`normalize/src/taxi_normalize/cli.py`,
-`schema-drift/src/schema_drift/report.py` twice). Docs quote that output verbatim, so
+`schema-drift/src/taxi_schema_drift/report.py` twice). Docs quote that output verbatim, so
 those quotes keep the old word until the strings themselves change.
 
 **Mirror**:
@@ -96,10 +96,10 @@ flag, no configuration key. It reaches the load manifest too, because both come 
 `taxi_shared.sql_generator.generate_create_table_sql`.
 _Avoid_: compression (unqualified — backup compression is a different feature)
 
-## Orchestrator
+## Pipeline
 
 **Pipeline**:
-download → normalize → load, run per trip type. `taxi-run` drives it.
+download → normalize → load, run per trip type. `taxi-pipeline` drives it.
 _Avoid_: workflow, job, chain, ETL
 
 **Needs review**:

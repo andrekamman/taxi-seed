@@ -109,7 +109,7 @@ Bumping DuckDB is therefore a deliberate, four-step act:
    current), and record `extension_version` and `mssql_version()`.
 2. **Re-vendor.** `taxi-vendor-extension --all --root <dir>` fetches every platform and
    verifies each against the SHA-256 table. Update `DUCKDB_VERSION`, `EXPECTED_EXT_VERSION`,
-   `EXPECTED_MSSQL_VERSION` and `SHA256` in `loader/src/taxi_loader/extension.py` — they are
+   `EXPECTED_MSSQL_VERSION` and `SHA256` in `load/src/taxi_load/extension.py` — they are
    one fact expressed four ways, so they move together.
 3. **Publish** a `mssql-ext-<duckdb version>-<build>` release carrying the five
    `.duckdb_extension.gz` files and a `SHA256SUMS.txt`, marked `--latest=false`.
