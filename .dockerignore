@@ -1,0 +1,22 @@
+# The build context for mssql/Dockerfile is the repo root (see
+# mssql/docker-compose.yml: context: ..), so this file lives here, not in mssql/.
+#
+# Docker COPY has no concept of .gitignore and happily copies dotfiles, so
+# without the first entry `COPY mssql/ ./mssql/` would bake mssql/.env --
+# including a real SA password -- into an image layer, where it survives even if
+# a later layer deletes it.
+mssql/.env
+
+# Not needed in the image, and together these dominate the context size.
+.git
+.venv
+site
+__pycache__
+*.egg-info
+dist
+build
+.pytest_cache
+.claude
+.github
+docs
+tests
