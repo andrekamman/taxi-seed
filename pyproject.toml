@@ -88,10 +88,16 @@ taxi-vendor-extension = "taxi_load.extension:main"
 # importlib mode, pytest imports same-named files as the same top-level module and fails
 # collection with "import file mismatch"; the alternative is an __init__.py in every test
 # directory, which rootdir-relative imports do not otherwise need.
-addopts = "--import-mode=importlib"
+# -m "not integration" by default: tests/taxi_mssql/test_integration_compose.py drives
+# the real Compose stack, which builds images and downloads a month of trip data. Run it
+# deliberately with `-m integration`, never by accident from a bare `pytest`.
+addopts = "--import-mode=importlib -m 'not integration'"
 testpaths = ["tests"]
 # Two test directories hold a helper that their tests import as a top-level module:
 # tests/e2e/fakedata.py, and write_month from tests/taxi_load/conftest.py. The default
 # "prepend" import mode put those directories on sys.path implicitly; importlib mode does
 # not, so say it explicitly rather than reach for __init__.py files nothing else needs.
 pythonpath = ["tests/e2e", "tests/taxi_load"]
+markers = [
+    "integration: drives the real Compose stack; needs Docker, minutes and gigabytes",
+]
