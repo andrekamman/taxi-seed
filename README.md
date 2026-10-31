@@ -21,18 +21,18 @@ The site has the deep-dive guides, a cookbook of cross-cutting recipes, an archi
 
 One repo, five tools plus a shared library:
 
-- [`downloader/`](downloader/) — Python CLI (`taxi-download`) that mirrors the TLC CloudFront bucket to local parquet.
-- [`schema-drift/`](schema-drift/) — Python CLI that reports column-name and column-shape drift across a mirror.
-- [`normalize/`](normalize/) — Python CLI that rewrites a mirror to a single target schema, refusing to lose data.
-- [`loader/`](loader/) — Python CLI that loads normalized parquet into a target database.
-- [`orchestrator/`](orchestrator/) — Python CLI that drives download → normalize → load as one pipeline.
+- [`download/`](download/) — Python CLI (`taxi-download`) that mirrors the TLC CloudFront bucket to local parquet.
+- [`schema-drift/`](schema-drift/) — Python CLI (`taxi-schema-drift`) that reports column-name and column-shape drift across a mirror.
+- [`normalize/`](normalize/) — Python CLI (`taxi-normalize`) that rewrites a mirror to a single target schema, refusing to lose data.
+- [`load/`](load/) — Python CLI (`taxi-load`) that loads normalized parquet into a target database.
+- [`pipeline/`](pipeline/) — Python CLI (`taxi-pipeline`) that drives download → normalize → load as one pipeline.
 - [`shared/`](shared/) — common library code (`sql_generator.py` for `CREATE TABLE` DDL generation, `type_mapping.py` for DuckDB→SQL Server type mapping) used across the tools.
 
 Each component has a short `README.md` that points at the guide on the site; the guide is authoritative.
 
 ## Install
 
-`taxi-seed` is published to PyPI as one distribution. It puts six commands on your PATH — `taxi-download`, `schema-drift`, `normalize`, `taxi-load`, `taxi-run`, and `taxi-curate-mappings`:
+`taxi-seed` is published to PyPI as one distribution. It puts seven commands on your PATH, all `taxi-` prefixed — `taxi-download`, `taxi-schema-drift`, `taxi-normalize`, `taxi-load`, `taxi-pipeline`, `taxi-curate-mappings`, and `taxi-vendor-extension`:
 
 ```bash
 uv tool install taxi-seed     # isolated env, every CLI on PATH
@@ -57,7 +57,7 @@ A full-history mirror is roughly 40–100 GB (depending on how many of the four 
 ## Requirements
 
 - Python 3.12 or 3.13. [uv](https://github.com/astral-sh/uv) for the clone workflow; a PyPI install works with plain `pip`.
-- Disk sized to intent — see the [Downloader guide](https://andrekamman.github.io/taxi-seed/guides/downloader/#disk-sizing).
+- Disk sized to intent — see the [Downloader guide](https://andrekamman.github.io/taxi-seed/guides/download/#disk-sizing).
 - Individual tools list per-guide prerequisites (a target database for the loader, etc.).
 
 Everything runs on macOS, Linux, and Windows (via Git Bash). CI runs the test suite on Python 3.12 and 3.13, the loader and pipeline integration tests against a real SQL Server, and a strict docs build, on every PR.
@@ -68,7 +68,7 @@ The [documentation site](https://andrekamman.github.io/taxi-seed/) is the source
 
 - **[Installation](https://andrekamman.github.io/taxi-seed/install/)** — installing the released package from PyPI vs working from a clone.
 - **[Getting Started](https://andrekamman.github.io/taxi-seed/getting-started/)** — 10-minute end-to-end walkthrough from clone to normalized parquet.
-- **[Guides](https://andrekamman.github.io/taxi-seed/guides/downloader/)** — one deep-dive per tool: Downloader, Schema Drift, Normalize, Loader, Orchestrator.
+- **[Guides](https://andrekamman.github.io/taxi-seed/guides/download/)** — one deep-dive per tool: Downloader, Schema Drift, Normalize, Loader, Orchestrator.
 - **[Cookbook](https://andrekamman.github.io/taxi-seed/cookbook/)** — cross-cutting recipes (nightly cron, DuckDB `httpfs` querying, corporate proxy).
 - **[Architecture](https://andrekamman.github.io/taxi-seed/architecture/)** — how the tools fit together end-to-end.
 - **[Reference](https://andrekamman.github.io/taxi-seed/reference/configuration/)** — configuration keys and exit codes.

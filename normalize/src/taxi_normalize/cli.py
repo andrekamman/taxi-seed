@@ -1,10 +1,10 @@
-"""Entry point for the `normalize` command.
+"""Entry point for the `taxi-normalize` command.
 
 Single-command flow:
 - `normalize <type>` — first run generates the mapping scaffold and exits 3;
   subsequent runs with unresolved items amend the scaffold and exit 1;
   a complete mapping runs the normalization and exits 0.
-- `normalize` (no arg) — runs each of the four data types in turn.
+- `taxi-normalize` (no arg) — runs each of the four data types in turn.
 - `--sample <N|N%>` — passed to analysis; only takes effect when scaffold
   generation or amendment runs. Default 100% (full scan).
 """
@@ -28,7 +28,7 @@ DATA_TYPES = ("yellow", "green", "fhv", "fhvhv")
 
 def main(argv=None) -> int:
     parser = argparse.ArgumentParser(
-        prog="normalize",
+        prog="taxi-normalize",
         description="Rewrite historical TLC parquet files to conform to the latest schema.",
     )
     parser.add_argument(

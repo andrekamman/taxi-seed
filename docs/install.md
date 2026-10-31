@@ -1,6 +1,6 @@
 # Installation
 
-`taxi-seed` is published to [PyPI](https://pypi.org/project/taxi-seed/) as a single distribution carrying all six commands plus the shared library. There are two ways to get it, and they suit different jobs:
+`taxi-seed` is published to [PyPI](https://pypi.org/project/taxi-seed/) as a single distribution carrying all seven commands plus the shared library. There are two ways to get it, and they suit different jobs:
 
 - **Install the released package** if you want to *run* the tools — mirror the TLC bucket, analyze drift, load a database.
 - **Work from a clone** if you want to *develop* on the repo, or if you want the curated normalize mappings that live in the repo rather than in the wheel (see [Curated mappings are not in the wheel](#mappings) below).
@@ -42,12 +42,13 @@ Either of the first two puts these commands on your `PATH`:
 
 | Command | What it does | Guide |
 |---|---|---|
-| `taxi-download` | Mirror TLC parquet from CloudFront to `raw/` | [Downloader](guides/downloader.md) |
-| `schema-drift` | Report column-name and column-shape drift across a mirror | [Schema Drift](guides/schema-drift.md) |
-| `normalize` | Rewrite a mirror to a single target schema | [Normalize](guides/normalize.md) |
-| `taxi-load` | Load normalized parquet into a target database | [Loader](guides/loader.md) |
-| `taxi-run` | Drive download → normalize → load as one pipeline | [Orchestrator](guides/orchestrator.md) |
-| `taxi-curate-mappings` | Auto-accept detected drift into complete mapping YAMLs | [Orchestrator](guides/orchestrator.md) |
+| `taxi-download` | Mirror TLC parquet from CloudFront to `raw/` | [taxi-download](guides/downloader.md) |
+| `taxi-schema-drift` | Report column-name and column-shape drift across a mirror | [taxi-schema-drift](guides/schema-drift.md) |
+| `taxi-normalize` | Rewrite a mirror to a single target schema | [taxi-normalize](guides/normalize.md) |
+| `taxi-load` | Load normalized parquet into a target database | [taxi-load](guides/loader.md) |
+| `taxi-pipeline` | Drive download → normalize → load as one pipeline | [taxi-pipeline](guides/orchestrator.md) |
+| `taxi-curate-mappings` | Auto-accept detected drift into complete mapping YAMLs | [taxi-pipeline](guides/orchestrator.md) |
+| `taxi-vendor-extension` | Fetch and verify the vendored DuckDB `mssql` extension | [taxi-load](guides/loader.md) |
 
 ### Verify the install
 
@@ -104,7 +105,7 @@ taxi-download yellow --recent 3
 
 The repo carries hand-curated normalize mappings at `normalize/mappings/{yellow,green,fhv,fhvhv}.yaml`. **These are not packaged into the wheel** — the distribution contains Python modules only.
 
-`normalize` (and the normalize stage of `taxi-run`) resolves its mapping as `normalize/mappings/<type>.yaml` *relative to the current working directory*, with no flag to point it elsewhere. So from a PyPI install in an arbitrary directory, the first `normalize yellow` finds no mapping, bootstraps a fresh scaffold into `./normalize/mappings/yellow.yaml`, and exits `3` for review — the documented first-run behavior, but starting from zero rather than from the curated file.
+`taxi-normalize` (and the normalize stage of `taxi-pipeline`) resolves its mapping as `normalize/mappings/<type>.yaml` *relative to the current working directory*, with no flag to point it elsewhere. So from a PyPI install in an arbitrary directory, the first `normalize yellow` finds no mapping, bootstraps a fresh scaffold into `./normalize/mappings/yellow.yaml`, and exits `3` for review — the documented first-run behavior, but starting from zero rather than from the curated file.
 
 Two ways to get the curated mappings under an installed workflow:
 
@@ -118,7 +119,7 @@ Two ways to get the curated mappings under an installed workflow:
 
     Repeat per trip type. Everything else (`raw/`, `raw-normalized/`) is already relative to `--data-dir`.
 
-2. Or run `normalize` / `taxi-run` from a clone, and use the PyPI install only for `taxi-download`, `schema-drift`, and `taxi-load` — those three are fully self-contained and need no repo files.
+2. Or run `taxi-normalize` / `taxi-pipeline` from a clone, and use the PyPI install only for `taxi-download`, `taxi-schema-drift`, and `taxi-load` — those three are fully self-contained and need no repo files.
 
 See the [Normalize guide](guides/normalize.md) for what the mapping file contains and how bootstrap/amend semantics work.
 

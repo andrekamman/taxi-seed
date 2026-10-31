@@ -1,5 +1,5 @@
 site_name: taxi-seed
-site_description: Downloader, schema-drift analyzer, normalizer, SQL Server loader, and orchestrator for NYC TLC taxi trip data
+site_description: Downloader, schema-drift analyzer, normalizer, SQL Server loader, and pipeline runner for NYC TLC taxi trip data
 site_url: https://andrekamman.github.io/taxi-seed/
 repo_url: https://github.com/andrekamman/taxi-seed
 repo_name: andrekamman/taxi-seed
@@ -51,11 +51,14 @@ nav:
   - Installation: install.md
   - Getting Started: getting-started.md
   - Guides:
-      - Downloader: guides/downloader.md
-      - Schema Drift: guides/schema-drift.md
-      - Normalize: guides/normalize.md
-      - Loader: guides/loader.md
-      - Orchestrator: guides/orchestrator.md
+      # Filenames still carry the old component names; renaming them changes
+      # published URLs, which is a decision left to the docs rewrite. The labels
+      # are the command names, which is what a reader is looking for.
+      - taxi-download: guides/downloader.md
+      - taxi-schema-drift: guides/schema-drift.md
+      - taxi-normalize: guides/normalize.md
+      - taxi-load: guides/loader.md
+      - taxi-pipeline: guides/orchestrator.md
   - Cookbook: cookbook.md
   - Architecture: architecture.md
   - Reference:

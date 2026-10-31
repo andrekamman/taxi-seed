@@ -110,13 +110,13 @@ The strictness is deliberate: silent tolerance of a mistyped field name would de
 
 ## Loader and orchestrator configuration
 
-There is no YAML config file for the loader or the orchestrator — `taxi-load` and `taxi-run` are configured entirely through CLI flags (`--host`, `--port`, `--database`, `--schema`, `--user`, `--data-dir`/`--input-dir`, `--flush-rows`, `--full-refresh`, `--dry-run`, and, for `taxi-run`, `--recent`, `--skip-download`, `--download-only`, `--load`, `--sample`) plus one required environment variable, `MSSQL_PASSWORD`, whenever a load is involved. See [Loader](../guides/loader.md) and [Orchestrator](../guides/orchestrator.md) for the full flag reference.
+There is no YAML config file for the loader or the orchestrator — `taxi-load` and `taxi-pipeline` are configured entirely through CLI flags (`--host`, `--port`, `--database`, `--schema`, `--user`, `--data-dir`/`--input-dir`, `--flush-rows`, `--full-refresh`, `--dry-run`, and, for `taxi-pipeline`, `--recent`, `--skip-download`, `--download-only`, `--load`, `--sample`) plus one required environment variable, `MSSQL_PASSWORD`, whenever a load is involved. See [Loader](../guides/loader.md) and [Orchestrator](../guides/orchestrator.md) for the full flag reference.
 
 ## Environment variables
 
 | Variable | Used by | Description |
 |---|---|---|
-| `MSSQL_PASSWORD` | `taxi-load` / `taxi-run` | SQL Server password. Required whenever a load happens: always for `taxi-load`, and for `taxi-run` only when `--load` is passed. There is no `--password` flag — this is deliberate so the password never appears in `ps` output or shell history via an argument. |
+| `MSSQL_PASSWORD` | `taxi-load` / `taxi-pipeline` | SQL Server password. Required whenever a load happens: always for `taxi-load`, and for `taxi-pipeline` only when `--load` is passed. There is no `--password` flag — this is deliberate so the password never appears in `ps` output or shell history via an argument. |
 | `HTTPS_PROXY` / `HTTP_PROXY` | httpx (downloader), uv, gh | Standard HTTP proxy env vars. The downloader honors them implicitly via httpx. |
 | `NO_PROXY` | httpx (downloader), uv, gh | Standard bypass list. Include `localhost` if you run SQL Server locally and need it to bypass a corporate proxy. |
 

@@ -1,6 +1,6 @@
 # Loader
 
-`taxi-load` bulk-loads normalized TLC parquet (`raw-normalized/<type>/<year>/*.parquet`) into SQL Server, one table per year per type, entirely through DuckDB and the `mssql` extension — no ODBC driver, no separate ETL framework. The extension is vendored rather than installed at runtime (see [Troubleshooting](#troubleshooting)). It reconciles what's on disk against what's already loaded and picks, per year, one of three actions: skip, append the new months, or truncate and reload the whole year. That reconciliation is what makes re-running the tool after a fresh `normalize` pass (or after TLC ships a new month) safe and cheap.
+`taxi-load` bulk-loads normalized TLC parquet (`raw-normalized/<type>/<year>/*.parquet`) into SQL Server, one table per year per type, entirely through DuckDB and the `mssql` extension — no ODBC driver, no separate ETL framework. The extension is vendored rather than installed at runtime (see [Troubleshooting](#troubleshooting)). It reconciles what's on disk against what's already loaded and picks, per year, one of three actions: skip, append the new months, or truncate and reload the whole year. That reconciliation is what makes re-running the tool after a fresh `taxi-normalize` pass (or after TLC ships a new month) safe and cheap.
 
 ## Prerequisites
 
@@ -15,10 +15,10 @@
 uv sync
 ```
 
-This exposes the `taxi-load` console script (defined in the root `pyproject.toml`, `taxi_loader.cli:main`). You can also invoke it as a module:
+This exposes the `taxi-load` console script (defined in the root `pyproject.toml`, `taxi_load.cli:main`). You can also invoke it as a module:
 
 ```bash
-python -m taxi_loader.cli yellow
+python -m taxi_load.cli yellow
 ```
 
 ## Basic usage
@@ -40,7 +40,7 @@ uv run taxi-load yellow --dry-run
 
 ## One table per year per type
 
-Every `(type, year)` pair gets its own table, named `<type>_<year>` (e.g. `yellow_2024`, `fhvhv_2019`) in the configured schema (`dbo` by default). The table's DDL is derived directly from the parquet: the loader runs `DESCRIBE` on a sample month, maps each DuckDB column type to a SQL Server type (`taxi_shared.type_mapping.map_duckdb_to_mssql` — e.g. `DOUBLE`→`FLOAT`, `VARCHAR`→`NVARCHAR(MAX)`, `TIMESTAMP`→`DATETIME2`, `DECIMAL(p,s)` preserved), and generates a `CREATE TABLE` statement. There is no manual DDL to maintain — the schema tracks whatever `normalize` last wrote.
+Every `(type, year)` pair gets its own table, named `<type>_<year>` (e.g. `yellow_2024`, `fhvhv_2019`) in the configured schema (`dbo` by default). The table's DDL is derived directly from the parquet: the loader runs `DESCRIBE` on a sample month, maps each DuckDB column type to a SQL Server type (`taxi_shared.type_mapping.map_duckdb_to_mssql` — e.g. `DOUBLE`→`FLOAT`, `VARCHAR`→`NVARCHAR(MAX)`, `TIMESTAMP`→`DATETIME2`, `DECIMAL(p,s)` preserved), and generates a `CREATE TABLE` statement. There is no manual DDL to maintain — the schema tracks whatever `taxi-normalize` last wrote.
 
 If a column's DuckDB type has no SQL Server equivalent, `map_duckdb_to_mssql` raises `TypeMappingError` and that type's load fails (see [Exit codes](#exit-codes)).
 
@@ -83,7 +83,7 @@ The loader tracks what it has already loaded in a bookkeeping table, `<schema>._
 - **append** — every manifest month still matches its disk file, and disk has one or more new months not yet in the manifest. Only the new months are copied; the existing table and its rows are untouched.
 - **truncate + reload** — anything smells inconsistent: `--full-refresh` was passed, the live table's row count doesn't match the manifest's recorded sum (someone loaded outside this tool, or a prior run was interrupted after the `COPY` but before the manifest write), a month recorded in the manifest is no longer on disk, or a month's row count changed on disk (re-normalized data). The table is dropped, recreated from the current parquet schema, and every month for that year is copied in one `COPY` statement.
 
-This is computed by the pure function `reconcile()` (`taxi_loader/reconcile.py`) from three inputs gathered up front: the disk parquet files (with per-file row counts from parquet metadata), the manifest rows for that type, and the live table row counts — no database writes happen during planning.
+This is computed by the pure function `reconcile()` (`taxi_load/reconcile.py`) from three inputs gathered up front: the disk parquet files (with per-file row counts from parquet metadata), the manifest rows for that type, and the live table row counts — no database writes happen during planning.
 
 **Durability model**, applied while executing the plan (`load.py:execute_year_plan`):
 
@@ -101,7 +101,7 @@ uv run taxi-load yellow --dry-run
 
 ## The `--full-refresh` flag
 
-`--full-refresh` forces every `(type, year)` being processed onto the **truncate + reload** path, regardless of what the manifest says. Use it to rebuild a year after fixing a mapping bug in `normalize`, or to recover from a manifest you no longer trust.
+`--full-refresh` forces every `(type, year)` being processed onto the **truncate + reload** path, regardless of what the manifest says. Use it to rebuild a year after fixing a mapping bug in `taxi-normalize`, or to recover from a manifest you no longer trust.
 
 ```bash
 uv run taxi-load yellow --full-refresh
@@ -171,19 +171,19 @@ A: Set it before invoking: `export MSSQL_PASSWORD=...` (or `MSSQL_PASSWORD=... u
 A: `--schema` and `--database` are validated against a strict identifier pattern before anything touches SQL Server, since they're interpolated into DDL (`CREATE DATABASE`, `CREATE SCHEMA`) rather than passed as bind parameters. Rename to a plain identifier, or quote/alias it on the SQL Server side and point `--database`/`--schema` at that name instead.
 
 **Q: `error: vendored mssql extension is not the pinned build: ...`.**
-A: The loader does not `INSTALL` the extension from the community registry — it loads a **vendored** copy, because that registry rebuilds. DuckDB 1.5.5 alone has served three different builds (`37596c2`, `e2b8c01`, `d35b617`), so what `INSTALL` returns today is not what was tested. The assertion checks both the build hash and `mssql_version()`, and the message names whichever disagreed: the hash catches a version re-pinned without re-spiking, the semver catches a stale vendored directory. Re-run `taxi-vendor-extension` against a clean directory. Changing the pinned values in `loader/src/taxi_loader/extension.py` is a decision to make after re-testing, not a way to silence this.
+A: The loader does not `INSTALL` the extension from the community registry — it loads a **vendored** copy, because that registry rebuilds. DuckDB 1.5.5 alone has served three different builds (`37596c2`, `e2b8c01`, `d35b617`), so what `INSTALL` returns today is not what was tested. The assertion checks both the build hash and `mssql_version()`, and the message names whichever disagreed: the hash catches a version re-pinned without re-spiking, the semver catches a stale vendored directory. Re-run `taxi-vendor-extension` against a clean directory. Changing the pinned values in `load/src/taxi_load/extension.py` is a decision to make after re-testing, not a way to silence this.
 
 **Q: `could not vendor the mssql extension`.**
 A: The loader fetches the extension on first use, preferring taxi-seed's own release mirror and falling back to the community CDN. The message lists what each source returned. Run `taxi-vendor-extension` (optionally `--root DIR`) to do it as a separate, retryable step; set `TAXI_EXTENSION_DIR` to point the loader at a directory you populated yourself, which is what the container does at image build time.
 
 **Q: `error: yellow: No SQL Server mapping for DuckDB type: '...'`.**
-A: A `TypeMappingError` — a normalized parquet column has a DuckDB type with no entry in `taxi_shared.type_mapping`. Add the mapping there, or check whether `normalize` should have cast the column to something already mapped.
+A: A `TypeMappingError` — a normalized parquet column has a DuckDB type with no entry in `taxi_shared.type_mapping`. Add the mapping there, or check whether `taxi-normalize` should have cast the column to something already mapped.
 
 **Q: `error: yellow failed mid-load: ...`.**
 A: The type got partway through a `COPY` or DDL statement and DuckDB (or the `mssql` extension) raised. Common causes: SQL Server connectivity dropped mid-run, a constraint violation, or disk/log space exhausted on the SQL Server side. Re-running is safe — the reconcile logic will pick up from the manifest's actual state (the affected year likely reloads rather than silently continuing a corrupt append).
 
 **Q: The plan says `truncate + reload` for a year I didn't expect to change.**
-A: This fires whenever the live table's row count doesn't match the manifest's recorded sum for that year — which can mean rows were inserted/deleted outside `taxi-load`, a prior run was interrupted between the `COPY` and the manifest write, or `normalize` re-wrote that year's parquet with different row counts. Run with `--dry-run` first to see exactly which years are affected before committing to a reload.
+A: This fires whenever the live table's row count doesn't match the manifest's recorded sum for that year — which can mean rows were inserted/deleted outside `taxi-load`, a prior run was interrupted between the `COPY` and the manifest write, or `taxi-normalize` re-wrote that year's parquet with different row counts. Run with `--dry-run` first to see exactly which years are affected before committing to a reload.
 
 **Q: `<type>: no parquet under <dir>/<type>, skipping`.**
 A: Nothing has been normalized for that type yet at the resolved input directory. Run [normalize](normalize.md) for that type first, or check `--data-dir`/`--input-dir` if your normalized output lives elsewhere. This is not an error — the type contributes exit 0.

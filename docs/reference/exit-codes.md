@@ -6,7 +6,7 @@ The tables below list the *emitted* codes. Codes are stable and part of the tool
 
 ## Downloader (`taxi-download`)
 
-`taxi-download` is the Python console script (`downloader/src/taxi_download/cli.py`); it classifies every CloudFront response before choosing to retry, skip, or back off, and reports one summary line per requested type (`<type>: downloaded N, gave up on M`).
+`taxi-download` is the Python console script (`download/src/taxi_download/cli.py`); it classifies every CloudFront response before choosing to retry, skip, or back off, and reports one summary line per requested type (`<type>: downloaded N, gave up on M`).
 
 | Code | Meaning | Suggested action |
 |---|---|---|
@@ -25,7 +25,7 @@ CloudFront responds to requests in several distinguishable ways:
 
 On a rate-limit classification, `taxi-download` backs off and retries; if every attempt for a type is exhausted with zero successful downloads, that type reports `gaveup > 0` and the overall exit code becomes 2.
 
-## Normalize (`uv run normalize`)
+## Normalize (`uv run taxi-normalize`)
 
 | Code | Meaning | Suggested action |
 |---|---|---|
@@ -38,7 +38,7 @@ A missing `raw/<type>/` directory is **not** a configuration error — it's trea
 
 ### Multi-type aggregation
 
-When invoked with no argument (`uv run normalize`), the tool runs all four trip types in turn and returns the **highest** exit code observed. A mixed run — e.g. `yellow` succeeds (0), `fhvhv` needs edits (1) — exits `1`. This keeps CI logic simple: any non-zero means "at least one type needs attention", and the code tells you what kind of attention.
+When invoked with no argument (`uv run taxi-normalize`), the tool runs all four trip types in turn and returns the **highest** exit code observed. A mixed run — e.g. `yellow` succeeds (0), `fhvhv` needs edits (1) — exits `1`. This keeps CI logic simple: any non-zero means "at least one type needs attention", and the code tells you what kind of attention.
 
 The ordering used by exit-code precedence, from lowest to highest: `0 → 1 → 2 → 3`. A first-run-plus-mapping-error scenario therefore exits `3` (the more actionable state), not `2`.
 
@@ -46,15 +46,15 @@ The ordering used by exit-code precedence, from lowest to highest: `0 → 1 → 
 
 ```bash
 # Fail the CI job on any non-zero — the strictest posture.
-uv run normalize || exit $?
+uv run taxi-normalize || exit $?
 
 # Treat exit 3 (first run) as expected on a fresh clone; anything else fails.
-uv run normalize
+uv run taxi-normalize
 code=$?
 if [ "$code" != "0" ] && [ "$code" != "3" ]; then exit "$code"; fi
 ```
 
-## Schema-drift (`uv run schema-drift`)
+## Schema-drift (`uv run taxi-schema-drift`)
 
 | Code | Meaning | Suggested action |
 |---|---|---|
@@ -73,7 +73,7 @@ Schema-drift itself does not raise on missing columns, mismatched types, or ambi
 
 When multiple types are processed in one invocation (no positional `data_type`), the overall exit code is the **maximum** across all per-type outcomes — a `TypeMappingError` on one type (2) outranks a mid-load failure on another (1), which outranks types that loaded cleanly (0). See [Loader → Exit codes](../guides/loader.md#exit-codes) for the full writeup.
 
-## Orchestrator (`taxi-run`)
+## Orchestrator (`taxi-pipeline`)
 
 | Code | Meaning | Suggested action |
 |---|---|---|
@@ -107,13 +107,13 @@ None of these are emitted by the tools themselves — they come from the surroun
 For a quick one-liner check:
 
 ```bash
-uv run normalize yellow; echo "exit=$?"
+uv run taxi-normalize yellow; echo "exit=$?"
 ```
 
 For a scripted decision, capture immediately (a subsequent command overwrites `$?`):
 
 ```bash
-uv run normalize yellow
+uv run taxi-normalize yellow
 code=$?
 case "$code" in
     0) echo "normalized" ;;

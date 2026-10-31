@@ -9,7 +9,7 @@ import os
 import sys
 import time
 
-from taxi_loader.connection import ConnConfig, connect_duckdb, ensure_database
+from taxi_load.connection import ConnConfig, connect_duckdb, ensure_database
 
 ATTEMPTS = 40
 DELAY_S = 3

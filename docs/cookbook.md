@@ -1,6 +1,6 @@
 # Cookbook
 
-Scenario-oriented recipes that combine the tools — downloader, schema-drift, normalize, and loader, orchestrated end-to-end by `taxi-run` — into real workflows. Each recipe is self-contained and copy-pasteable, aimed at data engineers running the stack in a real environment. Where a recipe overlaps with a per-tool guide, this page focuses on the glue between tools and the operational details (cron, proxies, dev bootstraps).
+Scenario-oriented recipes that combine the tools — downloader, schema-drift, normalize, and loader, orchestrated end-to-end by `taxi-pipeline` — into real workflows. Each recipe is self-contained and copy-pasteable, aimed at data engineers running the stack in a real environment. Where a recipe overlaps with a per-tool guide, this page focuses on the glue between tools and the operational details (cron, proxies, dev bootstraps).
 
 ## Nightly refresh via cron
 
@@ -8,7 +8,7 @@ Scenario-oriented recipes that combine the tools — downloader, schema-drift, n
 
 **Recipe** — a shell script plus a scheduler entry.
 
-1. Create `/srv/taxi/bin/nightly-refresh.sh`. The orchestrator (`taxi-run`) already chains download → normalize per type and honors each stage's exit code, so the whole refresh is one command:
+1. Create `/srv/taxi/bin/nightly-refresh.sh`. The orchestrator (`taxi-pipeline`) already chains download → normalize per type and honors each stage's exit code, so the whole refresh is one command:
 
     ```bash
     #!/bin/bash
@@ -18,18 +18,18 @@ Scenario-oriented recipes that combine the tools — downloader, schema-drift, n
     # 1+2. Fetch any newly-published months (recent-mode stops at first local
     # file) then normalize; auto-amends the mapping if new drift showed up.
     # Exit 1 means at least one type needs a human to review a mapping amend.
-    uv run taxi-run --recent 3
+    uv run taxi-pipeline --recent 3
 
     # 3. Snapshot schema-drift report for later diffing
-    uv run schema-drift --output /var/log/taxi/drift-$(date +%Y%m%d).txt
+    uv run taxi-schema-drift --output /var/log/taxi/drift-$(date +%Y%m%d).txt
     ```
 
-    If you'd rather run each stage yourself instead of going through `taxi-run` (for finer-grained logging, say), the equivalent per-type chain is:
+    If you'd rather run each stage yourself instead of going through `taxi-pipeline` (for finer-grained logging, say), the equivalent per-type chain is:
 
     ```bash
     for t in yellow green fhv fhvhv; do
         uv run taxi-download --recent 3 "$t"
-        uv run normalize "$t"
+        uv run taxi-normalize "$t"
     done
     ```
 
@@ -76,7 +76,7 @@ Scenario-oriented recipes that combine the tools — downloader, schema-drift, n
 **Notes:**
 
 - `--recent`'s stop-on-local semantic makes this fully idempotent — running it twice in the same day just skips everything.
-- `taxi-run` exits 0 for a clean run, 1 if any type's normalize amended its mapping and needs a human to review the new drift, or 2 for an operational failure (download failure, a real normalize config error). Consider paging on exit=2 vs. logging-only on exit=1 — see the [orchestrator guide's exit codes](guides/orchestrator.md#exit-codes). Note `set -euo pipefail` means the script stops at the `taxi-run` line on any non-zero exit, so the schema-drift snapshot won't run that day either; drop `-e` (or run schema-drift unconditionally with `|| true` before it) if you want the snapshot regardless.
+- `taxi-pipeline` exits 0 for a clean run, 1 if any type's normalize amended its mapping and needs a human to review the new drift, or 2 for an operational failure (download failure, a real normalize config error). Consider paging on exit=2 vs. logging-only on exit=1 — see the [orchestrator guide's exit codes](guides/orchestrator.md#exit-codes). Note `set -euo pipefail` means the script stops at the `taxi-pipeline` line on any non-zero exit, so the schema-drift snapshot won't run that day either; drop `-e` (or run schema-drift unconditionally with `|| true` before it) if you want the snapshot regardless.
 - `raw/` grows monotonically — plan capacity via the [Downloader guide's sizing table](guides/downloader.md#disk-sizing).
 - Prefer systemd timers over cron on modern hosts: `Persistent=true` catches up missed runs after downtime, and logs land in the journal automatically.
 
@@ -119,7 +119,7 @@ Scenario-oriented recipes that combine the tools — downloader, schema-drift, n
 
 - First query downloads the file; subsequent queries in the same session hit DuckDB's in-memory cache. Across sessions, use the on-disk cache: `SET enable_external_file_cache=true; PRAGMA cache_directory='/tmp/duckdb-cache';`
 - Costs: TLC's CloudFront is unmetered from the requester side, but repeated full-scans of a 50 MB file are wasteful. Use the downloader for anything you'll query more than a couple of times.
-- Schema drift is on you here — DuckDB will happily union files with different schemas via `union_by_name=true`, but drops columns silently. Cross-reference with `schema-drift` output.
+- Schema drift is on you here — DuckDB will happily union files with different schemas via `union_by_name=true`, but drops columns silently. Cross-reference with `taxi-schema-drift` output.
 - The glob pattern hits CloudFront's directory listing, which requires HTTP range requests — some corporate proxies mangle these. If globs fail, list the URLs explicitly.
 
 ## Side-by-side comparison of multiple TLC years
@@ -200,9 +200,9 @@ Scenario-oriented recipes that combine the tools — downloader, schema-drift, n
 **Notes:**
 
 - The loader reads `raw-normalized/<type>/<year>/*.parquet` by default; point it elsewhere with `--data-dir DIR` (reads `DIR/raw-normalized`) or `--input-dir DIR` (reads `DIR/<type>/<year>/*.parquet` directly, bypassing the `raw-normalized` assumption).
-- Re-running `taxi-load` after a fresh `normalize` pass is the common case, not a special one: new months on disk get **appended**; years where nothing changed are **skipped**; anything that looks inconsistent (a prior interrupted run, a row-count mismatch against the manifest) gets **truncated and reloaded** rather than silently left half-updated. Pass `--full-refresh` to force every year onto the reload path regardless of the manifest.
+- Re-running `taxi-load` after a fresh `taxi-normalize` pass is the common case, not a special one: new months on disk get **appended**; years where nothing changed are **skipped**; anything that looks inconsistent (a prior interrupted run, a row-count mismatch against the manifest) gets **truncated and reloaded** rather than silently left half-updated. Pass `--full-refresh` to force every year onto the reload path regardless of the manifest.
 - Table DDL is generated straight from the parquet schema via `taxi_shared`'s type mapper — there's no separate DDL file to hand-maintain or apply.
-- One command does download → normalize → load end to end: `uv run taxi-run yellow --load` (see the [orchestrator guide](guides/orchestrator.md)).
+- One command does download → normalize → load end to end: `uv run taxi-pipeline yellow --load` (see the [orchestrator guide](guides/orchestrator.md)).
 
 ## Running behind a corporate proxy
 
@@ -281,8 +281,8 @@ Scenario-oriented recipes that combine the tools — downloader, schema-drift, n
 3. Normalize (first-run bootstrap + human ack pass omitted for brevity — on a stable-schema `--recent 3` window it's typically a no-op):
 
     ```bash
-    uv run normalize yellow
-    uv run normalize yellow    # 2nd run once mapping is fine
+    uv run taxi-normalize yellow
+    uv run taxi-normalize yellow    # 2nd run once mapping is fine
     ```
 
 4. Load into SQL Server. The loader creates the `taxi` database and `dbo` schema automatically, derives table DDL from the parquet, and writes one table per year (e.g. `yellow_2026`):
@@ -296,7 +296,7 @@ Scenario-oriented recipes that combine the tools — downloader, schema-drift, n
 
     ```bash
     export MSSQL_PASSWORD='YourStrong@Passw0rd'
-    uv run taxi-run --recent 3 --load yellow
+    uv run taxi-pipeline --recent 3 --load yellow
     ```
 
 5. Verify the load:

@@ -137,7 +137,7 @@ Same output, tabulated. Either approach works.
 Schema-drift walks the full parquet family for a taxi type and reports each transition where columns were added, removed, renamed, or type-changed. Even on our tiny 3-month sample it's a good smoke test.
 
 ```bash
-uv run schema-drift --types yellow
+uv run taxi-schema-drift --types yellow
 ```
 
 Expected output (excerpt):
@@ -176,7 +176,7 @@ Normalize rewrites historical parquet so every file matches the latest schema. I
 **First run:**
 
 ```bash
-uv run normalize yellow
+uv run taxi-normalize yellow
 ```
 
 Expected output:
@@ -190,7 +190,7 @@ Next steps:
   1. Review normalize/mappings/yellow.yaml
   2. Uncomment SUGGESTED entries you accept, delete the rest
   3. Fill in `ack_date:` for each TODO to acknowledge lossy casts or data loss
-  4. Re-run: uv run normalize yellow
+  4. Re-run: uv run taxi-normalize yellow
 ```
 
 On a small `--recent 3` sample, all three months sit inside the stable-schema era (2015+), so there are no drift transitions and no `SUGGESTED`/`TODO` items to review. The tool still exits with status 3 the first time — it wants a human confirmation that the empty mapping is what you intended before it writes any output.
@@ -200,7 +200,7 @@ Open `normalize/mappings/yellow.yaml` in your editor if you're curious: the file
 **Second run** (re-running is the confirmation):
 
 ```bash
-uv run normalize yellow
+uv run taxi-normalize yellow
 ```
 
 Expected output:

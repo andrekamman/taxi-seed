@@ -18,26 +18,26 @@ At a glance:
 
 ```
 taxi-seed/
-├── downloader/
+├── download/
 │   └── src/taxi_download/             resumable mirror (Python + httpx)
 ├── schema-drift/
-│   └── src/schema_drift/              analyzer (Python)
+│   └── src/taxi_schema_drift/              analyzer (Python)
 ├── normalize/
 │   ├── mappings/                      curated per-type YAML mappings
 │   └── src/taxi_normalize/            normalizer (Python)
-├── loader/
-│   └── src/taxi_loader/               bulk loader (Python + DuckDB `mssql` extension)
-├── orchestrator/
-│   └── src/taxi_orchestrate/          taxi-run + taxi-curate-mappings (curate.py)
+├── load/
+│   └── src/taxi_load/               bulk loader (Python + DuckDB `mssql` extension)
+├── pipeline/
+│   └── src/taxi_pipeline/          taxi-pipeline + taxi-curate-mappings (curate.py)
 ├── shared/
 │   └── src/taxi_shared/               shared library
 ├── scripts/                           CI/dev helpers (wait_for_mssql.py, e2e-smoke.sh)
 ├── tests/                             pytest per component
-│   ├── downloader/
-│   ├── schema_drift/
+│   ├── download/
+│   ├── taxi_schema_drift/
 │   ├── taxi_normalize/
-│   ├── taxi_loader/
-│   ├── taxi_orchestrate/
+│   ├── taxi_load/
+│   ├── taxi_pipeline/
 │   ├── taxi_shared/
 │   └── e2e/
 ├── docs/                              this site
@@ -51,7 +51,7 @@ taxi-seed/
 
 A few things worth calling out:
 
-- **Single `pyproject.toml`** at the root manages all six Python packages (`taxi_download`, `schema_drift`, `taxi_normalize`, `taxi_loader`, `taxi_orchestrate`, `taxi_shared`) via `[tool.hatch.build.targets.wheel] packages = [...]`. There's one lockfile, one dependency graph, and one `uv sync` to get a working dev environment.
+- **Single `pyproject.toml`** at the root manages all six Python packages (`taxi_download`, `taxi_schema_drift`, `taxi_normalize`, `taxi_load`, `taxi_pipeline`, `taxi_shared`) via `[tool.hatch.build.targets.wheel] packages = [...]`. There's one lockfile, one dependency graph, and one `uv sync` to get a working dev environment.
 - **`src/` layout** used consistently — each Python package lives in `<component>/src/<package_name>/`. This enforces the "package under test is the installed package" rule: tests can't accidentally import the working-copy source and shadow the installed version.
 - **Tests** live in `tests/<package_name>/` rather than `<component>/tests/`. That way pytest discovers them with default settings and there's no ambiguity about which fixtures apply to which package.
 - **`docs/superpowers/`** contains design specs and implementation plans authored during development. They're kept publicly visible because they answer "why is X this way" better than after-the-fact prose can.
@@ -77,7 +77,7 @@ flowchart LR
   RN --> LOAD
   LOAD --> SQL
 
-  RUN{{orchestrator<br/>taxi-run}}
+  RUN{{orchestrator<br/>taxi-pipeline}}
   RUN -.drives.-> DL
   RUN -.drives.-> NORM
   RUN -.drives.-> LOAD
@@ -89,9 +89,9 @@ flowchart LR
 2. **schema-drift** reads the mirror and reports what's changed schema-wise across the years of parquet files. It doesn't rewrite anything; it just produces a report.
 3. **normalize** rewrites historical files to match the latest schema, producing `raw-normalized/` — a directory of parquet with uniform columns and types across every month.
 4. The **loader** (`taxi-load`) bulk-loads normalized parquet into SQL Server, one table per type per year, through DuckDB's `mssql` community extension. It reconciles disk against what's already loaded and picks, per year, skip / append / truncate-reload — see the [loader guide](guides/loader.md) for the full reconciliation model.
-5. The **orchestrator** (`taxi-run`) isn't a pipeline stage itself — it drives stages 1, 3, and 4 as subprocesses for one command, per trip type, stopping a type early if a stage needs human review or fails outright. See the [orchestrator guide](guides/orchestrator.md).
+5. The **orchestrator** (`taxi-pipeline`) isn't a pipeline stage itself — it drives stages 1, 3, and 4 as subprocesses for one command, per trip type, stopping a type early if a stage needs human review or fails outright. See the [orchestrator guide](guides/orchestrator.md).
 
-Each stage writes its output to disk; the next stage reads from disk. There is no in-memory pipeline, no shared process between the four data stages, and no coordinator baked into any one of them — `taxi-run` is an optional layer on top, not a requirement. That makes each stage individually restartable and individually inspectable — you can open the intermediate parquet in DuckDB, in Python, in DBeaver, or in any other tool that reads parquet, without any project-specific tooling.
+Each stage writes its output to disk; the next stage reads from disk. There is no in-memory pipeline, no shared process between the four data stages, and no coordinator baked into any one of them — `taxi-pipeline` is an optional layer on top, not a requirement. That makes each stage individually restartable and individually inspectable — you can open the intermediate parquet in DuckDB, in Python, in DBeaver, or in any other tool that reads parquet, without any project-specific tooling.
 
 **Independence.** No tool requires any of the others upstream:
 
@@ -100,7 +100,7 @@ Each stage writes its output to disk; the next stage reads from disk. There is n
 - Use only **normalize** if you have parquet from somewhere else and want to consolidate it to a target schema. The mapping YAML format is generic.
 - Use only the **loader** if you already have normalized parquet from somewhere else and just want it in SQL Server — it doesn't know or care how `raw-normalized/` was produced.
 
-The pipeline shape is a strong suggestion, not a contract. `taxi-run` exists for the common case (run everything, in order, unattended), but nothing stops you from wiring your own tool into the seam between two stages — the seam is always a directory of parquet files.
+The pipeline shape is a strong suggestion, not a contract. `taxi-pipeline` exists for the common case (run everything, in order, unattended), but nothing stops you from wiring your own tool into the seam between two stages — the seam is always a directory of parquet files.
 
 **Shared conventions across all stages.** Beyond the language-and-tool split, every stage follows the same handful of rules:
 
@@ -167,7 +167,7 @@ The design spec above documents the pre-monorepo layout (three separate repos) a
 `shared/src/taxi_shared/` is deliberately small. Two modules:
 
 - **`type_mapping.py`** — DuckDB → SQL Server type mapping. Handles the common cases (`DOUBLE` → `FLOAT`, `VARCHAR` → `NVARCHAR(MAX)`, `TIMESTAMP` → `DATETIME2`, and so on) and the `DECIMAL(p,s)` parameterization where DuckDB's precision and scale are carried through to the SQL Server column definition.
-- **`sql_generator.py`** — `CREATE TABLE` DDL generation from a DuckDB schema. Used by the loader (`taxi_loader`) to derive each year's table DDL directly from the normalized parquet's schema. Generated tables are page-compressed (`WITH (DATA_COMPRESSION = PAGE)`), unconditionally — see the [Loader guide](guides/loader.md#page-compression).
+- **`sql_generator.py`** — `CREATE TABLE` DDL generation from a DuckDB schema. Used by the loader (`taxi_load`) to derive each year's table DDL directly from the normalized parquet's schema. Generated tables are page-compressed (`WITH (DATA_COMPRESSION = PAGE)`), unconditionally — see the [Loader guide](guides/loader.md#page-compression).
 
 The downloader, schema-drift, and normalize don't import `taxi_shared` — none of them touch SQL Server. Keeping the shared library scoped to the SQL Server concern keeps its API surface small and its change cadence slow: type mappings change when SQL Server introduces a new type, which is roughly once a decade.
 
@@ -179,23 +179,23 @@ If shared logic is discovered later (for example, a parquet-family iteration hel
 
 Every test builds its own synthetic parquet fixtures with DuckDB inside `conftest.py` (per component) and writes them under `tmp_path`. There are no network dependencies, no shared filesystem state, and no fixtures that persist across runs. This means:
 
-- **Fast**: the fast unit suite — every test except `tests/taxi_loader/test_load_integration.py` and `tests/e2e/` — runs in seconds on a laptop, no external services required. This is what `uv run --extra test pytest -q` gives you locally and what CI's `test` job runs on every push.
+- **Fast**: the fast unit suite — every test except `tests/taxi_load/test_load_integration.py` and `tests/e2e/` — runs in seconds on a laptop, no external services required. This is what `uv run --extra test pytest -q` gives you locally and what CI's `test` job runs on every push.
 - **Deterministic**: no flakiness from external services, no rate-limited APIs, no "the CI runner had a different DNS resolver" mysteries.
 - **Isolated**: tests can't corrupt each other's state because each one writes to its own `tmp_path`.
 - **Grounded**: fixtures produce real parquet files that exercise the real DuckDB code paths. There are no mocks of DuckDB or of the parquet reader — the code that runs in tests is the code that runs in production.
 - **Debuggable**: when a test fails, `tmp_path` contains the actual parquet files that broke it. You can open them in DuckDB and inspect them directly, without regenerating anything.
 
-A second, smaller suite needs a real SQL Server: `tests/taxi_loader/test_load_integration.py` and `tests/e2e/test_pipeline_e2e.py` are skipped automatically unless `MSSQL_PASSWORD` is set. CI's `integration` job runs them against a disposable `mssql/server` container on every push; locally, `scripts/e2e-smoke.sh` does the same (bring up a container, `scripts/wait_for_mssql.py` to wait for readiness, run the two suites, tear the container down). There is still no test against live TLC CloudFront — that integration point is validated manually before releases — but the SQL Server side is exercised automatically now that the loader exists.
+A second, smaller suite needs a real SQL Server: `tests/taxi_load/test_load_integration.py` and `tests/e2e/test_pipeline_e2e.py` are skipped automatically unless `MSSQL_PASSWORD` is set. CI's `integration` job runs them against a disposable `mssql/server` container on every push; locally, `scripts/e2e-smoke.sh` does the same (bring up a container, `scripts/wait_for_mssql.py` to wait for readiness, run the two suites, tear the container down). There is still no test against live TLC CloudFront — that integration point is validated manually before releases — but the SQL Server side is exercised automatically now that the loader exists.
 
 The upshot is that the fast unit suite doubles as a tight feedback loop during development — a change-run-observe cycle that costs less than a git commit — while the container-backed integration/e2e suite catches the class of bug (a `COPY` that doesn't actually round-trip through the `mssql` extension, a pipeline wiring mistake) that synthetic-fixture unit tests structurally can't.
 
 Component-level test layouts:
 
-- `tests/downloader/` — synthetic PAR1 fixtures and stubbed HTTP responses exercising the WAF classifier, backoff ladder, and recent-mode/full-history walkers.
-- `tests/schema_drift/` — synthetic parquet families with injected column adds, drops, renames, and type changes.
+- `tests/download/` — synthetic PAR1 fixtures and stubbed HTTP responses exercising the WAF classifier, backoff ladder, and recent-mode/full-history walkers.
+- `tests/taxi_schema_drift/` — synthetic parquet families with injected column adds, drops, renames, and type changes.
 - `tests/taxi_normalize/` — synthetic parquet with schema drift plus mapping YAML fixtures covering acknowledged and unacknowledged drift.
-- `tests/taxi_loader/` — the reconcile planner (skip/append/reload) tested purely against synthetic disk/manifest/table-count inputs, plus `test_load_integration.py` for the real `COPY`-into-SQL-Server path (needs `MSSQL_PASSWORD`, skipped otherwise).
-- `tests/taxi_orchestrate/` — stage classification (`pipeline.classify`, `overall_exit_code`) and CLI wiring, with the subprocess calls to the other tools stubbed out.
+- `tests/taxi_load/` — the reconcile planner (skip/append/reload) tested purely against synthetic disk/manifest/table-count inputs, plus `test_load_integration.py` for the real `COPY`-into-SQL-Server path (needs `MSSQL_PASSWORD`, skipped otherwise).
+- `tests/taxi_pipeline/` — stage classification (`pipeline.classify`, `overall_exit_code`) and CLI wiring, with the subprocess calls to the other tools stubbed out.
 - `tests/taxi_shared/` — DuckDB schemas fed through the type mapper and DDL generator; string-compare against expected `CREATE TABLE` output.
 - `tests/e2e/` — the full download → normalize → load pipeline run against generated fake data and a real SQL Server; skipped without `MSSQL_PASSWORD`.
 
