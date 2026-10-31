@@ -52,11 +52,18 @@ git_describe_command = "git describe --dirty --tags --long --match v*"
 packages = [
   "download/src/taxi_download",
   "load/src/taxi_load",
+  "mssql/src/taxi_mssql",
   "normalize/src/taxi_normalize",
   "pipeline/src/taxi_pipeline",
   "schema-drift/src/taxi_schema_drift",
   "shared/src/taxi_shared",
 ]
+
+[tool.hatch.build.targets.wheel.force-include]
+# mssql/sql/ lives outside src/, so without this the wheel omits it and the container
+# resolves taxi_mssql.ola.VENDORED_SCRIPT to a path that does not exist -- a failure no
+# unit test catches, since the tests inject script=.
+"mssql/sql" = "taxi_mssql/sql"
 
 [project.optional-dependencies]
 test = ["pytest>=8.0"]
@@ -70,7 +77,21 @@ docs = [
 taxi-curate-mappings = "taxi_pipeline.curate:main"
 taxi-download = "taxi_download.cli:main"
 taxi-load = "taxi_load.cli:main"
+taxi-mssql = "taxi_mssql.cli:main"
 taxi-normalize = "taxi_normalize.cli:main"
 taxi-pipeline = "taxi_pipeline.cli:main"
 taxi-schema-drift = "taxi_schema_drift.cli:main"
 taxi-vendor-extension = "taxi_load.extension:main"
+
+[tool.pytest.ini_options]
+# Several packages carry a test_cli.py, test_stages.py and test_report.py. Without
+# importlib mode, pytest imports same-named files as the same top-level module and fails
+# collection with "import file mismatch"; the alternative is an __init__.py in every test
+# directory, which rootdir-relative imports do not otherwise need.
+addopts = "--import-mode=importlib"
+testpaths = ["tests"]
+# Two test directories hold a helper that their tests import as a top-level module:
+# tests/e2e/fakedata.py, and write_month from tests/taxi_load/conftest.py. The default
+# "prepend" import mode put those directories on sys.path implicitly; importlib mode does
+# not, so say it explicitly rather than reach for __init__.py files nothing else needs.
+pythonpath = ["tests/e2e", "tests/taxi_load"]
