@@ -1,0 +1,155 @@
+# The taxi-mssql Compose stack, end to end, on demand only.
+#
+# WHAT THIS RUNS
+# `tests/taxi_mssql/test_integration_compose.py` (marker: `integration`, 6 tests). It
+# builds the seeder image, brings up SQL Server, mirrors and normalizes several months of
+# yellow trip data, provisions presized files, loads them, takes an Ola-verified backup --
+# and then runs the whole stack a second time to prove the resumability claim. Minutes and
+# gigabytes, not seconds. A bare `pytest` never collects it: pyproject's addopts carry
+# `-m 'not integration'`, and that deselection is load-bearing, not an oversight.
+#
+# THIS IS NOT CI'S `integration` JOB.
+# `ci.yml` has a job called `integration`: the loader + pipeline e2e tests against a
+# service-container SQL Server, on every PR, and a *required status check* on both `dev`
+# and `main`. This workflow is a different thing entirely, which is why nothing here is
+# named `integration`. Branch protection matches on job name, so do not rename
+# `compose-stack` into anything resembling `integration`, and do not make it required: it
+# is deliberately not run on every PR, so requiring it would block every merge on a job
+# that never starts.
+#
+# HOW TO TRIGGER IT
+#   1. Manually: Actions -> "Compose stack (on demand)" -> "Run workflow", and pick the
+#      branch. `workflow_dispatch` is served from the default branch (`dev`), so the
+#      button only exists once this file is on `dev`; the ref picker then runs it against
+#      whatever branch you choose.
+#   2. On a pull request: add the `ci:compose-stack` label. The run starts on the label
+#      and re-runs on every later push to that PR while the label is still attached.
+#      Remove the label to stop paying for it.
+#
+# WHEN IT IS EXPECTED TO BE RUN
+#   - Before a release, at minimum: after `dev` is promoted to `main` and before the `v*`
+#     tag goes up. Nothing else in CI builds the seeder image or exercises provisioning,
+#     presizing, Ola, backup or resumability, so an untested seeder ships otherwise.
+#   - On any PR that touches `mssql/**` (the seeder, its Dockerfile, its Compose file),
+#     `load/**`, the vendored DuckDB extension pin, or a `target:` pin in
+#     `normalize/mappings/`.
+#   - After a TLC release moves the published months, since the test computes its own
+#     `--recent` window from the pinned `target:` and the download grows by one month each
+#     time.
+name: Compose stack (on demand)
+
+on:
+  workflow_dispatch:
+  # `labeled` starts the run; `synchronize` and `reopened` keep a labelled PR honest as it
+  # gets new commits. Every one of these is filtered by the `if:` on the job below, so an
+  # unlabelled PR costs a skipped job and no runner minutes.
+  pull_request:
+    types: [labeled, synchronize, reopened]
+
+# One run per ref. A labelled PR that gets three pushes in a row should pay for the last
+# one only -- at ~30 minutes and several GB a run, a queue of superseded runs is real money.
+concurrency:
+  group: compose-stack-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  compose-stack:
+    name: compose-stack (seeder, on demand)
+    # On a `labeled` event the new label is already present in the payload, so this one
+    # expression covers both "just labelled" and "pushed while labelled".
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      contains(github.event.pull_request.labels.*.name, 'ci:compose-stack')
+    runs-on: ubuntu-latest
+    # The test caps each of its two `docker compose up` calls at 1800s itself, so the
+    # worst in-test case is ~60 minutes. The job timeout has to sit *above* that sum:
+    # a Compose stack that hangs should fail inside pytest, which reports which command
+    # stalled and the output so far, rather than be killed by the runner with no
+    # diagnosis. 90 minutes leaves room for image build and setup on top, and still fails
+    # two orders of magnitude short of GitHub's 6-hour ceiling.
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # Tags, so hatch-vcs can derive a real version to stamp into the image below.
+          fetch-depth: 0
+
+      - name: Reclaim runner disk, and record what we have
+        # Disk is the tightest constraint in this job. A full run leaves ~4.5 GB of
+        # parquet, presized mdf/ldf and a backup on the bind mount, on top of the SQL
+        # Server image (~1.5 GB pulled) and the seeder image it builds. The toolchains
+        # removed here are worth over 10 GB between them and nothing in this job uses
+        # them -- uv downloads its own Python. `|| true` throughout: this is a best-effort
+        # optimisation and a missing directory in a future runner image must not fail the
+        # run.
+        run: |
+          sudo rm -rf /usr/local/lib/android /usr/share/dotnet /opt/ghc || true
+          df -h / /mnt || true
+
+      - name: Choose a data directory on the largest disk
+        # GitHub's Ubuntu runners mount a second, much larger ephemeral disk at /mnt. The
+        # bind-mounted data tree is the bulky half of this job, so put it there and leave
+        # the root filesystem to Docker's images and build cache. If /mnt is ever absent
+        # or too small, fall back to the runner temp dir rather than fail -- the run may
+        # then be tight on space, which the df output above makes visible.
+        run: |
+          pick="$RUNNER_TEMP/taxi-compose"
+          if [ -d /mnt ] && [ "$(df -Pm /mnt | awk 'NR==2 {print $4}')" -gt 20480 ]; then
+            pick=/mnt/taxi-compose
+          fi
+          sudo mkdir -p "$pick"
+          sudo chown "$(id -u):$(id -g)" "$pick"
+          echo "PYTEST_BASETEMP=$pick" >> "$GITHUB_ENV"
+          echo "Using $pick ($(df -Pm "$pick" | awk 'NR==2 {print $4}') MB free)"
+
+      - name: Check the Docker daemon and Compose v2
+        # The test shells out to `docker compose` (the v2 subcommand, not docker-compose).
+        # ubuntu-latest ships both the daemon and the Compose plugin preinstalled, so no
+        # setup action is needed -- but assert it here, so a runner image that drops
+        # either one fails in two seconds with an obvious cause instead of 20 minutes in.
+        run: |
+          docker version
+          docker compose version
+
+      - uses: astral-sh/setup-uv@v3
+        with:
+          enable-cache: true
+      - run: uv python install 3.13
+      - run: uv sync --extra test
+
+      - name: Stamp the image with the version it was built from
+        # .git is deliberately outside the image build context, so hatch-vcs inside the
+        # build falls back to 0.0.0 and the image cannot say what it is. Compose forwards
+        # TAXI_SEED_VERSION as a build arg; the test passes the whole environment through,
+        # so setting it here is enough. Unset is explicitly fine (see mssql/Dockerfile),
+        # hence the fallback rather than a failure.
+        run: |
+          version="$(uv run python -c 'from importlib.metadata import version; print(version("taxi-seed"))' 2>/dev/null || true)"
+          echo "TAXI_SEED_VERSION=$version" >> "$GITHUB_ENV"
+          echo "TAXI_SEED_VERSION=${version:-<unset, image will report its fallback>}"
+
+      - name: Run the Compose stack end to end, twice
+        # -m integration overrides pyproject's `-m 'not integration'` (a command-line -m
+        # wins over addopts), so the deselection stays intact for every other run.
+        # --basetemp puts the bind-mounted data tree on the disk chosen above. No -p
+        # no:randomly or ordering flags: the tests are deliberately ordered, the first
+        # one produces the state the rest assert on.
+        run: |
+          uv run --extra test pytest -m integration \
+            tests/taxi_mssql/test_integration_compose.py \
+            --basetemp "$PYTEST_BASETEMP" -v
+
+      - name: What the run consumed
+        # Cleanup is not the point -- the runner is ephemeral and the mssql container
+        # leaves root-owned files on the bind mount anyway. This records the real disk
+        # cost so the next person does not have to guess whether the job is near its
+        # ceiling. If these numbers get close, the remedies are re-pinning the mapping
+        # `target:` (a smaller --recent window) or a larger runner, not a quieter job.
+        if: always()
+        run: |
+          df -h / /mnt || true
+          du -sh "$PYTEST_BASETEMP" 2>/dev/null || true
+          docker system df || true
