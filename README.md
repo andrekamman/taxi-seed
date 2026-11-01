@@ -19,13 +19,14 @@ The site has the deep-dive guides, a cookbook of cross-cutting recipes, an archi
 
 ## Components
 
-One repo, five tools plus a shared library:
+One repo, six tools plus a shared library:
 
 - [`download/`](download/) — Python CLI (`taxi-download`) that mirrors the TLC CloudFront bucket to local parquet.
 - [`schema-drift/`](schema-drift/) — Python CLI (`taxi-schema-drift`) that reports column-name and column-shape drift across a mirror.
 - [`normalize/`](normalize/) — Python CLI (`taxi-normalize`) that rewrites a mirror to a single target schema, refusing to lose data.
 - [`load/`](load/) — Python CLI (`taxi-load`) that loads normalized parquet into a target database.
 - [`pipeline/`](pipeline/) — Python CLI (`taxi-pipeline`) that drives download → normalize → load as one pipeline.
+- [`mssql/`](mssql/) — Docker Compose stack (`taxi-mssql`) that turns one host folder into a complete, backed-up SQL Server data set.
 - [`shared/`](shared/) — common library code (`sql_generator.py` for `CREATE TABLE` DDL generation, `type_mapping.py` for DuckDB→SQL Server type mapping) used across the tools.
 
 Each component has a short `README.md` that points at the guide on the site; the guide is authoritative.
@@ -53,6 +54,40 @@ uv run taxi-download yellow --recent 3
 Downloads ~200 MB in 1–2 minutes on residential broadband. This Quick Start only exercises the downloader. All tools live in one `uv sync`-managed environment; the [Getting Started tutorial](https://andrekamman.github.io/taxi-seed/getting-started/) walks the full end-to-end path from clone to normalized parquet. Installed from PyPI instead? Same commands, without the `uv run` prefix.
 
 A full-history mirror is roughly 40–100 GB (depending on how many of the four trip types and how much history you mirror) and takes 6–10 hours end-to-end. The downloader is therefore built to be resumable, incremental, and cheap to re-run on a schedule.
+
+## A complete SQL Server data set
+
+[`mssql/`](mssql/) is a Compose stack. Give it one folder on your host and it fills that
+folder with the whole **deliverable set** — raw parquet, normalized parquet, a presized
+data file and log file, and a compressed, verified backup. Run it again on the same folder
+and it continues from where the last run stopped; every step reads the folder to decide
+whether it has work to do, so there is no state file to go stale.
+
+Two settings are required, in `mssql/.env`, which is gitignored:
+
+```bash
+cat > mssql/.env <<'ENV'
+TAXI_DATA_DIR=/srv/taxi
+MSSQL_PASSWORD=change-me-Str0ng!
+ENV
+```
+
+`TAXI_DATA_DIR` is the host folder to fill, and it must exist first. `MSSQL_PASSWORD` must
+satisfy SQL Server's complexity policy or the `mssql` container exits during startup.
+
+```bash
+cd mssql
+docker compose up --build --abort-on-container-exit --exit-code-from seeder
+```
+
+Keep both flags. They stop the whole stack as soon as the seeder exits, and they make `$?`
+the seeder's own exit code — `0` clean, `1` needs review (usually schema drift to
+acknowledge), `2` operational failure. Without them the `mssql` service keeps running
+after the work finishes, and you are left watching a SQL Server log with no signal that
+the run ended and no exit code.
+
+The default run covers all four trip types over the full history: expect several hours and
+a large database on the first run, and a near no-op on later ones.
 
 ## Requirements
 
