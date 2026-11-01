@@ -58,8 +58,39 @@ jobs:
         with:
           repository-url: https://test.pypi.org/legacy/
 
-  pypi:
+  # Publishing to PyPI is gated on a manual approval (the `pypi` environment has a
+  # required reviewer). That gate is deliberate -- a PyPI version number can never be
+  # reused, so the pause before an irreversible publish is worth having.
+  #
+  # But v0.3.0 was lost to exactly that gate: it waited for an approval nobody was told
+  # about and GitHub expired the pending deployment, so the tag exists and PyPI never
+  # got it. An approval you do not hear about is not a gate, it is a silent drop. This
+  # job runs BEFORE the gated one -- no `environment:`, so nothing blocks it -- purely
+  # so the run says out loud that it is waiting, and where to go.
+  announce-gate:
     needs: build
+    if: needs.build.outputs.is_prerelease == 'false'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Say that the release is waiting for approval
+        env:
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          {
+            echo "## :lock: ${GITHUB_REF_NAME} is waiting for PyPI approval"
+            echo
+            echo "The \`pypi\` job cannot start until a reviewer approves the deployment."
+            echo "**Nothing is published until then, and GitHub expires a pending"
+            echo "deployment after 30 days** -- which is how v0.3.0 was lost."
+            echo
+            echo "Approve it here: <${RUN_URL}>"
+            echo
+            echo "See \`docs/operations/releasing.md\` for the full procedure."
+          } >> "$GITHUB_STEP_SUMMARY"
+          echo "::warning title=Approval required::${GITHUB_REF_NAME} will not publish to PyPI until the pypi deployment is approved: ${RUN_URL}"
+
+  pypi:
+    needs: [build, announce-gate]
     if: needs.build.outputs.is_prerelease == 'false'
     runs-on: ubuntu-latest
     environment: pypi

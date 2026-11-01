@@ -95,7 +95,27 @@ git tag v0.2.0
 git push origin v0.2.0
 ```
 
-This runs `build`, then the `pypi` job — which waits for approval in the `pypi` GitHub Environment (the required reviewer configured during one-time setup) before it publishes — then creates the GitHub Release. Approve the deployment from the Actions run page (or `gh run watch`, which surfaces the pending-approval state) when you're ready for it to go live.
+This runs `build`, then an `announce-gate` job, then the `pypi` job — which waits for approval in the `pypi` GitHub Environment (the required reviewer configured during one-time setup) before it publishes — then creates the GitHub Release. Approve the deployment from the Actions run page (or `gh run watch`, which surfaces the pending-approval state) when you're ready for it to go live.
+
+!!! danger "An unapproved deployment expires, and the release is simply lost"
+    **GitHub expires a pending deployment after 30 days.** The run then reports
+    `pypi: failure` with no failing step, nothing is published, and the only trace is a tag
+    that never shipped. Nothing retries.
+
+    This is not hypothetical: **`v0.3.0` was tagged on 2026-08-17 and died exactly this
+    way.** `v0.3.0rc1` had succeeded to TestPyPI the same day, which made the release look
+    fine, and PyPI stayed on `0.2.0` for months before anyone noticed — via a downstream
+    repo resolving an old version.
+
+    The gate itself is deliberate and stays: a PyPI version number can never be reused, so
+    the pause before an irreversible publish is worth having. What was missing was being
+    *told*. The `announce-gate` job now runs before the gated one — it has no
+    `environment:`, so nothing blocks it — and writes a job summary plus a workflow warning
+    annotation saying the release is waiting and where to approve it.
+
+    **`v0.3.0` is not being re-cut.** Its tag stays as a tag that never shipped;
+    re-creating a tag would rewrite published history for anyone who fetched it, and point
+    it at different content. The next final release is `v0.4.0`.
 
 Once it lands, confirm the release from a consumer's position — the console scripts are the part most likely to be wrong, since they change whenever a tool is added or removed:
 
