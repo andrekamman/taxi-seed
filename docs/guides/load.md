@@ -1,11 +1,14 @@
-# Loader
+# taxi-load
 
-`taxi-load` bulk-loads normalized TLC parquet (`raw-normalized/<type>/<year>/*.parquet`) into SQL Server, one table per year per type, entirely through DuckDB and the `mssql` extension — no ODBC driver, no separate ETL framework. The extension is vendored rather than installed at runtime (see [Troubleshooting](#troubleshooting)). It reconciles what's on disk against what's already loaded and picks, per year, one of three actions: skip, append the new months, or truncate and reload the whole year. That reconciliation is what makes re-running the tool after a fresh `taxi-normalize` pass (or after TLC ships a new month) safe and cheap.
+`taxi-load` bulk-loads normalized TLC parquet (`raw-normalized/<type>/<year>/*.parquet`) into SQL Server, one table per year per type, entirely through DuckDB and the `mssql` extension — no ODBC driver, no separate ETL framework. DuckDB is pinned at exactly `1.5.5` and the extension is **vendored**, not installed at runtime (see [The vendored extension](#the-vendored-extension)). It reconciles what's on disk against what's already loaded and picks, per year, one of three actions: skip, append the new months, or truncate and reload the whole year. That reconciliation is what makes re-running the tool after a fresh `taxi-normalize` pass (or after TLC ships a new month) safe and cheap.
+
+If you want a complete, presized, backed-up SQL Server data set rather than just rows in a database you already have, [`taxi-mssql`](mssql.md) drives this tool as one of its stages and does the database shaping around it.
 
 ## Prerequisites
 
 - Normalized parquet under `raw-normalized/<type>/<year>/` — produced by the [normalize](normalize.md) guide's tool.
-- A reachable SQL Server instance (local, container, or remote). The `mssql` DuckDB extension is installed automatically on first run; you don't need to install anything server-side beyond SQL Server itself.
+- A reachable SQL Server instance (local, container, or remote). Nothing has to be installed server-side beyond SQL Server itself.
+- The vendored `mssql` extension on disk. `taxi-load` fetches it on first use, or run [`taxi-vendor-extension`](#the-vendored-extension) as a separate, retryable step first.
 - The `MSSQL_PASSWORD` environment variable set. There is no `--password` flag — the password only ever comes from the environment, so it never shows up in shell history or process listings.
 - `uv sync` in the repo root.
 
@@ -37,6 +40,49 @@ uv run taxi-load yellow --dry-run
 ```
 
 `data_type` is a positional argument, one of `yellow`, `green`, `fhv`, `fhvhv`; omit it to load all four in turn.
+
+## The vendored extension
+
+`INSTALL mssql FROM community` resolves against a registry that **rebuilds**. DuckDB 1.5.5 alone has served three different builds of the `mssql` extension — `37596c2` (`mssql_version()` `0.2.3`), `e2b8c01` (`0.2.4`) and `d35b617` — with no DuckDB release in between. Pinning either the build hash or the semver therefore pins nothing on its own: the bytes move underneath an unchanged pin. Worse, a plain `INSTALL` **never re-fetches when the extension is cached**, so a machine that has run the loader before cannot even observe the drift without `FORCE INSTALL`.
+
+So taxi-seed owns the bytes. The extension is mirrored as a release asset on this repo and loaded from a vendored extension directory, which has three consequences worth knowing:
+
+- **Integrity is cryptographic, not a checksum we keep.** DuckDB enforces the extension signature on that path under its *default* configuration. `allow_unsigned_extensions` is not needed and is not used; a tampered file is refused outright. The recorded SHA-256s are an identity pin — "this is the build we tested" — not the integrity mechanism.
+- **`LOAD mssql` resolves by name** out of `extension_directory`, with no `INSTALL`, no network and no `.info` sidecar.
+- **Both the build hash and the semver are asserted at load**, and the error names whichever disagreed. The hash catches a version re-pinned without re-spiking; the semver catches a stale vendored directory.
+
+One pinned fact drives all of it — DuckDB version, build hash, semver and download URL all derive from constants in `load/src/taxi_load/extension.py`. That is also why `duckdb==1.5.5` is an **exact** pin in `pyproject.toml`: the vendored directory is keyed by exact DuckDB version, so a floating pin silently orphans it.
+
+Vendoring happens on first use, but you can do it as a separate, retryable step:
+
+```bash
+uv run taxi-vendor-extension                 # into ~/.taxi-seed/extensions
+uv run taxi-vendor-extension --root /opt/ext  # somewhere else
+export TAXI_EXTENSION_DIR=/opt/ext            # point the loader at it
+```
+
+`TAXI_EXTENSION_DIR` is what the [`taxi-mssql`](mssql.md) image sets, having baked the extension at build time so a multi-hour run never stops to download it. The fetch prefers taxi-seed's own release mirror and falls back to the community CDN; both are tried before it gives up, and the message says what each returned. (The community CDN serves over plain HTTP and 403s `urllib` while allowing `curl` — the signature, not the transport, is what protects the fetch.)
+
+## Session settings
+
+Three DuckDB session settings have defaults that are wrong for this loader, so it sets all three explicitly on every connection:
+
+| Setting | Extension default | What the loader sets | Why |
+|---|---|---|---|
+| `mssql_copy_tablock` | `auto` | `true` | `auto` resolves to **off** for any clustered target, so table shape would silently decide it. See [`--writers`](#the-writers-flag) for what off costs. |
+| `mssql_exec_invalidate_cache` | `false` | `true` | The catalog metadata cache returns stale results within a session, so a table created through `mssql_exec` can be invisible to the catalog in that same session. This loader issues DDL constantly. |
+| `mssql_query_timeout` | `30s` | `0` (disabled) | A `COUNT_BIG` over a large year table can exceed 30s, and the timeout surfaces as what looks like a connection failure. |
+
+`mssql_copy_parallel_writers` is deliberately *not* in that list: its default (0) derives from DuckDB's thread count capped at 8, which is the fastest configuration measured here. [`--writers`](#the-writers-flag) overrides it.
+
+Credentials go through DuckDB's `mssql` **secret type** rather than a connection string:
+
+```sql
+CREATE OR REPLACE SECRET taxi_mssql (TYPE mssql, HOST ?, PORT ?, DATABASE ?, USER ?, PASSWORD ?, USE_ENCRYPT true);
+ATTACH '' AS mssql (TYPE mssql, SECRET taxi_mssql);
+```
+
+Every field binds as a parameter, so the password never reaches a SQL string — `ATTACH` takes no bind parameters, which is why the connection-string form could only interpolate it as a literal. `duckdb_secrets()` renders it redacted. Note there is no trust-server-certificate option on an `mssql` secret; `USE_ENCRYPT` encrypts without validating the certificate, which is the posture a SQL Server container's self-signed certificate requires.
 
 ## One table per year per type
 
@@ -139,9 +185,28 @@ If a type has no parquet at all under the resolved input directory, that type is
 
 **`--writers N`** — how many concurrent bulk-load connections a single `COPY` may open (`mssql_copy_parallel_writers`). Omit it and DuckDB derives the count from its thread count, capped at 8, which is the fastest configuration measured on this repo's tables. `--writers 1` loads serially, which is the tool to reach for when bisecting a load problem.
 
-This is in-process parallelism: one `COPY`, several bulk-load connections. It replaced an earlier design that ran one process per month and beat it by 1.65x on a 19.2M-row year, and by 1.44x at the same degree of parallelism — so the gain is the mechanism, not simply the count.
+This is in-process parallelism: one `COPY`, several bulk-load connections. It replaced an earlier design that ran one `taxi-load` process per month, supervised by a thread pool, with a year-level integrity gate to clean up after a killed worker. On green 2015 (19.2M rows) the in-process writers measured **1.65x faster** — 47.9s against 79.0s — and still **1.44x faster at matched parallelism**, so the gain is the mechanism rather than simply the count. The fan-out, its shard discovery and the integrity gate are all gone; the loader's own reconcile covers the hazard the gate existed for.
 
-`TABLOCK` is always on, and that matters more than the writer count. On the page-compressed heaps this loader creates, turning it off is 3.2x slower and produces a 36% larger table: without `TABLOCK` the writers contend on `PAGELATCH_EX` at the insert point and rows land in less densely packed pages. The extension's own `mssql_copy_tablock` default is `auto`, which resolves to *off* for any clustered target, so the loader sets it explicitly rather than letting table shape decide.
+### `TABLOCK` and table shape
+
+`TABLOCK` is always on, and it matters more than the writer count. Three results from the same measurement, on this repo's actual table shape:
+
+| Arm | Against page-compressed heap + `TABLOCK` |
+|---|---|
+| `TABLOCK=false` | **3.2x slower**, and a **36% larger** table |
+| Clustered index, no writers | no gain |
+| Clustered index + `TABLOCK` + writers | **fails outright**, with a partial load |
+
+The `TABLOCK=false` penalty is **page-latch contention, not lost compression**: without `TABLOCK` the writers contend on `PAGELATCH_EX` at the insert point and rows land in less densely packed pages. That is why the extension's `mssql_copy_tablock = auto` default is a trap here — `auto` resolves to *off* for any clustered target, so adding an index would silently turn off the setting the load depends on. The loader sets it explicitly rather than letting table shape decide.
+
+!!! note "Published advice to the contrary is scoped elsewhere"
+    Microsoft's and the community's `TABLOCK=false` guidance is written for Azure SQL Database and for clustered tables. Neither holds for a boxed SQL Server loading page-compressed heaps, which is what this loader creates. The numbers above were taken on this repo's tables; prefer them.
+
+## The `--year` and `--month` flags
+
+**`--year YYYY`** restricts the run to one year; **`--month 1..12`** restricts it further to one month of that year, and requires `--year` (a bare `--month` would mean "this month of every year", which is not a useful request).
+
+These narrow what reconcile considers. They are a debugging and backfill tool — reload a single bad year without touching the rest, or bisect a load failure down to one file — not a parallelism mechanism. Running several of them at once is no longer how this loader goes fast; `--writers` is.
 
 ## The `--require-existing-database` flag
 
@@ -164,8 +229,12 @@ By default the loader creates the database if it is absent, with server-default 
 | `--flush-rows` | `100000` | BCP commit batch size passed to the `mssql` extension's `COPY`. |
 | `--full-refresh` | off | Force truncate + reload of every year processed, ignoring the manifest. |
 | `--dry-run` | off | Print the reconciliation plan; write nothing. |
+| `--writers` | *(DuckDB's thread count, capped at 8)* | Concurrent bulk-load connections one `COPY` may open (`mssql_copy_parallel_writers`). `1` loads serially. |
+| `--require-existing-database` | off | Fail if the target database is absent instead of creating it. |
+| `--year` | *(every year on disk)* | Restrict the run to one year. |
+| `--month` | *(every month of `--year`)* | Restrict the run to one month; requires `--year`. |
 
-`MSSQL_PASSWORD` is the only accepted source for the password — there is no `--password` flag.
+`MSSQL_PASSWORD` is the only accepted source for the password — there is no `--password` flag. `TAXI_EXTENSION_DIR` is the only other environment variable the loader reads; see [The vendored extension](#the-vendored-extension).
 
 ## Exit codes
 
@@ -173,7 +242,7 @@ By default the loader creates the database if it is absent, with server-default 
 |---|---|
 | 0 | Every requested type either loaded successfully, was a no-op (`--dry-run`), or had no parquet under the resolved input dir (skipped as "nothing to load yet"). |
 | 1 | At least one type failed mid-load (a `duckdb.Error` or a loader-internal error during `COPY`/DDL execution) — a partial load; other types may have still succeeded. |
-| 2 | An identifier/config error (invalid `--schema` or `--database`), a missing `MSSQL_PASSWORD`, a connection/provisioning failure (installing the `mssql` extension, an unexpected extension version, attaching the database, creating the database/schema), or a per-type `TypeMappingError` (a DuckDB column type with no SQL Server equivalent). |
+| 2 | An identifier/config error (invalid `--schema` or `--database`), a missing `MSSQL_PASSWORD`, a connection/provisioning failure (vendoring or loading the `mssql` extension, an extension build or version that does not match the pin, attaching the database, creating the database/schema, or `--require-existing-database` with no such database), or a per-type `TypeMappingError` (a DuckDB column type with no SQL Server equivalent). |
 
 When multiple types are processed in one invocation (no positional `data_type`), the overall exit code is the **maximum** across all per-type outcomes — so a `TypeMappingError` on one type (2) outranks a mid-load failure on another (1), which outranks types that loaded cleanly (0). Note that the DuckDB extension install/attach/provisioning check happens once, up front, before any type is processed — a failure there returns 2 immediately without attempting any type.
 

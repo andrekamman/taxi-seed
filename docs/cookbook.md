@@ -1,6 +1,6 @@
 # Cookbook
 
-Scenario-oriented recipes that combine the tools — downloader, schema-drift, normalize, and loader, orchestrated end-to-end by `taxi-pipeline` — into real workflows. Each recipe is self-contained and copy-pasteable, aimed at data engineers running the stack in a real environment. Where a recipe overlaps with a per-tool guide, this page focuses on the glue between tools and the operational details (cron, proxies, dev bootstraps).
+Scenario-oriented recipes that combine the tools — downloader, schema-drift, normalize, and loader, chained end-to-end by `taxi-pipeline` — into real workflows. Each recipe is self-contained and copy-pasteable, aimed at data engineers running the stack in a real environment. Where a recipe overlaps with a per-tool guide, this page focuses on the glue between tools and the operational details (cron, proxies, dev bootstraps).
 
 ## Nightly refresh via cron
 
@@ -8,7 +8,7 @@ Scenario-oriented recipes that combine the tools — downloader, schema-drift, n
 
 **Recipe** — a shell script plus a scheduler entry.
 
-1. Create `/srv/taxi/bin/nightly-refresh.sh`. The orchestrator (`taxi-pipeline`) already chains download → normalize per type and honors each stage's exit code, so the whole refresh is one command:
+1. Create `/srv/taxi/bin/nightly-refresh.sh`. `taxi-pipeline` already chains download → normalize per type and honors each stage's exit code, so the whole refresh is one command:
 
     ```bash
     #!/bin/bash
@@ -76,8 +76,8 @@ Scenario-oriented recipes that combine the tools — downloader, schema-drift, n
 **Notes:**
 
 - `--recent`'s stop-on-local semantic makes this fully idempotent — running it twice in the same day just skips everything.
-- `taxi-pipeline` exits 0 for a clean run, 1 if any type's normalize amended its mapping and needs a human to review the new drift, or 2 for an operational failure (download failure, a real normalize config error). Consider paging on exit=2 vs. logging-only on exit=1 — see the [orchestrator guide's exit codes](guides/orchestrator.md#exit-codes). Note `set -euo pipefail` means the script stops at the `taxi-pipeline` line on any non-zero exit, so the schema-drift snapshot won't run that day either; drop `-e` (or run schema-drift unconditionally with `|| true` before it) if you want the snapshot regardless.
-- `raw/` grows monotonically — plan capacity via the [Downloader guide's sizing table](guides/downloader.md#disk-sizing).
+- `taxi-pipeline` exits 0 for a clean run, 1 if any type's normalize amended its mapping and needs a human to review the new drift, or 2 for an operational failure (download failure, a real normalize config error). Consider paging on exit=2 vs. logging-only on exit=1 — see the [pipeline guide's exit codes](guides/pipeline.md#exit-codes). Note `set -euo pipefail` means the script stops at the `taxi-pipeline` line on any non-zero exit, so the schema-drift snapshot won't run that day either; drop `-e` (or run schema-drift unconditionally with `|| true` before it) if you want the snapshot regardless.
+- `raw/` grows monotonically — plan capacity via the [Downloader guide's sizing table](guides/download.md#disk-sizing).
 - Prefer systemd timers over cron on modern hosts: `Persistent=true` catches up missed runs after downtime, and logs land in the journal automatically.
 
 ## DuckDB `httpfs` — no local mirror
@@ -183,7 +183,7 @@ Scenario-oriented recipes that combine the tools — downloader, schema-drift, n
     uv run taxi-load yellow --dry-run
     ```
 
-    This prints, per year, one of `skip`, `append month(s) NN, NN`, or `truncate + reload (N month file(s))` — see the [loader guide](guides/loader.md#idempotent-reconcile-skip-append-truncate-reload) for how that decision is made.
+    This prints, per year, one of `skip`, `append month(s) NN, NN`, or `truncate + reload (N month file(s))` — see the [loader guide](guides/load.md#idempotent-reconcile-skip-append-truncate-reload) for how that decision is made.
 
 3. Run it for real:
 
@@ -202,7 +202,7 @@ Scenario-oriented recipes that combine the tools — downloader, schema-drift, n
 - The loader reads `raw-normalized/<type>/<year>/*.parquet` by default; point it elsewhere with `--data-dir DIR` (reads `DIR/raw-normalized`) or `--input-dir DIR` (reads `DIR/<type>/<year>/*.parquet` directly, bypassing the `raw-normalized` assumption).
 - Re-running `taxi-load` after a fresh `taxi-normalize` pass is the common case, not a special one: new months on disk get **appended**; years where nothing changed are **skipped**; anything that looks inconsistent (a prior interrupted run, a row-count mismatch against the manifest) gets **truncated and reloaded** rather than silently left half-updated. Pass `--full-refresh` to force every year onto the reload path regardless of the manifest.
 - Table DDL is generated straight from the parquet schema via `taxi_shared`'s type mapper — there's no separate DDL file to hand-maintain or apply.
-- One command does download → normalize → load end to end: `uv run taxi-pipeline yellow --load` (see the [orchestrator guide](guides/orchestrator.md)).
+- One command does download → normalize → load end to end: `uv run taxi-pipeline yellow --load` (see the [pipeline guide](guides/pipeline.md)).
 
 ## Running behind a corporate proxy
 
@@ -251,6 +251,9 @@ Scenario-oriented recipes that combine the tools — downloader, schema-drift, n
 ## Populating a fresh dev SQL Server
 
 **Goal:** go from an empty Docker-hosted SQL Server to a populated `taxi` database in well under 30 minutes.
+
+!!! tip "There is a one-command version of this"
+    If you want the *whole* data set rather than a quick dev database — presized files, page compression, a verified backup, resumable across runs — use [`taxi-mssql`](guides/mssql.md) instead. It brings up its own SQL Server and does every step below plus the ones this recipe skips. Keep reading if you want to drive the pieces yourself, or if you already have a server you must load into.
 
 **Recipe:**
 
@@ -314,5 +317,5 @@ Scenario-oriented recipes that combine the tools — downloader, schema-drift, n
 
 - The loader's defaults (`--host localhost`, `--port 1433`, `--database taxi`, `--schema dbo`, `--user sa`) match this docker-compose setup, so no flags are needed beyond `MSSQL_PASSWORD` for a local dev target.
 - Total time is dominated by network to CloudFront (parquet download); the SQL Server load itself is a bulk `COPY` via DuckDB's `mssql` extension and is fast even for a full year. On a residential gigabit link, `--recent 3 yellow` end to end is a few minutes, not 30.
-- Re-running `taxi-load yellow` after loading is a no-op (`skip`) unless new months landed on disk, in which case it appends just those months — see the [loader guide](guides/loader.md) for the full reconcile model.
+- Re-running `taxi-load yellow` after loading is a no-op (`skip`) unless new months landed on disk, in which case it appends just those months — see the [loader guide](guides/load.md) for the full reconcile model.
 - If you're iterating on schema and want to reset a year without losing the container: `uv run taxi-load yellow --full-refresh` forces a drop-and-reload of every year processed, or drop the table by hand (`sqlcmd ... -Q "DROP TABLE yellow_2026;"`) and re-run `taxi-load`.

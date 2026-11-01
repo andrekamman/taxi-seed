@@ -6,7 +6,7 @@ Field-by-field schema for every YAML configuration file in the repo, plus the en
 
 **File path:** `normalize/mappings/<type>.yaml` where `<type>` is one of `yellow`, `green`, `fhv`, `fhvhv`.
 
-Emitted by `normalize <type>` on bootstrap (first run against a type with no mapping) and amended in place on subsequent runs with unresolved items. Hand-edited by the user between runs to accept or reject SUGGESTED entries and to fill in `ack_date:` on TODO blocks. Consumed by every subsequent `normalize <type>` run.
+Emitted by `taxi-normalize <type>` on bootstrap (first run against a type with no mapping) and amended in place on subsequent runs with unresolved items. Hand-edited by the user between runs to accept or reject SUGGESTED entries and to fill in `ack_date:` on TODO blocks. Consumed by every subsequent `taxi-normalize <type>` run.
 
 ### Top-level fields
 
@@ -18,7 +18,7 @@ Emitted by `normalize <type>` on bootstrap (first run against a type with no map
 | `acknowledged_data_loss` | dict[str, DataLossEntry] | no | Explicit acknowledgments for historical columns that have data but no place to land in the target schema (and no rename mapping). Keyed by the historical column name. |
 | `value_maps` | dict[str, dict] | no | Column value remapping, keyed by column name. Each entry is either a bare `{source_value: target_value}` map, or `{map: {...}, on_unmapped: "error"\|"null"}` (default policy `"error"`) to control behavior for values not present in the map. |
 
-Unknown top-level keys are rejected by the loader.
+Unknown top-level keys are rejected by the mapping loader.
 
 ### `LossyCastEntry` fields
 
@@ -93,9 +93,9 @@ acknowledged_data_loss:
     reason: "Same rationale as pickup_latitude."
 ```
 
-### Loader-rejected shapes
+### Rejected mapping shapes
 
-The loader is strict — anything outside the listed structure raises `MappingError`:
+The mapping loader inside `taxi_normalize` is strict — anything outside the listed structure raises `MappingError`. (This is the YAML loader, not `taxi-load`.)
 
 - Missing file → `Mapping file not found: {path}`.
 - Empty file → `Empty mapping file: {path}`.
@@ -108,16 +108,50 @@ The loader is strict — anything outside the listed structure raises `MappingEr
 
 The strictness is deliberate: silent tolerance of a mistyped field name would defeat the whole "explicit acknowledgment" model.
 
-## Loader and orchestrator configuration
+## Loader and pipeline configuration
 
-There is no YAML config file for the loader or the orchestrator — `taxi-load` and `taxi-pipeline` are configured entirely through CLI flags (`--host`, `--port`, `--database`, `--schema`, `--user`, `--data-dir`/`--input-dir`, `--flush-rows`, `--full-refresh`, `--dry-run`, and, for `taxi-pipeline`, `--recent`, `--skip-download`, `--download-only`, `--load`, `--sample`) plus one required environment variable, `MSSQL_PASSWORD`, whenever a load is involved. See [Loader](../guides/loader.md) and [Orchestrator](../guides/orchestrator.md) for the full flag reference.
+There is no YAML config file for the loader or the pipeline — `taxi-load` and `taxi-pipeline` are configured entirely through CLI flags (`--host`, `--port`, `--database`, `--schema`, `--user`, `--data-dir`/`--input-dir`, `--flush-rows`, `--full-refresh`, `--dry-run`, `--writers`, `--require-existing-database`, `--year`/`--month`, and, for `taxi-pipeline`, `--recent`, `--skip-download`, `--download-only`, `--load`, `--sample`) plus one required environment variable, `MSSQL_PASSWORD`, whenever a load is involved. See [taxi-load](../guides/load.md#configuration) and [taxi-pipeline](../guides/pipeline.md#flags) for the full flag reference.
+
+## Seeder configuration (`taxi-mssql`)
+
+`taxi-mssql` is the one tool here with **no flags at all** — it takes no positional or optional arguments and is configured entirely by environment variables, because it runs as a container `ENTRYPOINT` where a bind-mounted `.env` is the natural channel. The file is `mssql/.env`, resolved by Compose relative to `mssql/docker-compose.yml`, and it is gitignored.
+
+Two settings have no default and Compose refuses to start without them:
+
+| Variable | Description |
+|---|---|
+| `TAXI_DATA_DIR` | Host data directory to fill. Bind-mounted at `/data` in both services. **Must exist before the first run.** |
+| `MSSQL_PASSWORD` | SA password. Must satisfy SQL Server's complexity policy, or the `mssql` container exits during startup. |
+
+Everything else is optional. The defaults below live in `taxi_mssql.config.from_env` and nowhere else — Compose forwards every variable but passes it through **empty when unset**, so there is exactly one owner per default:
+
+| Variable | Default | Description |
+|---|---|---|
+| `TAXI_TYPES` | `yellow,green,fhv,fhvhv` | Comma-separated trip types. Reordered to canonical order whatever order you list, so sizing and reporting stay deterministic. An unknown type is a config error. |
+| `TAXI_RECENT` | *(unset — full history)* | Mirror only the most recent N months. Must be ≥ 1. |
+| `TAXI_DATA_FACTOR` | `3.0` | mdf size = normalized parquet bytes × this factor. Must be > 0. |
+| `MSSQL_DATA_SIZE_GB` | *(derived)* | Skip the estimate and use this mdf size. Must be ≥ 1. Consulted **only at database creation**. |
+| `MSSQL_LOG_SIZE_GB` | *(25% of the mdf, floored at 1 GB, capped at 16 GB)* | ldf size. Must be ≥ 1. |
+| `MSSQL_FILEGROWTH_MB` | `1024` | Autogrowth increment for both files. |
+| `MSSQL_MAX_MEMORY_MB` | *(host RAM minus the larger of 4 GB and 25%)* | SQL Server `max server memory`, applied with `sp_configure` before provisioning. Must be ≥ 1024. |
+| `MSSQL_HOST` | `mssql` | The Compose service name of the SQL Server. |
+| `MSSQL_PORT` | `1433` | |
+| `MSSQL_DATABASE` | `taxi` | Validated against `[A-Za-z_][A-Za-z0-9_]*` **at config time**, because it is interpolated into T-SQL. |
+| `MSSQL_SCHEMA` | `dbo` | Same identifier rule. Also what `<schema>._load_manifest` resolves to. |
+| `MSSQL_USER` | `sa` | *Not* identifier-validated: the login only ever reaches `sqlcmd -U` and `taxi-load --user`, never a SQL string. |
+| `TAXI_PROGRESS_INTERVAL_S` | `60` | Seconds between progress lines during the mirror and load stages. `0` disables the heartbeat. |
+
+Two details worth knowing. The identifier validation happens in `from_env`, not in the SQL builders: deferring it would let `MSSQL_DATABASE=taxi-db` pass the config stage, run the mirror for hours, and only then die. And any bad value is a config error with exit 2 before any work starts. See the [taxi-mssql guide](../guides/mssql.md#the-mssqlenv-contract) for the operational reading of each.
 
 ## Environment variables
 
 | Variable | Used by | Description |
 |---|---|---|
-| `MSSQL_PASSWORD` | `taxi-load` / `taxi-pipeline` | SQL Server password. Required whenever a load happens: always for `taxi-load`, and for `taxi-pipeline` only when `--load` is passed. There is no `--password` flag — this is deliberate so the password never appears in `ps` output or shell history via an argument. |
+| `MSSQL_PASSWORD` | `taxi-load`, `taxi-pipeline`, `taxi-mssql` | SQL Server password. Required whenever a load happens: always for `taxi-load` and `taxi-mssql`, and for `taxi-pipeline` only when `--load` is passed. There is no `--password` flag — this is deliberate so the password never appears in `ps` output or shell history via an argument. |
+| `TAXI_EXTENSION_DIR` | `taxi-load`, `taxi-vendor-extension` | Where the vendored DuckDB `mssql` extension lives. Default `~/.taxi-seed/extensions`; the `taxi-mssql` image sets it to a directory baked at build time. See [the vendored extension](../guides/load.md#the-vendored-extension). |
+| `TAXI_*` / `MSSQL_*` | `taxi-mssql` | The seeder's full configuration — see [Seeder configuration](#seeder-configuration-taxi-mssql) above. |
+| `SETUPTOOLS_SCM_PRETEND_VERSION` | the image build | Only relevant when building the seeder image: `.git` is out of the build context, so Compose passes the version through a `TAXI_SEED_VERSION` build arg and the Dockerfile exports this for one `RUN`. The per-distribution form (`..._FOR_TAXI_SEED`) is silently ignored under hatch-vcs. |
 | `HTTPS_PROXY` / `HTTP_PROXY` | httpx (downloader), uv, gh | Standard HTTP proxy env vars. The downloader honors them implicitly via httpx. |
 | `NO_PROXY` | httpx (downloader), uv, gh | Standard bypass list. Include `localhost` if you run SQL Server locally and need it to bypass a corporate proxy. |
 
-`--data-dir` is the shared "base directory" flag across the downloader, normalize, loader, and orchestrator — each tool resolves its own subdirectory beneath it (`<data-dir>/raw`, `<data-dir>/raw-normalized`, etc.). The loader also accepts `--input-dir` to point directly at a normalized-parquet directory, overriding the `--data-dir`-derived path.
+`--data-dir` is the shared "base directory" flag across the downloader, normalize, loader, and pipeline — each tool resolves its own subdirectory beneath it (`<data-dir>/raw`, `<data-dir>/raw-normalized`, etc.). `TAXI_DATA_DIR` is the seeder's name for the same thing, forwarded to each stage as `--data-dir`. The loader also accepts `--input-dir` to point directly at a normalized-parquet directory, overriding the `--data-dir`-derived path.
