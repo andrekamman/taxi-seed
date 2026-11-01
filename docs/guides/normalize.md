@@ -4,11 +4,11 @@
 
 The operational model is a two-phase loop: you run the tool, and it either (a) writes normalized parquet successfully or (b) rewrites a per-type mapping file with new items for you to review. You edit the mapping, re-run, and repeat until everything is resolved. On the first run against a raw type that has no mapping yet, the tool auto-generates the scaffold from the actual raw data and exits without writing any parquet. On every subsequent run it validates the mapping against the current raw data and, if new schema drift has appeared since the last run, amends the mapping in place with new SUGGESTED/TODO entries.
 
-This bootstrap-and-amend semantics is what makes `taxi-normalize` safe to run on a schedule. The orchestrator (`taxi-pipeline`) already invokes `taxi-normalize` as part of its pipeline and classifies its exit codes (0/1/3) accordingly — only scheduling `taxi-pipeline` itself on a cron is still future work — so when TLC ships new drift (they do, roughly once a year), you'll wake up to a mapping-file diff to review in a pull request, not a silent failure and not a wholesale scaffold regeneration that clobbers your prior decisions.
+This bootstrap-and-amend semantics is what makes `taxi-normalize` safe to run on a schedule. `taxi-pipeline` already invokes `taxi-normalize` as part of its pipeline and classifies its exit codes (0/1/3) accordingly — only scheduling `taxi-pipeline` itself on a cron is still future work — so when TLC ships new drift (they do, roughly once a year), you'll wake up to a mapping-file diff to review in a pull request, not a silent failure and not a wholesale scaffold regeneration that clobbers your prior decisions.
 
 ## Prerequisites
 
-- A `raw/<type>/` mirror produced by the [downloader](downloader.md).
+- A `raw/<type>/` mirror produced by the [downloader](download.md).
 - `uv sync` in the repo root.
 
 ## Install
@@ -88,7 +88,7 @@ needed, because a target column with no source in the raw file is a `null_fill` 
 a drop.
 
 What it also does is change the loaded table's column set — and that is **not** something
-[`taxi-load`](loader.md) can detect. Its reconcile compares the months on disk, the rows in
+[`taxi-load`](load.md) can detect. Its reconcile compares the months on disk, the rows in
 the load manifest and the committed row counts; it never compares column sets. So appending
 a newly-widened year into a table created from the old target fails at `COPY` with a column
 mismatch rather than triggering a rebuild.
@@ -132,7 +132,7 @@ Fires when the mapping exists but the planner finds unresolved items. Sequence:
 
 The critical property: **your semantic decisions survive**. A rename you accepted stays accepted. An `ack_date` you filled in stays filled in. What you lose are the free-form comments you wrote in the file body — because there's no way for the tool to associate a comment with the entry it describes across an edit. Put reasoning in the `reason:` field of an ack entry instead, or in the git commit message.
 
-Operational rationale: the orchestrator (`taxi-pipeline`) already runs `taxi-normalize` as part of its pipeline; only invoking it on a cron schedule is still future work. When TLC ships new drift, amend semantics mean the human wakes up to a mapping-file diff to review — not a silent failure, not a scaffold regenerated from scratch.
+Operational rationale: `taxi-pipeline` already runs `taxi-normalize` as part of its pipeline; only invoking it on a cron schedule is still future work. When TLC ships new drift, amend semantics mean the human wakes up to a mapping-file diff to review — not a silent failure, not a scaffold regenerated from scratch.
 
 ## The `ack_date` convention
 

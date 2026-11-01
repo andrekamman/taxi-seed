@@ -21,7 +21,9 @@ uv sync --extra test --extra docs
 - `--extra test` installs `pytest` (and any test-only dependencies) so you can run the test suite.
 - `--extra docs` installs `mkdocs`, `mkdocs-material`, and `pymdown-extensions` so you can build the documentation site locally.
 
-Both extras are optional at runtime; the tools themselves (`taxi-download`, `taxi-schema-drift`, `taxi-normalize`, `taxi-load`, `taxi-pipeline`, `taxi-curate-mappings`) work with a bare `uv sync`. Contributors will almost always want both, so the command above is the recommended default.
+Both extras are optional at runtime; the tools themselves (`taxi-download`, `taxi-schema-drift`, `taxi-normalize`, `taxi-load`, `taxi-pipeline`, `taxi-mssql`, `taxi-curate-mappings`, `taxi-vendor-extension`) work with a bare `uv sync`. Contributors will almost always want both, so the command above is the recommended default.
+
+Working on the seeder additionally needs Docker — see [the two container-backed suites](#the-two-container-backed-suites). One local quirk is worth knowing before you debug it: under an editable `uv sync`, hatchling does not materialize force-included files, so `taxi_mssql.ola.VENDORED_SCRIPT` falls back to the repo-relative `mssql/sql/MaintenanceSolution.sql` rather than the installed sibling path. That fallback exists for exactly this reason; only a real (non-editable) wheel install exercises the sibling path.
 
 `uv sync` creates a project-local `.venv/`. You do not need to activate it — every command in this guide uses `uv run` as the entry point, which resolves the interpreter and the extras on each invocation. If you prefer an activated shell, `source .venv/bin/activate` works, but the CI and every example below run without activation.
 
@@ -36,7 +38,30 @@ uv run --extra test pytest -q
 
 Expected output on a clean tree: `N passed in <n>.<nn>s` (the count grows as tests are added; treat any failure, not a specific number, as the signal). If you see a failure that does not reproduce for you locally in isolation, run the offending test with `-vv` and check whether a fixture is leaking state — every fixture in this repo is required to be `tmp_path`-scoped, and any cross-test leak is a bug worth reporting.
 
-The full suite also includes SQL-Server integration and end-to-end tests (loader integration + pipeline e2e) that need a real SQL Server container — these are what CI's `integration` job runs, and they are not sub-second. See `.github/workflows/ci.yml` for how CI brings up the container.
+### The two container-backed suites {#the-two-container-backed-suites}
+
+Beyond the unit suite there are two heavier suites, and they are deliberately different things. Keep them apart — the names matter, because branch protection matches on job name.
+
+**`integration` — the loader and pipeline against a real SQL Server.** `tests/taxi_load/test_load_integration.py` and `tests/e2e/test_pipeline_e2e.py`, skipped automatically unless `MSSQL_PASSWORD` is set. This is the `integration` job in `.github/workflows/ci.yml`, it runs on **every PR** against a service container, and it is a **required status check** on `dev` and `main`. Locally:
+
+```bash
+MSSQL_PASSWORD='YourStrong@Passw0rd' uv run --extra test pytest tests/taxi_load tests/e2e -q
+# or let the script bring the container up and tear it down:
+./scripts/e2e-smoke.sh
+```
+
+**`compose-stack` — the whole Docker stack.** `tests/taxi_mssql/test_integration_compose.py`, marked `integration` in pytest and **deselected by `addopts`**, so a bare `pytest` never starts it. It runs the real Compose stack twice against one data directory: the first run must produce the full deliverable set, the second must be a near no-op, which is what proves the resumability claim.
+
+```bash
+uv run --extra test pytest -m integration -v
+```
+
+It is not free. A run pulls the SQL Server image, builds the seeder image and downloads several months of trip data — budget minutes and gigabytes. The last full run left **~4.5 GB** behind under pytest's temp tree, and cleaning it up **needed `sudo`**: the SQL Server container runs as root and leaves root-owned files on the bind mount, which is exactly why the test does not try to remove them itself.
+
+In CI this is a separate workflow, `.github/workflows/compose-stack.yml`, and it does **not** run on every PR. Ask for it either by adding the **`ci:compose-stack`** label to your PR, or by dispatching the workflow by hand.
+
+!!! warning "Do not rename `compose-stack` toward `integration`"
+    `integration` is a required status check on both protected branches, and protection matches job names literally. If `compose-stack` were ever renamed to something protection matches, every merge would block on a job that normally never starts.
 
 To narrow the run to one component while iterating:
 
@@ -129,9 +154,14 @@ There is no enforced formatter today — the conventions below are informal but 
 ## Where design decisions live
 
 - [`docs/superpowers/specs/`](superpowers/specs/2026-07-19-monorepo-restructure-design.md) — one design spec per major sub-project. Answers "why is this shaped this way?". Current specs:
-    - [Monorepo restructure](superpowers/specs/2026-07-19-monorepo-restructure-design.md) — why the five tools live in one repo with shared tooling instead of five separate repos.
+    - [Monorepo restructure](superpowers/specs/2026-07-19-monorepo-restructure-design.md) — why the tools live in one repo with shared tooling instead of one repo each.
     - [Normalizer](superpowers/specs/2026-07-21-normalizer-design.md) — the "data loss is a first-class error" contract, the mapping YAML shape, and the `ack_date` acknowledgment protocol.
     - [Documentation site](superpowers/specs/2026-07-22-documentation-design.md) — how the site is structured, what belongs in guides vs cookbook vs reference, and the strict-build convention.
-    - SQL load testing (legacy) — the design for this has moved with the tool to the separate `taxi-lab` repo.
+    - [Seeder container](superpowers/specs/2026-08-01-seeder-container-design.md) — why the Compose stack is shaped the way it is: the ephemeral `master`, the bind mount, the `SQLCMDPASSWORD` hazard, the exit-code contract. Written in `taxi-lab` and adopted here with its superseded parts annotated.
+    - [Seeder logging](superpowers/specs/2026-08-15-seeder-logging-design.md) — the stage announcements and the progress heartbeat.
+    - [Parallel loading](superpowers/specs/2026-08-15-parallel-loading-design.md) — **historical**. It designed a month-shard process fan-out that was deleted before it ever moved here; what remains valuable is the measurement that motivated parallelism at all. Do not implement from it.
+    - SQL load testing (legacy) — the design for this has moved with the tool to the separate `taxi-lab` repo, which keeps the k6 load tester.
+
+Dated records under `docs/superpowers/` keep their original filenames and their original wording, including names that no longer exist. Rewriting a 2026-07 note to use names coined in October would be revisionism; the supersede notes at the top of a spec are how a stale record is corrected.
 - `docs/superpowers/plans/` — implementation plans for each spec. Answers "how did we get from design to code?". Kept in the repo but excluded from the published site because they read as working notes rather than reference material.
 - Commit history — the "why did this line change?" reader. Commit messages are expected to explain intent, not just restate the diff; if the "why" needs more than a paragraph, it belongs in a spec instead.

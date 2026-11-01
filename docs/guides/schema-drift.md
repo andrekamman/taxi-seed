@@ -15,7 +15,7 @@ Two scenarios drive most usage:
 
 Install dependencies with `uv sync` in the repo root.
 
-You need a parquet family: either the [downloader](downloader.md)'s `raw/` mirror or any directory of parquet files whose names follow the convention `<type>_tripdata_YYYY-MM.parquet`. That pattern is required — the analyzer extracts the period from the filename to order the files and label the transitions.
+You need a parquet family: either the [downloader](download.md)'s `raw/` mirror or any directory of parquet files whose names follow the convention `<type>_tripdata_YYYY-MM.parquet`. That pattern is required — the analyzer extracts the period from the filename to order the files and label the transitions.
 
 ## Basic usage
 

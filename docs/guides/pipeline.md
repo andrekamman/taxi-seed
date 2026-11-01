@@ -1,11 +1,19 @@
-# Orchestrator
+# taxi-pipeline
 
 `taxi-pipeline` runs the pipeline as one command: download → normalize → (opt-in) load, per trip type, honoring each stage's own exit-code contract rather than reinventing one. It exists so a cron job or CI step can invoke a single tool instead of chaining three, while still stopping cleanly the moment a type needs a human (normalize found unresolved mapping items) or a stage genuinely fails. A companion command, `taxi-curate-mappings`, auto-accepts detected schema drift into complete mapping YAMLs for cases where you want the pipeline to run unattended and are comfortable with heuristic acknowledgments.
 
+!!! info "Where this stops, and what picks it up"
+    `taxi-pipeline` is the **portable** pipeline: it loads into a database that already
+    exists, and it knows nothing about how that database was shaped. Provisioning,
+    presizing, the memory cap, the maintenance solution and the backup belong to
+    [`taxi-mssql`](mssql.md), which is SQL-Server-specific on purpose and drives
+    `taxi-pipeline` and `taxi-load` as its own stages. If you want a complete,
+    backed-up SQL Server data set from one folder, start there instead.
+
 ## Prerequisites
 
-- `uv sync` in the repo root — this also pulls in the [downloader](downloader.md), [normalize](normalize.md), and [loader](loader.md) packages that `taxi-pipeline` shells out to.
-- Everything the stages you enable need: for `--load`, a reachable SQL Server and `MSSQL_PASSWORD` set (see the [loader guide](loader.md#prerequisites)).
+- `uv sync` in the repo root — this also pulls in the [downloader](download.md), [normalize](normalize.md), and [loader](load.md) packages that `taxi-pipeline` shells out to.
+- Everything the stages you enable need: for `--load`, a reachable SQL Server and `MSSQL_PASSWORD` set (see the [loader guide](load.md#prerequisites)).
 
 ## Install
 
@@ -78,7 +86,7 @@ uv run taxi-pipeline yellow --load   # error: MSSQL_PASSWORD environment variabl
 
 **`--dry-run`** — print the planned stage list per type (e.g. `download -> normalize -> load`) and exit 0 without invoking any subprocess.
 
-**Load-only pass-through flags** — meaningful only when `--load` is set; forwarded to `taxi-load` unchanged: `--host` (default `localhost`), `--port` (default `1433`), `--database` (default `taxi`), `--schema` (default `dbo`), `--user` (default `sa`), `--flush-rows` (default `100000`), `--full-refresh`. See the [loader guide](loader.md#configuration) for what each controls.
+**Load-only pass-through flags** — meaningful only when `--load` is set; forwarded to `taxi-load` unchanged: `--host` (default `localhost`), `--port` (default `1433`), `--database` (default `taxi`), `--schema` (default `dbo`), `--user` (default `sa`), `--flush-rows` (default `100000`), `--full-refresh`. See the [loader guide](load.md#configuration) for what each controls.
 
 ## Exit codes
 
@@ -90,7 +98,7 @@ uv run taxi-pipeline yellow --load   # error: MSSQL_PASSWORD environment variabl
 
 Precedence is **2 > 1 > 0**: `pipeline.overall_exit_code` scans every stage outcome across every type and returns 2 if any outcome is in the failure set (`failed`, `partial`, `conn_error`), else 1 if any is `needs_review`, else 0.
 
-Note the one subtlety: a loader exit of `1` (partial load) classifies as `partial`, which **is** counted among the exit-2 statuses in `overall_exit_code` — so a partial load on any type escalates the whole run's exit code to 2, even though that type's own stage exit was 1. This is intentional: a partial load is a real operational anomaly (some rows may be missing from SQL Server), not merely "needs human review of a mapping file," so it's treated with the same urgency as a hard failure at the orchestrator level.
+Note the one subtlety: a loader exit of `1` (partial load) classifies as `partial`, which **is** counted among the exit-2 statuses in `overall_exit_code` — so a partial load on any type escalates the whole run's exit code to 2, even though that type's own stage exit was 1. This is intentional: a partial load is a real operational anomaly (some rows may be missing from SQL Server), not merely "needs human review of a mapping file," so it's treated with the same urgency as a hard failure at the pipeline level.
 
 ## `taxi-curate-mappings`
 
@@ -125,13 +133,13 @@ Because it writes machine-accepted mapping YAMLs directly, treat its output the 
 A: The two flags are mutually exclusive by design — `--download-only` explicitly means "stop after mirroring," so pairing it with `--load` is a contradiction the CLI rejects up front (exit 2) rather than silently picking one.
 
 **Q: `error: MSSQL_PASSWORD environment variable is required for --load`.**
-A: Set it before invoking, same as the [loader](loader.md#prerequisites): `export MSSQL_PASSWORD=...`. Checked once up front for the whole run, before any type's stages execute.
+A: Set it before invoking, same as the [loader](load.md#prerequisites): `export MSSQL_PASSWORD=...`. Checked once up front for the whole run, before any type's stages execute.
 
 **Q: A type shows `NEEDS REVIEW` in the summary and load never ran for it.**
 A: Normalize exited `1` or `3` (unresolved mapping items or first-run scaffold) for that type, which halts that type's remaining stages — load included. Resolve it the normal way: edit `normalize/mappings/<type>.yaml` and re-run, or use `taxi-curate-mappings` if you want it auto-resolved.
 
 **Q: One type's `LOAD ERROR` seems to have skipped load for every type after it.**
-A: That's `abort_run` firing — a loader exit `2` (connection/config error, or a `TypeMappingError`) is treated as likely to recur identically for every subsequent type's load, so the orchestrator stops attempting the load stage for the rest of the run rather than repeating a doomed connection attempt N times. Download and normalize still run normally for the remaining types.
+A: That's `abort_run` firing — a loader exit `2` (connection/config error, or a `TypeMappingError`) is treated as likely to recur identically for every subsequent type's load, so `taxi-pipeline` stops attempting the load stage for the rest of the run rather than repeating a doomed connection attempt N times. Download and normalize still run normally for the remaining types.
 
 **Q: `taxi-curate-mappings` raised `non-executable cast(s) need manual mapping`.**
 A: A column changed from a string type to a numeric/temporal type (or similarly incompatible family) between historical files — casting it automatically could crash at runtime on real data (e.g. a `payment_type` column that was `'CASH'`/`'CREDIT'` text becoming a numeric code). This needs a human decision (a `value_maps` entry or an explicit drop), so the tool refuses to auto-accept it. Add the mapping by hand in `normalize/mappings/<type>.yaml` and re-run `taxi-normalize` directly.

@@ -1,4 +1,4 @@
-# orchestrator
+# pipeline
 
 Runs the pipeline as one command: `taxi-pipeline [TYPE]` chains download → normalize
 → (opt-in `--load`) load, honoring each stage's exit codes and halting a type
