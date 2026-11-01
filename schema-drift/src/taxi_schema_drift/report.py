@@ -143,14 +143,14 @@ def generate_report(results: list[dict], output_format: str = "text") -> str:
     lines.append("=" * 80)
     lines.append("")
 
-    # Collect all unique column names across all data types
+    # Collect all unique column names across all trip types
     all_columns = defaultdict(set)
     for result in results:
         for period, schema in result["schemas"].items():
             for col in schema:
                 all_columns[col.name].add(result["data_type"])
 
-    lines.append("Columns by data type coverage:")
+    lines.append("Columns by trip type coverage:")
     for col_name in sorted(all_columns.keys()):
         types = sorted(all_columns[col_name])
         lines.append(f"  {col_name}: {', '.join(types)}")

@@ -66,10 +66,11 @@ def parse_args(argv=None) -> argparse.Namespace:
                    help="load only this year; omit for every year on disk")
     p.add_argument("--month", type=int, default=None, choices=range(1, 13),
                    metavar="{1..12}",
-                   help="load only this month of --year. Each month is a "
-                        "separate parquet file, so separate processes may load "
-                        "different months of one year concurrently -- TABLOCK "
-                        "takes a BU lock, and BU locks are compatible.")
+                   help="load only this month of --year. Narrows a load to one "
+                        "parquet file: useful for a partial reload, or to bisect "
+                        "which month a load problem comes from. Parallelism "
+                        "within a load is handled inside taxi-load by DuckDB's "
+                        "mssql_copy_parallel_writers -- see --writers.")
     args = p.parse_args(argv)
     if args.month is not None and args.year is None:
         # A bare --month would mean "this month of every year", which is not a

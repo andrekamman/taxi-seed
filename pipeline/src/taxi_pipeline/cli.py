@@ -1,4 +1,4 @@
-"""taxi-pipeline: chain download -> normalize -> (opt-in) load per data type.
+"""taxi-pipeline: chain download -> normalize -> (opt-in) load per trip type.
 
 Honors each stage's exit codes: a needs-review or failure halts that type's
 remaining stages; a loader conn/config error aborts the load stage for all

@@ -4,7 +4,7 @@ Single-command flow:
 - `normalize <type>` — first run generates the mapping scaffold and exits 3;
   subsequent runs with unresolved items amend the scaffold and exit 1;
   a complete mapping runs the normalization and exits 0.
-- `taxi-normalize` (no arg) — runs each of the four data types in turn.
+- `taxi-normalize` (no arg) — runs each of the four trip types in turn.
 - `--sample <N|N%>` — passed to analysis; only takes effect when scaffold
   generation or amendment runs. Default 100% (full scan).
 """
@@ -158,7 +158,7 @@ def _print_unresolved(
         f"\nERROR: {data_type} - {len(unresolved_by_col)} unresolved item(s) in {mapping_path}",
         file=sys.stderr,
     )
-    print("  Cannot normalize this data type until these are handled.\n", file=sys.stderr)
+    print("  Cannot normalize this trip type until these are handled.\n", file=sys.stderr)
     for col, details in sorted(unresolved_by_col.items()):
         print(f"  - {col}: {details}", file=sys.stderr)
     if amend_result is not None and amend_result.new_items > 0:
