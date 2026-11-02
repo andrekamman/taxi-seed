@@ -335,7 +335,7 @@ Expected output:
 
 ```text
 ERROR: yellow - 2 unresolved item(s) in normalize/mappings/yellow.yaml
-  Cannot normalize this data type until these are handled.
+  Cannot normalize this trip type until these are handled.
 
   - passenger_count: unacked_lossy_cast: DOUBLE -> INTEGER would lose data (range/precision)
   - route_zone_hash: unmapped_drop: column has data; add to renames: or acknowledged_data_loss:

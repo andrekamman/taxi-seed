@@ -41,7 +41,7 @@ class BootstrapResult:
 
 @dataclass
 class DriftReport:
-    """Structured drift detection for a data type, relative to an existing mapping."""
+    """Structured drift detection for a trip type, relative to an existing mapping."""
     target_name: str
     timeline: list[str]
     rename_suggestions: list[tuple[str, str, float]]   # (old, new, confidence)
@@ -85,7 +85,7 @@ def _summarize_change(change) -> str:
 
 def detect_drift(data_type: str, raw_dir: Path, existing: Optional[Mapping],
                  sample: str = "100%") -> DriftReport:
-    """Detect drift for one data type relative to an existing mapping (or None).
+    """Detect drift for one trip type relative to an existing mapping (or None).
 
     Pure of any YAML emission — returns the structured suggestions/TODOs that
     bootstrap would otherwise render as commented scaffold.

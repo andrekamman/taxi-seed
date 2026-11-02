@@ -97,7 +97,7 @@ FINAL SCHEMA (2016-07): ...
 ================================================================================
 CROSS-TYPE SUMMARY
 ================================================================================
-Columns by data type coverage:
+Columns by trip type coverage:
   pickup_datetime: fhv, fhvhv, green, yellow
   trip_distance: green, yellow
   ...

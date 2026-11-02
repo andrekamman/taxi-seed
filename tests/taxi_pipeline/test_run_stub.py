@@ -11,7 +11,7 @@ def _fake_run(codes):
             stage = "normalize"
         else:
             stage = "load"
-        # data type is the last non-flag token for our stub purposes
+        # trip type is the last non-flag token for our stub purposes
         dtype = cmd[-1] if not cmd[-1].startswith("-") else "?"
         return codes.get((stage, dtype), codes.get(stage, 0))
     return _run

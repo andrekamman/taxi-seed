@@ -26,7 +26,7 @@ def extract_period(file_path: Path) -> str:
 
 
 def find_parquet_files(data_dir: Path, data_type: str) -> list[Path]:
-    """Find all parquet files for a given data type, sorted by period."""
+    """Find all parquet files for a given trip type, sorted by period."""
     type_dir = data_dir / data_type
     if not type_dir.exists():
         return []
@@ -81,7 +81,7 @@ def analyze_data_type(
     generic_mode: bool = False,
     sample_size: "int | str" = 5000,
 ) -> dict:
-    """Analyze schema drift for a specific data type.
+    """Analyze schema drift for a specific trip type.
 
     Args:
         conn: DuckDB connection

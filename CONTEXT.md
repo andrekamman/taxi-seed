@@ -24,10 +24,8 @@ _Note_: defined in both repos; keep in step.
 One of the four services the TLC publishes separately: `yellow`, `green`, `fhv`, `fhvhv`.
 _Avoid_: data type, series, taxi type, category
 _Note_: defined in both repos; keep in step. The code identifier is `data_type` and stays
-that way. Three strings the tools print still say "data type"
-(`normalize/src/taxi_normalize/cli.py`, `schema-drift/src/taxi_schema_drift/report.py`
-twice). Docs quote that output verbatim, so those quotes keep the old word until the
-strings themselves change.
+that way — renaming it would churn every CLI, every manifest row and every table name for
+no gain. Printed output and prose say "trip type".
 
 **Mirror**:
 The local copy of the published parquet, under `raw/`. Also the verb for making it.
