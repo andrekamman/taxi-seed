@@ -11,17 +11,25 @@ from __future__ import annotations
 from pathlib import Path
 
 import duckdb
+import yaml
 
 DATA_TYPES = ("yellow", "green", "fhv", "fhvhv")
 TARGET_YEAR = 2026
 DRIFT_YEAR = 2015
 
-TARGET_FILE = {
-    "yellow": "yellow_tripdata_2026-05.parquet",
-    "green": "green_tripdata_2026-05.parquet",
-    "fhv": "fhv_tripdata_2026-04.parquet",
-    "fhvhv": "fhvhv_tripdata_2026-05.parquet",
-}
+def _pinned_target(data_type: str) -> str:
+    """Read `target:` out of the real committed mapping.
+
+    This used to be a hardcoded table, which is a second copy of a fact that already
+    lives in normalize/mappings/<type>.yaml -- so re-pinning a mapping broke these
+    tests with "target file ... not found", a failure about the fixture rather than
+    about normalize. Derive it instead, and it cannot drift again.
+    """
+    mapping = Path(__file__).resolve().parents[2] / "normalize" / "mappings" / f"{data_type}.yaml"
+    return yaml.safe_load(mapping.read_text())["target"]
+
+
+TARGET_FILE = {t: _pinned_target(t) for t in DATA_TYPES}
 
 TARGET_COLUMNS = {
     "yellow": [
@@ -35,6 +43,7 @@ TARGET_COLUMNS = {
         ("improvement_surcharge", "DOUBLE"), ("total_amount", "DOUBLE"),
         ("congestion_surcharge", "DOUBLE"), ("Airport_fee", "DOUBLE"),
         ("cbd_congestion_fee", "DOUBLE"),
+            ("request_source", "VARCHAR"),
     ],
     "green": [
         ("VendorID", "INTEGER"), ("lpep_pickup_datetime", "TIMESTAMP"),
@@ -47,6 +56,7 @@ TARGET_COLUMNS = {
         ("total_amount", "DOUBLE"), ("payment_type", "BIGINT"),
         ("trip_type", "BIGINT"), ("congestion_surcharge", "DOUBLE"),
         ("cbd_congestion_fee", "DOUBLE"),
+            ("request_source", "VARCHAR"),
     ],
     "fhv": [
         ("dispatching_base_num", "VARCHAR"), ("pickup_datetime", "TIMESTAMP"),

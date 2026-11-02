@@ -1,6 +1,6 @@
 """Mapping YAML scaffold generator with amend semantics.
 
-Analyzes raw/<type>/ files (schema + metadata + schema-drift rename detection)
+Analyzes raw/<type>/ files (schema + metadata + taxi-schema-drift rename detection)
 and produces a YAML with:
 - a machine-generated timeline header of detected drift transitions
 - existing semantic content (renames/lossy_casts/acknowledged_data_loss) preserved
@@ -19,7 +19,7 @@ from typing import Optional, Union
 
 import duckdb
 
-from schema_drift.analyze import analyze_data_type
+from taxi_schema_drift.analyze import analyze_data_type
 from taxi_normalize.data_check import (
     aggregate_across_files,
     fits_in_target_type,
@@ -28,7 +28,7 @@ from taxi_normalize.data_check import (
 from taxi_normalize.mapping import Mapping, load_mapping
 
 
-RENAME_CONFIDENCE_THRESHOLD = 0.6  # matches schema-drift's default
+RENAME_CONFIDENCE_THRESHOLD = 0.6  # matches taxi-schema-drift's default
 
 
 @dataclass
@@ -41,7 +41,7 @@ class BootstrapResult:
 
 @dataclass
 class DriftReport:
-    """Structured drift detection for a data type, relative to an existing mapping."""
+    """Structured drift detection for a trip type, relative to an existing mapping."""
     target_name: str
     timeline: list[str]
     rename_suggestions: list[tuple[str, str, float]]   # (old, new, confidence)
@@ -50,7 +50,7 @@ class DriftReport:
 
 
 def _parse_sample(sample: str) -> Union[int, str]:
-    """Convert CLI --sample value into what schema-drift's get_column_stats expects."""
+    """Convert CLI --sample value into what taxi-schema-drift's get_column_stats expects."""
     s = sample.strip()
     if s.endswith("%"):
         pct = int(s.rstrip("%"))
@@ -65,7 +65,7 @@ def _parse_sample(sample: str) -> Union[int, str]:
 
 
 def _summarize_change(change) -> str:
-    """One-line human-readable summary of a schema-drift SchemaChange transition."""
+    """One-line human-readable summary of a taxi-schema-drift SchemaChange transition."""
     parts = []
     if change.columns_renamed:
         r = ", ".join(f"{c.old_col.name}->{c.new_col.name}" for c in change.columns_renamed)
@@ -85,7 +85,7 @@ def _summarize_change(change) -> str:
 
 def detect_drift(data_type: str, raw_dir: Path, existing: Optional[Mapping],
                  sample: str = "100%") -> DriftReport:
-    """Detect drift for one data type relative to an existing mapping (or None).
+    """Detect drift for one trip type relative to an existing mapping (or None).
 
     Pure of any YAML emission — returns the structured suggestions/TODOs that
     bootstrap would otherwise render as commented scaffold.

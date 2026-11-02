@@ -1,0 +1,89 @@
+name: taxi-mssql
+
+services:
+  mssql:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    # Ola's backup path is <Directory>/<@@SERVERNAME>/<db>/<type>/ and
+    # @@SERVERNAME follows the container hostname. Unpinned it is random per
+    # run, so every run would write to a new folder and cleanup would never
+    # find the previous backup.
+    hostname: taxi-sql
+    # The image runs as uid 10001, which cannot write into a fresh bind-mount
+    # subdirectory it does not own -- and the seeder cannot pre-chown them
+    # because Compose starts this service first. Alternative: chown -R 10001:0
+    # the host folder and drop this line.
+    user: root
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_SA_PASSWORD: ${MSSQL_PASSWORD:?set MSSQL_PASSWORD in .env}
+      # Developer edition: backup compression is unavailable in Express.
+      MSSQL_PID: Developer
+    volumes:
+      # Deliberately no volume on /var/opt/mssql: master/msdb are left to reset
+      # on every container start. provision.py's FOR ATTACH branch is what
+      # actually keeps the user database safe -- a fresh master has no record
+      # of 'taxi', finds the mdf/ldf already on the bind mount below, and
+      # attaches rather than tries to CREATE over them (which would fail with
+      # Msg 5170 forever). Persisting master instead only trades that for two
+      # worse failures: a moved TAXI_DATA_DIR leaves a stale path recorded in
+      # the old master, and a rotated MSSQL_PASSWORD never takes effect,
+      # because SQL Server only consumes MSSQL_SA_PASSWORD on first
+      # initialization of /var/opt/mssql. An ephemeral master makes every start
+      # a first initialization, so both just work.
+      - ${TAXI_DATA_DIR:?set TAXI_DATA_DIR in .env}:/data
+    healthcheck:
+      # SQLCMDPASSWORD, not -P: Compose turns $$ into $, the shell expands it,
+      # and with -P the plaintext password lands in sqlcmd's argv -- every 10
+      # seconds, for the container's whole lifetime, readable via `docker top`,
+      # via `ps` on the host, and by any process in the container. The env-var
+      # form is the same rule mssql.py's build_cmd follows.
+      test: ["CMD-SHELL", "SQLCMDPASSWORD=\"$$MSSQL_SA_PASSWORD\" /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -C -b -Q 'SELECT 1'"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 60s
+
+  seeder:
+    build:
+      context: ..
+      dockerfile: mssql/Dockerfile
+      args:
+        # Lets the image report what it was built from. .git is out of the build
+        # context, so hatch-vcs would otherwise fall back to 0.0.0. Unset is fine.
+        TAXI_SEED_VERSION: ${TAXI_SEED_VERSION:-}
+    depends_on:
+      mssql:
+        condition: service_healthy
+    environment:
+      MSSQL_PASSWORD: ${MSSQL_PASSWORD:?}
+      TAXI_DATA_DIR: /data
+      # Pass through EMPTY when unset -- never repeat a default that
+      # config.from_env already owns. Compose's `:-16` on MSSQL_LOG_SIZE_GB used
+      # to look harmless, but it meant the container always saw the variable as
+      # explicitly set, so the log could never scale down with the run: a 128 MB
+      # test dataset demanded a 16 GB log. Two sources of truth for one default
+      # drift the moment either moves. config.from_env treats empty as unset.
+      TAXI_TYPES: ${TAXI_TYPES:-}
+      TAXI_RECENT: ${TAXI_RECENT:-}
+      TAXI_DATA_FACTOR: ${TAXI_DATA_FACTOR:-}
+      MSSQL_DATA_SIZE_GB: ${MSSQL_DATA_SIZE_GB:-}
+      MSSQL_LOG_SIZE_GB: ${MSSQL_LOG_SIZE_GB:-}
+      MSSQL_FILEGROWTH_MB: ${MSSQL_FILEGROWTH_MB:-}
+      # Every remaining variable config.from_env reads. Listed even where the
+      # default is the only sane value in this stack: a variable the design
+      # spec documents but that never reaches the container is worse than an
+      # undocumented one.
+      MSSQL_HOST: ${MSSQL_HOST:-}
+      MSSQL_PORT: ${MSSQL_PORT:-}
+      MSSQL_DATABASE: ${MSSQL_DATABASE:-}
+      MSSQL_SCHEMA: ${MSSQL_SCHEMA:-}
+      MSSQL_USER: ${MSSQL_USER:-}
+      # Cap for SQL Server's buffer pool. Unset -> derived from host RAM as
+      # total - max(4 GB, 25%), applied with sp_configure before provisioning.
+      MSSQL_MAX_MEMORY_MB: ${MSSQL_MAX_MEMORY_MB:-}
+      # Heartbeat cadence while a stage is inside a long subprocess. 0 disables.
+      TAXI_PROGRESS_INTERVAL_S: ${TAXI_PROGRESS_INTERVAL_S:-}
+    volumes:
+      - ${TAXI_DATA_DIR}:/data
+    working_dir: /data
+    restart: "no"

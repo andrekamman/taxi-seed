@@ -7,7 +7,11 @@ license = "MIT"
 license-files = ["LICENSE"]
 requires-python = ">=3.12"
 dependencies = [
-    "duckdb>=1.4.4",
+    # Pinned EXACTLY, and it must stay that way. The vendored mssql extension lives in
+    # a directory keyed by exact DuckDB version (v1.5.5/<platform>/), so a floating pin
+    # silently orphans it. The version also travels with a specific extension build --
+    # see DUCKDB_VERSION in load/src/taxi_load/extension.py, which this must match.
+    "duckdb==1.5.5",
     "httpx>=0.27",
     "pyyaml>=6.0",
 ]
@@ -36,16 +40,30 @@ fallback-version = "0.0.0"
 [tool.hatch.version.raw-options]
 version_scheme = "no-guess-dev"
 local_scheme = "no-local-version"
+# Only v-prefixed tags are releases. Without this, ANY other tag reaching the repo
+# breaks version derivation outright -- setuptools-scm's default tag_regex accepts a
+# "word-" prefix, so the `mssql-ext-1.5.5-e2b8c01` tag that carries the vendored
+# extension binaries raises "Can't parse version from tag" and every build that
+# resolves a version fails: `uv sync` for anyone who has fetched tags, the docs
+# deploy job, and the release workflow (both of which use fetch-depth: 0).
+git_describe_command = "git describe --dirty --tags --long --match v*"
 
 [tool.hatch.build.targets.wheel]
 packages = [
-  "downloader/src/taxi_download",
-  "loader/src/taxi_loader",
+  "download/src/taxi_download",
+  "load/src/taxi_load",
+  "mssql/src/taxi_mssql",
   "normalize/src/taxi_normalize",
-  "orchestrator/src/taxi_orchestrate",
-  "schema-drift/src/schema_drift",
+  "pipeline/src/taxi_pipeline",
+  "schema-drift/src/taxi_schema_drift",
   "shared/src/taxi_shared",
 ]
+
+[tool.hatch.build.targets.wheel.force-include]
+# mssql/sql/ lives outside src/, so without this the wheel omits it and the container
+# resolves taxi_mssql.ola.VENDORED_SCRIPT to a path that does not exist -- a failure no
+# unit test catches, since the tests inject script=.
+"mssql/sql" = "taxi_mssql/sql"
 
 [project.optional-dependencies]
 test = ["pytest>=8.0"]
@@ -56,9 +74,30 @@ docs = [
 ]
 
 [project.scripts]
-normalize = "taxi_normalize.cli:main"
-schema-drift = "schema_drift.cli:main"
-taxi-curate-mappings = "taxi_orchestrate.curate:main"
+taxi-curate-mappings = "taxi_pipeline.curate:main"
 taxi-download = "taxi_download.cli:main"
-taxi-load = "taxi_loader.cli:main"
-taxi-run = "taxi_orchestrate.cli:main"
+taxi-load = "taxi_load.cli:main"
+taxi-mssql = "taxi_mssql.cli:main"
+taxi-normalize = "taxi_normalize.cli:main"
+taxi-pipeline = "taxi_pipeline.cli:main"
+taxi-schema-drift = "taxi_schema_drift.cli:main"
+taxi-vendor-extension = "taxi_load.extension:main"
+
+[tool.pytest.ini_options]
+# Several packages carry a test_cli.py, test_stages.py and test_report.py. Without
+# importlib mode, pytest imports same-named files as the same top-level module and fails
+# collection with "import file mismatch"; the alternative is an __init__.py in every test
+# directory, which rootdir-relative imports do not otherwise need.
+# -m "not integration" by default: tests/taxi_mssql/test_integration_compose.py drives
+# the real Compose stack, which builds images and downloads a month of trip data. Run it
+# deliberately with `-m integration`, never by accident from a bare `pytest`.
+addopts = "--import-mode=importlib -m 'not integration'"
+testpaths = ["tests"]
+# Two test directories hold a helper that their tests import as a top-level module:
+# tests/e2e/fakedata.py, and write_month from tests/taxi_load/conftest.py. The default
+# "prepend" import mode put those directories on sys.path implicitly; importlib mode does
+# not, so say it explicitly rather than reach for __init__.py files nothing else needs.
+pythonpath = ["tests/e2e", "tests/taxi_load"]
+markers = [
+    "integration: drives the real Compose stack; needs Docker, minutes and gigabytes",
+]

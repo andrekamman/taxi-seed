@@ -12,7 +12,7 @@ The commands below assume a POSIX shell (bash or zsh) and a working internet con
 - Optional: [DuckDB CLI](https://duckdb.org/docs/installation/) for the "look at what you got" step (not required; you can do the same via `uv run python -c "..."`).
 
 !!! warning "WSL users"
-    If you're running on WSL2, your data will land on the Linux filesystem — which grows the WSL2 VHDX on your Windows C: drive and does NOT shrink when files are deleted. Point downloads at a Windows path with `uv run taxi-download --data-dir /mnt/c/Users/$USER/taxi-data yellow --recent 3` instead. See the [Downloader guide's WSL section](guides/downloader.md#windows-wsl) for full details.
+    If you're running on WSL2, your data will land on the Linux filesystem — which grows the WSL2 VHDX on your Windows C: drive and does NOT shrink when files are deleted. Point downloads at a Windows path with `uv run taxi-download --data-dir /mnt/c/Users/$USER/taxi-data yellow --recent 3` instead. See the [Downloader guide's WSL section](guides/download.md#windows-wsl) for full details.
 
 ## 1. Clone and install
 
@@ -65,10 +65,10 @@ If a previous run left a corrupt partial file behind, you'll see an extra leadin
 
 `--recent N` (default 3) always anchors to "today minus one month" and walks backward until it either finds `N` new files or hits a locally-existing file (which signals it can stop, because prior runs already caught up to that point). That makes it the right flag for a nightly cron. Omit `--recent` for a full-history download instead. Use `--data-dir DIR` to change where files land (they're always written under `<DIR>/raw`; the default is `.`).
 
-The downloader also skips corrupt local files by deleting and re-fetching them, and it validates each new download by checking the PAR1 parquet magic bytes before declaring it saved. The [Downloader guide](guides/downloader.md) covers the WAF classifier that distinguishes "not published yet" from "throttled" from "hard 4xx" — a distinction that matters when you're building automation on top.
+The downloader also skips corrupt local files by deleting and re-fetching them, and it validates each new download by checking the PAR1 parquet magic bytes before declaring it saved. The [Downloader guide](guides/download.md) covers the WAF classifier that distinguishes "not published yet" from "throttled" from "hard 4xx" — a distinction that matters when you're building automation on top.
 
 !!! warning "Windows / WSL disk usage"
-    On WSL2 the raw parquet lands on the Linux filesystem and permanently grows your WSL2 VHDX. See the [Downloader guide](guides/downloader.md#windows-wsl) for the `--data-dir` workaround.
+    On WSL2 the raw parquet lands on the Linux filesystem and permanently grows your WSL2 VHDX. See the [Downloader guide](guides/download.md#windows-wsl) for the `--data-dir` workaround.
 
 ## 4. Look at what you got
 
@@ -137,7 +137,7 @@ Same output, tabulated. Either approach works.
 Schema-drift walks the full parquet family for a taxi type and reports each transition where columns were added, removed, renamed, or type-changed. Even on our tiny 3-month sample it's a good smoke test.
 
 ```bash
-uv run schema-drift --types yellow
+uv run taxi-schema-drift --types yellow
 ```
 
 Expected output (excerpt):
@@ -176,7 +176,7 @@ Normalize rewrites historical parquet so every file matches the latest schema. I
 **First run:**
 
 ```bash
-uv run normalize yellow
+uv run taxi-normalize yellow
 ```
 
 Expected output:
@@ -190,7 +190,7 @@ Next steps:
   1. Review normalize/mappings/yellow.yaml
   2. Uncomment SUGGESTED entries you accept, delete the rest
   3. Fill in `ack_date:` for each TODO to acknowledge lossy casts or data loss
-  4. Re-run: uv run normalize yellow
+  4. Re-run: uv run taxi-normalize yellow
 ```
 
 On a small `--recent 3` sample, all three months sit inside the stable-schema era (2015+), so there are no drift transitions and no `SUGGESTED`/`TODO` items to review. The tool still exits with status 3 the first time — it wants a human confirmation that the empty mapping is what you intended before it writes any output.
@@ -200,7 +200,7 @@ Open `normalize/mappings/yellow.yaml` in your editor if you're curious: the file
 **Second run** (re-running is the confirmation):
 
 ```bash
-uv run normalize yellow
+uv run taxi-normalize yellow
 ```
 
 Expected output:
@@ -223,8 +223,10 @@ The [Normalize guide](guides/normalize.md) walks through the real-world case whe
 
 ## Where to next
 
-- **[Downloader guide](guides/downloader.md)** — WAF classifier, disk sizing table, WSL warning explained in detail.
+- **[Downloader guide](guides/download.md)** — WAF classifier, disk sizing table, WSL warning explained in detail.
 - **[Schema Drift guide](guides/schema-drift.md)** — three modes, how rename detection works, programmatic API.
 - **[Normalize guide](guides/normalize.md)** — three-state model, bootstrap+amend semantics, two worked examples.
+- **[taxi-load guide](guides/load.md)** — the reconcile model, the vendored DuckDB extension, `TABLOCK` and parallel writers.
+- **[taxi-mssql guide](guides/mssql.md)** — skip all of the above and get the *whole* data set, presized and backed up, from one command against one data directory.
 - **[Cookbook](cookbook.md)** — nightly cron, DuckDB `httpfs`, corporate proxy, populating a fresh dev SQL Server.
 - **[Architecture](architecture.md)** — the pipeline DAG and the core design principles.

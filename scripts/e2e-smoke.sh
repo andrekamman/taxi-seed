@@ -19,5 +19,5 @@ MSSQL_PASSWORD="$PASSWORD" MSSQL_HOST=127.0.0.1 MSSQL_PORT=1433 MSSQL_USER=sa \
 
 MSSQL_PASSWORD="$PASSWORD" MSSQL_HOST=127.0.0.1 MSSQL_PORT=1433 MSSQL_USER=sa \
   uv run --extra test pytest \
-    tests/taxi_loader/test_load_integration.py \
+    tests/taxi_load/test_load_integration.py \
     tests/e2e/test_pipeline_e2e.py -v

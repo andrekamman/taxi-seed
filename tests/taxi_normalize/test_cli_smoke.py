@@ -112,7 +112,7 @@ def test_normalize_missing_raw_data_skips_cleanly(tmp_path):
 
 
 def test_normalize_no_args_iterates_all_types(tmp_path):
-    """Bare `normalize` iterates over all four types; with no raw data present,
+    """Bare `taxi-normalize` iterates over all four types; with no raw data present,
     each one skips cleanly and the overall exit code is 0."""
     r = _run(cwd=tmp_path)
     assert r.returncode == 0

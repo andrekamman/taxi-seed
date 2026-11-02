@@ -1,11 +1,12 @@
 # Installation
 
-`taxi-seed` is published to [PyPI](https://pypi.org/project/taxi-seed/) as a single distribution carrying all six commands plus the shared library. There are two ways to get it, and they suit different jobs:
+`taxi-seed` is published to [PyPI](https://pypi.org/project/taxi-seed/) as a single distribution carrying all eight commands plus the shared library. There are three ways to get it, and they suit different jobs:
 
 - **Install the released package** if you want to *run* the tools — mirror the TLC bucket, analyze drift, load a database.
 - **Work from a clone** if you want to *develop* on the repo, or if you want the curated normalize mappings that live in the repo rather than in the wheel (see [Curated mappings are not in the wheel](#mappings) below).
+- **Run the Compose stack** if what you actually want is a complete SQL Server data set rather than the individual tools. That needs a clone and Docker, nothing from PyPI — see the [taxi-mssql guide](guides/mssql.md).
 
-Both require Python 3.12 or 3.13.
+The first two require Python 3.12 or 3.13.
 
 !!! note "Use 0.2.0 or newer"
     `0.1.0` predates the Python downloader, so it ships every command except `taxi-download`. It also shipped a `k6_loadtest` package that shadows the one in [taxi-lab](https://github.com/andrekamman/taxi-lab). `0.2.0` fixed both and is the current release.
@@ -42,12 +43,17 @@ Either of the first two puts these commands on your `PATH`:
 
 | Command | What it does | Guide |
 |---|---|---|
-| `taxi-download` | Mirror TLC parquet from CloudFront to `raw/` | [Downloader](guides/downloader.md) |
-| `schema-drift` | Report column-name and column-shape drift across a mirror | [Schema Drift](guides/schema-drift.md) |
-| `normalize` | Rewrite a mirror to a single target schema | [Normalize](guides/normalize.md) |
-| `taxi-load` | Load normalized parquet into a target database | [Loader](guides/loader.md) |
-| `taxi-run` | Drive download → normalize → load as one pipeline | [Orchestrator](guides/orchestrator.md) |
-| `taxi-curate-mappings` | Auto-accept detected drift into complete mapping YAMLs | [Orchestrator](guides/orchestrator.md) |
+| `taxi-download` | Mirror TLC parquet from CloudFront to `raw/` | [taxi-download](guides/download.md) |
+| `taxi-schema-drift` | Report column-name and column-shape drift across a mirror | [taxi-schema-drift](guides/schema-drift.md) |
+| `taxi-normalize` | Rewrite a mirror to a single target schema | [taxi-normalize](guides/normalize.md) |
+| `taxi-load` | Load normalized parquet into a target database | [taxi-load](guides/load.md) |
+| `taxi-pipeline` | Drive download → normalize → load as one pipeline | [taxi-pipeline](guides/pipeline.md) |
+| `taxi-mssql` | Advance one data directory to a complete SQL Server data set | [taxi-mssql](guides/mssql.md) |
+| `taxi-curate-mappings` | Auto-accept detected drift into complete mapping YAMLs | [taxi-pipeline](guides/pipeline.md) |
+| `taxi-vendor-extension` | Fetch and verify the vendored DuckDB `mssql` extension | [taxi-load](guides/load.md) |
+
+!!! note "`taxi-mssql` on PATH is not the stack"
+    The console script is installed like any other, but on its own it is only useful if you already have a SQL Server it can reach and the other `taxi-*` commands on `PATH`. It takes no arguments and is configured entirely by environment variables. The supported way to run it is the Compose stack in `mssql/`, which brings up the SQL Server next to it — see the [taxi-mssql guide](guides/mssql.md).
 
 ### Verify the install
 
@@ -56,6 +62,18 @@ taxi-download --help
 ```
 
 If the command is not found after `uv tool install`, run `uv tool update-shell` (or add `~/.local/bin` to your `PATH`) and open a new shell.
+
+### Bootstrap the vendored extension
+
+`taxi-load` needs the DuckDB `mssql` extension, and taxi-seed **vendors** it rather than installing it from the community registry at runtime — the registry rebuilds, so an `INSTALL` today does not return the build that was tested. Nothing is needed up front: the loader fetches and verifies it on first use. Doing it deliberately is better on a machine that runs the pipeline on a schedule, so the download is not inside a multi-hour run:
+
+```bash
+taxi-vendor-extension                   # into ~/.taxi-seed/extensions
+taxi-vendor-extension --root /opt/ext   # or somewhere you choose
+export TAXI_EXTENSION_DIR=/opt/ext      # then point the loader at it
+```
+
+The download is checked against a recorded SHA-256 before it is accepted, and DuckDB enforces the extension's own signature when it loads — `allow_unsigned_extensions` is not needed and is not used. Both the build hash and `mssql_version()` are asserted at load time, so a stale directory fails loudly rather than loading something untested. See [the vendored extension](guides/load.md#the-vendored-extension) for the whole story, including why `duckdb==1.5.5` is an exact pin.
 
 ### Upgrading
 
@@ -86,6 +104,20 @@ uv run taxi-download yellow --recent 3
 
 This is what [Getting Started](getting-started.md) walks through, and it is what [Contributing](contributing.md) assumes. `uv sync` materializes the exact locked versions from `uv.lock` into `.venv/`, which an install from PyPI does not do — a PyPI install resolves dependencies fresh against the ranges in `pyproject.toml`.
 
+A clone is also what the Compose stack needs. Its build context is the repo itself, so the image cannot drift from the source it was built from and no published release has to exist:
+
+```bash
+mkdir -p /srv/taxi
+cat > mssql/.env <<'ENV'
+TAXI_DATA_DIR=/srv/taxi
+MSSQL_PASSWORD=change-me-Str0ng!
+ENV
+cd mssql
+docker compose up --build --abort-on-container-exit --exit-code-from seeder
+```
+
+See the [taxi-mssql guide](guides/mssql.md) for what that produces and every other setting.
+
 ## Reading the examples
 
 Every example in these docs is written for the clone workflow, so commands are prefixed with `uv run`:
@@ -104,7 +136,7 @@ taxi-download yellow --recent 3
 
 The repo carries hand-curated normalize mappings at `normalize/mappings/{yellow,green,fhv,fhvhv}.yaml`. **These are not packaged into the wheel** — the distribution contains Python modules only.
 
-`normalize` (and the normalize stage of `taxi-run`) resolves its mapping as `normalize/mappings/<type>.yaml` *relative to the current working directory*, with no flag to point it elsewhere. So from a PyPI install in an arbitrary directory, the first `normalize yellow` finds no mapping, bootstraps a fresh scaffold into `./normalize/mappings/yellow.yaml`, and exits `3` for review — the documented first-run behavior, but starting from zero rather than from the curated file.
+`taxi-normalize` (and the normalize stage of `taxi-pipeline`) resolves its mapping as `normalize/mappings/<type>.yaml` *relative to the current working directory*, with no flag to point it elsewhere. So from a PyPI install in an arbitrary directory, the first `normalize yellow` finds no mapping, bootstraps a fresh scaffold into `./normalize/mappings/yellow.yaml`, and exits `3` for review — the documented first-run behavior, but starting from zero rather than from the curated file.
 
 Two ways to get the curated mappings under an installed workflow:
 
@@ -118,7 +150,7 @@ Two ways to get the curated mappings under an installed workflow:
 
     Repeat per trip type. Everything else (`raw/`, `raw-normalized/`) is already relative to `--data-dir`.
 
-2. Or run `normalize` / `taxi-run` from a clone, and use the PyPI install only for `taxi-download`, `schema-drift`, and `taxi-load` — those three are fully self-contained and need no repo files.
+2. Or run `taxi-normalize` / `taxi-pipeline` from a clone, and use the PyPI install only for `taxi-download`, `taxi-schema-drift`, and `taxi-load` — those three are fully self-contained and need no repo files.
 
 See the [Normalize guide](guides/normalize.md) for what the mapping file contains and how bootstrap/amend semantics work.
 

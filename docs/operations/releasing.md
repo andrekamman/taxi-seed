@@ -6,19 +6,28 @@ This page is the operator's runbook for the branch model, the CI gate that prote
 
 - **`dev`** is the default branch and the integration branch. Feature branches are cut from `dev`, and pull requests target `dev` — not `main`.
 - **`main`** is the stable, released branch. Nothing lands on `main` directly; it only moves forward by merging `dev` into it once `dev` is in a state worth shipping.
-- The docs site deploys from `main` (see the `docs` job in `.github/workflows/ci.yml`, gated on `push` to `refs/heads/main`), so `main` is also "what's live on the docs site" at any given moment.
+- The docs site deploys from `main` (see the `docs-deploy` job in `.github/workflows/ci.yml`, gated on `push` to `refs/heads/main`), so `main` is also "what's live on the docs site" at any given moment. A docs change merged to `dev` is **not** live until `dev` is promoted.
 - Releases are tagged **on `main`**, after the promotion merge — never on `dev` and never on a feature branch. The version published to PyPI is whatever `main` looked like when the tag was pushed.
 
 The promotion path in order: feature branch → PR into `dev` → `dev` passes CI → PR/merge `dev` into `main` → tag `main` → release workflow runs.
 
 ## The CI gate
 
-`.github/workflows/ci.yml` defines four jobs — `test`, `docs`, `integration`, and `branch-guard`. A pull request runs `test`, `integration`, and `branch-guard`; `docs` only runs (and deploys) on a `push` to `main`, so it does not gate PRs.
+`.github/workflows/ci.yml` defines five jobs — `test`, `docs-build`, `docs-deploy`, `integration`, and `branch-guard`. A pull request runs `test`, `docs-build`, `integration`, and `branch-guard`; `docs-deploy` only runs on a `push` to `main`, so it does not gate PRs.
 
 - **`test`** — unit tests across the Python version matrix (3.12, 3.13).
-- **`docs`** — builds and deploys the documentation site; gated on `push` to `refs/heads/main`, not on pull requests.
-- **`integration`** — end-to-end tests against a real SQL Server container (loader integration + pipeline e2e), on Python 3.13.
+- **`docs-build`** — `mkdocs build --strict` on every PR. This is what catches a broken internal link or a nav entry pointing at a file that no longer exists, before it reaches a deploy.
+- **`docs-deploy`** — publishes the site with `mkdocs gh-deploy`; gated on `push` to `refs/heads/main` and gated *behind* `docs-build`, not run on pull requests.
+- **`integration`** — end-to-end tests against a real SQL Server service container (loader integration + pipeline e2e), on Python 3.13.
 - **`branch-guard`** — fails a pull request that targets `main` from any head branch other than `dev`. It runs on every PR and passes trivially for PRs into `dev`, so it costs a few seconds and only bites when the branch model above is being bypassed.
+
+A **sixth** job lives in a second workflow, `.github/workflows/compose-stack.yml`, and is deliberately not part of the gate: it drives the whole Docker Compose stack, which costs minutes and gigabytes. Run it by adding the **`ci:compose-stack`** label to a pull request, or by dispatching the workflow by hand. See [the two container-backed suites](../contributing.md#the-two-container-backed-suites).
+
+!!! warning "`compose-stack` must never be renamed toward `integration`"
+    `integration` is a required status check on both protected branches and protection matches names literally. A `compose-stack` rename that protection starts matching would require a job that normally never starts, blocking every merge.
+
+!!! note "`workflow_dispatch` is served from the default branch"
+    GitHub reads the dispatch definition from `dev` (the default branch here), so the "Run workflow" button for `compose-stack` only appears once that workflow exists **on `dev`** — not on a feature branch where it was added.
 
 Merging into `dev` or `main` is blocked until `integration` passes — it is configured as a **required status check** (see the one-time setup below for the exact command that wires this up) `main` additionally requires `branch-guard`.
 
@@ -40,6 +49,18 @@ The published version is derived entirely from the git tag via `hatch-vcs` — t
 | anything else matching `v*` | `v0.2.0rc1`, `v0.2.0a1`, `v0.2.0b1`, `v0.2.0.dev1` | prerelease | TestPyPI + GitHub prerelease |
 
 Both paths run the same `build` job first (checkout with full history/tags for `hatch-vcs`, `uv sync --extra test`, `pytest -q` as a guard, `uv build`), then fan out to `testpypi` or `pypi` based on the classification, then create the GitHub release/prerelease from the built artifacts. Publishing uses OIDC Trusted Publishing (`id-token: write`) — there are no PyPI tokens stored anywhere in the repo or its secrets.
+
+### Before the tag: run the Compose stack {#before-the-tag}
+
+**Nothing does this automatically.** `compose-stack` is on-demand, so a release can be cut without the full Docker stack ever having been exercised against the code being shipped. Do it deliberately, on the promotion PR into `main` or on `main` itself:
+
+- Add the **`ci:compose-stack`** label to the `dev` → `main` promotion PR, or dispatch `.github/workflows/compose-stack.yml` by hand, and wait for it to pass.
+- Or run it locally: `uv run --extra test pytest -m integration -v`. Budget minutes, gigabytes, and a `sudo rm -rf` afterwards — see [the two container-backed suites](../contributing.md#the-two-container-backed-suites).
+
+This is the only check that exercises the image build, the baked mappings, the baked extension, Ola's script resolving from site-packages, and the resumability claim. The `integration` job covers none of those: it drives the loader and the pipeline against a service container, not the stack.
+
+!!! warning "A non-`v*` tag breaks every version derivation"
+    `hatch-vcs` is restricted to `--match v*` for a reason. Before that restriction, the `mssql-ext-1.5.5-e2b8c01` release tag stopped `dev` and `main` resolving a version at all — invisible in CI, because `actions/checkout` does not fetch tags by default, but fatal to the docs deploy, to `release.yml`, and to any local `uv sync` on a clone that *had* fetched tags. Keep extension-mirror tags out of the `v*` namespace, and keep the `--match` restriction.
 
 ### Cut a prerelease (TestPyPI)
 
@@ -74,21 +95,80 @@ git tag v0.2.0
 git push origin v0.2.0
 ```
 
-This runs `build`, then the `pypi` job — which waits for approval in the `pypi` GitHub Environment (the required reviewer configured during one-time setup) before it publishes — then creates the GitHub Release. Approve the deployment from the Actions run page (or `gh run watch`, which surfaces the pending-approval state) when you're ready for it to go live.
+This runs `build`, then an `announce-gate` job, then the `pypi` job — which waits for approval in the `pypi` GitHub Environment (the required reviewer configured during one-time setup) before it publishes — then creates the GitHub Release. Approve the deployment from the Actions run page (or `gh run watch`, which surfaces the pending-approval state) when you're ready for it to go live.
+
+!!! danger "An unapproved deployment expires, and the release is simply lost"
+    **GitHub expires a pending deployment after 30 days.** The run then reports
+    `pypi: failure` with no failing step, nothing is published, and the only trace is a tag
+    that never shipped. Nothing retries.
+
+    This is not hypothetical: **`v0.3.0` was tagged on 2026-08-17 and died exactly this
+    way.** `v0.3.0rc1` had succeeded to TestPyPI the same day, which made the release look
+    fine, and PyPI stayed on `0.2.0` for months before anyone noticed — via a downstream
+    repo resolving an old version.
+
+    The gate itself is deliberate and stays: a PyPI version number can never be reused, so
+    the pause before an irreversible publish is worth having. What was missing was being
+    *told*. The `announce-gate` job now runs before the gated one — it has no
+    `environment:`, so nothing blocks it — and writes a job summary plus a workflow warning
+    annotation saying the release is waiting and where to approve it.
+
+    **`v0.3.0` is not being re-cut.** Its tag stays as a tag that never shipped;
+    re-creating a tag would rewrite published history for anyone who fetched it, and point
+    it at different content. The next final release is `v0.4.0`.
 
 Once it lands, confirm the release from a consumer's position — the console scripts are the part most likely to be wrong, since they change whenever a tool is added or removed:
 
 ```bash
 uv tool install taxi-seed@0.2.0 --force
-taxi-download --help
+for c in taxi-download taxi-schema-drift taxi-normalize taxi-load \
+         taxi-pipeline taxi-mssql taxi-curate-mappings taxi-vendor-extension; do
+    "$c" --help >/dev/null && echo "ok $c"
+done
 ```
 
-The user-facing install instructions are on the [Installation](../install.md) page; update it in the same PR whenever a release adds, removes, or renames a CLI.
+All eight must resolve. The user-facing install instructions are on the [Installation](../install.md) page; update it in the same PR whenever a release adds, removes, or renames a CLI.
 
 ### Safety / gotchas
 
 - **The required reviewer on the `pypi` Environment is the only gate protecting production PyPI.** If that environment is created without a required reviewer (or not created at all), a final `vX.Y.Z` tag publishes to real PyPI unattended — there is no other approval step in the path. Don't skip step 3 of the one-time setup below.
 - **`release.yml` triggers on any `v*` tag pushed to any branch**, not just `main`. Only create release tags on `main`, per the branch model above — an accidental `v1.0.0` tag pushed on a feature branch or on `dev` would build from that commit and publish it just the same.
+- **A tag is not a release.** Pushing the tag starts the workflow; the `pypi` job then waits on a required reviewer. A tag whose approval never arrived leaves a version that exists in git and nowhere on PyPI. Check the Actions run, not just `git tag`.
+- **The Compose stack is not in the gate.** See [Before the tag](#before-the-tag).
+
+## Refreshing the vendored mssql extension
+
+The loader does not `INSTALL mssql FROM community` at runtime. It loads a **vendored**
+extension that this repo mirrors as a release asset, because the community registry
+rebuilds: DuckDB 1.5.5 served build `37596c2` (`mssql_version() 0.2.3`) in mid-August 2026
+and `e2b8c01` (`0.2.4`) since 2026-08-18, with no DuckDB release between them. Builds also
+disappear — DuckDB 1.4.5 has no `mssql` build at all.
+
+These assets are **not** cut per taxi-seed release. They are keyed to a DuckDB version, so
+they are refreshed only when the DuckDB pin moves, which is why `release.yml` does not touch
+them.
+
+Bumping DuckDB is therefore a deliberate, four-step act:
+
+1. **Re-spike.** Install the new DuckDB, `FORCE INSTALL mssql FROM community` (a plain
+   `INSTALL` is a no-op when the extension is cached and will report the stale build as
+   current), and record `extension_version` and `mssql_version()`.
+2. **Re-vendor.** `taxi-vendor-extension --all --root <dir>` fetches every platform and
+   verifies each against the SHA-256 table. Update `DUCKDB_VERSION`, `EXPECTED_EXT_VERSION`,
+   `EXPECTED_MSSQL_VERSION` and `SHA256` in `load/src/taxi_load/extension.py` — they are
+   one fact expressed four ways, so they move together.
+3. **Publish** a `mssql-ext-<duckdb version>-<build>` release carrying the five
+   `.duckdb_extension.gz` files and a `SHA256SUMS.txt`, marked `--latest=false`.
+4. **Move the `duckdb` pin** in `pyproject.toml` to the exact new version. The vendored
+   directory is keyed by exact DuckDB version, so a mismatched pin silently orphans the
+   vendored extension.
+
+!!! warning "Only `v*` tags are releases"
+    `[tool.hatch.version.raw-options]` restricts `git describe` to `--match v*`. Without it,
+    a tag like `mssql-ext-1.5.5-e2b8c01` is accepted as a version candidate by
+    setuptools-scm's default `tag_regex` and then fails to parse, breaking version
+    derivation — and therefore every build, CI and the release workflow included — for
+    anyone who has fetched tags. Do not relax that setting.
 
 ## One-time setup checklist
 

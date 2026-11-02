@@ -1,5 +1,5 @@
 site_name: taxi-seed
-site_description: Downloader, schema-drift analyzer, normalizer, SQL Server loader, and orchestrator for NYC TLC taxi trip data
+site_description: Mirror, normalize and load the NYC TLC taxi trip data set into SQL Server - data to ingest for lakehouse testing
 site_url: https://andrekamman.github.io/taxi-seed/
 repo_url: https://github.com/andrekamman/taxi-seed
 repo_name: andrekamman/taxi-seed
@@ -46,16 +46,32 @@ exclude_docs: |
   superpowers/plans/
   agents/
 
+# A broken *anchor* is only an INFO by default, so `--strict` let it through --
+# which is most of the breakage a docs rewrite actually causes: the file still
+# exists, the heading it pointed at does not. Promoted to a warning so the
+# docs-build job fails on it.
+validation:
+  omitted_files: warn
+  absolute_links: warn
+  unrecognized_links: warn
+  anchors: warn
+
 nav:
   - Home: index.md
   - Installation: install.md
   - Getting Started: getting-started.md
   - Guides:
-      - Downloader: guides/downloader.md
-      - Schema Drift: guides/schema-drift.md
-      - Normalize: guides/normalize.md
-      - Loader: guides/loader.md
-      - Orchestrator: guides/orchestrator.md
+      # One guide per command, filename matching the directory and the package:
+      # command taxi-X -> package taxi_X -> directory X/ -> guide guides/X.md.
+      # The three guides that carried the old component names (downloader,
+      # loader, orchestrator) were renamed here; docs/guides/<old>/index.html
+      # are meta-refresh stubs keeping the already-published URLs alive.
+      - taxi-download: guides/download.md
+      - taxi-schema-drift: guides/schema-drift.md
+      - taxi-normalize: guides/normalize.md
+      - taxi-load: guides/load.md
+      - taxi-pipeline: guides/pipeline.md
+      - taxi-mssql: guides/mssql.md
   - Cookbook: cookbook.md
   - Architecture: architecture.md
   - Reference:
@@ -63,13 +79,36 @@ nav:
       - Exit codes: reference/exit-codes.md
   - Operations:
       - Releasing: operations/releasing.md
+  # Chronological, and the dated filenames stay as they were written. A record
+  # rewritten to use names coined later is no longer a record; where one has
+  # gone stale the document carries a supersede note at the top, and the nav
+  # label says so too.
   - Design Specs:
       - Monorepo restructure: superpowers/specs/2026-07-19-monorepo-restructure-design.md
       - Normalizer: superpowers/specs/2026-07-21-normalizer-design.md
       - Documentation site: superpowers/specs/2026-07-22-documentation-design.md
       - SQL loader: superpowers/specs/2026-07-22-sql-loader-design.md
-      - Orchestrator: superpowers/specs/2026-07-23-orchestrator-design.md
+      - "Orchestrator (now taxi-pipeline)": superpowers/specs/2026-07-23-orchestrator-design.md
+      - Multi-source renames and value maps: superpowers/specs/2026-07-23-normalize-multisource-valuemap-design.md
+      - CI and fake data: superpowers/specs/2026-07-23-ci-fake-data-design.md
+      - dev/test/prod promotion: superpowers/specs/2026-07-25-devtestprod-promotion-design.md
       - Python downloader: superpowers/specs/2026-07-26-python-downloader-design.md
       - Configurable data dir: superpowers/specs/2026-07-26-configurable-data-dir-design.md
       - Documentation sync: superpowers/specs/2026-07-26-documentation-sync-design.md
+      - Documentation audit and rewrite: superpowers/specs/2026-07-29-docs-audit-rewrite-design.md
+      # The three below were written in taxi-lab and adopted here with the
+      # seeder (#24, #35), each annotated with what in it is superseded.
+      - Seeder container: superpowers/specs/2026-08-01-seeder-container-design.md
+      - Seeder logging: superpowers/specs/2026-08-15-seeder-logging-design.md
+      # Labelled historical in the nav as well as in the document: it designed
+      # the month-shard fan-out that #19 deleted, and that never moved here. A
+      # reader must not reach it from an entry that reads like current design.
+      - "Parallel loading (historical)": superpowers/specs/2026-08-15-parallel-loading-design.md
+  # Published but previously unreachable from the nav. The probe note in
+  # particular is cited by the extension-refresh runbook, so it needs a URL a
+  # reader can get to.
+  - Research Notes:
+      - mssql extension spike: superpowers/notes/2026-07-22-mssql-extension-spike.md
+      - CI / fake-data kickoff: superpowers/notes/2026-07-23-ci-fake-data-kickoff.md
+      - mssql_version() probe: superpowers/notes/2026-08-30-mssql-version-probe.md
   - Contributing: contributing.md

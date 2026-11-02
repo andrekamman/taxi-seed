@@ -4,9 +4,12 @@ Every CLI in this repo follows the same convention: `0` on success, non-zero on 
 
 The tables below list the *emitted* codes. Codes are stable and part of the tools' contract: changing one is a breaking change and requires a version bump.
 
+!!! note "Run-level versus tool-level"
+    `taxi-pipeline` and `taxi-mssql` summarise a whole run with three codes — **0** clean, **1** needs review, **2** operational failure. The tools underneath emit more than that: normalize has a `3` for a first-run scaffold, and `taxi-load` distinguishes a partial load (`1`) from a config or connection error (`2`). The two drivers collapse those into the three-code contract, and one of the translations is deliberately not the identity — see [`taxi-mssql`](#taxi-mssql). So "0/1/2" describes a run, not every command in this repo.
+
 ## Downloader (`taxi-download`)
 
-`taxi-download` is the Python console script (`downloader/src/taxi_download/cli.py`); it classifies every CloudFront response before choosing to retry, skip, or back off, and reports one summary line per requested type (`<type>: downloaded N, gave up on M`).
+`taxi-download` is the Python console script (`download/src/taxi_download/cli.py`); it classifies every CloudFront response before choosing to retry, skip, or back off, and reports one summary line per requested type (`<type>: downloaded N, gave up on M`).
 
 | Code | Meaning | Suggested action |
 |---|---|---|
@@ -25,7 +28,7 @@ CloudFront responds to requests in several distinguishable ways:
 
 On a rate-limit classification, `taxi-download` backs off and retries; if every attempt for a type is exhausted with zero successful downloads, that type reports `gaveup > 0` and the overall exit code becomes 2.
 
-## Normalize (`uv run normalize`)
+## Normalize (`uv run taxi-normalize`)
 
 | Code | Meaning | Suggested action |
 |---|---|---|
@@ -38,7 +41,7 @@ A missing `raw/<type>/` directory is **not** a configuration error — it's trea
 
 ### Multi-type aggregation
 
-When invoked with no argument (`uv run normalize`), the tool runs all four trip types in turn and returns the **highest** exit code observed. A mixed run — e.g. `yellow` succeeds (0), `fhvhv` needs edits (1) — exits `1`. This keeps CI logic simple: any non-zero means "at least one type needs attention", and the code tells you what kind of attention.
+When invoked with no argument (`uv run taxi-normalize`), the tool runs all four trip types in turn and returns the **highest** exit code observed. A mixed run — e.g. `yellow` succeeds (0), `fhvhv` needs edits (1) — exits `1`. This keeps CI logic simple: any non-zero means "at least one type needs attention", and the code tells you what kind of attention.
 
 The ordering used by exit-code precedence, from lowest to highest: `0 → 1 → 2 → 3`. A first-run-plus-mapping-error scenario therefore exits `3` (the more actionable state), not `2`.
 
@@ -46,15 +49,15 @@ The ordering used by exit-code precedence, from lowest to highest: `0 → 1 → 
 
 ```bash
 # Fail the CI job on any non-zero — the strictest posture.
-uv run normalize || exit $?
+uv run taxi-normalize || exit $?
 
 # Treat exit 3 (first run) as expected on a fresh clone; anything else fails.
-uv run normalize
+uv run taxi-normalize
 code=$?
 if [ "$code" != "0" ] && [ "$code" != "3" ]; then exit "$code"; fi
 ```
 
-## Schema-drift (`uv run schema-drift`)
+## Schema-drift (`uv run taxi-schema-drift`)
 
 | Code | Meaning | Suggested action |
 |---|---|---|
@@ -69,11 +72,11 @@ Schema-drift itself does not raise on missing columns, mismatched types, or ambi
 |---|---|---|
 | 0 | Every requested type either loaded successfully, was a no-op (`--dry-run`), or had no parquet under the resolved input dir (skipped as "nothing to load yet"). | None. |
 | 1 | At least one type failed mid-load (a `duckdb.Error` or a loader-internal error during `COPY`/DDL execution) — a partial load; other types may have still succeeded. | Re-run — the reconcile logic picks up from the manifest's actual state. |
-| 2 | An identifier/config error (invalid `--schema` or `--database`), a missing `MSSQL_PASSWORD`, a connection/provisioning failure (installing the `mssql` extension, an unexpected extension version, attaching the database, creating the database/schema), or a per-type `TypeMappingError` (a DuckDB column type with no SQL Server equivalent). | Check the stderr message; set `MSSQL_PASSWORD`, fix the identifier, or add the missing type mapping. |
+| 2 | An identifier/config error (invalid `--schema` or `--database`), a missing `MSSQL_PASSWORD`, a connection/provisioning failure (vendoring or loading the `mssql` extension, an extension build or version that does not match the pin, attaching the database, creating the database/schema, or `--require-existing-database` with no such database), or a per-type `TypeMappingError` (a DuckDB column type with no SQL Server equivalent). | Check the stderr message; set `MSSQL_PASSWORD`, fix the identifier, or add the missing type mapping. |
 
-When multiple types are processed in one invocation (no positional `data_type`), the overall exit code is the **maximum** across all per-type outcomes — a `TypeMappingError` on one type (2) outranks a mid-load failure on another (1), which outranks types that loaded cleanly (0). See [Loader → Exit codes](../guides/loader.md#exit-codes) for the full writeup.
+When multiple types are processed in one invocation (no positional `data_type`), the overall exit code is the **maximum** across all per-type outcomes — a `TypeMappingError` on one type (2) outranks a mid-load failure on another (1), which outranks types that loaded cleanly (0). See [Loader → Exit codes](../guides/load.md#exit-codes) for the full writeup.
 
-## Orchestrator (`taxi-run`)
+## Pipeline (`taxi-pipeline`)
 
 | Code | Meaning | Suggested action |
 |---|---|---|
@@ -81,7 +84,27 @@ When multiple types are processed in one invocation (no positional `data_type`),
 | 1 | No stage failed outright, but at least one type stopped at `needs_review` — normalize returned 1 (unresolved mapping items) or 3 (first-run scaffold awaiting review) for that type. | Resolve the mapping YAML for the flagged type(s) and re-run. |
 | 2 | At least one stage classified as `failed`, `partial`, or `conn_error` (download failed, normalize hit a real config error, or the loader reported a partial load / connection-config error / `TypeMappingError`). Also returned immediately for `--download-only` combined with `--load`, or for a missing `MSSQL_PASSWORD` when `--load` is set — before any stage runs. | Check the per-type summary printed at the end of the run; fix the failing stage and re-run. |
 
-Precedence is **2 > 1 > 0**: `pipeline.overall_exit_code` returns 2 if any stage outcome is in the failure set (`failed`, `partial`, `conn_error`), else 1 if any is `needs_review`, else 0. Note that a loader exit of `1` (partial load) classifies as `partial`, which **is** counted among the exit-2 statuses at the orchestrator level — so a partial load on any type escalates the whole run's exit code to 2, even though that type's own stage exit was 1. See [Orchestrator → Exit codes](../guides/orchestrator.md#exit-codes) for the full writeup.
+Precedence is **2 > 1 > 0**: `pipeline.overall_exit_code` returns 2 if any stage outcome is in the failure set (`failed`, `partial`, `conn_error`), else 1 if any is `needs_review`, else 0. Note that a loader exit of `1` (partial load) classifies as `partial`, which **is** counted among the exit-2 statuses at the run level — so a partial load on any type escalates the whole run's exit code to 2, even though that type's own stage exit was 1. See [taxi-pipeline → Exit codes](../guides/pipeline.md#exit-codes) for the full writeup.
+
+## Seeder (`taxi-mssql`) {#taxi-mssql}
+
+| Code | Meaning | Suggested action |
+|---|---|---|
+| 0 | Clean. Every stage completed; the data directory is either current or was advanced by this run. | None. Re-running is a near no-op. |
+| 1 | Needs review. In practice, `taxi-normalize` met unacknowledged schema drift during the mirror stage and amended the curated mapping. | Edit `<data dir>/normalize/mappings/<trip type>.yaml` on the host — it lives on the volume for this reason — and re-run. |
+| 2 | Operational failure. Bad configuration (missing `MSSQL_PASSWORD`, a non-identifier `MSSQL_DATABASE`/`MSSQL_SCHEMA`, an out-of-range numeric), SQL Server unreachable, not enough free disk for the planned mdf/ldf, Ola's vendored script missing, a taxi-seed CLI not on `PATH`, or at least one trip type that failed to load. | Read the stderr message. A failed load usually needs only a re-run: `taxi-load` resumes from the load manifest. |
+
+The code is the **maximum** across every stage that ran, and the run stops at the first stage returning non-zero — with one exception. A trip type that fails to **load** does not abandon the others: each is independent and a partial data set is more useful than none, so every type is attempted, every failure is reported, the worst code wins, and the backup is skipped unless everything was clean.
+
+One translation is deliberately not the identity. `taxi-load` returns `1` for "failed mid-load" (a dropped connection, a DuckDB error on one type); `taxi-mssql` reports that as **2**. Here `1` means "a human must decide something", and a mid-load failure is not that — passing it through would send an operator looking for a drift acknowledgment that does not exist when a plain re-run is the remedy. The log still prints the child's own code, so you can see what `taxi-load` actually said.
+
+Getting that code out of Compose requires both flags:
+
+```bash
+docker compose up --build --abort-on-container-exit --exit-code-from seeder
+```
+
+Without them the `mssql` service keeps running after the work finishes, and `$?` is not the seeder's. See [taxi-mssql → Exit codes](../guides/mssql.md#exit-codes) for the full writeup.
 
 ## Mapping curator (`taxi-curate-mappings`)
 
@@ -90,7 +113,7 @@ Precedence is **2 > 1 > 0**: `pipeline.overall_exit_code` returns 2 if any stage
 | 0 | Every requested type curated cleanly, or was skipped because `<raw-dir>/<type>` doesn't exist (not an error). | None. |
 | 2 | At least one type raised: a `FileNotFoundError` (no parquet files for that type, or the mapping's `target` file is missing) or a `RuntimeError` (a non-executable cast needing manual mapping, or unresolved items remaining after 8 curation rounds); argument errors also exit 2. | Read the stderr message for the blocking column/type and resolve it by hand in the mapping YAML. |
 
-Multiple types aggregate via `max()`, same as the other multi-type tools in this repo. See [Orchestrator → `taxi-curate-mappings`](../guides/orchestrator.md#taxi-curate-mappings) for the full writeup.
+Multiple types aggregate via `max()`, same as the other multi-type tools in this repo. See [taxi-pipeline → `taxi-curate-mappings`](../guides/pipeline.md#taxi-curate-mappings) for the full writeup.
 
 ## Standard shell conventions
 
@@ -107,13 +130,13 @@ None of these are emitted by the tools themselves — they come from the surroun
 For a quick one-liner check:
 
 ```bash
-uv run normalize yellow; echo "exit=$?"
+uv run taxi-normalize yellow; echo "exit=$?"
 ```
 
 For a scripted decision, capture immediately (a subsequent command overwrites `$?`):
 
 ```bash
-uv run normalize yellow
+uv run taxi-normalize yellow
 code=$?
 case "$code" in
     0) echo "normalized" ;;

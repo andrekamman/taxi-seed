@@ -6,8 +6,8 @@ from uuid import uuid4
 
 import pytest
 from fakedata import DATA_TYPES, generate
-from taxi_loader import load, manifest
-from taxi_loader.connection import ATTACH_NAME, ConnConfig, attach_target, connect_duckdb
+from taxi_load import load, manifest
+from taxi_load.connection import ATTACH_NAME, ConnConfig, attach_target, connect_duckdb
 
 pytestmark = pytest.mark.skipif(
     not os.environ.get("MSSQL_PASSWORD"),
@@ -44,7 +44,7 @@ def attached(conn_cfg):
 
 def _run_pipeline(workroot: Path, data_type: str, cfg) -> None:
     argv = [
-        "taxi-run", data_type, "--skip-download", "--load",
+        "taxi-pipeline", data_type, "--skip-download", "--load",
         "--data-dir", str(workroot),
         "--host", cfg.host, "--port", str(cfg.port),
         "--database", cfg.database, "--schema", cfg.schema, "--user", cfg.user,
@@ -52,7 +52,7 @@ def _run_pipeline(workroot: Path, data_type: str, cfg) -> None:
     env = {**os.environ, "MSSQL_PASSWORD": cfg.password}
     result = subprocess.run(argv, env=env, capture_output=True, text=True)
     assert result.returncode == 0, (
-        f"taxi-run exited {result.returncode}\nSTDOUT:\n{result.stdout}\nSTDERR:\n{result.stderr}"
+        f"taxi-pipeline exited {result.returncode}\nSTDOUT:\n{result.stdout}\nSTDERR:\n{result.stderr}"
     )
 
 
