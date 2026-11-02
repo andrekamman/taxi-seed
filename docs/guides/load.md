@@ -137,20 +137,45 @@ This is computed by the pure function `reconcile()` (`taxi_load/reconcile.py`) f
 - On **reload**, the table is dropped and recreated, the year's manifest rows are deleted up front, all months for the year are copied in a single `COPY` statement, and manifest rows for every month are written afterward.
 - A year that had manifest rows but now has **zero** files on disk (the whole year vanished) is treated as a reload target with no months: the table is dropped and the manifest rows for that year are deleted, but nothing is recreated.
 
-### What reconcile does not look at
+### What reconcile does not look at, and the guard that covers it
 
 Reconcile decides from three observables: the months on disk, the rows in the load
 manifest, and the committed row count of the live table. **Column sets are not among
-them.**
+them**, and they deliberately stay that way — reconcile is a pure function with no
+database access, which is where nearly all of the loader's correctness is tested.
 
-That is fine while the target schema is stable, which is the normal case — `target:` in a
-curated mapping is a fixed reference. But if that pin moves (see
-[Re-pinning `target:`](normalize.md#re-pinning-target-changes-the-table-shape)), the
-normalized parquet gains a column while the existing year table does not, and reconcile
-will choose `APPEND` because the row counts still agree. The `COPY` then fails on a column
-mismatch.
+That matters when a curated mapping's `target:` moves (see
+[Re-pinning `target:`](normalize.md#re-pinning-target-changes-the-table-shape)). The
+normalized parquet gains a column while the existing year table does not, the row counts
+still agree, so reconcile picks `APPEND`.
 
-The remedy is `--full-refresh` for the affected types, once, after re-pinning.
+A separate guard runs after reconcile and **refuses** such a plan:
+
+```
+error: green refused: the normalized parquet and the existing table disagree on columns:
+  2026: parquet has ['request_source'] which the table lacks
+
+Appending would fail in the bulk-load path. This usually means a curated mapping's
+`target:` was re-pinned to adopt a new column ... Re-run with --full-refresh for this
+trip type to rebuild the affected year(s), or drop them by hand.
+```
+
+Exit code **2**, and the message names the remedy. Three choices in that behaviour are
+deliberate:
+
+- **It refuses rather than rebuilding automatically.** A `RELOAD` drops and recreates the
+  table, so a spurious mismatch — a column someone added by hand on purpose, say — would
+  silently discard a loaded year. Typing `--full-refresh` keeps that decision yours.
+- **It compares names, not types.** Comparing types would mean trusting that
+  `map_duckdb_to_mssql` round-trips identically against `sys.columns`; a rendering
+  difference there would make the guard misfire on a table that is actually fine.
+- **It only checks `APPEND`.** `RELOAD` rebuilds the table from the parquet anyway, and
+  checking it would make the guard refuse the very command its own message tells you to
+  run.
+
+So the remedy after re-pinning is still `--full-refresh`, once, for the affected types —
+but you now get told, before anything is attempted, instead of a column mismatch surfacing
+from inside the bulk-load path.
 
 ## The `--dry-run` flag
 

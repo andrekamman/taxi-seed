@@ -75,6 +75,29 @@ def table_exists(conn: duckdb.DuckDBPyConnection, cfg: ConnConfig, table: str) -
     return bool(row and row[0] is not None)
 
 
+def table_column_names(conn: duckdb.DuckDBPyConnection, cfg: ConnConfig,
+                       table: str) -> list[str]:
+    """Column names of a live year table, in ordinal order.
+
+    Names only, deliberately. Comparing types would mean trusting that
+    taxi_shared.map_duckdb_to_mssql round-trips identically against sys.columns, which
+    is a second source of truth to keep in step -- and a rendering difference there
+    would make the guard misfire on a table that is actually fine.
+    """
+    fq = _fq(cfg, table)
+    rows = conn.execute(
+        f"SELECT c FROM mssql_scan('{ATTACH_NAME}', ?)",
+        [f"SELECT name AS c FROM sys.columns "
+         f"WHERE object_id = OBJECT_ID('{_sql_str(fq)}','U') ORDER BY column_id"],
+    ).fetchall()
+    return [r[0] for r in rows]
+
+
+def parquet_column_names(conn: duckdb.DuckDBPyConnection, path) -> list[str]:
+    """Column names of a normalized parquet file, in file order."""
+    return list(describe_parquet_types(conn, path).keys())
+
+
 def count_year_table(conn: duckdb.DuckDBPyConnection, cfg: ConnConfig, table: str) -> int:
     if not table_exists(conn, cfg, table):
         return 0

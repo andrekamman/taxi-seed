@@ -56,6 +56,15 @@ class LoaderConnectionError(LoaderError):
     """Install/load/attach/provision failure."""
 
 
+class LoaderRefusedError(LoaderError):
+    """The loader declined to act, before loading anything.
+
+    Distinct from a mid-load failure: nothing was written, and re-running unchanged
+    will refuse again. Maps to exit code 2, because a plain re-run is not the remedy --
+    the operator has to change something (today: pass --full-refresh).
+    """
+
+
 class LoaderConfigError(LoaderError):
     """Bad configuration (identifier, missing password, unmapped type)."""
 
