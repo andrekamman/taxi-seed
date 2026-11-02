@@ -17,6 +17,7 @@ import duckdb
 from taxi_load import load, manifest
 from taxi_load.connection import (
     ATTACH_NAME, ConnConfig, LoaderConfigError, LoaderConnectionError, LoaderError,
+    LoaderRefusedError,
     attach_target, connect_duckdb, ensure_database, validate_identifier,
 )
 from taxi_load.reconcile import APPEND, RELOAD, SKIP, MonthFile, reconcile
@@ -131,6 +132,60 @@ def guard_month_mode(plans, month: int | None) -> None:
     return None
 
 
+def guard_column_drift(plans, columns_by_year: dict[int, tuple[list[str], list[str]]]
+                       ) -> None:
+    """Refuse an APPEND whose parquet and table disagree on columns.
+
+    Reconcile decides from three observables -- months on disk, manifest rows, committed
+    row counts -- and column sets are not among them. That is invisible while a curated
+    mapping's `target:` is stable, which is the normal case. But when a target is
+    re-pinned to adopt a new column, the normalized parquet gains one while the existing
+    year table does not; the row counts still agree, so reconcile picks APPEND, and the
+    COPY then fails deep in the bulk-load path on a column mismatch.
+
+    This refuses instead, and names the remedy. Deliberately a refusal and NOT an
+    automatic RELOAD: a RELOAD drops and recreates the table, so a spurious mismatch --
+    a column someone added by hand on purpose, say -- would silently destroy a loaded
+    year. Making the operator type --full-refresh keeps that decision theirs.
+
+    Only APPEND is checked. RELOAD rebuilds the table from the parquet anyway, and SKIP
+    loads nothing.
+    """
+    problems = []
+    for plan in plans:
+        if plan.action != APPEND:
+            continue
+        pair = columns_by_year.get(plan.year)
+        if not pair:
+            continue
+        parquet_cols, table_cols = pair
+        if not table_cols:          # table does not exist yet; APPEND will create it
+            continue
+        if parquet_cols != table_cols:
+            added = [c for c in parquet_cols if c not in table_cols]
+            dropped = [c for c in table_cols if c not in parquet_cols]
+            detail = []
+            if added:
+                detail.append(f"parquet has {added} which the table lacks")
+            if dropped:
+                detail.append(f"table has {dropped} which the parquet lacks")
+            if not detail:          # same names, different order
+                detail.append("same columns in a different order")
+            problems.append(f"  {plan.year}: " + "; ".join(detail))
+    if problems:
+        raise LoaderRefusedError(
+            "the normalized parquet and the existing table disagree on columns:\n"
+            + "\n".join(problems)
+            + "\n\nAppending would fail in the bulk-load path. This usually means a "
+              "curated mapping's `target:` was re-pinned to adopt a new column, which "
+              "changes the table shape for every year. Re-run with --full-refresh for "
+              "this trip type to rebuild the affected year(s), or drop them by hand. "
+              "Refusing rather than rebuilding automatically, because a rebuild would "
+              "discard whatever is loaded."
+        )
+    return None
+
+
 def _describe_plan(data_type: str, plans) -> None:
     for plan in plans:
         if plan.action == SKIP:
@@ -186,6 +241,22 @@ def _process_type(conn, cfg, data_type: str, input_dir: str,
         }
     plans = reconcile(disk, manifest_rows, table_counts, full_refresh)
     guard_month_mode(plans, month)
+
+    # Column names for every year that would APPEND, so the guard below can refuse a
+    # shape change reconcile cannot see. One DESCRIBE and one sys.columns read per
+    # affected year, and only for APPEND -- nothing on a SKIP-only run.
+    columns_by_year: dict[int, tuple[list[str], list[str]]] = {}
+    if not dry_run or attached:
+        for plan in plans:
+            if plan.action != APPEND or not plan.months:
+                continue
+            table = load.year_table(data_type, plan.year)
+            columns_by_year[plan.year] = (
+                load.parquet_column_names(conn, plan.months[0].path),
+                load.table_column_names(conn, cfg, table)
+                if load.table_exists(conn, cfg, table) else [],
+            )
+    guard_column_drift(plans, columns_by_year)
 
     if dry_run:
         print(f"{data_type}: plan")
@@ -254,6 +325,12 @@ def main(argv=None) -> int:
                               attached, year=args.year, month=args.month)
             except TypeMappingError as e:
                 print(f"error: {data_type}: {e}", file=sys.stderr)
+                overall = max(overall, 2)
+            except LoaderRefusedError as e:
+                # Nothing was written, so "failed mid-load" would be a lie, and 1
+                # (needs review) would tell CI to look for a drift acknowledgment
+                # that does not exist. 2: a plain re-run is not the remedy.
+                print(f"error: {data_type} refused: {e}", file=sys.stderr)
                 overall = max(overall, 2)
             except (duckdb.Error, LoaderError) as e:
                 print(f"error: {data_type} failed mid-load: {e}", file=sys.stderr)
